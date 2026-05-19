@@ -5,6 +5,7 @@ N = 2   # number of aircraft
 T = 7   # time horizon  (times 0..T-1)
 M = 5   # number of stations (labels 1..M)
 D = 2   # max noise level allowed at any station at any time
+U = 2   # max noise difference between adjacent stations
 
 # Adjacency matrix (0-indexed): adj[a][b] = 1 means station a+1 -> b+1 is OK
 adjacency = [
@@ -74,8 +75,8 @@ for m1 in range(M):
             adjacent_pairs.add((min(m1, m2), max(m1, m2)))
 
 s.add([
-    And(C[m1][t] - C[m2][t] <= 2,
-        C[m2][t] - C[m1][t] <= 2)
+    And(C[m1][t] - C[m2][t] <= U,
+        C[m2][t] - C[m1][t] <= U)
     for (m1, m2) in adjacent_pairs
     for t in range(T)
 ])
