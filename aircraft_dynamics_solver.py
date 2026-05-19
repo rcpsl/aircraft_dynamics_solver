@@ -1,6 +1,6 @@
 from z3 import *
 
-# ── Problem parameters ──────────────────────────────────────────────────────
+# Problem parameters
 N = 2   # number of aircraft
 T = 7   # time horizon  (times 0..T-1)
 M = 5   # number of stations (labels 1..M)
@@ -14,27 +14,31 @@ adjacency = [
     [0, 0, 0, 0, 1],
 ]
 
+
+# Predefined start and end positions (1-indexed, length = N)
+start_positions = [1, 3]   # aircraft 0 starts at 1, aircraft 1 starts at 3
+end_positions   = [5, 5]   # aircraft 0 ends   at 5, aircraft 1 ends   at 5
+
+
 def valid_next_locations(src_1indexed):
     src = src_1indexed - 1
     return [dst + 1 for dst in range(M) if adjacency[src][dst] == 1]
 
-# ── Decision variables ───────────────────────────────────────────────────────
+# Decision variables
 # L[i][t] = location (1..M) of aircraft i at time t
 L = [[Int("L_%d_%d" % (i, t)) for t in range(T)] for i in range(N)]
 
 s = Solver()
 
-# ── Constraint 1: bounds ─────────────────────────────────────────────────────
+
+# Constraint 1: bounds
 s.add([And(1 <= L[i][t], L[i][t] <= M)
        for i in range(N) for t in range(T)])
 
 # ── Constraint 2: start and end positions ────────────────────────────────────
-s.add(L[0][0] == 1,      # aircraft 0 starts at station 1
-      L[0][T-1] == 5,    # aircraft 0 ends   at station 5
-      L[1][0] == 3,      # aircraft 1 starts at station 3
-      L[1][T-1] == 5)    # aircraft 1 ends   at station 5
-
-# ── Constraint 3: valid movement along graph edges ───────────────────────────
+s.add([L[i][0]    == start_positions[i] for i in range(N)])
+s.add([L[i][T-1]  == end_positions[i]   for i in range(N)])
+# Constraint 3: valid movement along graph edges
 for i in range(N):
     for t in range(T - 1):
         for src in range(1, M + 1):
@@ -44,7 +48,7 @@ for i in range(N):
                 Or([L[i][t+1] == dst for dst in dsts])
             ))
 
-# ── Solve and display ────────────────────────────────────────────────────────
+# Solve and display 
 if s.check() == sat:
     m = s.model()
     print("Solution found!\n")
