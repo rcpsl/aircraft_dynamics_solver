@@ -16,6 +16,11 @@ adjacency = [
     [0, 0, 0, 0, 1],
 ]
 
+# Predefined start and end positions (1-indexed, length = N)
+start_positions = [1, 3]   # aircraft 0 starts at 1, aircraft 1 starts at 3
+end_positions   = [5, 5]   # aircraft 0 ends   at 5, aircraft 1 ends   at 5
+
+
 def valid_next_locations(src_1indexed):
     src = src_1indexed - 1
     return [dst + 1 for dst in range(M) if adjacency[src][dst] == 1]
@@ -32,10 +37,6 @@ s.add([And(1 <= L[i][t], L[i][t] <= M)
        for i in range(N) for t in range(T)])
 
 # Constraint 2: start and end positions 
-
-# Predefined start and end positions (1-indexed, length = N)
-start_positions = [1, 3]   # aircraft 0 starts at 1, aircraft 1 starts at 3
-end_positions   = [5, 5]   # aircraft 0 ends   at 5, aircraft 1 ends   at 5
 
 s.add([L[i][0]    == start_positions[i] for i in range(N)])
 s.add([L[i][T-1]  == end_positions[i]   for i in range(N)])
