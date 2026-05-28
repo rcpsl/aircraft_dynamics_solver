@@ -76,18 +76,34 @@
 <script type="text/babel">
 const { useState, useMemo } = React;
 
-const NEIGHBORHOODS = [
-  { id: "roundrock", name: "Round Rock", type: "Suburban", existingNoise: 40, income: "Med-High", burden: "Low", pop: 24000, schools: true, hospitals: true },
-  { id: "north", name: "North Austin", type: "Suburban/Urban", existingNoise: 50, income: "Med-High", burden: "Med", pop: 35000, schools: true, hospitals: true },
-  { id: "westlake", name: "Westlake", type: "Suburban", existingNoise: 42, income: "High", burden: "Low", pop: 12800, schools: true, hospitals: false },
-  { id: "downtown", name: "Downtown", type: "Urban Core", existingNoise: 58, income: "High", burden: "Med", pop: 15200, schools: false, hospitals: true },
-  { id: "east", name: "East Austin", type: "Urban", existingNoise: 54, income: "Low-Med", burden: "High", pop: 28000, schools: true, hospitals: true },
-  { id: "south", name: "S. Austin", type: "Suburban", existingNoise: 48, income: "Med", burden: "Med", pop: 22000, schools: true, hospitals: false },
-  { id: "delvalle", name: "Del Valle", type: "Rural", existingNoise: 36, income: "Low", burden: "High", pop: 5600, schools: false, hospitals: false },
-  { id: "buda", name: "Buda", type: "Rural/Suburban", existingNoise: 38, income: "Med", burden: "Low", pop: 8500, schools: true, hospitals: false },
+// Station index → neighborhood id (0-indexed in solver, 1-indexed externally)
+const HOOD_ORDER = ["roundrock","north","westlake","downtown","east","south","delvalle","buda"];
+
+// Austin geographic adjacency (0-indexed; 1 = aircraft can move or stay)
+const AUSTIN_ADJACENCY = [
+  [1,1,0,0,0,0,0,0],  // 0 Round Rock   → stay, North
+  [1,1,1,1,1,0,0,0],  // 1 North Austin  → RR, stay, Westlake, Downtown, East
+  [0,1,1,1,0,1,0,0],  // 2 Westlake      → North, stay, Downtown, South
+  [0,1,1,1,1,1,0,0],  // 3 Downtown      → North, Westlake, stay, East, South
+  [0,1,0,1,1,1,1,0],  // 4 East Austin   → North, Downtown, stay, South, Del Valle
+  [0,0,1,1,1,1,1,1],  // 5 South Austin  → Westlake, Downtown, East, stay, Del Valle, Buda
+  [0,0,0,0,1,1,1,1],  // 6 Del Valle     → East, South, stay, Buda
+  [0,0,0,0,0,1,1,1],  // 7 Buda          → South, Del Valle, stay
 ];
 
-const DEFAULT_FLIGHTS = { roundrock: 10, north: 14, westlake: 12, downtown: 20, east: 12, south: 14, delvalle: 10, buda: 8 };
+const NEIGHBORHOODS = [
+  { id: "roundrock", name: "Round Rock",   type: "Suburban",       existingNoise: 40, income: "Med-High", burden: "Low",  pop: 24000, schools: true,  hospitals: true  },
+  { id: "north",     name: "North Austin", type: "Suburban/Urban", existingNoise: 50, income: "Med-High", burden: "Med",  pop: 35000, schools: true,  hospitals: true  },
+  { id: "westlake",  name: "Westlake",     type: "Suburban",       existingNoise: 42, income: "High",     burden: "Low",  pop: 12800, schools: true,  hospitals: false },
+  { id: "downtown",  name: "Downtown",     type: "Urban Core",     existingNoise: 58, income: "High",     burden: "Med",  pop: 15200, schools: false, hospitals: true  },
+  { id: "east",      name: "East Austin",  type: "Urban",          existingNoise: 54, income: "Low-Med",  burden: "High", pop: 28000, schools: true,  hospitals: true  },
+  { id: "south",     name: "S. Austin",    type: "Suburban",       existingNoise: 48, income: "Med",      burden: "Med",  pop: 22000, schools: true,  hospitals: false },
+  { id: "delvalle",  name: "Del Valle",    type: "Rural",          existingNoise: 36, income: "Low",      burden: "High", pop: 5600,  schools: false, hospitals: false },
+  { id: "buda",      name: "Buda",         type: "Rural/Suburban", existingNoise: 38, income: "Med",      burden: "Low",  pop: 8500,  schools: true,  hospitals: false },
+];
+
+// Fallback display values before solver runs
+const DEFAULT_FLIGHTS = { roundrock: 3, north: 5, westlake: 3, downtown: 4, east: 4, south: 5, delvalle: 3, buda: 2 };
 
 const PRINCIPLES = [
   { id: "equal", name: "Equal Allocation", desc: "Same noise burden for all communities", color: "#3b82f6", bg: "#eff6ff", metrics: ["disparity"] },
@@ -174,17 +190,64 @@ function formatHour(h) { return h === 0 ? "12 AM" : h < 12 ? h + " AM" : h === 1
 function Dashboard() {
   const [selectedPrinciples, setSelectedPrinciples] = useState(["sufficientarian"]);
   const [activeMetrics, setActiveMetrics] = useState(["threshold"]);
-  const [thresholdDb, setThresholdDb] = useState(55);
-  const [thresholdMode, setThresholdMode] = useState("all");
-  const [maxRatio, setMaxRatio] = useState(3);
-  const [protectedFactors, setProtectedFactors] = useState(["burden"]);
-  const [blackoutStart, setBlackoutStart] = useState(22);
-  const [blackoutEnd, setBlackoutEnd] = useState(7);
+
+  // Z3 solver parameters (replaces static thresholdDb / maxRatio)
+  const [D, setD] = useState(1);                        // max aircraft per neighborhood per timestep
+  const [U, setU] = useState(2);                        // max adjacent noise difference
+  const [solverN, setSolverN] = useState(3);            // number of aircraft
+  const [solverT, setSolverT] = useState(10);           // time horizon
+  const [startPos, setStartPos] = useState([1, 2, 3]);  // 1-indexed start stations (must be distinct when D=1)
+  const [endPos,   setEndPos]   = useState([7, 8, 6]);  // 1-indexed end stations
+
+  // Solver status + results
+  const [solverStatus,  setSolverStatus]  = useState("idle");
+  const [solverFlights, setSolverFlights] = useState(DEFAULT_FLIGHTS);
+
+  // Display-only parameters (unchanged from original)
+  const [protectedFactors,  setProtectedFactors]  = useState(["burden"]);
+  const [blackoutStart,     setBlackoutStart]     = useState(22);
+  const [blackoutEnd,       setBlackoutEnd]       = useState(7);
   const [maxFlightsPerHood, setMaxFlightsPerHood] = useState(25);
 
-  const flights = DEFAULT_FLIGHTS;
+  const flights = solverFlights;
   const totalFlights = Object.values(flights).reduce((a, b) => a + b, 0);
   const numHoods = NEIGHBORHOODS.length;
+
+  function handleSolverN(newN) {
+    setSolverN(newN);
+    setStartPos(p => { const a = [...p]; while (a.length < newN) a.push(1); return a.slice(0, newN); });
+    setEndPos(p   => { const a = [...p]; while (a.length < newN) a.push(8); return a.slice(0, newN); });
+  }
+
+  async function handleSolve() {
+    setSolverStatus("solving");
+    try {
+      const res = await fetch("http://localhost:5050/solve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          N: solverN, T: solverT, M: 8, D, U,
+          adjacency: AUSTIN_ADJACENCY,
+          startPositions: startPos,
+          endPositions: endPos,
+        }),
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      if (data.status === "sat") {
+        const newFlights = {};
+        HOOD_ORDER.forEach((id, m) => {
+          newFlights[id] = data.noiseMatrix[m].reduce((a, b) => a + b, 0);
+        });
+        setSolverFlights(newFlights);
+        setSolverStatus("sat");
+      } else {
+        setSolverStatus("unsat");
+      }
+    } catch {
+      setSolverStatus("error");
+    }
+  }
 
   const availableMetrics = useMemo(() => {
     const ids = new Set();
@@ -223,38 +286,63 @@ function Dashboard() {
       (protectedFactors.includes("income") && (hood.income === "Low" || hood.income === "Low-Med")) ||
       (protectedFactors.includes("schools") && hood.schools) ||
       (protectedFactors.includes("density") && hood.pop > 20000);
-    let effectiveThreshold = thresholdDb;
-    if (thresholdMode === "stricter_burden" && hood.burden === "High") effectiveThreshold -= 5;
-    return { ...hood, flights: f, uamNoise: Math.round(uamNoise*10)/10, totalNoise: Math.round(totalNoise*10)/10, isProtected, effectiveThreshold, overThreshold: totalNoise > effectiveThreshold, overBy: Math.round((totalNoise - effectiveThreshold)*10)/10 };
-  }), [flights, thresholdDb, thresholdMode, protectedFactors]);
+    // Threshold: flag neighborhoods using > 60% of their theoretical capacity (D * T)
+    const maxCap = Math.max(1, D * solverT);
+    const capLine = maxCap * 0.6;
+    const overThreshold = f > capLine;
+    return { ...hood, flights: f, uamNoise: Math.round(uamNoise*10)/10, totalNoise: Math.round(totalNoise*10)/10, isProtected, overThreshold, overBy: Math.round(f - capLine) };
+  }), [flights, D, solverT, protectedFactors]);
 
   const metricResults = useMemo(() => {
     const res = {};
-    const overCount = results.filter(r => r.overThreshold).length;
-    res.threshold = { status: overCount === 0 ? "pass" : "fail", value: (numHoods-overCount)+"/"+numHoods, detail: overCount === 0 ? "All under "+thresholdDb+" dB" : overCount+" over "+thresholdDb+" dB limit" };
+
+    // Threshold \u2192 driven by solver status and D constraint
+    if (solverStatus === "unsat") {
+      res.threshold = { status: "fail", value: "unsat", detail: "D="+D+" too tight \u2014 relax D or U" };
+    } else if (solverStatus === "sat") {
+      const overCount = results.filter(r => r.overThreshold).length;
+      res.threshold = { status: overCount === 0 ? "pass" : "warn", value: (numHoods-overCount)+"/"+numHoods, detail: "D="+D+" ac/step \u00b7 "+solverT+" steps" };
+    } else {
+      res.threshold = { status: "off", value: "\u2014", detail: "Run solver to evaluate" };
+    }
+
+    // Disparity \u2192 actual flight ratio, U notes the Z3 adjacent-difference cap
     const fv = results.map(r => r.flights);
-    const maxF = Math.max(...fv), minF = Math.min(...fv.filter(f => f > 0)) || 1;
+    const maxF = Math.max(...fv, 1), minF = Math.min(...fv.filter(f => f > 0)) || 1;
     const fr = Math.round((maxF/minF)*10)/10;
-    res.disparity = { status: fr <= maxRatio ? "pass" : "fail", value: fr+":1", detail: fr <= maxRatio ? "Within "+maxRatio+":1 max" : "Exceeds "+maxRatio+":1 max" };
+    res.disparity = {
+      status: solverStatus === "idle" ? "off" : solverStatus === "sat" ? "pass" : "fail",
+      value: fr > 0 ? fr+":1" : "\u2014",
+      detail: "U="+U+" adj. cap" + (solverStatus === "sat" ? " \u00b7 satisfied" : " \u00b7 run solver"),
+    };
+
+    // Protected (unchanged)
     const ph = results.filter(r => r.isProtected), pp = ph.filter(r => !r.overThreshold);
-    res.protected = { status: ph.length === 0 ? "off" : pp.length === ph.length ? "pass" : "fail", value: pp.length+"/"+ph.length, detail: ph.length === 0 ? "None selected" : pp.length === ph.length ? "All protected areas safe" : (ph.length-pp.length)+" protected over limit" };
+    res.protected = { status: ph.length === 0 ? "off" : pp.length === ph.length ? "pass" : "fail", value: pp.length+"/"+ph.length, detail: ph.length === 0 ? "None selected" : pp.length === ph.length ? "All protected areas safe" : (ph.length-pp.length)+" protected over cap" };
+
+    // Blackout (unchanged)
     const bh = blackoutStart > blackoutEnd ? 24 - blackoutStart + blackoutEnd : blackoutEnd - blackoutStart;
     res.blackout = { status: bh >= 8 ? "pass" : "warn", value: bh+"h", detail: formatHour(blackoutStart)+"\u2013"+formatHour(blackoutEnd) };
+
+    // Frequency (unchanged)
     const oc = results.filter(r => r.flights > maxFlightsPerHood).length;
     res.frequency = { status: oc === 0 ? "pass" : "fail", value: (numHoods-oc)+"/"+numHoods, detail: oc === 0 ? "All under "+maxFlightsPerHood+"/day" : oc+" over "+maxFlightsPerHood+"/day cap" };
+
     return res;
-  }, [results, thresholdDb, maxRatio, blackoutStart, blackoutEnd, maxFlightsPerHood]);
+  }, [results, D, U, solverT, solverStatus, blackoutStart, blackoutEnd, maxFlightsPerHood, numHoods]);
 
   function hoodFill(r) {
     if (!activeMetrics.includes("threshold")) return "rgba(200,195,185,0.35)";
-    if (r.overBy > 10) return "rgba(252,165,165,0.65)";
-    if (r.overBy > 0) return "rgba(253,186,116,0.6)";
-    if (r.overBy > -3) return "rgba(253,249,195,0.55)";
+    const maxCap = Math.max(1, D * solverT);
+    const ratio = r.flights / maxCap;
+    if (ratio > 0.75) return "rgba(252,165,165,0.65)";
+    if (ratio > 0.50) return "rgba(253,186,116,0.6)";
+    if (ratio > 0.25) return "rgba(253,249,195,0.55)";
     return "rgba(134,239,172,0.5)";
   }
   function hoodStroke(r) {
     if (!activeMetrics.includes("threshold")) return "#b5b0a5";
-    if (r.overBy > 0) return "#ef4444";
+    if (r.overThreshold) return "#ef4444";
     return "#22c55e";
   }
 
@@ -273,6 +361,65 @@ function Dashboard() {
 
       {/* LEFT PANEL */}
       <div className="left-panel">
+
+        {/* ── Z3 Solver section ── */}
+        <div>
+          <p className="section-label">Z3 Solver</p>
+          <p className="section-title">Aircraft Scheduler</p>
+          <p className="section-desc">Set aircraft count and timesteps. D and U are configured in the metrics below.</p>
+
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            {/* N */}
+            <div>
+              <p className="section-label" style={{marginBottom:3}}>Aircraft (N)</p>
+              <div className="slider-row">
+                <input type="range" min={1} max={8} value={solverN} onChange={e=>handleSolverN(+e.target.value)} />
+                <span className="slider-val">{solverN}</span>
+              </div>
+            </div>
+
+            {/* T */}
+            <div>
+              <p className="section-label" style={{marginBottom:3}}>Timesteps (T)</p>
+              <div className="slider-row">
+                <input type="range" min={2} max={20} value={solverT} onChange={e=>setSolverT(+e.target.value)} />
+                <span className="slider-val">{solverT}</span>
+              </div>
+            </div>
+
+            {/* Start → End per aircraft */}
+            <div>
+              <p className="section-label" style={{marginBottom:5}}>Route start → end</p>
+              {Array.from({length:solverN},(_,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:5,marginBottom:5}}>
+                  <span style={{fontSize:9,fontWeight:700,color:"#999",width:18,flexShrink:0}}>A{i}</span>
+                  <select value={startPos[i]} onChange={e=>setStartPos(p=>p.map((x,j)=>j===i?+e.target.value:x))} style={{flex:1,fontSize:10,padding:"3px 4px"}}>
+                    {NEIGHBORHOODS.map((h,idx)=><option key={idx} value={idx+1}>{idx+1}. {h.name}</option>)}
+                  </select>
+                  <span style={{fontSize:9,color:"#bbb",flexShrink:0}}>→</span>
+                  <select value={endPos[i]} onChange={e=>setEndPos(p=>p.map((x,j)=>j===i?+e.target.value:x))} style={{flex:1,fontSize:10,padding:"3px 4px"}}>
+                    {NEIGHBORHOODS.map((h,idx)=><option key={idx} value={idx+1}>{idx+1}. {h.name}</option>)}
+                  </select>
+                </div>
+              ))}
+            </div>
+
+            {/* Solve button + status */}
+            <button
+              onClick={handleSolve}
+              disabled={solverStatus==="solving"}
+              style={{padding:"9px 0",background:"#1a1a1a",color:"#fff",border:"none",borderRadius:6,fontFamily:"'DM Sans',sans-serif",fontSize:12,fontWeight:600,cursor:solverStatus==="solving"?"not-allowed":"pointer",opacity:solverStatus==="solving"?0.5:1,marginTop:2}}
+            >
+              {solverStatus==="solving" ? "Solving…" : "Run Solver"}
+            </button>
+            {solverStatus==="sat"   && <p style={{fontSize:10,color:"#059669",fontWeight:600,marginTop:2}}>✓ Feasible — map updated</p>}
+            {solverStatus==="unsat" && <p style={{fontSize:10,color:"#dc2626",fontWeight:600,marginTop:2}}>✗ Infeasible — relax D or U</p>}
+            {solverStatus==="error" && <p style={{fontSize:10,color:"#dc2626",fontWeight:600,marginTop:2}}>Error — is server running on port 5050?</p>}
+          </div>
+        </div>
+
+        <hr className="divider" />
+
         <div>
           <p className="section-label">Step 1</p>
           <p className="section-title">Choose Fairness Principles</p>
@@ -280,16 +427,37 @@ function Dashboard() {
           <div className="principle-grid">
             {PRINCIPLES.map(p => {
               const sel = selectedPrinciples.includes(p.id);
+              const disabled = ["utilitarian","prioritarian","proportional"].includes(p.id);
               return (
-                <div key={p.id} className={"principle-chip"+(sel?" selected":"")} style={sel?{"--chip-color":p.color,"--chip-bg":p.bg}:{}} onClick={()=>togglePrinciple(p.id)}>
+                <div
+                  key={p.id}
+                  className={"principle-chip"+(sel&&!disabled?" selected":"")}
+                  style={{
+                    ...(sel&&!disabled?{"--chip-color":p.color,"--chip-bg":p.bg}:{}),
+                    ...(disabled?{opacity:0.35,cursor:"not-allowed",filter:"grayscale(0.6)"}:{}),
+                  }}
+                  onClick={()=>{ if (!disabled) togglePrinciple(p.id); }}
+                  title={disabled?"Not modelled by the Z3 solver":undefined}
+                >
                   <span className="principle-dot" style={{background:p.color}} />
-                  <div><div className="principle-name">{p.name}</div><div className="principle-desc">{p.desc}</div></div>
+                  <div>
+                    <div className="principle-name">{p.name}</div>
+                    <div className="principle-desc">{disabled?"Not used by solver":p.desc}</div>
+                  </div>
                 </div>
               );
             })}
-            <div className={"principle-chip"+(selectedPrinciples.includes("temporal")?" selected":"")} style={selectedPrinciples.includes("temporal")?{"--chip-color":TEMPORAL.color,"--chip-bg":TEMPORAL.bg}:{}} onClick={()=>togglePrinciple("temporal")}>
+            {/* Temporal — not connected to solver */}
+            <div
+              className="principle-chip"
+              style={{opacity:0.35,cursor:"not-allowed",filter:"grayscale(0.6)"}}
+              title="Not modelled by the Z3 solver"
+            >
               <span className="principle-dot" style={{background:TEMPORAL.color}} />
-              <div><div className="principle-name">{TEMPORAL.name}</div><div className="principle-desc">{TEMPORAL.desc}</div></div>
+              <div>
+                <div className="principle-name">{TEMPORAL.name}</div>
+                <div className="principle-desc">Not used by solver</div>
+              </div>
             </div>
           </div>
         </div>
@@ -313,19 +481,16 @@ function Dashboard() {
                   </div>
                   {active && m.id==="threshold" && (
                     <div className="metric-body">
-                      <p className="section-label">Max acceptable noise</p>
-                      <div className="slider-row"><input type="range" min={40} max={80} value={thresholdDb} onChange={e=>setThresholdDb(+e.target.value)} /><span className="slider-val">{thresholdDb}<span style={{fontSize:10,color:"#999",fontWeight:400}}> dB</span></span></div>
-                      <div className="slider-hint"><span>40 dB quiet</span><span>80 dB loud</span></div>
-                      <select value={thresholdMode} onChange={e=>setThresholdMode(e.target.value)} style={{marginTop:8}}>
-                        <option value="all">Same for all neighborhoods</option>
-                        <option value="stricter_burden">5 dB stricter for high-burden</option>
-                      </select>
+                      <p className="section-label">Max aircraft per neighborhood per timestep (D)</p>
+                      <div className="slider-row"><input type="range" min={1} max={solverN} value={D} onChange={e=>setD(+e.target.value)} /><span className="slider-val">{D}</span></div>
+                      <div className="slider-hint"><span>1 strict</span><span>{solverN} relaxed</span></div>
                     </div>
                   )}
                   {active && m.id==="disparity" && (
                     <div className="metric-body">
-                      <p className="section-label">Max flight ratio</p>
-                      <div className="slider-row"><input type="range" min={1} max={10} step={0.5} value={maxRatio} onChange={e=>setMaxRatio(+e.target.value)} /><span className="slider-val">{maxRatio}:1</span></div>
+                      <p className="section-label">Max adjacent neighborhood difference (U)</p>
+                      <div className="slider-row"><input type="range" min={0} max={solverN} value={U} onChange={e=>setU(+e.target.value)} /><span className="slider-val">{U}</span></div>
+                      <div className="slider-hint"><span>0 equal</span><span>{solverN} free</span></div>
                     </div>
                   )}
                   {active && m.id==="protected" && (
@@ -446,7 +611,7 @@ function Dashboard() {
                     <g><rect x={c.x-26} y={c.y+46} width="52" height="14" rx="7" fill="#8b5cf6" /><text x={c.x} y={c.y+56} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:7,fontWeight:700,fill:"#fff",letterSpacing:"0.06em"}}>PROTECTED</text></g>
                   )}
                   {isOver && (
-                    <g><rect x={c.x-22} y={c.y+(activeMetrics.includes("protected")&&r.isProtected?63:46)} width="44" height="14" rx="7" fill="#dc2626" /><text x={c.x} y={c.y+(activeMetrics.includes("protected")&&r.isProtected?73:56)} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:7,fontWeight:700,fill:"#fff",letterSpacing:"0.04em"}}>+{r.overBy} dB OVER</text></g>
+                    <g><rect x={c.x-26} y={c.y+(activeMetrics.includes("protected")&&r.isProtected?63:46)} width="52" height="14" rx="7" fill="#dc2626" /><text x={c.x} y={c.y+(activeMetrics.includes("protected")&&r.isProtected?73:56)} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:7,fontWeight:700,fill:"#fff",letterSpacing:"0.04em"}}>+{r.overBy} over cap</text></g>
                   )}
                 </g>
               );
