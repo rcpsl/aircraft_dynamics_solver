@@ -4,7 +4,7 @@ from z3 import *
 N = 2   # number of aircraft
 T = 7   # time horizon  (times 0..T-1)
 M = 5   # number of stations (labels 1..M)
-D = 2   # max noise level allowed at any station at any time
+D = 1   # max noise level allowed at any station at any time
 U = 2   # max noise difference between adjacent stations
 
 # Adjacency matrix (0-indexed): adj[a][b] = 1 means station a+1 -> b+1 is OK
@@ -18,7 +18,7 @@ adjacency = [
 
 # Predefined start and end positions (1-indexed, length = N)
 start_positions = [1, 3]   # aircraft 0 starts at 1, aircraft 1 starts at 3
-end_positions   = [5, 5]   # aircraft 0 ends   at 5, aircraft 1 ends   at 5
+end_positions   = [4, 5]   # aircraft 0 ends   at 5, aircraft 1 ends   at 5
 
 
 def valid_next_locations(src_1indexed):
