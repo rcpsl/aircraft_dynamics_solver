@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Your Fairness Rules — UAM Noise Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #f8f6f2; color: #1a1a1a; min-height: 100vh; }
+  .serif { font-family: 'Fraunces', Georgia, serif; }
+  .app { display: grid; grid-template-columns: 320px 1fr; grid-template-rows: auto 1fr auto; height: 100vh; }
+  .topbar { grid-column: 1 / -1; background: #1a1a1a; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar h1 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+  .topbar-sub { font-size: 11px; color: #777; margin-left: 12px; }
+  .tag { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 12px; border-radius: 20px; }
+  .tag-teal { background: #134e4a; color: #5eead4; }
+  .tag-amber { background: #451a03; color: #fbbf24; }
+  .left-panel { background: #fff; border-right: 1px solid #e5e2dc; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+  .map-panel { padding: 0; overflow: hidden; position: relative; background: #e8e4db; }
+  .bottom-bar { grid-column: 1 / -1; background: #fff; border-top: 1px solid #e5e2dc; padding: 14px 28px; }
+  .section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #999; margin-bottom: 10px; }
+  .section-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+  .section-desc { font-size: 11px; color: #888; line-height: 1.5; margin-bottom: 12px; }
+  .divider { border: none; border-top: 1px solid #eae7e0; margin: 0; }
+  .principle-grid { display: flex; flex-direction: column; gap: 6px; }
+  .principle-chip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; border: 2px solid #eae7e0; background: #fafaf7; cursor: pointer; transition: all 0.2s; user-select: none; }
+  .principle-chip:hover { border-color: #ccc; }
+  .principle-chip.selected { border-color: var(--chip-color, #1a1a1a); background: var(--chip-bg, #f0f0f0); }
+  .principle-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .principle-name { font-size: 12px; font-weight: 700; color: #1a1a1a; }
+  .principle-desc { font-size: 10px; color: #888; margin-top: 2px; }
+  .metric-controls { display: flex; flex-direction: column; gap: 10px; }
+  .metric-card { background: #fafaf7; border-radius: 8px; border: 1px solid #eae7e0; padding: 12px; transition: all 0.2s; }
+  .metric-card.active { border-color: #1a1a1a; background: #fff; }
+  .metric-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .metric-header-left { display: flex; align-items: center; gap: 8px; }
+  .metric-icon { font-size: 14px; }
+  .metric-name { font-size: 11px; font-weight: 700; }
+  .metric-from { font-size: 9px; color: #999; font-weight: 500; }
+  .metric-toggle { width: 36px; height: 20px; border-radius: 10px; background: #ddd; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .metric-toggle.on { background: #1a1a1a; }
+  .metric-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
+  .metric-toggle.on::after { transform: translateX(16px); }
+  .metric-body { margin-top: 10px; padding-top: 10px; border-top: 1px solid #eae7e0; }
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+  .slider-row input[type="range"] { flex: 1; accent-color: #1a1a1a; height: 4px; }
+  .slider-val { font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px; min-width: 48px; text-align: right; }
+  .slider-hint { font-size: 9px; color: #bbb; display: flex; justify-content: space-between; margin-top: 2px; }
+  select { width: 100%; font-size: 11px; border: 1px solid #ddd; border-radius: 6px; padding: 6px 8px; background: #fff; font-family: inherit; }
+  input[type="checkbox"] { accent-color: #1a1a1a; }
+  .check-label { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #555; padding: 3px 0; cursor: pointer; }
+  .map-container { width: 100%; height: 100%; }
+  .map-container svg { width: 100%; height: 100%; }
+  .scorecard-row { display: flex; gap: 12px; align-items: stretch; }
+  .scorecard { flex: 1; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; border: 1px solid #eae7e0; background: #fafaf7; transition: all 0.2s; min-width: 0; }
+  .scorecard.off { opacity: 0.35; }
+  .scorecard-icon { font-size: 18px; flex-shrink: 0; }
+  .scorecard-info { flex: 1; min-width: 0; }
+  .scorecard-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #888; }
+  .scorecard-val { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; margin-top: 2px; }
+  .scorecard-detail { font-size: 9px; color: #999; margin-top: 2px; }
+  .status-pill { font-size: 8px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; }
+  .status-pass { background: #ecfdf5; color: #059669; }
+  .status-fail { background: #fef2f2; color: #dc2626; }
+  .status-warn { background: #fffbeb; color: #d97706; }
+  .status-off { background: #f3f3f0; color: #aaa; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo } = React;
+
+const NEIGHBORHOODS = [
+  { id: "roundrock", name: "Round Rock", type: "Suburban", existingNoise: 40, income: "Med-High", burden: "Low", pop: 24000, schools: true, hospitals: true },
+  { id: "north", name: "North Austin", type: "Suburban/Urban", existingNoise: 50, income: "Med-High", burden: "Med", pop: 35000, schools: true, hospitals: true },
+  { id: "westlake", name: "Westlake", type: "Suburban", existingNoise: 42, income: "High", burden: "Low", pop: 12800, schools: true, hospitals: false },
+  { id: "downtown", name: "Downtown", type: "Urban Core", existingNoise: 58, income: "High", burden: "Med", pop: 15200, schools: false, hospitals: true },
+  { id: "east", name: "East Austin", type: "Urban", existingNoise: 54, income: "Low-Med", burden: "High", pop: 28000, schools: true, hospitals: true },
+  { id: "south", name: "S. Austin", type: "Suburban", existingNoise: 48, income: "Med", burden: "Med", pop: 22000, schools: true, hospitals: false },
+  { id: "delvalle", name: "Del Valle", type: "Rural", existingNoise: 36, income: "Low", burden: "High", pop: 5600, schools: false, hospitals: false },
+  { id: "buda", name: "Buda", type: "Rural/Suburban", existingNoise: 38, income: "Med", burden: "Low", pop: 8500, schools: true, hospitals: false },
+];
+
+const DEFAULT_FLIGHTS = { roundrock: 10, north: 14, westlake: 12, downtown: 20, east: 12, south: 14, delvalle: 10, buda: 8 };
+
+const PRINCIPLES = [
+  { id: "equal", name: "Equal Allocation", desc: "Same noise burden for all communities", color: "#3b82f6", bg: "#eff6ff", metrics: ["disparity"] },
+  { id: "utilitarian", name: "Utilitarian", desc: "Minimize total harm across the city", color: "#f59e0b", bg: "#fffbeb", metrics: ["frequency"] },
+  { id: "sufficientarian", name: "Sufficientarian", desc: "No community exceeds a minimum threshold", color: "#10b981", bg: "#ecfdf5", metrics: ["threshold"] },
+  { id: "prioritarian", name: "Prioritarian", desc: "Extra protection for worst-off communities", color: "#8b5cf6", bg: "#f5f3ff", metrics: ["protected", "threshold"] },
+  { id: "proportional", name: "Proportional", desc: "More benefit = proportionally more noise", color: "#ec4899", bg: "#fdf2f8", metrics: ["disparity", "frequency"] },
+];
+const TEMPORAL = { id: "temporal", name: "Temporal (from Activity 2)", desc: "Protect specific time periods", color: "#6b7280", bg: "#f9fafb", metrics: ["blackout"] };
+
+const ALL_METRICS = [
+  { id: "threshold", label: "Noise Threshold", desc: "Max dB for any neighborhood", icon: "\u{1F50A}", from: "Sufficientarian / Prioritarian" },
+  { id: "disparity", label: "Disparity Ratio", desc: "Max ratio loudest:quietest", icon: "\u2696\uFE0F", from: "Equal / Proportional" },
+  { id: "protected", label: "Protected Communities", desc: "Extra limits for vulnerable areas", icon: "\u{1F6E1}\uFE0F", from: "Prioritarian" },
+  { id: "frequency", label: "Max Flights/Area", desc: "Daily flight cap per neighborhood", icon: "\u2708\uFE0F", from: "Utilitarian / Proportional" },
+  { id: "blackout", label: "Blackout Hours", desc: "Zero-flight time windows", icon: "\u{1F319}", from: "Temporal" },
+];
+
+// Realistic Austin map — SVG paths for neighborhoods (viewBox 1000x900)
+const MAP_PATHS = {
+  roundrock: "M 340,20 C 380,15 440,10 500,15 L 560,25 590,50 600,90 590,130 560,150 520,155 460,150 400,145 360,130 340,100 335,60 Z",
+  north: "M 260,150 C 290,140 340,130 400,145 L 460,150 520,155 540,180 530,230 500,270 450,290 380,295 310,280 270,250 250,210 245,175 Z",
+  westlake: "M 120,280 C 140,250 170,230 200,220 L 245,230 270,250 280,290 270,340 250,380 220,400 180,410 140,390 115,350 110,310 Z",
+  downtown: "M 310,280 L 380,295 450,290 470,310 460,360 430,390 380,400 340,395 310,370 295,340 300,300 Z",
+  east: "M 500,270 L 540,250 600,240 660,260 690,310 680,370 650,410 600,430 540,420 480,400 460,360 470,310 Z",
+  south: "M 220,400 L 250,380 295,340 310,370 340,395 380,400 430,390 420,440 400,490 360,520 300,530 250,510 220,470 210,430 Z",
+  delvalle: "M 540,420 L 600,430 650,410 700,430 740,480 730,550 690,600 620,620 550,610 490,580 470,530 480,470 500,440 Z",
+  buda: "M 210,530 L 300,530 360,520 400,540 410,590 390,650 350,690 280,700 220,680 180,640 170,590 185,550 Z",
+};
+
+const MAP_CENTERS = {
+  roundrock: { x: 465, y: 82 },
+  north: { x: 395, y: 215 },
+  westlake: { x: 195, y: 320 },
+  downtown: { x: 380, y: 340 },
+  east: { x: 580, y: 340 },
+  south: { x: 320, y: 455 },
+  delvalle: { x: 600, y: 520 },
+  buda: { x: 300, y: 610 },
+};
+
+// Major highway paths
+const HIGHWAYS = [
+  // I-35: N-S through center
+  { id: "i35", label: "I-35", path: "M 470,0 C 465,50 460,100 455,150 C 445,200 430,250 420,300 C 410,350 395,400 380,450 C 365,500 350,550 335,600 L 320,680 310,750 300,850 290,900", width: 5, color: "#a8a29e" },
+  // MoPac / Loop 1: N-S west side
+  { id: "mopac", label: "MoPac", path: "M 280,0 C 275,60 270,120 265,180 C 258,230 252,270 248,310 C 244,350 240,390 238,430 C 236,470 234,520 232,570 L 230,650 228,750", width: 4, color: "#a8a29e" },
+  // US-183: NW to SE through north
+  { id: "us183", label: "183", path: "M 100,100 C 160,120 220,145 280,170 C 340,195 400,210 460,220 C 520,230 580,235 640,230 L 720,220 800,200", width: 4, color: "#a8a29e" },
+  // SH-130: toll road east side
+  { id: "sh130", label: "130", path: "M 620,0 C 625,60 630,120 640,180 C 650,240 660,300 670,360 C 680,420 690,480 700,540 L 710,620 720,700 730,800", width: 3.5, color: "#a8a29e" },
+  // Ben White / US-290
+  { id: "benwhite", label: "Ben White / 290", path: "M 80,430 C 140,425 200,420 260,418 C 320,416 380,415 440,420 C 500,425 560,435 620,445 L 700,460 780,475", width: 4, color: "#a8a29e" },
+  // Loop 360
+  { id: "loop360", label: "360", path: "M 170,170 C 165,210 160,250 158,290 C 156,330 155,370 158,410 C 160,440 165,470 172,500", width: 3, color: "#b8b3a8" },
+  // SH-71
+  { id: "sh71", label: "71", path: "M 440,420 C 470,450 500,475 530,495 C 570,520 610,540 660,555 L 730,575 800,590", width: 3.5, color: "#a8a29e" },
+];
+
+// Water features
+const WATER = [
+  // Lady Bird Lake
+  { id: "ladybird", label: "Lady Bird Lake", path: "M 140,365 C 180,358 220,355 260,352 C 310,348 360,345 410,348 C 450,350 490,355 530,358 C 560,360 580,362 600,360", width: 10, labelPos: {x: 370, y: 340} },
+  // Colorado River continues SE
+  { id: "colorado", path: "M 600,360 C 630,365 660,380 690,400 C 720,420 740,445 755,475", width: 7 },
+  // Brushy Creek (Round Rock)
+  { id: "brushy", label: "Brushy Creek", path: "M 340,70 C 380,65 420,68 460,75 C 500,82 540,90 570,100", width: 4, labelPos: {x: 455, y: 58} },
+];
+
+// Landmarks
+const LANDMARKS = [
+  { id: "ut", label: "UT Austin", x: 400, y: 305, icon: "\u{1F393}" },
+  { id: "capitol", label: "Capitol", x: 395, y: 325, icon: "\u{1F3DB}" },
+  { id: "abia", label: "Austin-Bergstrom Intl Airport", x: 580, y: 470, icon: "\u2708\uFE0F" },
+  { id: "domain", label: "The Domain", x: 340, y: 175, icon: "\u{1F6CD}" },
+  { id: "zilker", label: "Zilker Park", x: 260, y: 370, icon: "\u{1F333}" },
+  { id: "circuit", label: "COTA", x: 680, y: 560, icon: "\u{1F3CE}" },
+];
+
+function computeUAMNoise(n) { return n <= 0 ? 0 : 50 + 10 * Math.log10(n * 0.15 + 0.1); }
+function combineNoise(a, b) { return b <= 0 ? a : 10 * Math.log10(Math.pow(10, a/10) + Math.pow(10, b/10)); }
+function formatHour(h) { return h === 0 ? "12 AM" : h < 12 ? h + " AM" : h === 12 ? "12 PM" : (h-12) + " PM"; }
+
+function Dashboard() {
+  const [selectedPrinciples, setSelectedPrinciples] = useState(["sufficientarian"]);
+  const [activeMetrics, setActiveMetrics] = useState(["threshold"]);
+  const [thresholdDb, setThresholdDb] = useState(55);
+  const [thresholdMode, setThresholdMode] = useState("all");
+  const [maxRatio, setMaxRatio] = useState(3);
+  const [protectedFactors, setProtectedFactors] = useState(["burden"]);
+  const [blackoutStart, setBlackoutStart] = useState(22);
+  const [blackoutEnd, setBlackoutEnd] = useState(7);
+  const [maxFlightsPerHood, setMaxFlightsPerHood] = useState(25);
+
+  const flights = DEFAULT_FLIGHTS;
+  const totalFlights = Object.values(flights).reduce((a, b) => a + b, 0);
+  const numHoods = NEIGHBORHOODS.length;
+
+  const availableMetrics = useMemo(() => {
+    const ids = new Set();
+    selectedPrinciples.forEach(pid => {
+      const p = PRINCIPLES.find(x => x.id === pid) || (pid === "temporal" ? TEMPORAL : null);
+      if (p) p.metrics.forEach(m => ids.add(m));
+    });
+    return ALL_METRICS.filter(m => ids.has(m.id));
+  }, [selectedPrinciples]);
+
+  const togglePrinciple = (pid) => {
+    setSelectedPrinciples(prev => {
+      const next = prev.includes(pid) ? prev.filter(x => x !== pid) : [...prev, pid];
+      const newMetricIds = new Set();
+      next.forEach(id => {
+        const p = PRINCIPLES.find(x => x.id === id) || (id === "temporal" ? TEMPORAL : null);
+        if (p) p.metrics.forEach(m => newMetricIds.add(m));
+      });
+      setActiveMetrics(prev => {
+        const kept = prev.filter(m => newMetricIds.has(m));
+        const added = [...newMetricIds].filter(m => !prev.includes(m));
+        return [...kept, ...added];
+      });
+      return next;
+    });
+  };
+
+  const toggleMetric = (mid) => setActiveMetrics(prev => prev.includes(mid) ? prev.filter(x => x !== mid) : [...prev, mid]);
+  const toggleProtection = (f) => setProtectedFactors(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
+
+  const results = useMemo(() => NEIGHBORHOODS.map((hood) => {
+    const f = flights[hood.id] || 0;
+    const uamNoise = computeUAMNoise(f);
+    const totalNoise = combineNoise(hood.existingNoise, uamNoise);
+    const isProtected = (protectedFactors.includes("burden") && hood.burden === "High") ||
+      (protectedFactors.includes("income") && (hood.income === "Low" || hood.income === "Low-Med")) ||
+      (protectedFactors.includes("schools") && hood.schools) ||
+      (protectedFactors.includes("density") && hood.pop > 20000);
+    let effectiveThreshold = thresholdDb;
+    if (thresholdMode === "stricter_burden" && hood.burden === "High") effectiveThreshold -= 5;
+    return { ...hood, flights: f, uamNoise: Math.round(uamNoise*10)/10, totalNoise: Math.round(totalNoise*10)/10, isProtected, effectiveThreshold, overThreshold: totalNoise > effectiveThreshold, overBy: Math.round((totalNoise - effectiveThreshold)*10)/10 };
+  }), [flights, thresholdDb, thresholdMode, protectedFactors]);
+
+  const metricResults = useMemo(() => {
+    const res = {};
+    const overCount = results.filter(r => r.overThreshold).length;
+    res.threshold = { status: overCount === 0 ? "pass" : "fail", value: (numHoods-overCount)+"/"+numHoods, detail: overCount === 0 ? "All under "+thresholdDb+" dB" : overCount+" over "+thresholdDb+" dB limit" };
+    const fv = results.map(r => r.flights);
+    const maxF = Math.max(...fv), minF = Math.min(...fv.filter(f => f > 0)) || 1;
+    const fr = Math.round((maxF/minF)*10)/10;
+    res.disparity = { status: fr <= maxRatio ? "pass" : "fail", value: fr+":1", detail: fr <= maxRatio ? "Within "+maxRatio+":1 max" : "Exceeds "+maxRatio+":1 max" };
+    const ph = results.filter(r => r.isProtected), pp = ph.filter(r => !r.overThreshold);
+    res.protected = { status: ph.length === 0 ? "off" : pp.length === ph.length ? "pass" : "fail", value: pp.length+"/"+ph.length, detail: ph.length === 0 ? "None selected" : pp.length === ph.length ? "All protected areas safe" : (ph.length-pp.length)+" protected over limit" };
+    const bh = blackoutStart > blackoutEnd ? 24 - blackoutStart + blackoutEnd : blackoutEnd - blackoutStart;
+    res.blackout = { status: bh >= 8 ? "pass" : "warn", value: bh+"h", detail: formatHour(blackoutStart)+"\u2013"+formatHour(blackoutEnd) };
+    const oc = results.filter(r => r.flights > maxFlightsPerHood).length;
+    res.frequency = { status: oc === 0 ? "pass" : "fail", value: (numHoods-oc)+"/"+numHoods, detail: oc === 0 ? "All under "+maxFlightsPerHood+"/day" : oc+" over "+maxFlightsPerHood+"/day cap" };
+    return res;
+  }, [results, thresholdDb, maxRatio, blackoutStart, blackoutEnd, maxFlightsPerHood]);
+
+  function hoodFill(r) {
+    if (!activeMetrics.includes("threshold")) return "rgba(200,195,185,0.35)";
+    if (r.overBy > 10) return "rgba(252,165,165,0.65)";
+    if (r.overBy > 0) return "rgba(253,186,116,0.6)";
+    if (r.overBy > -3) return "rgba(253,249,195,0.55)";
+    return "rgba(134,239,172,0.5)";
+  }
+  function hoodStroke(r) {
+    if (!activeMetrics.includes("threshold")) return "#b5b0a5";
+    if (r.overBy > 0) return "#ef4444";
+    return "#22c55e";
+  }
+
+  return (
+    <div className="app">
+      <div className="topbar">
+        <div style={{display:"flex",alignItems:"baseline"}}>
+          <h1 className="serif">Test Your Fairness Rules</h1>
+          <span className="topbar-sub">UAM Noise Allocation — Austin, TX</span>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          <span className="tag tag-teal">Workshop Tool</span>
+          <span className="tag tag-amber">Pilot v1</span>
+        </div>
+      </div>
+
+      {/* LEFT PANEL */}
+      <div className="left-panel">
+        <div>
+          <p className="section-label">Step 1</p>
+          <p className="section-title">Choose Fairness Principles</p>
+          <p className="section-desc">Select one or more. Each activates related metrics below.</p>
+          <div className="principle-grid">
+            {PRINCIPLES.map(p => {
+              const sel = selectedPrinciples.includes(p.id);
+              return (
+                <div key={p.id} className={"principle-chip"+(sel?" selected":"")} style={sel?{"--chip-color":p.color,"--chip-bg":p.bg}:{}} onClick={()=>togglePrinciple(p.id)}>
+                  <span className="principle-dot" style={{background:p.color}} />
+                  <div><div className="principle-name">{p.name}</div><div className="principle-desc">{p.desc}</div></div>
+                </div>
+              );
+            })}
+            <div className={"principle-chip"+(selectedPrinciples.includes("temporal")?" selected":"")} style={selectedPrinciples.includes("temporal")?{"--chip-color":TEMPORAL.color,"--chip-bg":TEMPORAL.bg}:{}} onClick={()=>togglePrinciple("temporal")}>
+              <span className="principle-dot" style={{background:TEMPORAL.color}} />
+              <div><div className="principle-name">{TEMPORAL.name}</div><div className="principle-desc">{TEMPORAL.desc}</div></div>
+            </div>
+          </div>
+        </div>
+        <hr className="divider" />
+        <div>
+          <p className="section-label">Step 2</p>
+          <p className="section-title">Configure Metrics</p>
+          <p className="section-desc">Toggle and adjust the measurement rules.</p>
+          <div className="metric-controls">
+            {availableMetrics.length===0 && <p style={{fontSize:11,color:"#bbb",fontStyle:"italic"}}>Select a principle above to see metrics.</p>}
+            {availableMetrics.map(m => {
+              const active = activeMetrics.includes(m.id);
+              return (
+                <div key={m.id} className={"metric-card"+(active?" active":"")}>
+                  <div className="metric-header" onClick={()=>toggleMetric(m.id)}>
+                    <div className="metric-header-left">
+                      <span className="metric-icon">{m.icon}</span>
+                      <div><div className="metric-name">{m.label}</div><div className="metric-from">{m.from}</div></div>
+                    </div>
+                    <div className={"metric-toggle"+(active?" on":"")} />
+                  </div>
+                  {active && m.id==="threshold" && (
+                    <div className="metric-body">
+                      <p className="section-label">Max acceptable noise</p>
+                      <div className="slider-row"><input type="range" min={40} max={80} value={thresholdDb} onChange={e=>setThresholdDb(+e.target.value)} /><span className="slider-val">{thresholdDb}<span style={{fontSize:10,color:"#999",fontWeight:400}}> dB</span></span></div>
+                      <div className="slider-hint"><span>40 dB quiet</span><span>80 dB loud</span></div>
+                      <select value={thresholdMode} onChange={e=>setThresholdMode(e.target.value)} style={{marginTop:8}}>
+                        <option value="all">Same for all neighborhoods</option>
+                        <option value="stricter_burden">5 dB stricter for high-burden</option>
+                      </select>
+                    </div>
+                  )}
+                  {active && m.id==="disparity" && (
+                    <div className="metric-body">
+                      <p className="section-label">Max flight ratio</p>
+                      <div className="slider-row"><input type="range" min={1} max={10} step={0.5} value={maxRatio} onChange={e=>setMaxRatio(+e.target.value)} /><span className="slider-val">{maxRatio}:1</span></div>
+                    </div>
+                  )}
+                  {active && m.id==="protected" && (
+                    <div className="metric-body">
+                      <p className="section-label">Protect neighborhoods with...</p>
+                      {[{id:"burden",label:"High environmental burden"},{id:"income",label:"Low household income"},{id:"density",label:"High population (>20k)"},{id:"schools",label:"Schools or hospitals"}].map(f=>(
+                        <label key={f.id} className="check-label"><input type="checkbox" checked={protectedFactors.includes(f.id)} onChange={()=>toggleProtection(f.id)} />{f.label}</label>
+                      ))}
+                    </div>
+                  )}
+                  {active && m.id==="blackout" && (
+                    <div className="metric-body">
+                      <p className="section-label">No flights between</p>
+                      <div style={{display:"flex",alignItems:"center",gap:6}}>
+                        <select value={blackoutStart} onChange={e=>setBlackoutStart(+e.target.value)} style={{width:"auto",flex:1}}>{Array.from({length:24},(_,i)=><option key={i} value={i}>{formatHour(i)}</option>)}</select>
+                        <span style={{fontSize:10,fontWeight:700,color:"#999"}}>to</span>
+                        <select value={blackoutEnd} onChange={e=>setBlackoutEnd(+e.target.value)} style={{width:"auto",flex:1}}>{Array.from({length:24},(_,i)=><option key={i} value={i}>{formatHour(i)}</option>)}</select>
+                      </div>
+                    </div>
+                  )}
+                  {active && m.id==="frequency" && (
+                    <div className="metric-body">
+                      <p className="section-label">Daily flight cap per area</p>
+                      <div className="slider-row"><input type="range" min={5} max={50} value={maxFlightsPerHood} onChange={e=>setMaxFlightsPerHood(+e.target.value)} /><span className="slider-val">{maxFlightsPerHood}</span></div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* MAP */}
+      <div className="map-panel">
+        <div className="map-container">
+          <svg viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="topo" width="60" height="60" patternUnits="userSpaceOnUse">
+                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
+              </pattern>
+              <filter id="shadow" x="-2%" y="-2%" width="104%" height="104%">
+                <feDropShadow dx="0" dy="1" stdDeviation="2" floodOpacity="0.08" />
+              </filter>
+              <linearGradient id="waterGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#93c5fd" stopOpacity="0.3" />
+                <stop offset="50%" stopColor="#60a5fa" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.3" />
+              </linearGradient>
+            </defs>
+
+            {/* Background */}
+            <rect width="1000" height="900" fill="#e8e4db" />
+            <rect width="1000" height="900" fill="url(#topo)" />
+
+            {/* Neighborhood fills */}
+            {results.map(r => (
+              <path key={r.id} d={MAP_PATHS[r.id]} fill={hoodFill(r)} stroke={hoodStroke(r)} strokeWidth="2" style={{transition:"all 0.4s"}} filter="url(#shadow)" />
+            ))}
+
+            {/* Highways */}
+            {HIGHWAYS.map(h => (
+              <g key={h.id}>
+                <path d={h.path} fill="none" stroke="#fff" strokeWidth={h.width + 3} strokeLinecap="round" opacity="0.6" />
+                <path d={h.path} fill="none" stroke={h.color} strokeWidth={h.width} strokeLinecap="round" strokeDasharray={h.width > 3.5 ? "none" : "8,5"} />
+              </g>
+            ))}
+
+            {/* Highway shields */}
+            {[
+              {label:"I-35",x:475,y:28,w:32},{label:"MoPac",x:282,y:28,w:38},{label:"183",x:680,y:205,w:26},
+              {label:"130",x:635,y:28,w:26},{label:"290",x:700,y:448,w:26},{label:"360",x:150,y:195,w:26},{label:"71",x:720,y:568,w:20},
+            ].map(s => (
+              <g key={s.label}>
+                <rect x={s.x-s.w/2-4} y={s.y-8} width={s.w+8} height={16} rx="3" fill="#fff" stroke="#a8a29e" strokeWidth="1" />
+                <text x={s.x} y={s.y+4} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:9,fontWeight:700,fill:"#78716c"}}>{s.label}</text>
+              </g>
+            ))}
+
+            {/* Water */}
+            {WATER.map(w => (
+              <g key={w.id}>
+                <path d={w.path} fill="none" stroke="#bfdbfe" strokeWidth={w.width+4} strokeLinecap="round" opacity="0.4" />
+                <path d={w.path} fill="none" stroke="url(#waterGrad)" strokeWidth={w.width} strokeLinecap="round" />
+                {w.label && w.labelPos && <text x={w.labelPos.x} y={w.labelPos.y} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:9,fill:"#60a5fa",fontWeight:500,fontStyle:"italic",letterSpacing:"0.08em"}}>{w.label}</text>}
+              </g>
+            ))}
+
+            {/* Landmarks */}
+            {LANDMARKS.map(lm => (
+              <g key={lm.id}>
+                <text x={lm.x} y={lm.y} textAnchor="middle" style={{fontSize:12}}>{lm.icon}</text>
+                <text x={lm.x} y={lm.y+12} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:7,fill:"#999",fontWeight:500,letterSpacing:"0.03em"}}>{lm.label}</text>
+              </g>
+            ))}
+
+            {/* Neighborhood labels */}
+            {results.map(r => {
+              const c = MAP_CENTERS[r.id];
+              const isOver = activeMetrics.includes("threshold") && r.overThreshold;
+              return (
+                <g key={r.id+"-lbl"}>
+                  {/* Background card */}
+                  <rect x={c.x-58} y={c.y-32} width="116" height={activeMetrics.includes("protected") && r.isProtected ? 88 : (isOver ? 82 : 68)} rx="8" fill="rgba(255,255,255,0.88)" stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
+
+                  <text x={c.x} y={c.y-16} textAnchor="middle" style={{fontFamily:"'Fraunces'",fontSize:14,fontWeight:700,fill:"#1a1a1a"}}>{r.name}</text>
+                  <text x={c.x} y={c.y-4} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:8,fill:"#aaa",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.08em"}}>{r.type}</text>
+
+                  <text x={c.x-20} y={c.y+16} textAnchor="middle" style={{fontFamily:"'Fraunces'",fontSize:20,fontWeight:800,fill:isOver?"#dc2626":"#1a1a1a"}}>{r.flights}</text>
+                  <text x={c.x-20} y={c.y+26} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:7,fill:"#bbb",fontWeight:500}}>flights</text>
+
+                  <text x={c.x+28} y={c.y+16} textAnchor="middle" style={{fontFamily:"'Fraunces'",fontSize:16,fontWeight:700,fill:isOver?"#dc2626":"#059669"}}>{r.totalNoise}</text>
+                  <text x={c.x+28} y={c.y+26} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:7,fill:"#bbb",fontWeight:500}}>dB total</text>
+
+                  <text x={c.x} y={c.y+40} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:8,fill:"#ccc"}}>{r.existingNoise} dB existing · {r.burden} burden</text>
+
+                  {activeMetrics.includes("protected") && r.isProtected && (
+                    <g><rect x={c.x-26} y={c.y+46} width="52" height="14" rx="7" fill="#8b5cf6" /><text x={c.x} y={c.y+56} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:7,fontWeight:700,fill:"#fff",letterSpacing:"0.06em"}}>PROTECTED</text></g>
+                  )}
+                  {isOver && (
+                    <g><rect x={c.x-22} y={c.y+(activeMetrics.includes("protected")&&r.isProtected?63:46)} width="44" height="14" rx="7" fill="#dc2626" /><text x={c.x} y={c.y+(activeMetrics.includes("protected")&&r.isProtected?73:56)} textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:7,fontWeight:700,fill:"#fff",letterSpacing:"0.04em"}}>+{r.overBy} dB OVER</text></g>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* North arrow */}
+            <g transform="translate(940, 40)">
+              <circle r="18" fill="rgba(255,255,255,0.8)" stroke="#ccc" strokeWidth="1" />
+              <path d="M 0,-12 L 3,4 0,0 -3,4 Z" fill="#1a1a1a" />
+              <text y="12" textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:8,fontWeight:700,fill:"#999"}}>N</text>
+            </g>
+
+            {/* Legend */}
+            <g transform="translate(790, 770)">
+              <rect x="0" y="0" width="180" height="100" rx="10" fill="rgba(255,255,255,0.92)" stroke="rgba(0,0,0,0.08)" strokeWidth="1" />
+              <text x="14" y="20" style={{fontFamily:"'DM Sans'",fontSize:9,fontWeight:700,fill:"#999",letterSpacing:"0.08em",textTransform:"uppercase"}}>Noise vs Threshold</text>
+              {[{c:"rgba(134,239,172,0.6)",l:"Under limit"},{c:"rgba(253,249,195,0.65)",l:"Near limit"},{c:"rgba(253,186,116,0.65)",l:"Over limit"},{c:"rgba(252,165,165,0.7)",l:"Far over limit"}].map((item,i)=>(
+                <g key={i} transform={"translate(14,"+(32+i*16)+")"}>
+                  <rect width="14" height="12" rx="3" fill={item.c} stroke="#ccc" strokeWidth="0.5" />
+                  <text x="20" y="10" style={{fontFamily:"'DM Sans'",fontSize:10,fill:"#666"}}>{item.l}</text>
+                </g>
+              ))}
+            </g>
+
+            {/* Scale bar */}
+            <g transform="translate(30, 860)">
+              <line x1="0" y1="0" x2="80" y2="0" stroke="#999" strokeWidth="1.5" />
+              <line x1="0" y1="-4" x2="0" y2="4" stroke="#999" strokeWidth="1.5" />
+              <line x1="80" y1="-4" x2="80" y2="4" stroke="#999" strokeWidth="1.5" />
+              <text x="40" y="14" textAnchor="middle" style={{fontFamily:"'DM Sans'",fontSize:8,fill:"#999"}}>~5 miles</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      {/* BOTTOM SCORECARDS */}
+      <div className="bottom-bar">
+        <div className="scorecard-row">
+          {ALL_METRICS.map(m => {
+            const active = activeMetrics.includes(m.id);
+            const r = metricResults[m.id];
+            const sc = !active?"off":r.status;
+            return (
+              <div key={m.id} className={"scorecard"+(!active?" off":"")}>
+                <span className="scorecard-icon">{m.icon}</span>
+                <div className="scorecard-info">
+                  <div className="scorecard-name">{m.label}</div>
+                  {active ? (<><div className="scorecard-val" style={{color:sc==="pass"?"#059669":sc==="fail"?"#dc2626":sc==="warn"?"#d97706":"#aaa"}}>{r.value}</div><div className="scorecard-detail">{r.detail}</div></>) : (<div className="scorecard-detail" style={{fontStyle:"italic"}}>Not active</div>)}
+                </div>
+                <span className={"status-pill status-"+(sc==="pass"?"pass":sc==="fail"?"fail":sc==="warn"?"warn":"off")}>{!active?"OFF":sc==="pass"?"PASS":sc==="fail"?"FAIL":"REVIEW"}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<Dashboard />, document.getElementById("root"));
+</script>
+</body>
+</html>
