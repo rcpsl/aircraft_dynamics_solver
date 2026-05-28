@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UAM Noise Solver</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Fraunces:wght@600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f8f6f2;
+      color: #1c1917;
+      min-height: 100vh;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Left panel ── */
+    .left-panel {
+      width: 360px;
+      min-width: 360px;
+      background: #ffffff;
+      border-right: 1px solid #e5e2db;
+      padding: 28px 24px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      overflow-y: auto;
+      position: sticky;
+      top: 0;
+      max-height: 100vh;
+    }
+
+    .left-panel h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #1c1917;
+      line-height: 1.2;
+    }
+
+    section h2 {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #78716c;
+      margin-bottom: 10px;
+    }
+
+    /* Sliders */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .slider-row label {
+      font-size: 13px;
+      width: 115px;
+      flex-shrink: 0;
+      color: #44403c;
+    }
+
+    .slider-row input[type=range] {
+      flex: 1;
+      accent-color: #1c1917;
+      cursor: pointer;
+      height: 4px;
+    }
+
+    .slider-value {
+      font-size: 13px;
+      font-weight: 600;
+      width: 22px;
+      text-align: right;
+      color: #1c1917;
+    }
+
+    /* Position inputs */
+    .pos-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .pos-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .pos-cell span {
+      font-size: 10px;
+      font-weight: 600;
+      color: #78716c;
+      text-transform: uppercase;
+    }
+
+    .pos-cell input[type=number] {
+      width: 42px;
+      padding: 4px 6px;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      border: 1px solid #d4cfc8;
+      border-radius: 4px;
+      background: #faf9f7;
+      text-align: center;
+      color: #1c1917;
+      -moz-appearance: textfield;
+    }
+
+    .pos-cell input[type=number]::-webkit-inner-spin-button,
+    .pos-cell input[type=number]::-webkit-outer-spin-button { opacity: 1; }
+
+    /* Adjacency matrix */
+    .adj-hint {
+      font-size: 11px;
+      color: #a8a29e;
+      margin-bottom: 8px;
+    }
+
+    .adj-grid {
+      display: grid;
+      gap: 3px;
+    }
+
+    .adj-header {
+      font-size: 10px;
+      font-weight: 600;
+      color: #78716c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+    }
+
+    .adj-cell {
+      width: 22px;
+      height: 22px;
+      border-radius: 3px;
+      cursor: pointer;
+      border: 1px solid #d4cfc8;
+      transition: background 0.1s;
+    }
+
+    .adj-on  { background: #1c1917; border-color: #1c1917; }
+    .adj-off { background: #faf9f7; }
+    .adj-off:hover { background: #e7e5e0; }
+
+    /* Solve button */
+    .solve-btn {
+      margin-top: 4px;
+      padding: 12px 0;
+      background: #1c1917;
+      color: #f8f6f2;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solve-btn:hover:not(:disabled) { background: #292524; }
+    .solve-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Right panel ── */
+    .right-panel {
+      flex: 1;
+      padding: 36px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      overflow-x: auto;
+    }
+
+    .idle-message {
+      color: #a8a29e;
+      font-size: 15px;
+      margin-top: 40px;
+    }
+
+    .status {
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .status.solving { background: #fef3c7; color: #92400e; }
+    .status.sat     { background: #dcfce7; color: #14532d; }
+    .status.unsat   { background: #fee2e2; color: #7f1d1d; }
+    .status.error   { background: #fee2e2; color: #7f1d1d; }
+
+    .right-panel section h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 17px;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+      color: #1c1917;
+      margin-bottom: 12px;
+    }
+
+    .noise-legend {
+      font-size: 12px;
+      color: #a8a29e;
+      margin-bottom: 10px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid #e5e2db;
+      padding: 5px 9px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f3f1ed;
+      font-weight: 600;
+      font-size: 11px;
+      color: #78716c;
+    }
+
+    .row-label {
+      font-weight: 600;
+      background: #f3f1ed;
+      color: #44403c;
+    }
+
+    .paths-table td { min-width: 36px; }
+
+    .noise-cell {
+      min-width: 36px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const DEFAULT_N   = 2;
+    const DEFAULT_T   = 7;
+    const DEFAULT_M   = 5;
+    const DEFAULT_D   = 1;
+    const DEFAULT_U   = 2;
+    const DEFAULT_ADJ = [
+      [1,1,0,0,0],
+      [0,1,1,0,0],
+      [0,0,1,1,0],
+      [0,0,0,1,1],
+      [0,0,0,0,1],
+    ];
+    const DEFAULT_START = [1, 3];
+    const DEFAULT_END   = [4, 5];
+
+    function resizeAdj(adj, newM) {
+      return Array.from({length: newM}, (_, i) =>
+        Array.from({length: newM}, (_, j) => {
+          if (i < adj.length && j < adj[i].length) return adj[i][j];
+          // default: stay (diagonal) and forward move
+          return (j === i || j === i + 1) ? 1 : 0;
+        })
+      );
+    }
+
+    function resizePos(pos, newN, M) {
+      if (newN <= pos.length) return pos.slice(0, newN);
+      return [...pos, ...Array.from({length: newN - pos.length}, () => 1)];
+    }
+
+    function Slider({ label, value, min, max, onChange }) {
+      return (
+        <div className="slider-row">
+          <label>{label}</label>
+          <input
+            type="range"
+            min={min}
+            max={max}
+            value={value}
+            onChange={e => onChange(Number(e.target.value))}
+          />
+          <span className="slider-value">{value}</span>
+        </div>
+      );
+    }
+
+    function noiseColor(val, maxVal) {
+      if (maxVal === 0) return "#f8f6f2";
+      const t = val / maxVal;
+      // warm white → steel blue
+      const r = Math.round(248 + t * (30  - 248));
+      const g = Math.round(246 + t * (64  - 246));
+      const b = Math.round(242 + t * (175 - 242));
+      return `rgb(${r},${g},${b})`;
+    }
+
+    function App() {
+      const [N, setN] = useState(DEFAULT_N);
+      const [T, setT] = useState(DEFAULT_T);
+      const [M, setM] = useState(DEFAULT_M);
+      const [D, setD] = useState(DEFAULT_D);
+      const [U, setU] = useState(DEFAULT_U);
+      const [adjacency, setAdjacency] = useState(DEFAULT_ADJ);
+      const [startPos, setStartPos] = useState(DEFAULT_START);
+      const [endPos,   setEndPos]   = useState(DEFAULT_END);
+
+      const [status,      setStatus]      = useState("idle");
+      const [paths,       setPaths]       = useState(null);
+      const [noiseMatrix, setNoiseMatrix] = useState(null);
+
+      function handleN(newN) {
+        setN(newN);
+        setStartPos(p => resizePos(p, newN, M));
+        setEndPos(p   => resizePos(p, newN, M));
+      }
+
+      function handleM(newM) {
+        setM(newM);
+        setAdjacency(a => resizeAdj(a, newM));
+        setStartPos(p => p.map(v => Math.min(v, newM)));
+        setEndPos(p   => p.map(v => Math.min(v, newM)));
+      }
+
+      function toggleAdj(i, j) {
+        setAdjacency(prev => prev.map((row, ri) =>
+          ri === i ? row.map((v, ci) => ci === j ? (v ? 0 : 1) : v) : row
+        ));
+      }
+
+      function setPos(arr, setArr, idx, raw, maxVal) {
+        const v = Math.max(1, Math.min(maxVal, Number(raw) || 1));
+        setArr(arr.map((x, i) => i === idx ? v : x));
+      }
+
+      async function handleSolve() {
+        setStatus("solving");
+        setPaths(null);
+        setNoiseMatrix(null);
+        try {
+          const res = await fetch("http://localhost:5050/solve", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              N, T, M, D, U,
+              adjacency,
+              startPositions: startPos,
+              endPositions:   endPos,
+            }),
+          });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          if (data.status === "sat") {
+            setStatus("sat");
+            setPaths(data.paths);
+            setNoiseMatrix(data.noiseMatrix);
+          } else {
+            setStatus("unsat");
+          }
+        } catch {
+          setStatus("error");
+        }
+      }
+
+      const maxNoise = noiseMatrix ? Math.max(1, ...noiseMatrix.flat()) : 1;
+
+      return (
+        <div className="app">
+
+          {/* ── Left panel ── */}
+          <div className="left-panel">
+            <h1>UAM Noise<br />Solver</h1>
+
+            <section>
+              <h2>Parameters</h2>
+              <Slider label="N  aircraft"  value={N} min={1} max={10} onChange={handleN} />
+              <Slider label="T  timesteps" value={T} min={2} max={20} onChange={setT} />
+              <Slider label="M  stations"  value={M} min={2} max={10} onChange={handleM} />
+              <Slider label="D  noise cap" value={D} min={0} max={10} onChange={setD} />
+              <Slider label="U  adj. diff" value={U} min={0} max={10} onChange={setU} />
+            </section>
+
+            <section>
+              <h2>Start Positions</h2>
+              <div className="pos-grid">
+                {startPos.map((p, i) => (
+                  <div className="pos-cell" key={i}>
+                    <span>A{i}</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={M}
+                      value={p}
+                      onChange={e => setPos(startPos, setStartPos, i, e.target.value, M)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h2>End Positions</h2>
+              <div className="pos-grid">
+                {endPos.map((p, i) => (
+                  <div className="pos-cell" key={i}>
+                    <span>A{i}</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={M}
+                      value={p}
+                      onChange={e => setPos(endPos, setEndPos, i, e.target.value, M)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h2>Adjacency Matrix</h2>
+              <div className="adj-hint">Row = from station, Col = to station</div>
+              <div
+                className="adj-grid"
+                style={{ gridTemplateColumns: `22px repeat(${M}, 22px)` }}
+              >
+                {/* Header row */}
+                <div />
+                {Array.from({length: M}, (_, j) => (
+                  <div key={j} className="adj-header">{j + 1}</div>
+                ))}
+
+                {/* Data rows */}
+                {adjacency.map((row, i) => [
+                  <div key={`h${i}`} className="adj-header">{i + 1}</div>,
+                  ...row.map((val, j) => (
+                    <div
+                      key={`${i}-${j}`}
+                      className={`adj-cell ${val ? "adj-on" : "adj-off"}`}
+                      onClick={() => toggleAdj(i, j)}
+                      title={`${i+1} → ${j+1}`}
+                    />
+                  ))
+                ])}
+              </div>
+            </section>
+
+            <button
+              className="solve-btn"
+              onClick={handleSolve}
+              disabled={status === "solving"}
+            >
+              {status === "solving" ? "Solving…" : "Run Solver"}
+            </button>
+          </div>
+
+          {/* ── Right panel ── */}
+          <div className="right-panel">
+
+            {status === "idle" && (
+              <p className="idle-message">
+                Configure parameters on the left and click <strong>Run Solver</strong>.
+              </p>
+            )}
+
+            {status !== "idle" && (
+              <div>
+                {status === "solving" && <span className="status solving">Solving…</span>}
+                {status === "sat"     && <span className="status sat">✓ sat — solution found</span>}
+                {status === "unsat"   && <span className="status unsat">✗ unsat — try relaxing D or U</span>}
+                {status === "error"   && <span className="status error">Connection error — is the server running on port 5050?</span>}
+              </div>
+            )}
+
+            {paths && (
+              <section>
+                <h2>Aircraft Paths</h2>
+                <div className="table-wrap">
+                  <table className="paths-table">
+                    <thead>
+                      <tr>
+                        <th>Aircraft</th>
+                        {Array.from({length: T}, (_, t) => <th key={t}>t={t}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paths.map((row, i) => (
+                        <tr key={i}>
+                          <td className="row-label">A{i}</td>
+                          {row.map((stn, t) => <td key={t}>{stn}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {noiseMatrix && (
+              <section>
+                <h2>Noise Matrix</h2>
+                <div className="noise-legend">
+                  Rows = stations 1…{M} &nbsp;·&nbsp; Columns = timesteps 0…{T-1} &nbsp;·&nbsp;
+                  Darker = more aircraft present
+                </div>
+                <div className="table-wrap">
+                  <table className="noise-table">
+                    <thead>
+                      <tr>
+                        <th>Stn</th>
+                        {Array.from({length: T}, (_, t) => <th key={t}>t={t}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {noiseMatrix.map((row, m) => (
+                        <tr key={m}>
+                          <td className="row-label">{m + 1}</td>
+                          {row.map((val, t) => (
+                            <td
+                              key={t}
+                              className="noise-cell"
+                              style={{ background: noiseColor(val, maxNoise) }}
+                              title={`stn ${m+1}, t=${t}: ${val}`}
+                            >
+                              {val}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
