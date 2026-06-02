@@ -278,42 +278,51 @@ function Dashboard() {
   const toggleMetric = (mid) => setActiveMetrics(prev => prev.includes(mid) ? prev.filter(x => x !== mid) : [...prev, mid]);
   const toggleProtection = (f) => setProtectedFactors(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
 
-  const results = useMemo(() => NEIGHBORHOODS.map((hood) => {
-    const f = flights[hood.id] || 0;
-    const uamNoise = computeUAMNoise(f);
-    const totalNoise = combineNoise(hood.existingNoise, uamNoise);
-    const isProtected = (protectedFactors.includes("burden") && hood.burden === "High") ||
-      (protectedFactors.includes("income") && (hood.income === "Low" || hood.income === "Low-Med")) ||
-      (protectedFactors.includes("schools") && hood.schools) ||
-      (protectedFactors.includes("density") && hood.pop > 20000);
-    // Threshold: flag neighborhoods using > 60% of their theoretical capacity (D * T)
-    const maxCap = Math.max(1, D * solverT);
-    const capLine = maxCap * 0.6;
-    const overThreshold = f > capLine;
-    return { ...hood, flights: f, uamNoise: Math.round(uamNoise*10)/10, totalNoise: Math.round(totalNoise*10)/10, isProtected, overThreshold, overBy: Math.round(f - capLine) };
-  }), [flights, D, solverT, protectedFactors]);
+  const results = useMemo(() => {
+    const fv = NEIGHBORHOODS.map(h => flights[h.id] || 0);
+    const avgF = fv.reduce((a, b) => a + b, 0) / numHoods;
+    const highLine = avgF * 1.5;  // flag if 50%+ above average
+    return NEIGHBORHOODS.map((hood, idx) => {
+      const f = fv[idx];
+      const uamNoise = computeUAMNoise(f);
+      const totalNoise = combineNoise(hood.existingNoise, uamNoise);
+      const isProtected = (protectedFactors.includes("burden") && hood.burden === "High") ||
+        (protectedFactors.includes("income") && (hood.income === "Low" || hood.income === "Low-Med")) ||
+        (protectedFactors.includes("schools") && hood.schools) ||
+        (protectedFactors.includes("density") && hood.pop > 20000);
+      const overThreshold = f > highLine;
+      return { ...hood, flights: f, uamNoise: Math.round(uamNoise*10)/10, totalNoise: Math.round(totalNoise*10)/10, isProtected, overThreshold, overBy: Math.round(f - highLine) };
+    });
+  }, [flights, protectedFactors, numHoods]);
 
   const metricResults = useMemo(() => {
     const res = {};
 
-    // Threshold \u2192 driven by solver status and D constraint
+    // Threshold \u2192 directly reflects the Z3 D-constraint result
     if (solverStatus === "unsat") {
-      res.threshold = { status: "fail", value: "unsat", detail: "D="+D+" too tight \u2014 relax D or U" };
+      res.threshold = { status: "fail", value: "unsat", detail: "D="+D+" infeasible \u2014 relax D or U" };
     } else if (solverStatus === "sat") {
-      const overCount = results.filter(r => r.overThreshold).length;
-      res.threshold = { status: overCount === 0 ? "pass" : "warn", value: (numHoods-overCount)+"/"+numHoods, detail: "D="+D+" ac/step \u00b7 "+solverT+" steps" };
+      res.threshold = { status: "pass", value: "sat", detail: "D="+D+" \u00b7 all "+numHoods+" stations \u2264"+D+" ac/step, every t" };
     } else {
       res.threshold = { status: "off", value: "\u2014", detail: "Run solver to evaluate" };
     }
 
-    // Disparity \u2192 actual flight ratio, U notes the Z3 adjacent-difference cap
+    // Disparity \u2192 actual spread of total visits across neighborhoods
     const fv = results.map(r => r.flights);
-    const maxF = Math.max(...fv, 1), minF = Math.min(...fv.filter(f => f > 0)) || 1;
-    const fr = Math.round((maxF/minF)*10)/10;
+    const maxF = Math.max(...fv, 0);
+    const minF = Math.min(...fv.filter(f => f > 0));
+    const ratio = (maxF > 0 && minF > 0) ? Math.round((maxF / minF) * 10) / 10 : null;
+    const ratioStr = ratio !== null ? ratio + ":1" : (maxF > 0 ? maxF + "\u20130" : "\u2014");
+    const disparityStatus = solverStatus === "idle" ? "off"
+      : solverStatus !== "sat"  ? "fail"
+      : ratio === null          ? "warn"
+      : ratio <= 2              ? "pass"
+      : ratio <= 3.5            ? "warn"
+      : "fail";
     res.disparity = {
-      status: solverStatus === "idle" ? "off" : solverStatus === "sat" ? "pass" : "fail",
-      value: fr > 0 ? fr+":1" : "\u2014",
-      detail: "U="+U+" adj. cap" + (solverStatus === "sat" ? " \u00b7 satisfied" : " \u00b7 run solver"),
+      status: disparityStatus,
+      value: ratioStr,
+      detail: "U="+U+" adj. cap \u00b7 max "+maxF+" vs min "+(minF||0)+" total visits",
     };
 
     // Protected (unchanged)
@@ -333,12 +342,10 @@ function Dashboard() {
 
   function hoodFill(r) {
     if (!activeMetrics.includes("threshold")) return "rgba(200,195,185,0.35)";
-    const maxCap = Math.max(1, D * solverT);
-    const ratio = r.flights / maxCap;
-    if (ratio > 0.75) return "rgba(252,165,165,0.65)";
-    if (ratio > 0.50) return "rgba(253,186,116,0.6)";
-    if (ratio > 0.25) return "rgba(253,249,195,0.55)";
-    return "rgba(134,239,172,0.5)";
+    if (r.overBy > 3)    return "rgba(252,165,165,0.65)";  // well above avg
+    if (r.overThreshold) return "rgba(253,186,116,0.6)";   // just above avg
+    if (r.flights > 0)   return "rgba(253,249,195,0.55)";  // below avg, some traffic
+    return "rgba(134,239,172,0.5)";                         // no traffic
   }
   function hoodStroke(r) {
     if (!activeMetrics.includes("threshold")) return "#b5b0a5";
