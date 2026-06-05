@@ -267,11 +267,10 @@
   <script type="text/babel">
     const { useState } = React;
 
-    const DEFAULT_N   = 2;
-    const DEFAULT_T   = 7;
-    const DEFAULT_M   = 5;
-    const DEFAULT_D   = 1;
-    const DEFAULT_U   = 2;
+    const DEFAULT_N = 2;
+    const DEFAULT_M = 5;
+    const DEFAULT_D = 1;
+    const DEFAULT_U = 2;
     const DEFAULT_ADJ = [
       [1,1,0,0,0],
       [0,1,1,0,0],
@@ -325,7 +324,6 @@
 
     function App() {
       const [N, setN] = useState(DEFAULT_N);
-      const [T, setT] = useState(DEFAULT_T);
       const [M, setM] = useState(DEFAULT_M);
       const [D, setD] = useState(DEFAULT_D);
       const [U, setU] = useState(DEFAULT_U);
@@ -334,8 +332,10 @@
       const [endPos,   setEndPos]   = useState(DEFAULT_END);
 
       const [status,      setStatus]      = useState("idle");
+      const [solvedT,     setSolvedT]     = useState(null);
       const [paths,       setPaths]       = useState(null);
       const [noiseMatrix, setNoiseMatrix] = useState(null);
+      const [unstatDetail, setUnstatDetail] = useState(null);
 
       function handleN(newN) {
         setN(newN);
@@ -365,12 +365,13 @@
         setStatus("solving");
         setPaths(null);
         setNoiseMatrix(null);
+        setSolvedT(null);
         try {
           const res = await fetch("http://localhost:5050/solve", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              N, T, M, D, U,
+              N, M, D, U,
               adjacency,
               startPositions: startPos,
               endPositions:   endPos,
@@ -380,10 +381,13 @@
           const data = await res.json();
           if (data.status === "sat") {
             setStatus("sat");
+            setSolvedT(data.T);
             setPaths(data.paths);
             setNoiseMatrix(data.noiseMatrix);
+            setUnstatDetail(null);
           } else {
             setStatus("unsat");
+            setUnstatDetail(data.detail || null);
           }
         } catch {
           setStatus("error");
@@ -402,7 +406,6 @@
             <section>
               <h2>Parameters</h2>
               <Slider label="N  aircraft"  value={N} min={1} max={10} onChange={handleN} />
-              <Slider label="T  timesteps" value={T} min={2} max={20} onChange={setT} />
               <Slider label="M  stations"  value={M} min={2} max={10} onChange={handleM} />
               <Slider label="D  noise cap" value={D} min={0} max={10} onChange={setD} />
               <Slider label="U  adj. diff" value={U} min={0} max={10} onChange={setU} />
@@ -493,8 +496,8 @@
             {status !== "idle" && (
               <div>
                 {status === "solving" && <span className="status solving">Solving…</span>}
-                {status === "sat"     && <span className="status sat">✓ sat — solution found</span>}
-                {status === "unsat"   && <span className="status unsat">✗ unsat — try relaxing D or U</span>}
+                {status === "sat"     && <span className="status sat">✓ sat — minimum T = {solvedT}</span>}
+                {status === "unsat"   && <span className="status unsat">✗ unsat — {unstatDetail || "try relaxing D or U"}</span>}
                 {status === "error"   && <span className="status error">Connection error — is the server running on port 5050?</span>}
               </div>
             )}
@@ -507,7 +510,7 @@
                     <thead>
                       <tr>
                         <th>Aircraft</th>
-                        {Array.from({length: T}, (_, t) => <th key={t}>t={t}</th>)}
+                        {Array.from({length: solvedT}, (_, t) => <th key={t}>t={t}</th>)}
                       </tr>
                     </thead>
                     <tbody>
@@ -527,7 +530,7 @@
               <section>
                 <h2>Noise Matrix</h2>
                 <div className="noise-legend">
-                  Rows = stations 1…{M} &nbsp;·&nbsp; Columns = timesteps 0…{T-1} &nbsp;·&nbsp;
+                  Rows = stations 1…{M} &nbsp;·&nbsp; Columns = timesteps 0…{solvedT - 1} &nbsp;·&nbsp;
                   Darker = more aircraft present
                 </div>
                 <div className="table-wrap">
@@ -535,7 +538,7 @@
                     <thead>
                       <tr>
                         <th>Stn</th>
-                        {Array.from({length: T}, (_, t) => <th key={t}>t={t}</th>)}
+                        {Array.from({length: solvedT}, (_, t) => <th key={t}>t={t}</th>)}
                       </tr>
                     </thead>
                     <tbody>
