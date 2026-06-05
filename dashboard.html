@@ -177,6 +177,27 @@
     .solve-btn:hover:not(:disabled) { background: #292524; }
     .solve-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    .config-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .config-btn {
+      flex: 1;
+      padding: 8px 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #44403c;
+      background: transparent;
+      border: 1px solid #d6d3cd;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .config-btn:hover { background: #f3f1ed; border-color: #a8a29e; }
+
     /* ── Right panel ── */
     .right-panel {
       flex: 1;
@@ -265,7 +286,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState } = React;
+    const { useState, useEffect, useRef } = React;
 
     const DEFAULT_N = 2;
     const DEFAULT_M = 5;
@@ -322,20 +343,36 @@
       return `rgb(${r},${g},${b})`;
     }
 
-    function App() {
-      const [N, setN] = useState(DEFAULT_N);
-      const [M, setM] = useState(DEFAULT_M);
-      const [D, setD] = useState(DEFAULT_D);
-      const [U, setU] = useState(DEFAULT_U);
-      const [adjacency, setAdjacency] = useState(DEFAULT_ADJ);
-      const [startPos, setStartPos] = useState(DEFAULT_START);
-      const [endPos,   setEndPos]   = useState(DEFAULT_END);
+    const STORAGE_KEY = "uam-config";
 
-      const [status,      setStatus]      = useState("idle");
-      const [solvedT,     setSolvedT]     = useState(null);
-      const [paths,       setPaths]       = useState(null);
-      const [noiseMatrix, setNoiseMatrix] = useState(null);
+    function loadSaved() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+      catch { return {}; }
+    }
+
+    function App() {
+      const saved = loadSaved();
+
+      const [N, setN] = useState(saved.N ?? DEFAULT_N);
+      const [M, setM] = useState(saved.M ?? DEFAULT_M);
+      const [D, setD] = useState(saved.D ?? DEFAULT_D);
+      const [U, setU] = useState(saved.U ?? DEFAULT_U);
+      const [adjacency, setAdjacency] = useState(saved.adjacency ?? DEFAULT_ADJ);
+      const [startPos, setStartPos] = useState(saved.startPos ?? DEFAULT_START);
+      const [endPos,   setEndPos]   = useState(saved.endPos   ?? DEFAULT_END);
+
+      const [status,       setStatus]       = useState("idle");
+      const [solvedT,      setSolvedT]      = useState(null);
+      const [paths,        setPaths]        = useState(null);
+      const [noiseMatrix,  setNoiseMatrix]  = useState(null);
       const [unstatDetail, setUnstatDetail] = useState(null);
+
+      const fileInputRef = useRef(null);
+
+      // ── A: auto-save to localStorage on every config change ──────────────
+      useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ N, M, D, U, adjacency, startPos, endPos }));
+      }, [N, M, D, U, adjacency, startPos, endPos]);
 
       function handleN(newN) {
         setN(newN);
@@ -359,6 +396,39 @@
       function setPos(arr, setArr, idx, raw, maxVal) {
         const v = Math.max(1, Math.min(maxVal, Number(raw) || 1));
         setArr(arr.map((x, i) => i === idx ? v : x));
+      }
+
+      // ── B: export config as JSON file ────────────────────────────────────
+      function handleExport() {
+        const config = { N, M, D, U, adjacency, startPos, endPos };
+        const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement("a");
+        a.href     = url;
+        a.download = "uam-config.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // ── B: import config from JSON file ──────────────────────────────────
+      function handleImport(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const c = JSON.parse(ev.target.result);
+            if (c.N !== undefined) handleN(c.N);
+            if (c.M !== undefined) handleM(c.M);
+            if (c.D !== undefined) setD(c.D);
+            if (c.U !== undefined) setU(c.U);
+            if (c.adjacency  !== undefined) setAdjacency(c.adjacency);
+            if (c.startPos   !== undefined) setStartPos(c.startPos);
+            if (c.endPos     !== undefined) setEndPos(c.endPos);
+          } catch { alert("Invalid config file."); }
+        };
+        reader.readAsText(file);
+        e.target.value = "";   // allow re-importing the same file
       }
 
       async function handleSolve() {
@@ -482,6 +552,18 @@
             >
               {status === "solving" ? "Solving…" : "Run Solver"}
             </button>
+
+            <div className="config-btns">
+              <button className="config-btn" onClick={handleExport}>Save Config</button>
+              <button className="config-btn" onClick={() => fileInputRef.current.click()}>Load Config</button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                style={{ display: "none" }}
+                onChange={handleImport}
+              />
+            </div>
           </div>
 
           {/* ── Right panel ── */}
