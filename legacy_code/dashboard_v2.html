@@ -13,7 +13,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; background: #f8f6f2; color: #1a1a1a; min-height: 100vh; }
   .serif { font-family: 'Fraunces', Georgia, serif; }
-  .app { display: grid; grid-template-columns: 320px 1fr; grid-template-rows: auto 1fr auto; height: 100vh; }
+  .app { display: grid; grid-template-columns: 320px 1fr 220px; grid-template-rows: auto 1fr; height: 100vh; }
   .topbar { grid-column: 1 / -1; background: #1a1a1a; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
   .topbar h1 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
   .topbar-sub { font-size: 11px; color: #777; margin-left: 12px; }
@@ -21,8 +21,8 @@
   .tag-teal { background: #134e4a; color: #5eead4; }
   .tag-amber { background: #451a03; color: #fbbf24; }
   .left-panel { background: #fff; border-right: 1px solid #e5e2dc; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+  .right-panel { background: #fff; border-left: 1px solid #e5e2dc; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
   .map-panel { padding: 0; overflow: hidden; position: relative; background: #e8e4db; }
-  .bottom-bar { grid-column: 1 / -1; background: #fff; border-top: 1px solid #e5e2dc; padding: 14px 28px; }
   .section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #999; margin-bottom: 10px; }
   .section-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
   .section-desc { font-size: 11px; color: #888; line-height: 1.5; margin-bottom: 12px; }
@@ -56,8 +56,8 @@
   .check-label { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #555; padding: 3px 0; cursor: pointer; }
   .map-container { width: 100%; height: 100%; }
   .map-container svg { width: 100%; height: 100%; }
-  .scorecard-row { display: flex; gap: 12px; align-items: stretch; }
-  .scorecard { flex: 1; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; border: 1px solid #eae7e0; background: #fafaf7; transition: all 0.2s; min-width: 0; }
+  .scorecard-row { display: flex; flex-direction: column; gap: 8px; }
+  .scorecard { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid #eae7e0; background: #fafaf7; transition: all 0.2s; min-width: 0; }
   .scorecard.off { opacity: 0.35; }
   .scorecard-icon { font-size: 18px; flex-shrink: 0; }
   .scorecard-info { flex: 1; min-width: 0; }
@@ -195,13 +195,16 @@ function Dashboard() {
   const [D, setD] = useState(1);                        // max aircraft per neighborhood per timestep
   const [U, setU] = useState(2);                        // max adjacent noise difference
   const [solverN, setSolverN] = useState(3);            // number of aircraft
-  const [solverT, setSolverT] = useState(10);           // time horizon
   const [startPos, setStartPos] = useState([1, 2, 3]);  // 1-indexed start stations (must be distinct when D=1)
   const [endPos,   setEndPos]   = useState([7, 8, 6]);  // 1-indexed end stations
 
   // Solver status + results
   const [solverStatus,  setSolverStatus]  = useState("idle");
   const [solverFlights, setSolverFlights] = useState(DEFAULT_FLIGHTS);
+  const [solvedD,  setSolvedD]  = useState(null);
+  const [solvedU,  setSolvedU]  = useState(null);
+  const [solvedT,  setSolvedT]  = useState(null);
+  const [unsatDetail, setUnsatDetail] = useState(null);
 
   // Display-only parameters (unchanged from original)
   const [protectedFactors,  setProtectedFactors]  = useState(["burden"]);
@@ -221,12 +224,14 @@ function Dashboard() {
 
   async function handleSolve() {
     setSolverStatus("solving");
+    setSolvedT(null);
+    setUnsatDetail(null);
     try {
       const res = await fetch("http://localhost:5050/solve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          N: solverN, T: solverT, M: 8, D, U,
+          N: solverN, M: 8, D, U,
           adjacency: AUSTIN_ADJACENCY,
           startPositions: startPos,
           endPositions: endPos,
@@ -234,14 +239,18 @@ function Dashboard() {
       });
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
+      setSolvedD(D);
+      setSolvedU(U);
       if (data.status === "sat") {
         const newFlights = {};
         HOOD_ORDER.forEach((id, m) => {
-          newFlights[id] = data.noiseMatrix[m].reduce((a, b) => a + b, 0);
+          newFlights[id] = Math.max(...data.noiseMatrix[m]);
         });
         setSolverFlights(newFlights);
+        setSolvedT(data.T);
         setSolverStatus("sat");
       } else {
+        setUnsatDetail(data.detail || null);
         setSolverStatus("unsat");
       }
     } catch {
@@ -300,9 +309,9 @@ function Dashboard() {
 
     // Threshold \u2192 directly reflects the Z3 D-constraint result
     if (solverStatus === "unsat") {
-      res.threshold = { status: "fail", value: "unsat", detail: "D="+D+" infeasible \u2014 relax D or U" };
+      res.threshold = { status: "fail", value: "unsat", detail: "D="+solvedD+" infeasible \u2014 relax D or U" };
     } else if (solverStatus === "sat") {
-      res.threshold = { status: "pass", value: "sat", detail: "D="+D+" \u00b7 all "+numHoods+" stations \u2264"+D+" ac/step, every t" };
+      res.threshold = { status: "pass", value: "sat", detail: "D="+solvedD+" \u00b7 T="+solvedT+" \u00b7 all "+numHoods+" stations \u2264"+solvedD+" ac/step" };
     } else {
       res.threshold = { status: "off", value: "\u2014", detail: "Run solver to evaluate" };
     }
@@ -322,7 +331,7 @@ function Dashboard() {
     res.disparity = {
       status: disparityStatus,
       value: ratioStr,
-      detail: "U="+U+" adj. cap \u00b7 max "+maxF+" vs min "+(minF||0)+" total visits",
+      detail: "U="+solvedU+" adj. cap \u00b7 max "+maxF+" vs min "+(minF||0)+" total visits",
     };
 
     // Protected (unchanged)
@@ -338,7 +347,7 @@ function Dashboard() {
     res.frequency = { status: oc === 0 ? "pass" : "fail", value: (numHoods-oc)+"/"+numHoods, detail: oc === 0 ? "All under "+maxFlightsPerHood+"/day" : oc+" over "+maxFlightsPerHood+"/day cap" };
 
     return res;
-  }, [results, D, U, solverT, solverStatus, blackoutStart, blackoutEnd, maxFlightsPerHood, numHoods]);
+  }, [results, solvedD, solvedU, solverStatus, blackoutStart, blackoutEnd, maxFlightsPerHood, numHoods]);
 
   function hoodFill(r) {
     if (!activeMetrics.includes("threshold")) return "rgba(200,195,185,0.35)";
@@ -385,15 +394,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* T */}
-            <div>
-              <p className="section-label" style={{marginBottom:3}}>Timesteps (T)</p>
-              <div className="slider-row">
-                <input type="range" min={2} max={20} value={solverT} onChange={e=>setSolverT(+e.target.value)} />
-                <span className="slider-val">{solverT}</span>
-              </div>
-            </div>
-
             {/* Start → End per aircraft */}
             <div>
               <p className="section-label" style={{marginBottom:5}}>Route start → end</p>
@@ -419,8 +419,8 @@ function Dashboard() {
             >
               {solverStatus==="solving" ? "Solving…" : "Run Solver"}
             </button>
-            {solverStatus==="sat"   && <p style={{fontSize:10,color:"#059669",fontWeight:600,marginTop:2}}>✓ Feasible — map updated</p>}
-            {solverStatus==="unsat" && <p style={{fontSize:10,color:"#dc2626",fontWeight:600,marginTop:2}}>✗ Infeasible — relax D or U</p>}
+            {solverStatus==="sat"   && <p style={{fontSize:10,color:"#059669",fontWeight:600,marginTop:2}}>✓ Feasible — minimum T = {solvedT}</p>}
+            {solverStatus==="unsat" && <p style={{fontSize:10,color:"#dc2626",fontWeight:600,marginTop:2}}>✗ Infeasible — {unsatDetail || "try relaxing D or U"}</p>}
             {solverStatus==="error" && <p style={{fontSize:10,color:"#dc2626",fontWeight:600,marginTop:2}}>Error — is server running on port 5050?</p>}
           </div>
         </div>
@@ -529,6 +529,7 @@ function Dashboard() {
             })}
           </div>
         </div>
+
       </div>
 
       {/* MAP */}
@@ -654,26 +655,27 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* BOTTOM SCORECARDS */}
-      <div className="bottom-bar">
-        <div className="scorecard-row">
-          {ALL_METRICS.map(m => {
-            const active = activeMetrics.includes(m.id);
-            const r = metricResults[m.id];
-            const sc = !active?"off":r.status;
-            return (
-              <div key={m.id} className={"scorecard"+(!active?" off":"")}>
-                <span className="scorecard-icon">{m.icon}</span>
-                <div className="scorecard-info">
-                  <div className="scorecard-name">{m.label}</div>
-                  {active ? (<><div className="scorecard-val" style={{color:sc==="pass"?"#059669":sc==="fail"?"#dc2626":sc==="warn"?"#d97706":"#aaa"}}>{r.value}</div><div className="scorecard-detail">{r.detail}</div></>) : (<div className="scorecard-detail" style={{fontStyle:"italic"}}>Not active</div>)}
-                </div>
-                <span className={"status-pill status-"+(sc==="pass"?"pass":sc==="fail"?"fail":sc==="warn"?"warn":"off")}>{!active?"OFF":sc==="pass"?"PASS":sc==="fail"?"FAIL":"REVIEW"}</span>
+      {/* RIGHT PANEL — Scorecards */}
+      <div className="right-panel">
+        <p className="section-label">Results</p>
+        <p className="section-title" style={{marginBottom:12}}>Metric Scorecards</p>
+        {ALL_METRICS.map(m => {
+          const active = activeMetrics.includes(m.id);
+          const r = metricResults[m.id];
+          const sc = !active?"off":r.status;
+          return (
+            <div key={m.id} className={"scorecard"+(!active?" off":"")}>
+              <span className="scorecard-icon">{m.icon}</span>
+              <div className="scorecard-info">
+                <div className="scorecard-name">{m.label}</div>
+                {active ? (<><div className="scorecard-val" style={{color:sc==="pass"?"#059669":sc==="fail"?"#dc2626":sc==="warn"?"#d97706":"#aaa"}}>{r.value}</div><div className="scorecard-detail">{r.detail}</div></>) : (<div className="scorecard-detail" style={{fontStyle:"italic"}}>Not active</div>)}
               </div>
-            );
-          })}
-        </div>
+              <span className={"status-pill status-"+(sc==="pass"?"pass":sc==="fail"?"fail":sc==="warn"?"warn":"off")}>{!active?"OFF":sc==="pass"?"PASS":sc==="fail"?"FAIL":"REVIEW"}</span>
+            </div>
+          );
+        })}
       </div>
+
     </div>
   );
 }
