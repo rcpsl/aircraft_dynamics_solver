@@ -375,17 +375,23 @@
 
     function GraphPanel({ M, adjacency }) {
       const W = 300, H = 300;
-      const cx = W / 2, cy = H / 2;
-      const layoutR = Math.min(W, H) / 2 - 48;
       const nodeR = 16;
 
-      const nodes = Array.from({ length: M }, (_, i) => ({
-        id: i + 1,
-        x: cx + layoutR * Math.cos((2 * Math.PI * i) / M - Math.PI / 2),
-        y: cy + layoutR * Math.sin((2 * Math.PI * i) / M - Math.PI / 2),
-      }));
+      function initPositions() {
+        const cx = W / 2, cy = H / 2;
+        const layoutR = Math.min(W, H) / 2 - 48;
+        return Array.from({ length: M }, (_, i) => ({
+          x: cx + layoutR * Math.cos((2 * Math.PI * i) / M - Math.PI / 2),
+          y: cy + layoutR * Math.sin((2 * Math.PI * i) / M - Math.PI / 2),
+        }));
+      }
 
-      // Collect edges, skipping self-loops (diagonal = "stay" is implicit)
+      const [positions,   setPositions]   = useState(initPositions);
+      const [isDragging,  setIsDragging]  = useState(false);
+      const dragging = useRef(null);   // { idx, ox, oy }
+      const svgRef   = useRef(null);
+
+      // Collect edges, skipping self-loops
       const edges = [];
       for (let i = 0; i < M; i++) {
         for (let j = i + 1; j < M; j++) {
@@ -396,54 +402,90 @@
       }
 
       function edgePts(i, j) {
-        const { x: x1, y: y1 } = nodes[i];
-        const { x: x2, y: y2 } = nodes[j];
+        const { x: x1, y: y1 } = positions[i];
+        const { x: x2, y: y2 } = positions[j];
         const len = Math.hypot(x2 - x1, y2 - y1);
         if (len === 0) return null;
         const ux = (x2 - x1) / len, uy = (y2 - y1) / len;
-        // Shorten both ends so arrowhead tips land at node circle edges
         return {
           x1: x1 + ux * nodeR, y1: y1 + uy * nodeR,
           x2: x2 - ux * nodeR, y2: y2 - uy * nodeR,
         };
       }
 
+      function startDrag(e, idx) {
+        e.preventDefault();
+        const rect = svgRef.current.getBoundingClientRect();
+        dragging.current = {
+          idx,
+          ox: (e.clientX - rect.left) - positions[idx].x,
+          oy: (e.clientY - rect.top)  - positions[idx].y,
+        };
+        setIsDragging(true);
+      }
+
+      function onMove(e) {
+        if (!dragging.current) return;
+        const rect = svgRef.current.getBoundingClientRect();
+        const { idx, ox, oy } = dragging.current;
+        const x = Math.max(nodeR, Math.min(W - nodeR, e.clientX - rect.left - ox));
+        const y = Math.max(nodeR, Math.min(H - nodeR, e.clientY - rect.top  - oy));
+        setPositions(prev => prev.map((p, i) => i === idx ? { x, y } : p));
+      }
+
+      function stopDrag() {
+        dragging.current = null;
+        setIsDragging(false);
+      }
+
       return (
-        <svg width={W} height={H} style={{ display: "block", margin: "0 auto" }}>
-          <defs>
-            {/* orient="auto-start-reverse" makes the same marker work for both
-                markerEnd (points forward) and markerStart (flips 180°) */}
-            <marker id="arr" markerWidth="9" markerHeight="6"
-              refX="9" refY="3" orient="auto-start-reverse">
-              <path d="M0,0 L0,6 L9,3 z" fill="#78716c" />
-            </marker>
-          </defs>
+        <div>
+          <svg ref={svgRef} width={W} height={H}
+            style={{ display: "block", margin: "0 auto", cursor: isDragging ? "grabbing" : "default" }}
+            onMouseMove={onMove}
+            onMouseUp={stopDrag}
+            onMouseLeave={stopDrag}
+          >
+            <defs>
+              <marker id="arr" markerWidth="9" markerHeight="6"
+                refX="9" refY="3" orient="auto-start-reverse">
+                <path d="M0,0 L0,6 L9,3 z" fill="#78716c" />
+              </marker>
+            </defs>
 
-          {edges.map(({ i, j, fwd, bwd }) => {
-            const p = edgePts(i, j);
-            if (!p) return null;
-            return (
-              <line key={`e${i}-${j}`}
-                x1={p.x1} y1={p.y1} x2={p.x2} y2={p.y2}
-                stroke="#a8a29e" strokeWidth="1.5"
-                markerEnd={fwd ? "url(#arr)" : undefined}
-                markerStart={bwd ? "url(#arr)" : undefined}
-              />
-            );
-          })}
+            {edges.map(({ i, j, fwd, bwd }) => {
+              const p = edgePts(i, j);
+              if (!p) return null;
+              return (
+                <line key={`e${i}-${j}`}
+                  x1={p.x1} y1={p.y1} x2={p.x2} y2={p.y2}
+                  stroke="#a8a29e" strokeWidth="1.5"
+                  markerEnd={fwd ? "url(#arr)" : undefined}
+                  markerStart={bwd ? "url(#arr)" : undefined}
+                />
+              );
+            })}
 
-          {nodes.map(({ id, x, y }) => (
-            <g key={`n${id}`}>
-              <circle cx={x} cy={y} r={nodeR}
-                fill="#f8f6f2" stroke="#44403c" strokeWidth="1.5" />
-              <text x={x} y={y} textAnchor="middle" dominantBaseline="central"
-                fontSize="12" fontWeight="600" fill="#1c1917"
-                style={{ userSelect: "none", pointerEvents: "none" }}>
-                {id}
-              </text>
-            </g>
-          ))}
-        </svg>
+            {positions.map(({ x, y }, idx) => (
+              <g key={`n${idx}`} style={{ cursor: "grab" }}
+                onMouseDown={e => startDrag(e, idx)}>
+                <circle cx={x} cy={y} r={nodeR}
+                  fill="#f8f6f2" stroke="#44403c" strokeWidth="1.5" />
+                <text x={x} y={y} textAnchor="middle" dominantBaseline="central"
+                  fontSize="12" fontWeight="600" fill="#1c1917"
+                  style={{ userSelect: "none", pointerEvents: "none" }}>
+                  {idx + 1}
+                </text>
+              </g>
+            ))}
+          </svg>
+
+          <button className="config-btn"
+            style={{ marginTop: "10px", width: "100%" }}
+            onClick={() => setPositions(initPositions())}>
+            Reset Layout
+          </button>
+        </div>
       );
     }
 
@@ -759,7 +801,7 @@
                 → one-way &nbsp;·&nbsp; ↔ two-way &nbsp;·&nbsp; self-loops omitted
               </p>
             </div>
-            <GraphPanel M={M} adjacency={adjacency} />
+            <GraphPanel key={M} M={M} adjacency={adjacency} />
           </div>
 
         </div>
