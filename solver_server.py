@@ -172,13 +172,29 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions):
     return {"status": "unsat", "reason": "timeout", "detail": "No solution found within T=50"}
 
 
-def optimize_utilitarian(N, T, M, D, U, adjacency, start_positions, end_positions):
+def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions,
+                        optimize_util, optimize_prior,
+                        protected_stations, w_util, w_prior):
     """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
-    minimize the sum of per-aircraft transit times.
+    minimize a weighted combination of transit time and protected-station noise.
 
     NOTE: z3.Optimize is slower than z3.Solver. For large N, T, or M this phase
     may take several seconds. T is fixed to the value found in phase 1.
     """
+    # ── Metric normalization ──────────────────────────────────────────────────
+    # Both metrics are divided by their theoretical maximums so that w_util and
+    # w_prior operate on a comparable [0,1] scale regardless of N, T, M, D.
+    #
+    # Scale note: max_transit = N*(T-1), max_protected = |protected|*T*D.
+    # If either denominator is 0, that term is inactive regardless of the flag.
+    max_transit   = N * (T - 1)
+    max_protected = len(protected_stations) * T * D
+
+    # After normalization, both coefficients are dimensionless and comparable,
+    # so w_util = w_prior = 1.0 gives genuinely equal weighting.
+    eff_w_util  = (w_util  / max_transit)   if (optimize_util  and max_transit   > 0) else 0.0
+    eff_w_prior = (w_prior / max_protected) if (optimize_prior and max_protected > 0) else 0.0
+
     def valid_next(src_1indexed):
         s0 = src_1indexed - 1
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
@@ -220,27 +236,45 @@ def optimize_utilitarian(N, T, M, D, U, adjacency, start_positions, end_position
         for (m1, m2) in adjacent_pairs:
             opt.add(And(C_t[m1] - C_t[m2] <= U, C_t[m2] - C_t[m1] <= U))
 
-    # ── Transit time encoding ─────────────────────────────────────────────────
-    # hm[i][t]: aircraft i has changed location at least once in t'=1..t
-    # ha[i][t]: aircraft i has reached end_positions[i] at some t'=0..t
-    # it[i][t]: aircraft i is currently accumulating transit cost at time t
-    hm = [[Bool(f"o_hm_{i}_{t}") for t in range(T)] for i in range(N)]
-    ha = [[Bool(f"o_ha_{i}_{t}") for t in range(T)] for i in range(N)]
-    it = [[Bool(f"o_it_{i}_{t}") for t in range(T)] for i in range(N)]
+    # ── Build objective terms ─────────────────────────────────────────────────
+    objective_terms = []
 
-    for i in range(N):
-        opt.add(hm[i][0] == False)
-        opt.add(ha[i][0] == (L[i][0] == end_positions[i]))
-        opt.add(it[i][0] == False)
-        for t in range(1, T):
-            opt.add(hm[i][t] == Or(hm[i][t - 1], L[i][t] != L[i][t - 1]))
-            opt.add(ha[i][t] == Or(ha[i][t - 1], L[i][t] == end_positions[i]))
-            # Arrival timestep IS counted — gate on t-1 arrival, not t
-            opt.add(it[i][t] == And(hm[i][t], Not(ha[i][t - 1])))
+    # Declare result variables in outer scope so the result block can read them
+    transit = None
+    total_transit = None
+    protected_noise = None
 
-    transit = [Sum([If(it[i][t], 1, 0) for t in range(T)]) for i in range(N)]
-    total_transit = Sum(transit)
-    opt.minimize(total_transit)
+    if eff_w_util > 0:
+        # hm[i][t]: aircraft i has changed location at least once in t'=1..t
+        # ha[i][t]: aircraft i has reached end_positions[i] at some t'=0..t
+        # it[i][t]: aircraft i is currently accumulating transit cost at time t
+        hm = [[Bool(f"o_hm_{i}_{t}") for t in range(T)] for i in range(N)]
+        ha = [[Bool(f"o_ha_{i}_{t}") for t in range(T)] for i in range(N)]
+        it = [[Bool(f"o_it_{i}_{t}") for t in range(T)] for i in range(N)]
+
+        for i in range(N):
+            opt.add(hm[i][0] == False)
+            opt.add(ha[i][0] == (L[i][0] == end_positions[i]))
+            opt.add(it[i][0] == False)
+            for t in range(1, T):
+                opt.add(hm[i][t] == Or(hm[i][t - 1], L[i][t] != L[i][t - 1]))
+                opt.add(ha[i][t] == Or(ha[i][t - 1], L[i][t] == end_positions[i]))
+                # Arrival timestep IS counted — gate on t-1 arrival, not t
+                opt.add(it[i][t] == And(hm[i][t], Not(ha[i][t - 1])))
+
+        transit       = [Sum([If(it[i][t], 1, 0) for t in range(T)]) for i in range(N)]
+        total_transit = Sum(transit)
+        objective_terms.append(eff_w_util * total_transit)
+
+    if eff_w_prior > 0:
+        protected_noise = Sum([
+            C_by_t[t][p - 1]
+            for p in protected_stations
+            for t in range(T)
+        ])
+        objective_terms.append(eff_w_prior * protected_noise)
+
+    opt.minimize(Sum(objective_terms))
 
     if opt.check() != sat:
         return None  # should not happen: phase-1 already confirmed sat at this T
@@ -254,16 +288,18 @@ def optimize_utilitarian(N, T, M, D, U, adjacency, start_positions, end_position
         [model.evaluate(C_by_t[t][m]).as_long() for t in range(T)]
         for m in range(M)
     ]
-    transit_times = [model.evaluate(transit[i]).as_long() for i in range(N)]
 
-    return {
-        "status": "sat",
-        "T": T,
-        "paths": paths,
-        "noiseMatrix": noise_matrix,
-        "transitTimes": transit_times,
-        "totalTransit": model.evaluate(total_transit).as_long(),
-    }
+    result = {"status": "sat", "T": T, "paths": paths, "noiseMatrix": noise_matrix}
+
+    if eff_w_util > 0:
+        result["transitTimes"] = [model.evaluate(transit[i]).as_long() for i in range(N)]
+        result["totalTransit"] = model.evaluate(total_transit).as_long()
+
+    if eff_w_prior > 0:
+        result["protectedNoise"]    = model.evaluate(protected_noise).as_long()
+        result["protectedStations"] = protected_stations
+
+    return result
 
 
 @app.route("/solve", methods=["POST"])
@@ -280,17 +316,40 @@ def solve():
     except (KeyError, TypeError, ValueError) as e:
         return jsonify({"error": f"Bad input: {e}"}), 400
 
-    optimize = data.get("optimizeUtilitarian", False)
-    if not isinstance(optimize, bool):
-        optimize = False
+    optimize_util  = data.get("optimizeUtilitarian",  False)
+    optimize_prior = data.get("optimizePrioritarian", False)
+    if not isinstance(optimize_util,  bool): optimize_util  = False
+    if not isinstance(optimize_prior, bool): optimize_prior = False
+
+    try:
+        w_util  = float(data.get("weightUtilitarian",  1.0))
+        w_prior = float(data.get("weightPrioritarian", 1.0))
+    except (TypeError, ValueError):
+        w_util, w_prior = 1.0, 1.0
+    if w_util  < 0: w_util  = 0.0
+    if w_prior < 0: w_prior = 0.0
+
+    protected_stations = data.get("protectedStations", [])
+    if optimize_prior:
+        if not isinstance(protected_stations, list) or len(protected_stations) == 0:
+            return jsonify({"error": "protectedStations must be a non-empty list when optimizePrioritarian is true"}), 400
+        try:
+            protected_stations = [int(p) for p in protected_stations]
+        except (TypeError, ValueError):
+            return jsonify({"error": "protectedStations must be a list of integers"}), 400
+        if any(p < 1 or p > M for p in protected_stations):
+            return jsonify({"error": f"protectedStations must be between 1 and M={M}"}), 400
 
     result = find_min_T(N, M, D, U, adjacency, start_positions, end_positions)
 
-    if result["status"] != "sat" or not optimize:
+    should_optimize = optimize_util or optimize_prior
+    if result["status"] != "sat" or not should_optimize:
         return jsonify(result)
 
-    opt_result = optimize_utilitarian(
-        N, result["T"], M, D, U, adjacency, start_positions, end_positions
+    opt_result = optimize_objectives(
+        N, result["T"], M, D, U, adjacency, start_positions, end_positions,
+        optimize_util, optimize_prior,
+        protected_stations, w_util, w_prior
     )
     if opt_result is None:
         # Phase-2 unexpectedly returned unsat — fall back to phase-1 result
