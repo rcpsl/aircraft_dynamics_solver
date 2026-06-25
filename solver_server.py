@@ -2,7 +2,7 @@ from math import ceil
 from collections import deque, Counter
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from z3 import Int, And, Or, Implies, Sum, If, Solver, Bool, sat
+from z3 import Int, And, Or, Not, Implies, Sum, If, Solver, Optimize, Bool, sat
 
 app = Flask(__name__)
 CORS(app)
@@ -172,6 +172,100 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions):
     return {"status": "unsat", "reason": "timeout", "detail": "No solution found within T=50"}
 
 
+def optimize_utilitarian(N, T, M, D, U, adjacency, start_positions, end_positions):
+    """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
+    minimize the sum of per-aircraft transit times.
+
+    NOTE: z3.Optimize is slower than z3.Solver. For large N, T, or M this phase
+    may take several seconds. T is fixed to the value found in phase 1.
+    """
+    def valid_next(src_1indexed):
+        s0 = src_1indexed - 1
+        return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
+
+    adjacent_pairs = set()
+    for m1 in range(M):
+        for m2 in range(M):
+            if m1 != m2 and adjacency[m1][m2] == 1:
+                adjacent_pairs.add((min(m1, m2), max(m1, m2)))
+
+    opt = Optimize()
+
+    # Location variables — "o_" prefix avoids name clashes with phase-1 variables
+    L = [[Int(f"o_L_{i}_{t}") for t in range(T)] for i in range(N)]
+
+    # Bounds
+    for i in range(N):
+        for t in range(T):
+            opt.add(And(1 <= L[i][t], L[i][t] <= M))
+
+    # Start and end pins
+    for i in range(N):
+        opt.add(L[i][0] == start_positions[i])
+        opt.add(L[i][T - 1] == end_positions[i])
+
+    # Movement constraints
+    for i in range(N):
+        for t in range(T - 1):
+            for src in range(1, M + 1):
+                dsts = valid_next(src)
+                opt.add(Implies(L[i][t] == src, Or([L[i][t + 1] == dst for dst in dsts])))
+
+    # Noise cap and adjacent disparity
+    C_by_t = []
+    for t in range(T):
+        C_t = [Sum([If(L[i][t] == m + 1, 1, 0) for i in range(N)]) for m in range(M)]
+        C_by_t.append(C_t)
+        opt.add([C_t[m] <= D for m in range(M)])
+        for (m1, m2) in adjacent_pairs:
+            opt.add(And(C_t[m1] - C_t[m2] <= U, C_t[m2] - C_t[m1] <= U))
+
+    # ── Transit time encoding ─────────────────────────────────────────────────
+    # hm[i][t]: aircraft i has changed location at least once in t'=1..t
+    # ha[i][t]: aircraft i has reached end_positions[i] at some t'=0..t
+    # it[i][t]: aircraft i is currently accumulating transit cost at time t
+    hm = [[Bool(f"o_hm_{i}_{t}") for t in range(T)] for i in range(N)]
+    ha = [[Bool(f"o_ha_{i}_{t}") for t in range(T)] for i in range(N)]
+    it = [[Bool(f"o_it_{i}_{t}") for t in range(T)] for i in range(N)]
+
+    for i in range(N):
+        opt.add(hm[i][0] == False)
+        opt.add(ha[i][0] == (L[i][0] == end_positions[i]))
+        opt.add(it[i][0] == False)
+        for t in range(1, T):
+            opt.add(hm[i][t] == Or(hm[i][t - 1], L[i][t] != L[i][t - 1]))
+            opt.add(ha[i][t] == Or(ha[i][t - 1], L[i][t] == end_positions[i]))
+            # Arrival timestep IS counted — gate on t-1 arrival, not t
+            opt.add(it[i][t] == And(hm[i][t], Not(ha[i][t - 1])))
+
+    transit = [Sum([If(it[i][t], 1, 0) for t in range(T)]) for i in range(N)]
+    total_transit = Sum(transit)
+    opt.minimize(total_transit)
+
+    if opt.check() != sat:
+        return None  # should not happen: phase-1 already confirmed sat at this T
+
+    model = opt.model()
+    paths = [
+        [model[L[i][t]].as_long() for t in range(T)]
+        for i in range(N)
+    ]
+    noise_matrix = [
+        [model.evaluate(C_by_t[t][m]).as_long() for t in range(T)]
+        for m in range(M)
+    ]
+    transit_times = [model.evaluate(transit[i]).as_long() for i in range(N)]
+
+    return {
+        "status": "sat",
+        "T": T,
+        "paths": paths,
+        "noiseMatrix": noise_matrix,
+        "transitTimes": transit_times,
+        "totalTransit": model.evaluate(total_transit).as_long(),
+    }
+
+
 @app.route("/solve", methods=["POST"])
 def solve():
     data = request.get_json(force=True)
@@ -186,8 +280,22 @@ def solve():
     except (KeyError, TypeError, ValueError) as e:
         return jsonify({"error": f"Bad input: {e}"}), 400
 
+    optimize = data.get("optimizeUtilitarian", False)
+    if not isinstance(optimize, bool):
+        optimize = False
+
     result = find_min_T(N, M, D, U, adjacency, start_positions, end_positions)
-    return jsonify(result)
+
+    if result["status"] != "sat" or not optimize:
+        return jsonify(result)
+
+    opt_result = optimize_utilitarian(
+        N, result["T"], M, D, U, adjacency, start_positions, end_positions
+    )
+    if opt_result is None:
+        # Phase-2 unexpectedly returned unsat — fall back to phase-1 result
+        return jsonify(result)
+    return jsonify(opt_result)
 
 
 if __name__ == "__main__":
