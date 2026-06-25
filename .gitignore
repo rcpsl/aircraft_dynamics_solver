@@ -2,3 +2,7 @@ Learning_z3/
 __pycache__/
 *.pyc
 *.log
+node_modules/
+package.json
+package-lock.json
+babel_check.js

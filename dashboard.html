@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Fraunces:wght@600;700&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.9/babel.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -198,6 +198,96 @@
 
     .config-btn:hover { background: #f3f1ed; border-color: #a8a29e; }
 
+    /* Tab bar */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid #e5e2db;
+      margin-bottom: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 7px 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: #78716c;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .tab-btn.active {
+      color: #1c1917;
+      font-weight: 600;
+      border-bottom-color: #1c1917;
+    }
+
+    .tab-btn:hover:not(.active) { color: #44403c; }
+
+    /* Noise model tab */
+    .noise-model-desc {
+      font-size: 12px;
+      color: #78716c;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    /* Zone selector */
+    .zone-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .zone-row label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #78716c;
+      width: 24px;
+      flex-shrink: 0;
+    }
+
+    .zone-row select {
+      flex: 1;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      color: #1c1917;
+      background: #f8f6f2;
+      border: 1px solid #d6d3cd;
+      border-radius: 6px;
+      padding: 3px 6px;
+      cursor: pointer;
+    }
+
+    /* Zone color legend */
+    .zone-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .zone-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #44403c;
+    }
+
+    .zone-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+
     /* ── Graph panel ── */
     .graph-panel {
       width: 340px;
@@ -331,6 +421,35 @@
     ];
     const DEFAULT_START = [1, 3];
     const DEFAULT_END   = [4, 5];
+    const DEFAULT_ZONES = [1, 1, 1, 1, 1];
+    const DEFAULT_DB_PER_CRAFT = 65;
+
+    const ZONES = [
+      { id: 1, name: "Commercial Hub",       dba: 63, category: "Very Noisy Urban"  },
+      { id: 2, name: "Mixed-Use Corridor",   dba: 52, category: "Urban"             },
+      { id: 3, name: "Affluent Enclave",     dba: 42, category: "Quiet Suburban"    },
+      { id: 4, name: "Sacrifice Zone",       dba: 55, category: "Urban"             },
+      { id: 5, name: "Institutional",        dba: 48, category: "Normal Suburban"   },
+      { id: 6, name: "Aging-in-Place",       dba: 40, category: "Quiet Suburban"    },
+      { id: 7, name: "Gentrifying",          dba: 58, category: "Noisy Urban"       },
+      { id: 8, name: "Growing / Future",     dba: 50, category: "Normal Suburban"   },
+      { id: 9, name: "Transit Double-Bind",  dba: 50, category: "Normal Suburban"   },
+    ];
+
+    const ZONE_COLORS = {
+      "Very Noisy Urban": "#b91c1c",
+      "Noisy Urban":      "#c2410c",
+      "Urban":            "#b45309",
+      "Normal Suburban":  "#1d4ed8",
+      "Quiet Suburban":   "#15803d",
+    };
+
+    function combinedDb(rawDb, nTotal, dbPerCraft) {
+      if (nTotal === 0) return rawDb;
+      var ambientPower  = Math.pow(10, rawDb      / 10);
+      var aircraftPower = nTotal * Math.pow(10, dbPerCraft / 10);
+      return 10 * Math.log10(ambientPower + aircraftPower);
+    }
 
     function resizeAdj(adj, newM) {
       return Array.from({length: newM}, (_, i) =>
@@ -363,17 +482,25 @@
       );
     }
 
-    function noiseColor(val, maxVal) {
+    function aircraftColor(val, maxVal) {
       if (maxVal === 0) return "#f8f6f2";
-      const t = val / maxVal;
-      // warm white → steel blue
-      const r = Math.round(248 + t * (30  - 248));
-      const g = Math.round(246 + t * (64  - 246));
-      const b = Math.round(242 + t * (175 - 242));
-      return `rgb(${r},${g},${b})`;
+      var t = val / maxVal;
+      var r = Math.round(248 + t * (30  - 248));
+      var g = Math.round(246 + t * (64  - 246));
+      var b = Math.round(242 + t * (175 - 242));
+      return "rgb(" + r + "," + g + "," + b + ")";
     }
 
-    function GraphPanel({ M, adjacency }) {
+    function noiseColor(deltaDB) {
+      var maxDelta = 15;
+      var t = Math.max(0, Math.min(1, deltaDB / maxDelta));
+      var r = Math.round(248 + t * (153 - 248));
+      var g = Math.round(246 + t * (27  - 246));
+      var b = Math.round(242 + t * (27  - 242));
+      return "rgb(" + r + "," + g + "," + b + ")";
+    }
+
+    function GraphPanel({ M, adjacency, stationZones }) {
       const W = 300, H = 300;
       const nodeR = 16;
 
@@ -395,8 +522,8 @@
       const edges = [];
       for (let i = 0; i < M; i++) {
         for (let j = i + 1; j < M; j++) {
-          const fwd = adjacency[i]?.[j] === 1;
-          const bwd = adjacency[j]?.[i] === 1;
+          const fwd = adjacency[i] && adjacency[i][j] === 1;
+          const bwd = adjacency[j] && adjacency[j][i] === 1;
           if (fwd || bwd) edges.push({ i, j, fwd, bwd });
         }
       }
@@ -466,18 +593,23 @@
               );
             })}
 
-            {positions.map(({ x, y }, idx) => (
-              <g key={`n${idx}`} style={{ cursor: "grab" }}
-                onMouseDown={e => startDrag(e, idx)}>
-                <circle cx={x} cy={y} r={nodeR}
-                  fill="#f8f6f2" stroke="#44403c" strokeWidth="1.5" />
-                <text x={x} y={y} textAnchor="middle" dominantBaseline="central"
-                  fontSize="12" fontWeight="600" fill="#1c1917"
-                  style={{ userSelect: "none", pointerEvents: "none" }}>
-                  {idx + 1}
-                </text>
-              </g>
-            ))}
+            {positions.map(({ x, y }, idx) => {
+              var zoneId    = stationZones ? stationZones[idx] : 1;
+              var zone      = ZONES[(zoneId || 1) - 1];
+              var fillColor = ZONE_COLORS[zone.category];
+              return (
+                <g key={"n" + idx} style={{ cursor: "grab" }}
+                  onMouseDown={e => startDrag(e, idx)}>
+                  <circle cx={x} cy={y} r={nodeR}
+                    fill={fillColor} stroke="#1c1917" strokeWidth="1.5" />
+                  <text x={x} y={y} textAnchor="middle" dominantBaseline="central"
+                    fontSize="12" fontWeight="700" fill="#ffffff"
+                    style={{ userSelect: "none", pointerEvents: "none" }}>
+                    {idx + 1}
+                  </text>
+                </g>
+              );
+            })}
           </svg>
 
           <button className="config-btn"
@@ -493,32 +625,35 @@
 
     function loadSaved() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-      catch { return {}; }
+      catch(e) { return {}; }
     }
 
     function App() {
       const saved = loadSaved();
 
-      const [N, setN] = useState(saved.N ?? DEFAULT_N);
-      const [M, setM] = useState(saved.M ?? DEFAULT_M);
-      const [D, setD] = useState(saved.D ?? DEFAULT_D);
-      const [U, setU] = useState(saved.U ?? DEFAULT_U);
-      const [adjacency, setAdjacency] = useState(saved.adjacency ?? DEFAULT_ADJ);
-      const [startPos, setStartPos] = useState(saved.startPos ?? DEFAULT_START);
-      const [endPos,   setEndPos]   = useState(saved.endPos   ?? DEFAULT_END);
+      const [N, setN] = useState(saved.N != null ? saved.N : DEFAULT_N);
+      const [M, setM] = useState(saved.M != null ? saved.M : DEFAULT_M);
+      const [D, setD] = useState(saved.D != null ? saved.D : DEFAULT_D);
+      const [U, setU] = useState(saved.U != null ? saved.U : DEFAULT_U);
+      const [adjacency,    setAdjacency]    = useState(saved.adjacency    != null ? saved.adjacency    : DEFAULT_ADJ);
+      const [startPos,     setStartPos]     = useState(saved.startPos    != null ? saved.startPos    : DEFAULT_START);
+      const [endPos,       setEndPos]       = useState(saved.endPos      != null ? saved.endPos      : DEFAULT_END);
+      const [stationZones, setStationZones] = useState(saved.stationZones != null ? saved.stationZones : DEFAULT_ZONES);
+      const [dbPerCraft,   setDbPerCraft]   = useState(saved.dbPerCraft  != null ? saved.dbPerCraft  : DEFAULT_DB_PER_CRAFT);
 
       const [status,       setStatus]       = useState("idle");
       const [solvedT,      setSolvedT]      = useState(null);
       const [paths,        setPaths]        = useState(null);
       const [noiseMatrix,  setNoiseMatrix]  = useState(null);
       const [unstatDetail, setUnstatDetail] = useState(null);
+      const [activeTab,    setActiveTab]    = useState("solver");
 
       const fileInputRef = useRef(null);
 
       // ── A: auto-save to localStorage on every config change ──────────────
       useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ N, M, D, U, adjacency, startPos, endPos }));
-      }, [N, M, D, U, adjacency, startPos, endPos]);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft }));
+      }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft]);
 
       function handleN(newN) {
         setN(newN);
@@ -531,6 +666,10 @@
         setAdjacency(a => resizeAdj(a, newM));
         setStartPos(p => p.map(v => Math.min(v, newM)));
         setEndPos(p   => p.map(v => Math.min(v, newM)));
+        setStationZones(z => {
+          if (newM <= z.length) return z.slice(0, newM);
+          return z.concat(Array.from({length: newM - z.length}, function() { return 1; }));
+        });
       }
 
       function toggleAdj(i, j) {
@@ -546,7 +685,7 @@
 
       // ── B: export config as JSON file ────────────────────────────────────
       function handleExport() {
-        const config = { N, M, D, U, adjacency, startPos, endPos };
+        const config = { N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft };
         const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
         const url  = URL.createObjectURL(blob);
         const a    = document.createElement("a");
@@ -568,10 +707,12 @@
             if (c.M !== undefined) handleM(c.M);
             if (c.D !== undefined) setD(c.D);
             if (c.U !== undefined) setU(c.U);
-            if (c.adjacency  !== undefined) setAdjacency(c.adjacency);
-            if (c.startPos   !== undefined) setStartPos(c.startPos);
-            if (c.endPos     !== undefined) setEndPos(c.endPos);
-          } catch { alert("Invalid config file."); }
+            if (c.adjacency    !== undefined) setAdjacency(c.adjacency);
+            if (c.startPos     !== undefined) setStartPos(c.startPos);
+            if (c.endPos       !== undefined) setEndPos(c.endPos);
+            if (c.stationZones !== undefined) setStationZones(c.stationZones);
+            if (c.dbPerCraft   !== undefined) setDbPerCraft(c.dbPerCraft);
+          } catch(e) { alert("Invalid config file."); }
         };
         reader.readAsText(file);
         e.target.value = "";   // allow re-importing the same file
@@ -605,12 +746,11 @@
             setStatus("unsat");
             setUnstatDetail(data.detail || null);
           }
-        } catch {
+        } catch(e) {
           setStatus("error");
         }
       }
 
-      const maxNoise = noiseMatrix ? Math.max(1, ...noiseMatrix.flat()) : 1;
 
       return (
         <div className="app">
@@ -619,96 +759,112 @@
           <div className="left-panel">
             <h1>UAM Noise<br />Solver</h1>
 
-            <section>
-              <h2>Parameters</h2>
-              <Slider label="N  aircraft"  value={N} min={1} max={10} onChange={handleN} />
-              <Slider label="M  stations"  value={M} min={2} max={10} onChange={handleM} />
-              <Slider label="D  noise cap" value={D} min={0} max={10} onChange={setD} />
-              <Slider label="U  adj. diff" value={U} min={0} max={10} onChange={setU} />
-            </section>
+            <div className="tab-bar">
+              <button className={"tab-btn" + (activeTab === "solver" ? " active" : "")} onClick={() => setActiveTab("solver")}>Solver</button>
+              <button className={"tab-btn" + (activeTab === "zones"  ? " active" : "")} onClick={() => setActiveTab("zones")}>Zones</button>
+              <button className={"tab-btn" + (activeTab === "noise"  ? " active" : "")} onClick={() => setActiveTab("noise")}>Noise Model</button>
+            </div>
 
-            <section>
-              <h2>Start Positions</h2>
-              <div className="pos-grid">
-                {startPos.map((p, i) => (
-                  <div className="pos-cell" key={i}>
-                    <span>A{i}</span>
-                    <input
-                      type="number"
-                      min={1}
-                      max={M}
-                      value={p}
-                      onChange={e => setPos(startPos, setStartPos, i, e.target.value, M)}
-                    />
+            {activeTab === "solver" && (
+              <div>
+                <section>
+                  <h2>Parameters</h2>
+                  <Slider label="N  aircraft"  value={N} min={1} max={10} onChange={handleN} />
+                  <Slider label="M  stations"  value={M} min={2} max={10} onChange={handleM} />
+                  <Slider label="D  noise cap" value={D} min={0} max={10} onChange={setD} />
+                  <Slider label="U  adj. diff" value={U} min={0} max={10} onChange={setU} />
+                </section>
+
+                <section>
+                  <h2>Start Positions</h2>
+                  <div className="pos-grid">
+                    {startPos.map((p, i) => (
+                      <div className="pos-cell" key={i}>
+                        <span>A{i}</span>
+                        <input type="number" min={1} max={M} value={p}
+                          onChange={e => setPos(startPos, setStartPos, i, e.target.value, M)} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </section>
+                </section>
 
-            <section>
-              <h2>End Positions</h2>
-              <div className="pos-grid">
-                {endPos.map((p, i) => (
-                  <div className="pos-cell" key={i}>
-                    <span>A{i}</span>
-                    <input
-                      type="number"
-                      min={1}
-                      max={M}
-                      value={p}
-                      onChange={e => setPos(endPos, setEndPos, i, e.target.value, M)}
-                    />
+                <section>
+                  <h2>End Positions</h2>
+                  <div className="pos-grid">
+                    {endPos.map((p, i) => (
+                      <div className="pos-cell" key={i}>
+                        <span>A{i}</span>
+                        <input type="number" min={1} max={M} value={p}
+                          onChange={e => setPos(endPos, setEndPos, i, e.target.value, M)} />
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </section>
+
+                <section>
+                  <h2>Adjacency Matrix</h2>
+                  <div className="adj-hint">Row = from station, Col = to station</div>
+                  <div className="adj-grid" style={{ gridTemplateColumns: "22px repeat(" + M + ", 22px)" }}>
+                    <div />
+                    {Array.from({length: M}, (_, j) => (
+                      <div key={j} className="adj-header">{j + 1}</div>
+                    ))}
+                    {adjacency.map((row, i) => [
+                      <div key={"h" + i} className="adj-header">{i + 1}</div>,
+                      ...row.map((val, j) => (
+                        <div key={i + "-" + j}
+                          className={"adj-cell " + (val ? "adj-on" : "adj-off")}
+                          onClick={() => toggleAdj(i, j)}
+                          title={(i+1) + " → " + (j+1)}
+                        />
+                      ))
+                    ])}
+                  </div>
+                </section>
               </div>
-            </section>
+            )}
 
-            <section>
-              <h2>Adjacency Matrix</h2>
-              <div className="adj-hint">Row = from station, Col = to station</div>
-              <div
-                className="adj-grid"
-                style={{ gridTemplateColumns: `22px repeat(${M}, 22px)` }}
-              >
-                {/* Header row */}
-                <div />
-                {Array.from({length: M}, (_, j) => (
-                  <div key={j} className="adj-header">{j + 1}</div>
-                ))}
-
-                {/* Data rows */}
-                {adjacency.map((row, i) => [
-                  <div key={`h${i}`} className="adj-header">{i + 1}</div>,
-                  ...row.map((val, j) => (
-                    <div
-                      key={`${i}-${j}`}
-                      className={`adj-cell ${val ? "adj-on" : "adj-off"}`}
-                      onClick={() => toggleAdj(i, j)}
-                      title={`${i+1} → ${j+1}`}
-                    />
-                  ))
-                ])}
+            {activeTab === "zones" && (
+              <div>
+                <section>
+                  <h2>Station Zones</h2>
+                  {stationZones.map((zoneId, m) => (
+                    <div className="zone-row" key={m}>
+                      <label>S{m + 1}</label>
+                      <select value={zoneId} onChange={e => setStationZones(z => z.map((v, i) => i === m ? Number(e.target.value) : v))}>
+                        {ZONES.map(z => (
+                          <option key={z.id} value={z.id}>{z.id}. {z.name} ({z.dba} dBA)</option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </section>
               </div>
-            </section>
+            )}
 
-            <button
-              className="solve-btn"
-              onClick={handleSolve}
-              disabled={status === "solving"}
-            >
+            {activeTab === "noise" && (
+              <div>
+                <section>
+                  <h2>Aircraft Noise</h2>
+                  <Slider label="dB / aircraft" value={dbPerCraft} min={40} max={80} onChange={setDbPerCraft} />
+                  <p className="noise-model-desc">
+                    Noise each aircraft adds at a station. Combined with the
+                    station's zone baseline using:<br />
+                    10 · log₁₀( 10^(baseline/10) + n · 10^(dB/10) )
+                  </p>
+                </section>
+              </div>
+            )}
+
+            <button className="solve-btn" onClick={handleSolve} disabled={status === "solving"}>
               {status === "solving" ? "Solving…" : "Run Solver"}
             </button>
 
             <div className="config-btns">
               <button className="config-btn" onClick={handleExport}>Save Config</button>
               <button className="config-btn" onClick={() => fileInputRef.current.click()}>Load Config</button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                style={{ display: "none" }}
-                onChange={handleImport}
-              />
+              <input ref={fileInputRef} type="file" accept=".json"
+                style={{ display: "none" }} onChange={handleImport} />
             </div>
           </div>
 
@@ -756,7 +912,7 @@
 
             {noiseMatrix && (
               <section>
-                <h2>Noise Matrix</h2>
+                <h2>Aircraft Matrix</h2>
                 <div className="noise-legend">
                   Rows = stations 1…{M} &nbsp;·&nbsp; Columns = timesteps 0…{solvedT - 1} &nbsp;·&nbsp;
                   Darker = more aircraft present
@@ -770,21 +926,62 @@
                       </tr>
                     </thead>
                     <tbody>
-                      {noiseMatrix.map((row, m) => (
-                        <tr key={m}>
-                          <td className="row-label">{m + 1}</td>
-                          {row.map((val, t) => (
-                            <td
-                              key={t}
-                              className="noise-cell"
-                              style={{ background: noiseColor(val, maxNoise) }}
-                              title={`stn ${m+1}, t=${t}: ${val}`}
-                            >
-                              {val}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
+                      {noiseMatrix.map((row, m) => {
+                        var maxVal = Math.max(1, ...noiseMatrix.map(function(r) { return Math.max.apply(null, r); }));
+                        return (
+                          <tr key={m}>
+                            <td className="row-label">{m + 1}</td>
+                            {row.map((count, t) => (
+                              <td key={t} className="noise-cell"
+                                style={{ background: aircraftColor(count, maxVal) }}
+                                title={"stn " + (m+1) + ", t=" + t + ": " + count + " aircraft"}>
+                                {count}
+                              </td>
+                            ))}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {noiseMatrix && (
+              <section>
+                <h2>Noise Matrix</h2>
+                <div className="noise-legend">
+                  Rows = stations 1…{M} &nbsp;·&nbsp; Columns = timesteps 0…{solvedT - 1} &nbsp;·&nbsp;
+                  dB increase above zone baseline &nbsp;·&nbsp; scale 0–15 dB
+                </div>
+                <div className="table-wrap">
+                  <table className="noise-table">
+                    <thead>
+                      <tr>
+                        <th>Stn</th>
+                        {Array.from({length: solvedT}, (_, t) => <th key={t}>t={t}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {noiseMatrix.map((row, m) => {
+                        var zoneBaseline = ZONES[(stationZones[m] || 1) - 1].dba;
+                        return (
+                          <tr key={m}>
+                            <td className="row-label">{m + 1}</td>
+                            {row.map((count, t) => {
+                              var db    = combinedDb(zoneBaseline, count, dbPerCraft);
+                              var delta = db - zoneBaseline;
+                              return (
+                                <td key={t} className="noise-cell"
+                                  style={{ background: noiseColor(delta) }}
+                                  title={"stn " + (m+1) + ", t=" + t + ": " + count + " aircraft, +" + delta.toFixed(1) + " dB above " + zoneBaseline + " dBA baseline"}>
+                                  {"+" + delta.toFixed(1)}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -801,7 +998,17 @@
                 → one-way &nbsp;·&nbsp; ↔ two-way &nbsp;·&nbsp; self-loops omitted
               </p>
             </div>
-            <GraphPanel key={M} M={M} adjacency={adjacency} />
+            <GraphPanel key={M} M={M} adjacency={adjacency} stationZones={stationZones} />
+            <div className="zone-legend">
+              {Object.entries(ZONE_COLORS).map(function(entry) {
+                return (
+                  <div key={entry[0]} className="zone-legend-item">
+                    <span className="zone-dot" style={{ background: entry[1] }} />
+                    <span>{entry[0]}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
         </div>
