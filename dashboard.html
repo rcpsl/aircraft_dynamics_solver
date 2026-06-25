@@ -177,6 +177,17 @@
     .solve-btn:hover:not(:disabled) { background: #292524; }
     .solve-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #44403c;
+      cursor: pointer;
+      user-select: none;
+    }
+    .check-row input[type=checkbox] { accent-color: #1c1917; width: 15px; height: 15px; cursor: pointer; }
+
     .config-btns {
       display: flex;
       gap: 8px;
@@ -491,6 +502,18 @@
       return "rgb(" + r + "," + g + "," + b + ")";
     }
 
+    function computeTransitTime(path, endStation) {
+      var firstMove = -1, firstArrival = -1;
+      for (var t = 1; t < path.length; t++) {
+        if (firstMove === -1 && path[t] !== path[t - 1]) firstMove = t;
+      }
+      for (var t = 0; t < path.length; t++) {
+        if (path[t] === endStation) { firstArrival = t; break; }
+      }
+      if (firstMove === -1 || firstArrival === -1 || firstMove > firstArrival) return 0;
+      return firstArrival - firstMove + 1;
+    }
+
     function noiseColor(deltaDB) {
       var maxDelta = 15;
       var t = Math.max(0, Math.min(1, deltaDB / maxDelta));
@@ -646,6 +669,7 @@
       const [paths,        setPaths]        = useState(null);
       const [noiseMatrix,  setNoiseMatrix]  = useState(null);
       const [unstatDetail, setUnstatDetail] = useState(null);
+      const [optimizeUtil, setOptimizeUtil] = useState(false);
       const [activeTab,    setActiveTab]    = useState("solver");
 
       const fileInputRef = useRef(null);
@@ -730,8 +754,9 @@
             body: JSON.stringify({
               N, M, D, U,
               adjacency,
-              startPositions: startPos,
-              endPositions:   endPos,
+              startPositions:      startPos,
+              endPositions:        endPos,
+              optimizeUtilitarian: optimizeUtil,
             }),
           });
           if (!res.ok) throw new Error("HTTP " + res.status);
@@ -821,6 +846,12 @@
                     ])}
                   </div>
                 </section>
+
+                <label className="check-row">
+                  <input type="checkbox" checked={optimizeUtil}
+                    onChange={e => setOptimizeUtil(e.target.checked)} />
+                  Minimize transit time
+                </label>
               </div>
             )}
 
@@ -880,7 +911,7 @@
             {status !== "idle" && (
               <div>
                 {status === "solving" && <span className="status solving">Solving…</span>}
-                {status === "sat"     && <span className="status sat">✓ sat — minimum T = {solvedT}</span>}
+                {status === "sat"     && <span className="status sat">✓ sat — minimum T = {solvedT}{optimizeUtil ? "  ·  transit minimized" : ""}</span>}
                 {status === "unsat"   && <span className="status unsat">✗ unsat — {unstatDetail || "try relaxing D or U"}</span>}
                 {status === "error"   && <span className="status error">Connection error — is the server running on port 5050?</span>}
               </div>
@@ -909,6 +940,37 @@
                 </div>
               </section>
             )}
+
+            {paths && (function() {
+              var tt = paths.map(function(path, i) { return computeTransitTime(path, endPos[i]); });
+              var total = tt.reduce(function(a, b) { return a + b; }, 0);
+              return (
+                <section>
+                  <h2>Transit Times</h2>
+                  <div className="noise-legend">
+                    Steps in motion per aircraft (first move → first arrival, inclusive) &nbsp;·&nbsp; Total: {total}
+                  </div>
+                  <div className="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th></th>
+                          {tt.map(function(_, i) { return <th key={i}>A{i}</th>; })}
+                          <th>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="row-label">Transit</td>
+                          {tt.map(function(v, i) { return <td key={i}>{v}</td>; })}
+                          <td className="row-label">{total}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              );
+            })()}
 
             {noiseMatrix && (
               <section>
