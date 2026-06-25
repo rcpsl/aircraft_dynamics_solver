@@ -188,6 +188,61 @@
     }
     .check-row input[type=checkbox] { accent-color: #1c1917; width: 15px; height: 15px; cursor: pointer; }
 
+    .opt-indent {
+      margin-left: 23px;
+      margin-top: 6px;
+    }
+
+    .weight-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .weight-row span.wlabel {
+      font-size: 12px;
+      color: #78716c;
+      width: 44px;
+      flex-shrink: 0;
+    }
+    .weight-row input[type=range] {
+      flex: 1;
+      accent-color: #1c1917;
+      cursor: pointer;
+      height: 4px;
+    }
+    .weight-row span.wval {
+      font-size: 12px;
+      font-weight: 600;
+      width: 26px;
+      text-align: right;
+      color: #1c1917;
+    }
+
+    .station-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .station-chip {
+      width: 28px;
+      height: 28px;
+      border-radius: 3px;
+      border: 1px solid #d4cfc8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #44403c;
+      background: #faf9f7;
+      transition: background 0.1s;
+      user-select: none;
+    }
+    .station-chip.on  { background: #1c1917; border-color: #1c1917; color: #fff; }
+    .station-chip:hover:not(.on) { background: #e7e5e0; }
+
     .config-btns {
       display: flex;
       gap: 8px;
@@ -664,20 +719,25 @@
       const [stationZones, setStationZones] = useState(saved.stationZones != null ? saved.stationZones : DEFAULT_ZONES);
       const [dbPerCraft,   setDbPerCraft]   = useState(saved.dbPerCraft  != null ? saved.dbPerCraft  : DEFAULT_DB_PER_CRAFT);
 
-      const [status,       setStatus]       = useState("idle");
-      const [solvedT,      setSolvedT]      = useState(null);
-      const [paths,        setPaths]        = useState(null);
-      const [noiseMatrix,  setNoiseMatrix]  = useState(null);
-      const [unstatDetail, setUnstatDetail] = useState(null);
-      const [optimizeUtil, setOptimizeUtil] = useState(false);
-      const [activeTab,    setActiveTab]    = useState("solver");
+      const [status,            setStatus]            = useState("idle");
+      const [solvedT,           setSolvedT]           = useState(null);
+      const [paths,             setPaths]             = useState(null);
+      const [noiseMatrix,       setNoiseMatrix]       = useState(null);
+      const [unstatDetail,      setUnstatDetail]      = useState(null);
+      const [protectedNoiseVal, setProtectedNoiseVal] = useState(null);
+      const [optimizeUtil,      setOptimizeUtil]      = useState(false);
+      const [optimizePrior,     setOptimizePrior]     = useState(false);
+      const [protectedStn,      setProtectedStn]      = useState(saved.protectedStn      != null ? saved.protectedStn      : []);
+      const [weightUtil,        setWeightUtil]        = useState(saved.weightUtil        != null ? saved.weightUtil        : 1.0);
+      const [weightPrior,       setWeightPrior]       = useState(saved.weightPrior       != null ? saved.weightPrior       : 1.0);
+      const [activeTab,         setActiveTab]         = useState("solver");
 
       const fileInputRef = useRef(null);
 
       // ── A: auto-save to localStorage on every config change ──────────────
       useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft }));
-      }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft]);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, protectedStn, weightUtil, weightPrior }));
+      }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, protectedStn, weightUtil, weightPrior]);
 
       function handleN(newN) {
         setN(newN);
@@ -694,6 +754,7 @@
           if (newM <= z.length) return z.slice(0, newM);
           return z.concat(Array.from({length: newM - z.length}, function() { return 1; }));
         });
+        setProtectedStn(ps => ps.filter(s => s <= newM));
       }
 
       function toggleAdj(i, j) {
@@ -747,6 +808,7 @@
         setPaths(null);
         setNoiseMatrix(null);
         setSolvedT(null);
+        setProtectedNoiseVal(null);
         try {
           const res = await fetch("http://localhost:5050/solve", {
             method: "POST",
@@ -754,9 +816,13 @@
             body: JSON.stringify({
               N, M, D, U,
               adjacency,
-              startPositions:      startPos,
-              endPositions:        endPos,
-              optimizeUtilitarian: optimizeUtil,
+              startPositions:       startPos,
+              endPositions:         endPos,
+              optimizeUtilitarian:  optimizeUtil,
+              optimizePrioritarian: optimizePrior,
+              protectedStations:    protectedStn,
+              weightUtilitarian:    weightUtil,
+              weightPrioritarian:   weightPrior,
             }),
           });
           if (!res.ok) throw new Error("HTTP " + res.status);
@@ -767,6 +833,7 @@
             setPaths(data.paths);
             setNoiseMatrix(data.noiseMatrix);
             setUnstatDetail(null);
+            setProtectedNoiseVal(data.protectedNoise != null ? data.protectedNoise : null);
           } else {
             setStatus("unsat");
             setUnstatDetail(data.detail || null);
@@ -847,11 +914,53 @@
                   </div>
                 </section>
 
-                <label className="check-row">
-                  <input type="checkbox" checked={optimizeUtil}
-                    onChange={e => setOptimizeUtil(e.target.checked)} />
-                  Minimize transit time
-                </label>
+                <section>
+                  <h2>Optimization</h2>
+
+                  <label className="check-row">
+                    <input type="checkbox" checked={optimizeUtil}
+                      onChange={e => setOptimizeUtil(e.target.checked)} />
+                    Minimize transit time
+                  </label>
+                  <div className="opt-indent">
+                    <div className="weight-row">
+                      <span className="wlabel">Weight</span>
+                      <input type="range" min={0} max={2} step={0.1} value={weightUtil}
+                        onChange={e => setWeightUtil(Number(e.target.value))} />
+                      <span className="wval">{weightUtil.toFixed(1)}</span>
+                    </div>
+                  </div>
+
+                  <label className="check-row" style={{marginTop: "10px"}}>
+                    <input type="checkbox" checked={optimizePrior}
+                      onChange={e => setOptimizePrior(e.target.checked)} />
+                    Reduce noise at protected stations
+                  </label>
+                  <div className="opt-indent">
+                    <div className="adj-hint" style={{marginBottom: "5px"}}>Target stations</div>
+                    <div className="station-chips">
+                      {Array.from({length: M}, function(_, idx) {
+                        var s = idx + 1;
+                        var on = protectedStn.includes(s);
+                        return (
+                          <div key={s} className={"station-chip" + (on ? " on" : "")}
+                            onClick={function() {
+                              if (on) setProtectedStn(function(ps) { return ps.filter(function(x) { return x !== s; }); });
+                              else    setProtectedStn(function(ps) { return ps.concat([s]).sort(function(a,b) { return a - b; }); });
+                            }}>
+                            {s}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="weight-row">
+                      <span className="wlabel">Weight</span>
+                      <input type="range" min={0} max={2} step={0.1} value={weightPrior}
+                        onChange={e => setWeightPrior(Number(e.target.value))} />
+                      <span className="wval">{weightPrior.toFixed(1)}</span>
+                    </div>
+                  </div>
+                </section>
               </div>
             )}
 
@@ -911,7 +1020,20 @@
             {status !== "idle" && (
               <div>
                 {status === "solving" && <span className="status solving">Solving…</span>}
-                {status === "sat"     && <span className="status sat">✓ sat — minimum T = {solvedT}{optimizeUtil ? "  ·  transit minimized" : ""}</span>}
+                {status === "sat" && (
+                  <div>
+                    <span className="status sat">
+                      ✓ sat — minimum T = {solvedT}
+                      {(optimizeUtil || optimizePrior) ? ("  ·  " + [optimizeUtil ? "transit" : null, optimizePrior ? "prioritarian" : null].filter(Boolean).join(" + ") + " optimized") : ""}
+                    </span>
+                    {protectedNoiseVal != null && (
+                      <div style={{fontSize: "13px", color: "#44403c", marginTop: "6px"}}>
+                        Total aircraft visits to protected stations: <strong>{protectedNoiseVal}</strong>
+                        {protectedStn.length > 0 ? " (stations " + protectedStn.join(", ") + ")" : ""}
+                      </div>
+                    )}
+                  </div>
+                )}
                 {status === "unsat"   && <span className="status unsat">✗ unsat — {unstatDetail || "try relaxing D or U"}</span>}
                 {status === "error"   && <span className="status error">Connection error — is the server running on port 5050?</span>}
               </div>
