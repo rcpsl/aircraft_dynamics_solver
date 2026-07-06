@@ -104,7 +104,7 @@ export default function SolverTab({
 
         <label className="check-row" style={{ marginTop: "10px" }}>
           <input type="checkbox" checked={optimizeProp} onChange={e => setOptimizeProp(e.target.checked)} />
-          Proportional allocation (maximize traffic at benefit stations)
+          Maximize burden on specific stations
         </label>
         <div className="opt-indent">
           <div className="adj-hint" style={{ marginBottom: "5px" }}>Benefit stations</div>

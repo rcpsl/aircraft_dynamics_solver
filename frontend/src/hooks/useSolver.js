@@ -35,7 +35,9 @@ export function useSolver() {
   const [noiseMatrix,       setNoiseMatrix]       = useState(null);
   const [unstatDetail,      setUnstatDetail]      = useState(null);
   const [protectedNoiseVal,    setProtectedNoiseVal]    = useState(null);
+  const [solvedProtectedStn,   setSolvedProtectedStn]   = useState(null);
   const [proportionalNoiseVal, setProportionalNoiseVal] = useState(null);
+  const [solvedProportionalStn,setSolvedProportionalStn]= useState(null);
   const [warningMsg,           setWarningMsg]           = useState(null);
   const [optimizeUtil,         setOptimizeUtil]         = useState(false);
   const [optimizePrior,        setOptimizePrior]        = useState(false);
@@ -115,7 +117,9 @@ export function useSolver() {
   async function handleSolve() {
     setStatus("solving");
     setPaths(null); setNoiseMatrix(null); setSolvedT(null);
-    setProtectedNoiseVal(null); setProportionalNoiseVal(null); setWarningMsg(null);
+    setProtectedNoiseVal(null); setSolvedProtectedStn(null);
+    setProportionalNoiseVal(null); setSolvedProportionalStn(null);
+    setWarningMsg(null);
     try {
       const res = await fetch("http://localhost:5050/solve", {
         method: "POST",
@@ -140,7 +144,9 @@ export function useSolver() {
         setStatus("sat"); setSolvedT(data.T); setPaths(data.paths);
         setNoiseMatrix(data.noiseMatrix); setUnstatDetail(null);
         setProtectedNoiseVal(data.protectedNoise ?? null);
+        setSolvedProtectedStn(data.protectedStations ?? null);
         setProportionalNoiseVal(data.proportionalNoise ?? null);
+        setSolvedProportionalStn(data.proportionalStations ?? null);
         setWarningMsg(data.warning ?? null);
       } else {
         setStatus("unsat"); setUnstatDetail(data.detail || null);
@@ -152,7 +158,7 @@ export function useSolver() {
     N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft,
     protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
     status, solvedT, paths, noiseMatrix, unstatDetail,
-    protectedNoiseVal, proportionalNoiseVal, warningMsg,
+    protectedNoiseVal, solvedProtectedStn, proportionalNoiseVal, solvedProportionalStn, warningMsg,
     optimizeUtil, optimizePrior, optimizeProp, activeTab, fileInputRef,
     setD, setU, setStationZones, setDbPerCraft,
     setWeightUtil, setWeightPrior, setWeightProp,

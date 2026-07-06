@@ -82,13 +82,13 @@ export default function App() {
                 {s.protectedNoiseVal != null && (
                   <div style={{ fontSize: "13px", color: "#44403c", marginTop: "6px" }}>
                     Total aircraft visits to protected stations: <strong>{s.protectedNoiseVal}</strong>
-                    {s.protectedStn.length > 0 ? ` (stations ${s.protectedStn.join(", ")})` : ""}
+                    {s.solvedProtectedStn?.length > 0 ? ` (stations ${s.solvedProtectedStn.join(", ")})` : ""}
                   </div>
                 )}
                 {s.proportionalNoiseVal != null && (
                   <div style={{ fontSize: "13px", color: "#44403c", marginTop: "6px" }}>
-                    Total aircraft visits to benefit stations: <strong>{s.proportionalNoiseVal}</strong>
-                    {s.proportionalStn.length > 0 ? ` (stations ${s.proportionalStn.join(", ")})` : ""}
+                    Total aircraft visits to burden stations: <strong>{s.proportionalNoiseVal}</strong>
+                    {s.solvedProportionalStn?.length > 0 ? ` (stations ${s.solvedProportionalStn.join(", ")})` : ""}
                   </div>
                 )}
                 {s.warningMsg && (
