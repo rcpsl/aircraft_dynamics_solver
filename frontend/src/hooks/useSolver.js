@@ -34,6 +34,8 @@ export function useSolver() {
   const [paths,             setPaths]             = useState(null);
   const [noiseMatrix,       setNoiseMatrix]       = useState(null);
   const [unstatDetail,      setUnstatDetail]      = useState(null);
+  const [solvedStationZones,   setSolvedStationZones]   = useState(null);
+  const [solvedDbPerCraft,     setSolvedDbPerCraft]     = useState(null);
   const [protectedNoiseVal,    setProtectedNoiseVal]    = useState(null);
   const [solvedProtectedStn,   setSolvedProtectedStn]   = useState(null);
   const [proportionalNoiseVal, setProportionalNoiseVal] = useState(null);
@@ -117,6 +119,7 @@ export function useSolver() {
   async function handleSolve() {
     setStatus("solving");
     setPaths(null); setNoiseMatrix(null); setSolvedT(null);
+    setSolvedStationZones(null); setSolvedDbPerCraft(null);
     setProtectedNoiseVal(null); setSolvedProtectedStn(null);
     setProportionalNoiseVal(null); setSolvedProportionalStn(null);
     setWarningMsg(null);
@@ -143,6 +146,7 @@ export function useSolver() {
       if (data.status === "sat") {
         setStatus("sat"); setSolvedT(data.T); setPaths(data.paths);
         setNoiseMatrix(data.noiseMatrix); setUnstatDetail(null);
+        setSolvedStationZones(stationZones); setSolvedDbPerCraft(dbPerCraft);
         setProtectedNoiseVal(data.protectedNoise ?? null);
         setSolvedProtectedStn(data.protectedStations ?? null);
         setProportionalNoiseVal(data.proportionalNoise ?? null);
@@ -158,6 +162,7 @@ export function useSolver() {
     N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft,
     protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
     status, solvedT, paths, noiseMatrix, unstatDetail,
+    solvedStationZones, solvedDbPerCraft,
     protectedNoiseVal, solvedProtectedStn, proportionalNoiseVal, solvedProportionalStn, warningMsg,
     optimizeUtil, optimizePrior, optimizeProp, activeTab, fileInputRef,
     setD, setU, setStationZones, setDbPerCraft,

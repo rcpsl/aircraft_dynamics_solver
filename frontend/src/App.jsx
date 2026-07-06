@@ -111,7 +111,7 @@ export default function App() {
         {s.paths && <TransitTable paths={s.paths} endPos={s.endPos} />}
         {s.noiseMatrix && (
           <NoiseMatrix noiseMatrix={s.noiseMatrix} solvedT={s.solvedT} M={s.M}
-            stationZones={s.stationZones} dbPerCraft={s.dbPerCraft} />
+            stationZones={s.solvedStationZones} dbPerCraft={s.solvedDbPerCraft} />
         )}
       </div>
 
