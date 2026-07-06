@@ -48,24 +48,28 @@ export default function NoiseMatrix({ noiseMatrix, solvedT, M, stationZones, dbP
               <tr>
                 <th>Stn</th>
                 {Array.from({ length: solvedT }, (_, t) => <th key={t}>t={t}</th>)}
+                <th>Avg</th>
               </tr>
             </thead>
             <tbody>
               {noiseMatrix.map((row, m) => {
                 const baseline = ZONES[(stationZones[m] || 1) - 1].dba;
+                const deltas = row.map(count => combinedDb(baseline, count, dbPerCraft) - baseline);
+                const avg = deltas.reduce((a, b) => a + b, 0) / deltas.length;
                 return (
                   <tr key={m}>
                     <td className="row-label">{m + 1}</td>
-                    {row.map((count, t) => {
-                      const delta = combinedDb(baseline, count, dbPerCraft) - baseline;
-                      return (
-                        <td key={t} className="noise-cell"
-                          style={{ background: noiseColor(delta) }}
-                          title={`stn ${m+1}, t=${t}: ${count} aircraft, +${delta.toFixed(1)} dB above ${baseline} dBA baseline`}>
-                          +{delta.toFixed(1)}
-                        </td>
-                      );
-                    })}
+                    {deltas.map((delta, t) => (
+                      <td key={t} className="noise-cell"
+                        style={{ background: noiseColor(delta) }}
+                        title={`stn ${m+1}, t=${t}: ${row[t]} aircraft, +${delta.toFixed(1)} dB above ${baseline} dBA baseline`}>
+                        +{delta.toFixed(1)}
+                      </td>
+                    ))}
+                    <td className="row-label noise-cell" style={{ background: noiseColor(avg) }}
+                      title={`stn ${m+1} avg: +${avg.toFixed(1)} dB above ${baseline} dBA baseline`}>
+                      +{avg.toFixed(1)}
+                    </td>
                   </tr>
                 );
               })}
