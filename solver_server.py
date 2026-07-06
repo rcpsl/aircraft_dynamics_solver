@@ -173,8 +173,9 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions):
 
 
 def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions,
-                        optimize_util, optimize_prior,
-                        protected_stations, w_util, w_prior):
+                        optimize_util, optimize_prior, optimize_prop,
+                        protected_stations, proportional_stations,
+                        w_util, w_prior, w_prop):
     """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
     minimize a weighted combination of transit time and protected-station noise.
 
@@ -182,18 +183,21 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     may take several seconds. T is fixed to the value found in phase 1.
     """
     # ── Metric normalization ──────────────────────────────────────────────────
-    # Both metrics are divided by their theoretical maximums so that w_util and
-    # w_prior operate on a comparable [0,1] scale regardless of N, T, M, D.
+    # All metrics are divided by their theoretical maximums so that weights
+    # operate on a comparable [0,1] scale regardless of N, T, M, D.
     #
-    # Scale note: max_transit = N*(T-1), max_protected = |protected|*T*D.
-    # If either denominator is 0, that term is inactive regardless of the flag.
-    max_transit   = N * (T - 1)
-    max_protected = len(protected_stations) * T * D
+    # Scale note: max_transit = N*(T-1), max_protected = |protected|*T*D,
+    # max_proportional = |proportional|*T*D.
+    # If any denominator is 0, that term is inactive regardless of the flag.
+    max_transit       = N * (T - 1)
+    max_protected     = len(protected_stations) * T * D
+    max_proportional  = len(proportional_stations) * T * D
 
-    # After normalization, both coefficients are dimensionless and comparable,
-    # so w_util = w_prior = 1.0 gives genuinely equal weighting.
-    eff_w_util  = (w_util  / max_transit)   if (optimize_util  and max_transit   > 0) else 0.0
-    eff_w_prior = (w_prior / max_protected) if (optimize_prior and max_protected > 0) else 0.0
+    # After normalization, all coefficients are dimensionless and comparable,
+    # so w_util = w_prior = w_prop = 1.0 gives genuinely equal weighting.
+    eff_w_util  = (w_util  / max_transit)      if (optimize_util  and max_transit      > 0) else 0.0
+    eff_w_prior = (w_prior / max_protected)    if (optimize_prior and max_protected    > 0) else 0.0
+    eff_w_prop  = (w_prop  / max_proportional) if (optimize_prop  and max_proportional > 0) else 0.0
 
     def valid_next(src_1indexed):
         s0 = src_1indexed - 1
@@ -243,6 +247,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     transit = None
     total_transit = None
     protected_noise = None
+    proportional_noise = None
 
     if eff_w_util > 0:
         # hm[i][t]: aircraft i has changed location at least once in t'=1..t
@@ -274,6 +279,14 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         ])
         objective_terms.append(eff_w_prior * protected_noise)
 
+    if eff_w_prop > 0:
+        proportional_noise = Sum([
+            C_by_t[t][b - 1]
+            for b in proportional_stations
+            for t in range(T)
+        ])
+        objective_terms.append(-eff_w_prop * proportional_noise)  # negative coefficient = maximize this term
+
     opt.minimize(Sum(objective_terms))
 
     if opt.check() != sat:
@@ -299,6 +312,10 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         result["protectedNoise"]    = model.evaluate(protected_noise).as_long()
         result["protectedStations"] = protected_stations
 
+    if eff_w_prop > 0:
+        result["proportionalNoise"]    = model.evaluate(proportional_noise).as_long()
+        result["proportionalStations"] = proportional_stations
+
     return result
 
 
@@ -318,16 +335,20 @@ def solve():
 
     optimize_util  = data.get("optimizeUtilitarian",  False)
     optimize_prior = data.get("optimizePrioritarian", False)
+    optimize_prop  = data.get("optimizeProportional", False)
     if not isinstance(optimize_util,  bool): optimize_util  = False
     if not isinstance(optimize_prior, bool): optimize_prior = False
+    if not isinstance(optimize_prop,  bool): optimize_prop  = False
 
     try:
         w_util  = float(data.get("weightUtilitarian",  1.0))
         w_prior = float(data.get("weightPrioritarian", 1.0))
+        w_prop  = float(data.get("weightProportional", 1.0))
     except (TypeError, ValueError):
-        w_util, w_prior = 1.0, 1.0
+        w_util, w_prior, w_prop = 1.0, 1.0, 1.0
     if w_util  < 0: w_util  = 0.0
     if w_prior < 0: w_prior = 0.0
+    if w_prop  < 0: w_prop  = 0.0
 
     protected_stations = data.get("protectedStations", [])
     if optimize_prior:
@@ -340,20 +361,45 @@ def solve():
         if any(p < 1 or p > M for p in protected_stations):
             return jsonify({"error": f"protectedStations must be between 1 and M={M}"}), 400
 
+    proportional_stations = data.get("proportionalStations", [])
+    if optimize_prop:
+        if not isinstance(proportional_stations, list) or len(proportional_stations) == 0:
+            return jsonify({"error": "proportionalStations must be a non-empty list when optimizeProportional is true"}), 400
+        try:
+            proportional_stations = [int(b) for b in proportional_stations]
+        except (TypeError, ValueError):
+            return jsonify({"error": "proportionalStations must be a list of integers"}), 400
+        if any(b < 1 or b > M for b in proportional_stations):
+            return jsonify({"error": f"proportionalStations must be between 1 and M={M}"}), 400
+
     result = find_min_T(N, M, D, U, adjacency, start_positions, end_positions)
 
-    should_optimize = optimize_util or optimize_prior
+    should_optimize = optimize_util or optimize_prior or optimize_prop
     if result["status"] != "sat" or not should_optimize:
         return jsonify(result)
 
+    overlap_warning = None
+    if optimize_prior and optimize_prop:
+        overlap = sorted(set(protected_stations) & set(proportional_stations))
+        if overlap:
+            overlap_warning = (
+                f"protectedStations and proportionalStations overlap at stations {overlap}"
+                " — solver will find weighted compromise"
+            )
+
     opt_result = optimize_objectives(
         N, result["T"], M, D, U, adjacency, start_positions, end_positions,
-        optimize_util, optimize_prior,
-        protected_stations, w_util, w_prior
+        optimize_util, optimize_prior, optimize_prop,
+        protected_stations, proportional_stations,
+        w_util, w_prior, w_prop
     )
     if opt_result is None:
         # Phase-2 unexpectedly returned unsat — fall back to phase-1 result
+        if overlap_warning:
+            result["warning"] = overlap_warning
         return jsonify(result)
+    if overlap_warning:
+        opt_result["warning"] = overlap_warning
     return jsonify(opt_result)
 
 
