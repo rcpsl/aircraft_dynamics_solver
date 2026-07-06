@@ -7,21 +7,19 @@ A Z3-powered dashboard for scheduling UAM (Urban Air Mobility) aircraft routes u
 ## Requirements
 
 - Python 3.9 or newer
+- Node.js 18 or newer (for the Vite frontend)
 - A modern web browser (Chrome, Firefox, Edge)
-- Internet connection on first load (Google Fonts + React loaded from CDN)
 
 ---
 
 ## Installation
 
-### 1. Clone or download the project
+### 1. Clone the project
 
 ```
 git clone <repo-url>
 cd EECS_199_Shoukry
 ```
-
-Or just unzip the project folder — no build step needed.
 
 ### 2. Install Python dependencies
 
@@ -37,13 +35,20 @@ Verified working versions:
 | flask-cors | 6.0.2 |
 | z3-solver | 4.16.0.0 |
 
-> If you have multiple Python installs, use `pip3` or `python -m pip install ...` to ensure you're installing into the right environment.
+### 3. Install frontend dependencies
+
+```
+cd frontend
+npm install
+```
 
 ---
 
-## Running the dashboard
+## Running
 
-### Step 1 — Start the solver server
+You always need two terminals — one for the solver backend, one for the frontend.
+
+### Terminal 1 — Start the solver server (always required)
 
 ```
 python solver_server.py
@@ -55,33 +60,39 @@ You should see:
  * Running on http://127.0.0.1:5050
 ```
 
-Leave this terminal open while using the dashboard.
+### Terminal 2 — Start the frontend
 
-### Step 2 — Open the dashboard
+**Option A — Vite dev server (recommended)**
 
-Open `dashboard.html` directly in your browser:
+```
+cd frontend
+npm run dev
+```
 
-- **Windows:** double-click `dashboard.html`, or drag it into a browser window
-- **Mac/Linux:** `open dashboard.html` in terminal
+Then open `http://localhost:5173/` in your browser. The page hot-reloads on every file save.
 
-No local web server is needed — the file runs entirely in-browser.
+**Option B — Plain HTML (no build step)**
 
-### Step 3 — Use the solver
+Open `dashboard.html` directly in your browser (double-click on Windows, or `open dashboard.html` on Mac/Linux). This version uses React from CDN and requires an internet connection on first load.
+
+---
+
+## Using the solver
 
 1. Set **N** (aircraft count), **M** (station count), **D** (max noise per station), **U** (max adjacent disparity) using the sliders
 2. Enter start and end station numbers for each aircraft
-3. Toggle the **Adjacency Matrix** cells to define which station-to-station moves are allowed (row = from, col = to)
-4. Click **Run Solver**
+3. Toggle **Adjacency Matrix** cells to define allowed moves (row = from, col = to)
+4. Assign zone types to each station in the **Zones** tab
+5. Optionally enable **Minimize transit time** or **Reduce noise at protected stations** in the Optimization section
+6. Click **Run Solver**
 
-The dashboard will display the minimum feasible T, each aircraft's path, and a color-coded noise matrix.
+The dashboard displays the minimum feasible T, each aircraft's path, transit times, a color-coded aircraft matrix, and a dB-increase noise matrix per zone baseline.
 
 ---
 
 ## Saving and loading configs
 
-Your current settings (sliders, positions, adjacency matrix) are **automatically saved** in the browser between sessions — no action needed.
-
-To save a named config file or share settings with someone else:
+Settings are **automatically saved** in the browser between sessions via `localStorage`.
 
 - **Save Config** — downloads `uam-config.json` with the current settings
 - **Load Config** — imports a previously saved `.json` file and restores all settings
@@ -92,8 +103,25 @@ To save a named config file or share settings with someone else:
 
 ```
 EECS_199_Shoukry/
-├── solver_server.py        # Flask backend — Z3 solver, port 5050
-├── dashboard.html          # Browser frontend — React (no build step)
+├── solver_server.py              # Flask backend — Z3 solver, port 5050
+├── dashboard.html                # Standalone frontend (React from CDN, no build)
+├── frontend/                     # Vite + React frontend
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── index.html
+│   └── src/
+│       ├── App.jsx
+│       ├── main.jsx
+│       ├── index.css
+│       ├── constants.js          # ZONES, ZONE_COLORS, defaults
+│       ├── utils.js              # combinedDb, color helpers, transit time
+│       ├── hooks/
+│       │   └── useSolver.js      # all state, localStorage sync, API call
+│       └── components/
+│           ├── Slider.jsx
+│           ├── GraphPanel.jsx    # draggable SVG station graph
+│           ├── LeftPanel/        # SolverTab, ZonesTab, NoiseModelTab
+│           └── RightPanel/       # PathsTable, TransitTable, NoiseMatrix
 ├── aircraft_dynamics_solver.py   # Standalone Z3 script (reference/testing)
 └── README.md
 ```
@@ -103,10 +131,9 @@ EECS_199_Shoukry/
 ## Troubleshooting
 
 **"Connection error — is the server running on port 5050?"**
-Make sure `solver_server.py` is running in a separate terminal before opening the dashboard.
+Make sure `solver_server.py` is running in a separate terminal before using the dashboard.
 
 **"unsat" result**
-Common causes and quick fixes:
 
 | Reason shown | Fix |
 |---|---|
@@ -116,4 +143,4 @@ Common causes and quick fixes:
 | structural | Noise/disparity constraints (D, U) conflict with the graph structure — try relaxing U or D |
 
 **Port 5050 already in use**
-Change the port in `solver_server.py` (last line) and update the `fetch` URL in `dashboard.html` to match.
+Change the port in `solver_server.py` (last line) and update the `fetch` URL in both `frontend/src/hooks/useSolver.js` and `dashboard.html` to match.

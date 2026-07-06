@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 *.log
 node_modules/
-package.json
-package-lock.json
+/package.json
+/package-lock.json
 babel_check.js
+frontend/dist/
+frontend/.vite/
