@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   DEFAULT_N, DEFAULT_M, DEFAULT_D, DEFAULT_U,
   DEFAULT_ADJ, DEFAULT_START, DEFAULT_END, DEFAULT_ZONES,
-  DEFAULT_DB_PER_CRAFT, STORAGE_KEY, BENEFIT_ZONE_IDS,
+  DEFAULT_DB_PER_CRAFT, STORAGE_KEY, BENEFIT_ZONE_IDS, PROTECTED_ZONE_IDS,
 } from '../constants';
 import { resizeAdj, resizePos } from '../utils';
 
@@ -45,6 +45,7 @@ export function useSolver() {
   const [optimizePrior,        setOptimizePrior]        = useState(false);
   const [optimizeProp,         setOptimizeProp]         = useState(false);
   const [autoProportional,     setAutoProportional]     = useState(false);
+  const [autoProtected,        setAutoProtected]        = useState(false);
   const [activeTab,         setActiveTab]         = useState("solver");
   const fileInputRef = useRef(null);
 
@@ -135,7 +136,9 @@ export function useSolver() {
           optimizeUtilitarian:   optimizeUtil,
           optimizePrioritarian:  optimizePrior,
           optimizeProportional:  optimizeProp,
-          protectedStations:     protectedStn,
+          protectedStations:     autoProtected
+            ? stationZones.map((z, i) => PROTECTED_ZONE_IDS.includes(z) ? i + 1 : null).filter(Boolean)
+            : protectedStn,
           proportionalStations:  autoProportional
             ? stationZones.map((z, i) => BENEFIT_ZONE_IDS.includes(z) ? i + 1 : null).filter(Boolean)
             : proportionalStn,
@@ -167,8 +170,8 @@ export function useSolver() {
     status, solvedT, paths, noiseMatrix, unstatDetail,
     solvedStationZones, solvedDbPerCraft,
     protectedNoiseVal, solvedProtectedStn, proportionalNoiseVal, solvedProportionalStn, warningMsg,
-    optimizeUtil, optimizePrior, optimizeProp, autoProportional, activeTab, fileInputRef,
-    setAutoProportional,
+    optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected, activeTab, fileInputRef,
+    setAutoProportional, setAutoProtected,
     setD, setU, setStationZones, setDbPerCraft,
     setWeightUtil, setWeightPrior, setWeightProp,
     setOptimizeUtil, setOptimizePrior, setOptimizeProp,

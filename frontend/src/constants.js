@@ -20,6 +20,10 @@ export const STORAGE_KEY = "uam-config";
 // should therefore accept a proportional share of noise burden.
 export const BENEFIT_ZONE_IDS = [1, 2, 8, 9];
 
+// Zones that already carry cumulative disadvantage and should receive
+// prioritarian protection from additional UAM noise.
+export const PROTECTED_ZONE_IDS = [2, 4, 7, 9];
+
 export const ZONES = [
   { id: 1, name: "Commercial Hub",      dba: 63, category: "Very Noisy Urban" },
   { id: 2, name: "Mixed-Use Corridor",  dba: 52, category: "Urban"            },

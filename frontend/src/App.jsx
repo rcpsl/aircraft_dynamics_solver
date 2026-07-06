@@ -36,14 +36,14 @@ export default function App() {
             N={s.N} M={s.M} D={s.D} U={s.U} adjacency={s.adjacency}
             startPos={s.startPos} endPos={s.endPos}
             optimizeUtil={s.optimizeUtil} optimizePrior={s.optimizePrior} optimizeProp={s.optimizeProp}
-            autoProportional={s.autoProportional}
+            autoProportional={s.autoProportional} autoProtected={s.autoProtected}
             protectedStn={s.protectedStn} proportionalStn={s.proportionalStn}
             stationZones={s.stationZones}
             weightUtil={s.weightUtil} weightPrior={s.weightPrior} weightProp={s.weightProp}
             handleN={s.handleN} handleM={s.handleM} setD={s.setD} setU={s.setU}
             toggleAdj={s.toggleAdj} updateStartPos={s.updateStartPos} updateEndPos={s.updateEndPos}
             setOptimizeUtil={s.setOptimizeUtil} setOptimizePrior={s.setOptimizePrior} setOptimizeProp={s.setOptimizeProp}
-            setAutoProportional={s.setAutoProportional}
+            setAutoProportional={s.setAutoProportional} setAutoProtected={s.setAutoProtected}
             setProtectedStn={s.setProtectedStn} setProportionalStn={s.setProportionalStn}
             setWeightUtil={s.setWeightUtil} setWeightPrior={s.setWeightPrior} setWeightProp={s.setWeightProp}
           />

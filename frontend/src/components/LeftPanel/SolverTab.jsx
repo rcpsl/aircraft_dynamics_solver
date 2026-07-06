@@ -1,12 +1,12 @@
 import Slider from '../Slider';
-import { BENEFIT_ZONE_IDS } from '../../constants';
+import { BENEFIT_ZONE_IDS, PROTECTED_ZONE_IDS } from '../../constants';
 
 export default function SolverTab({
   N, M, D, U, adjacency, startPos, endPos,
-  optimizeUtil, optimizePrior, optimizeProp, autoProportional,
+  optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected,
   protectedStn, proportionalStn, stationZones, weightUtil, weightPrior, weightProp,
   handleN, handleM, setD, setU, toggleAdj, updateStartPos, updateEndPos,
-  setOptimizeUtil, setOptimizePrior, setOptimizeProp, setAutoProportional,
+  setOptimizeUtil, setOptimizePrior, setOptimizeProp, setAutoProportional, setAutoProtected,
   setProtectedStn, setProportionalStn, setWeightUtil, setWeightPrior, setWeightProp,
 }) {
   return (
@@ -81,10 +81,19 @@ export default function SolverTab({
           Reduce noise at protected stations
         </label>
         <div className="opt-indent">
+          <label className="check-row" style={{ marginBottom: "8px" }}>
+            <input type="checkbox" checked={autoProtected}
+              onChange={e => setAutoProtected(e.target.checked)} />
+            Auto-select high-burden zone stations
+          </label>
           <div className="adj-hint" style={{ marginBottom: "5px" }}>Target stations</div>
-          <div className="station-chips">
+          <div className="station-chips"
+            style={autoProtected ? { opacity: 0.4, pointerEvents: 'none' } : {}}>
             {Array.from({ length: M }, (_, idx) => {
-              const s = idx + 1, on = protectedStn.includes(s);
+              const s = idx + 1;
+              const on = autoProtected
+                ? PROTECTED_ZONE_IDS.includes(stationZones[idx])
+                : protectedStn.includes(s);
               return (
                 <div key={s} className={`station-chip${on ? " on" : ""}`}
                   onClick={() => on
