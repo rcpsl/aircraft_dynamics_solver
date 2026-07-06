@@ -1,11 +1,12 @@
 import Slider from '../Slider';
+import { BENEFIT_ZONE_IDS } from '../../constants';
 
 export default function SolverTab({
   N, M, D, U, adjacency, startPos, endPos,
-  optimizeUtil, optimizePrior, optimizeProp,
-  protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
+  optimizeUtil, optimizePrior, optimizeProp, autoProportional,
+  protectedStn, proportionalStn, stationZones, weightUtil, weightPrior, weightProp,
   handleN, handleM, setD, setU, toggleAdj, updateStartPos, updateEndPos,
-  setOptimizeUtil, setOptimizePrior, setOptimizeProp,
+  setOptimizeUtil, setOptimizePrior, setOptimizeProp, setAutoProportional,
   setProtectedStn, setProportionalStn, setWeightUtil, setWeightPrior, setWeightProp,
 }) {
   return (
@@ -107,10 +108,19 @@ export default function SolverTab({
           Maximize burden on specific stations
         </label>
         <div className="opt-indent">
+          <label className="check-row" style={{ marginBottom: "8px" }}>
+            <input type="checkbox" checked={autoProportional}
+              onChange={e => setAutoProportional(e.target.checked)} />
+            Auto-select high-benefit zone stations
+          </label>
           <div className="adj-hint" style={{ marginBottom: "5px" }}>Benefit stations</div>
-          <div className="station-chips">
+          <div className="station-chips"
+            style={autoProportional ? { opacity: 0.4, pointerEvents: 'none' } : {}}>
             {Array.from({ length: M }, (_, idx) => {
-              const s = idx + 1, on = proportionalStn.includes(s);
+              const s = idx + 1;
+              const on = autoProportional
+                ? BENEFIT_ZONE_IDS.includes(stationZones[idx])
+                : proportionalStn.includes(s);
               return (
                 <div key={s} className={`station-chip${on ? " prop-on" : ""}`}
                   onClick={() => on

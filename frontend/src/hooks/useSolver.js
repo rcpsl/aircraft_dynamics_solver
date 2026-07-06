@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   DEFAULT_N, DEFAULT_M, DEFAULT_D, DEFAULT_U,
   DEFAULT_ADJ, DEFAULT_START, DEFAULT_END, DEFAULT_ZONES,
-  DEFAULT_DB_PER_CRAFT, STORAGE_KEY,
+  DEFAULT_DB_PER_CRAFT, STORAGE_KEY, BENEFIT_ZONE_IDS,
 } from '../constants';
 import { resizeAdj, resizePos } from '../utils';
 
@@ -44,6 +44,7 @@ export function useSolver() {
   const [optimizeUtil,         setOptimizeUtil]         = useState(false);
   const [optimizePrior,        setOptimizePrior]        = useState(false);
   const [optimizeProp,         setOptimizeProp]         = useState(false);
+  const [autoProportional,     setAutoProportional]     = useState(false);
   const [activeTab,         setActiveTab]         = useState("solver");
   const fileInputRef = useRef(null);
 
@@ -135,7 +136,9 @@ export function useSolver() {
           optimizePrioritarian:  optimizePrior,
           optimizeProportional:  optimizeProp,
           protectedStations:     protectedStn,
-          proportionalStations:  proportionalStn,
+          proportionalStations:  autoProportional
+            ? stationZones.map((z, i) => BENEFIT_ZONE_IDS.includes(z) ? i + 1 : null).filter(Boolean)
+            : proportionalStn,
           weightUtilitarian:     weightUtil,
           weightPrioritarian:    weightPrior,
           weightProportional:    weightProp,
@@ -164,7 +167,8 @@ export function useSolver() {
     status, solvedT, paths, noiseMatrix, unstatDetail,
     solvedStationZones, solvedDbPerCraft,
     protectedNoiseVal, solvedProtectedStn, proportionalNoiseVal, solvedProportionalStn, warningMsg,
-    optimizeUtil, optimizePrior, optimizeProp, activeTab, fileInputRef,
+    optimizeUtil, optimizePrior, optimizeProp, autoProportional, activeTab, fileInputRef,
+    setAutoProportional,
     setD, setU, setStationZones, setDbPerCraft,
     setWeightUtil, setWeightPrior, setWeightProp,
     setOptimizeUtil, setOptimizePrior, setOptimizeProp,

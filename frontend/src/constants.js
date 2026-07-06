@@ -16,6 +16,10 @@ export const DEFAULT_DB_PER_CRAFT = 65;
 
 export const STORAGE_KEY = "uam-config";
 
+// Zones that benefit from UAM (transit access, economic activity, jobs) and
+// should therefore accept a proportional share of noise burden.
+export const BENEFIT_ZONE_IDS = [1, 2, 8, 9];
+
 export const ZONES = [
   { id: 1, name: "Commercial Hub",      dba: 63, category: "Very Noisy Urban" },
   { id: 2, name: "Mixed-Use Corridor",  dba: 52, category: "Urban"            },
