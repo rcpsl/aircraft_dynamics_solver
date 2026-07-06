@@ -2,9 +2,11 @@ import Slider from '../Slider';
 
 export default function SolverTab({
   N, M, D, U, adjacency, startPos, endPos,
-  optimizeUtil, optimizePrior, protectedStn, weightUtil, weightPrior,
+  optimizeUtil, optimizePrior, optimizeProp,
+  protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
   handleN, handleM, setD, setU, toggleAdj, updateStartPos, updateEndPos,
-  setOptimizeUtil, setOptimizePrior, setProtectedStn, setWeightUtil, setWeightPrior,
+  setOptimizeUtil, setOptimizePrior, setOptimizeProp,
+  setProtectedStn, setProportionalStn, setWeightUtil, setWeightPrior, setWeightProp,
 }) {
   return (
     <div>
@@ -97,6 +99,33 @@ export default function SolverTab({
             <input type="range" min={0} max={2} step={0.1} value={weightPrior}
               onChange={e => setWeightPrior(Number(e.target.value))} />
             <span className="wval">{weightPrior.toFixed(1)}</span>
+          </div>
+        </div>
+
+        <label className="check-row" style={{ marginTop: "10px" }}>
+          <input type="checkbox" checked={optimizeProp} onChange={e => setOptimizeProp(e.target.checked)} />
+          Proportional allocation (maximize traffic at benefit stations)
+        </label>
+        <div className="opt-indent">
+          <div className="adj-hint" style={{ marginBottom: "5px" }}>Benefit stations</div>
+          <div className="station-chips">
+            {Array.from({ length: M }, (_, idx) => {
+              const s = idx + 1, on = proportionalStn.includes(s);
+              return (
+                <div key={s} className={`station-chip${on ? " prop-on" : ""}`}
+                  onClick={() => on
+                    ? setProportionalStn(ps => ps.filter(x => x !== s))
+                    : setProportionalStn(ps => [...ps, s].sort((a, b) => a - b))}>
+                  {s}
+                </div>
+              );
+            })}
+          </div>
+          <div className="weight-row">
+            <span className="wlabel">Weight</span>
+            <input type="range" min={0} max={2} step={0.1} value={weightProp}
+              onChange={e => setWeightProp(Number(e.target.value))} />
+            <span className="wval">{weightProp.toFixed(1)}</span>
           </div>
         </div>
       </section>

@@ -229,8 +229,9 @@ section h2 {
   transition: background 0.1s;
   user-select: none;
 }
-.station-chip.on  { background: #1c1917; border-color: #1c1917; color: #fff; }
-.station-chip:hover:not(.on) { background: #e7e5e0; }
+.station-chip.on      { background: #1c1917; border-color: #1c1917; color: #fff; }
+.station-chip.prop-on { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+.station-chip:hover:not(.on):not(.prop-on) { background: #e7e5e0; }
 
 .config-btns {
   display: flex;

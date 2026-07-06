@@ -23,27 +23,32 @@ export function useSolver() {
   const [endPos,       setEndPos]       = useState(saved.endPos       ?? DEFAULT_END);
   const [stationZones, setStationZones] = useState(saved.stationZones ?? DEFAULT_ZONES);
   const [dbPerCraft,   setDbPerCraft]   = useState(saved.dbPerCraft   ?? DEFAULT_DB_PER_CRAFT);
-  const [protectedStn, setProtectedStn] = useState(saved.protectedStn ?? []);
-  const [weightUtil,   setWeightUtil]   = useState(saved.weightUtil   ?? 1.0);
-  const [weightPrior,  setWeightPrior]  = useState(saved.weightPrior  ?? 1.0);
+  const [protectedStn,     setProtectedStn]     = useState(saved.protectedStn     ?? []);
+  const [proportionalStn,  setProportionalStn]  = useState(saved.proportionalStn  ?? []);
+  const [weightUtil,       setWeightUtil]       = useState(saved.weightUtil       ?? 1.0);
+  const [weightPrior,      setWeightPrior]      = useState(saved.weightPrior      ?? 1.0);
+  const [weightProp,       setWeightProp]       = useState(saved.weightProp       ?? 1.0);
 
   const [status,            setStatus]            = useState("idle");
   const [solvedT,           setSolvedT]           = useState(null);
   const [paths,             setPaths]             = useState(null);
   const [noiseMatrix,       setNoiseMatrix]       = useState(null);
   const [unstatDetail,      setUnstatDetail]      = useState(null);
-  const [protectedNoiseVal, setProtectedNoiseVal] = useState(null);
-  const [optimizeUtil,      setOptimizeUtil]      = useState(false);
-  const [optimizePrior,     setOptimizePrior]     = useState(false);
+  const [protectedNoiseVal,    setProtectedNoiseVal]    = useState(null);
+  const [proportionalNoiseVal, setProportionalNoiseVal] = useState(null);
+  const [warningMsg,           setWarningMsg]           = useState(null);
+  const [optimizeUtil,         setOptimizeUtil]         = useState(false);
+  const [optimizePrior,        setOptimizePrior]        = useState(false);
+  const [optimizeProp,         setOptimizeProp]         = useState(false);
   const [activeTab,         setActiveTab]         = useState("solver");
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       N, M, D, U, adjacency, startPos, endPos,
-      stationZones, dbPerCraft, protectedStn, weightUtil, weightPrior,
+      stationZones, dbPerCraft, protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
     }));
-  }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, protectedStn, weightUtil, weightPrior]);
+  }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, protectedStn, proportionalStn, weightUtil, weightPrior, weightProp]);
 
   function handleN(newN) {
     setN(newN);
@@ -58,6 +63,7 @@ export function useSolver() {
     setEndPos(p   => p.map(v => Math.min(v, newM)));
     setStationZones(z => newM <= z.length ? z.slice(0, newM) : z.concat(Array.from({ length: newM - z.length }, () => 1)));
     setProtectedStn(ps => ps.filter(s => s <= newM));
+    setProportionalStn(ps => ps.filter(s => s <= newM));
   }
 
   function toggleAdj(i, j) {
@@ -108,20 +114,24 @@ export function useSolver() {
 
   async function handleSolve() {
     setStatus("solving");
-    setPaths(null); setNoiseMatrix(null); setSolvedT(null); setProtectedNoiseVal(null);
+    setPaths(null); setNoiseMatrix(null); setSolvedT(null);
+    setProtectedNoiseVal(null); setProportionalNoiseVal(null); setWarningMsg(null);
     try {
       const res = await fetch("http://localhost:5050/solve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           N, M, D, U, adjacency,
-          startPositions:       startPos,
-          endPositions:         endPos,
-          optimizeUtilitarian:  optimizeUtil,
-          optimizePrioritarian: optimizePrior,
-          protectedStations:    protectedStn,
-          weightUtilitarian:    weightUtil,
-          weightPrioritarian:   weightPrior,
+          startPositions:        startPos,
+          endPositions:          endPos,
+          optimizeUtilitarian:   optimizeUtil,
+          optimizePrioritarian:  optimizePrior,
+          optimizeProportional:  optimizeProp,
+          protectedStations:     protectedStn,
+          proportionalStations:  proportionalStn,
+          weightUtilitarian:     weightUtil,
+          weightPrioritarian:    weightPrior,
+          weightProportional:    weightProp,
         }),
       });
       if (!res.ok) throw new Error("HTTP " + res.status);
@@ -130,6 +140,8 @@ export function useSolver() {
         setStatus("sat"); setSolvedT(data.T); setPaths(data.paths);
         setNoiseMatrix(data.noiseMatrix); setUnstatDetail(null);
         setProtectedNoiseVal(data.protectedNoise ?? null);
+        setProportionalNoiseVal(data.proportionalNoise ?? null);
+        setWarningMsg(data.warning ?? null);
       } else {
         setStatus("unsat"); setUnstatDetail(data.detail || null);
       }
@@ -138,12 +150,14 @@ export function useSolver() {
 
   return {
     N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft,
-    protectedStn, weightUtil, weightPrior,
-    status, solvedT, paths, noiseMatrix, unstatDetail, protectedNoiseVal,
-    optimizeUtil, optimizePrior, activeTab, fileInputRef,
+    protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
+    status, solvedT, paths, noiseMatrix, unstatDetail,
+    protectedNoiseVal, proportionalNoiseVal, warningMsg,
+    optimizeUtil, optimizePrior, optimizeProp, activeTab, fileInputRef,
     setD, setU, setStationZones, setDbPerCraft,
-    setWeightUtil, setWeightPrior, setOptimizeUtil, setOptimizePrior,
-    setProtectedStn, setActiveTab,
+    setWeightUtil, setWeightPrior, setWeightProp,
+    setOptimizeUtil, setOptimizePrior, setOptimizeProp,
+    setProtectedStn, setProportionalStn, setActiveTab,
     handleN, handleM, toggleAdj, updateStartPos, updateEndPos,
     handleExport, handleImport, handleSolve,
   };

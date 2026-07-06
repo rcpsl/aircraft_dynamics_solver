@@ -11,8 +11,11 @@ import NoiseMatrix from './components/RightPanel/NoiseMatrix';
 export default function App() {
   const s = useSolver();
 
-  const optLabel = [s.optimizeUtil ? "transit" : null, s.optimizePrior ? "prioritarian" : null]
-    .filter(Boolean).join(" + ");
+  const optLabel = [
+    s.optimizeUtil  ? "transit"       : null,
+    s.optimizePrior ? "prioritarian"  : null,
+    s.optimizeProp  ? "proportional"  : null,
+  ].filter(Boolean).join(" + ");
 
   return (
     <div className="app">
@@ -32,12 +35,14 @@ export default function App() {
           <SolverTab
             N={s.N} M={s.M} D={s.D} U={s.U} adjacency={s.adjacency}
             startPos={s.startPos} endPos={s.endPos}
-            optimizeUtil={s.optimizeUtil} optimizePrior={s.optimizePrior}
-            protectedStn={s.protectedStn} weightUtil={s.weightUtil} weightPrior={s.weightPrior}
+            optimizeUtil={s.optimizeUtil} optimizePrior={s.optimizePrior} optimizeProp={s.optimizeProp}
+            protectedStn={s.protectedStn} proportionalStn={s.proportionalStn}
+            weightUtil={s.weightUtil} weightPrior={s.weightPrior} weightProp={s.weightProp}
             handleN={s.handleN} handleM={s.handleM} setD={s.setD} setU={s.setU}
             toggleAdj={s.toggleAdj} updateStartPos={s.updateStartPos} updateEndPos={s.updateEndPos}
-            setOptimizeUtil={s.setOptimizeUtil} setOptimizePrior={s.setOptimizePrior}
-            setProtectedStn={s.setProtectedStn} setWeightUtil={s.setWeightUtil} setWeightPrior={s.setWeightPrior}
+            setOptimizeUtil={s.setOptimizeUtil} setOptimizePrior={s.setOptimizePrior} setOptimizeProp={s.setOptimizeProp}
+            setProtectedStn={s.setProtectedStn} setProportionalStn={s.setProportionalStn}
+            setWeightUtil={s.setWeightUtil} setWeightPrior={s.setWeightPrior} setWeightProp={s.setWeightProp}
           />
         )}
         {s.activeTab === "zones" && (
@@ -78,6 +83,17 @@ export default function App() {
                   <div style={{ fontSize: "13px", color: "#44403c", marginTop: "6px" }}>
                     Total aircraft visits to protected stations: <strong>{s.protectedNoiseVal}</strong>
                     {s.protectedStn.length > 0 ? ` (stations ${s.protectedStn.join(", ")})` : ""}
+                  </div>
+                )}
+                {s.proportionalNoiseVal != null && (
+                  <div style={{ fontSize: "13px", color: "#44403c", marginTop: "6px" }}>
+                    Total aircraft visits to benefit stations: <strong>{s.proportionalNoiseVal}</strong>
+                    {s.proportionalStn.length > 0 ? ` (stations ${s.proportionalStn.join(", ")})` : ""}
+                  </div>
+                )}
+                {s.warningMsg && (
+                  <div style={{ fontSize: "12px", color: "#92400e", background: "#fef3c7", borderRadius: "5px", padding: "6px 10px", marginTop: "6px" }}>
+                    ⚠ {s.warningMsg}
                   </div>
                 )}
               </div>
