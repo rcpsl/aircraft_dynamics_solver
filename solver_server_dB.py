@@ -68,33 +68,76 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     D_scaled = round(D * SCALE)
     U_scaled = round(U * SCALE)
 
-    # ── Suggestion 1: algebraic pre-checks (O(1), no Z3 needed) ─────────────
+    # ── Algebraic pre-checks (exact or O(M²), no Z3 needed) ─────────────────
 
-    # Pigeonhole: check if forcing ⌈N/M⌉ aircraft at the quietest station
-    # causes a dB increase exceeding D.
+    # all_pairs needed below for U checks
+    all_pairs = [(m1, m2) for m1 in range(M) for m2 in range(m1 + 1, M)]
+
+    # Pigeonhole: at every timestep some station must hold ≥⌈N/M⌉ aircraft.
+    # The best-case station for the D constraint is the one with the highest
+    # baseline (lowest dB increase per aircraft). If even that station exceeds D
+    # with ⌈N/M⌉ aircraft, no distribution can satisfy D.
     min_forced_count = ceil(N / M)
-    quietest = min(range(M), key=lambda m: baseline[m])
-    if scaled_table[quietest][min_forced_count] > D_scaled:
+    best_m = min(range(M), key=lambda m: scaled_table[m][min_forced_count])
+    if scaled_table[best_m][min_forced_count] > D_scaled:
         return {
             "status": "unsat", "reason": "noise_cap",
             "detail": (
                 f"Even distributing {N} aircraft across {M} stations forces ≥{min_forced_count} "
-                f"at the quietest station (baseline {baseline[quietest]} dBA), "
-                f"causing a dB increase that exceeds D={D} dBA"
+                f"at some station; even the most tolerant station "
+                f"(baseline {baseline[best_m]:.1f} dBA) would exceed D={D} dBA"
             )
         }
 
-    # Start-position conflict: check each starting station's actual dB increase.
+    # Start-position D + U check: t=0 positions are fixed, so dB profile is exact.
     start_counts = Counter(start_positions)
-    for station, count in start_counts.items():
-        inc_scaled = scaled_table[station - 1][count]   # station is 1-indexed
+    start_dB = [scaled_table[m][start_counts.get(m + 1, 0)] for m in range(M)]
+    for m, inc_scaled in enumerate(start_dB):
         if inc_scaled > D_scaled:
+            station = m + 1
             return {
                 "status": "unsat", "reason": "start_conflict",
                 "detail": (
-                    f"Station {station} has {count} aircraft at t=0, "
+                    f"Station {station} has {start_counts[station]} aircraft at t=0, "
                     f"causing a dB increase of {inc_scaled / SCALE:.1f} dBA "
                     f"which exceeds D={D} dBA"
+                )
+            }
+    for (m1, m2) in all_pairs:
+        diff = abs(start_dB[m1] - start_dB[m2])
+        if diff > U_scaled:
+            return {
+                "status": "unsat", "reason": "start_disparity",
+                "detail": (
+                    f"At t=0, stations {m1+1} and {m2+1} differ by {diff / SCALE:.1f} dBA "
+                    f"({start_dB[m1]/SCALE:.1f} vs {start_dB[m2]/SCALE:.1f}), "
+                    f"exceeding U={U} dBA"
+                )
+            }
+
+    # End-position D + U check: final-timestep positions are also fixed.
+    end_counts = Counter(end_positions)
+    end_dB = [scaled_table[m][end_counts.get(m + 1, 0)] for m in range(M)]
+    for m, inc_scaled in enumerate(end_dB):
+        if inc_scaled > D_scaled:
+            station = m + 1
+            return {
+                "status": "unsat", "reason": "end_conflict",
+                "detail": (
+                    f"Station {station} has {end_counts[station]} aircraft at their final position, "
+                    f"causing a dB increase of {inc_scaled / SCALE:.1f} dBA "
+                    f"which exceeds D={D} dBA"
+                )
+            }
+    for (m1, m2) in all_pairs:
+        diff = abs(end_dB[m1] - end_dB[m2])
+        if diff > U_scaled:
+            return {
+                "status": "unsat", "reason": "end_disparity",
+                "detail": (
+                    f"At the final timestep, stations {m1+1} and {m2+1} differ by {diff / SCALE:.1f} dBA "
+                    f"({end_dB[m1]/SCALE:.1f} vs {end_dB[m2]/SCALE:.1f}), "
+                    f"exceeding U={U} dBA"
                 )
             }
 
@@ -111,14 +154,9 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
 
     T_lower = max(2, max(individual_mins) + 1)
 
-    # ── Suggestions 2 & 3: incremental solver + unsat-core early exit ────────
-
     def valid_next(src_1indexed):
         s0 = src_1indexed - 1
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
-
-    # Global disparity: all station pairs, not just adjacent ones
-    all_pairs = [(m1, m2) for m1 in range(M) for m2 in range(m1 + 1, M)]
 
     # Build permanent base state up to T_lower (Suggestion 3: encode once)
     L = [[Int(f"L_{i}_{t}") for t in range(T_lower)] for i in range(N)]
@@ -157,8 +195,6 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
 
     T_current = T_lower
 
-    # Each iteration: try endpoint pins at t = T_current-1 via assumptions,
-    # then extend the base by one timestep if needed.
     for _ in range(T_lower, 51):
         # Assumption booleans — same names reused safely because the Implies
         # constraints referencing them are pushed/popped each iteration.
