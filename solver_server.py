@@ -262,6 +262,13 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
             for t in range(1, T):
                 opt.add(ha[i][t] == Or(ha[i][t - 1], L[i][t] == end_positions[i]))
 
+    # Sticky arrival: once an aircraft reaches its destination it must stay there.
+    # Without this, in soft mode aircraft can drift away between arrival and T-1.
+    if soft_T:
+        for i in range(N):
+            for t in range(T - 1):
+                opt.add(Implies(ha[i][t], L[i][t + 1] == end_positions[i]))
+
     if eff_w_util > 0:
         # hm[i][t]: aircraft i has changed location at least once in t'=1..t
         # it[i][t]: aircraft i is currently accumulating transit cost at time t
