@@ -69,11 +69,8 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions):
         s0 = src_1indexed - 1
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
 
-    adjacent_pairs = set()
-    for m1 in range(M):
-        for m2 in range(M):
-            if m1 != m2 and adjacency[m1][m2] == 1:
-                adjacent_pairs.add((min(m1, m2), max(m1, m2)))
+    # Global disparity: all station pairs, not just adjacent ones
+    all_pairs = [(m1, m2) for m1 in range(M) for m2 in range(m1 + 1, M)]
 
     # Build permanent base state up to T_lower (Suggestion 3: encode once)
     L = [[Int(f"L_{i}_{t}") for t in range(T_lower)] for i in range(N)]
@@ -94,14 +91,14 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions):
                 dsts = valid_next(src)
                 s.add(Implies(L[i][t] == src, Or([L[i][t + 1] == dst for dst in dsts])))
 
-    # Noise cap + adjacent disparity for t = 0 … T_lower-1
+    # Noise cap + global disparity for t = 0 … T_lower-1
     # C_by_t[t][m] = symbolic aircraft count at station m at time t
     C_by_t = []
     for t in range(T_lower):
         C_t = [Sum([If(L[i][t] == m + 1, 1, 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_t)
         s.add([C_t[m] <= D for m in range(M)])
-        for (m1, m2) in adjacent_pairs:
+        for (m1, m2) in all_pairs:
             s.add(And(C_t[m1] - C_t[m2] <= U, C_t[m2] - C_t[m1] <= U))
 
     T_current = T_lower
@@ -164,7 +161,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions):
         C_new = [Sum([If(L[i][new_t] == m + 1, 1, 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_new)
         s.add([C_new[m] <= D for m in range(M)])
-        for (m1, m2) in adjacent_pairs:
+        for (m1, m2) in all_pairs:
             s.add(And(C_new[m1] - C_new[m2] <= U, C_new[m2] - C_new[m1] <= U))
 
         T_current += 1
@@ -207,11 +204,8 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         s0 = src_1indexed - 1
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
 
-    adjacent_pairs = set()
-    for m1 in range(M):
-        for m2 in range(M):
-            if m1 != m2 and adjacency[m1][m2] == 1:
-                adjacent_pairs.add((min(m1, m2), max(m1, m2)))
+    # Global disparity: all station pairs, not just adjacent ones
+    all_pairs = [(m1, m2) for m1 in range(M) for m2 in range(m1 + 1, M)]
 
     opt = Optimize()
 
@@ -235,13 +229,13 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                 dsts = valid_next(src)
                 opt.add(Implies(L[i][t] == src, Or([L[i][t + 1] == dst for dst in dsts])))
 
-    # Noise cap and adjacent disparity
+    # Noise cap and global disparity
     C_by_t = []
     for t in range(T):
         C_t = [Sum([If(L[i][t] == m + 1, 1, 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_t)
         opt.add([C_t[m] <= D for m in range(M)])
-        for (m1, m2) in adjacent_pairs:
+        for (m1, m2) in all_pairs:
             opt.add(And(C_t[m1] - C_t[m2] <= U, C_t[m2] - C_t[m1] <= U))
 
     # ── Build objective terms ─────────────────────────────────────────────────
