@@ -11,8 +11,17 @@ import NoiseMatrix from './components/RightPanel/NoiseMatrix';
 export default function App() {
   const s = useSolver();
 
+  const effectiveT = s.paths
+    ? Math.max(1, ...s.paths.map(path => {
+        for (let t = path.length - 1; t > 0; t--) {
+          if (path[t] !== path[t - 1]) return t + 1;
+        }
+        return 1;
+      }))
+    : s.solvedT;
+
   const optLabel = [
-    s.solvedOptimizeUtil  ? "transit"       : null,
+    s.solvedOptimizeUtil  ? "sufficientarian" : null,
     s.solvedOptimizePrior ? "prioritarian"  : null,
     s.solvedOptimizeProp  ? "proportional"  : null,
   ].filter(Boolean).join(" + ");
@@ -114,10 +123,10 @@ export default function App() {
           </div>
         )}
 
-        {s.paths && <PathsTable paths={s.paths} solvedT={s.solvedT} />}
-        {s.paths && <TransitTable paths={s.paths} endPos={s.endPos} />}
+        {s.paths && <PathsTable paths={s.paths.map(p => p.slice(0, effectiveT))} solvedT={effectiveT} />}
+        {s.paths && <TransitTable paths={s.paths.map(p => p.slice(0, effectiveT))} endPos={s.endPos} />}
         {s.noiseMatrix && (
-          <NoiseMatrix noiseMatrix={s.noiseMatrix} solvedT={s.solvedT} M={s.M}
+          <NoiseMatrix noiseMatrix={s.noiseMatrix.map(r => r.slice(0, effectiveT))} solvedT={effectiveT} M={s.M}
             stationZones={s.solvedStationZones} dbPerCraft={s.solvedDbPerCraft} />
         )}
       </div>
