@@ -80,7 +80,7 @@ export default function NoiseMatrix({ noiseMatrix, solvedT, M, stationZones, dbP
       <section>
         <h2>Total Noise Matrix</h2>
         <div className="noise-legend">
-          Rows = stations 1…{M}&nbsp;·&nbsp;Columns = timesteps 0…{solvedT - 1}&nbsp;·&nbsp;total dB increase summed from t=0&nbsp;·&nbsp;scale 0–15 dB
+          Rows = stations 1…{M}&nbsp;·&nbsp;Columns = timesteps 0…{solvedT - 1}&nbsp;·&nbsp;absolute dB level at station (baseline + aircraft contribution)
         </div>
         <div className="table-wrap">
           <table>
@@ -88,28 +88,27 @@ export default function NoiseMatrix({ noiseMatrix, solvedT, M, stationZones, dbP
               <tr>
                 <th>Stn</th>
                 {Array.from({ length: solvedT }, (_, t) => <th key={t}>t={t}</th>)}
-                <th>Total</th>
+                <th>Peak</th>
               </tr>
             </thead>
             <tbody>
               {noiseMatrix.map((row, m) => {
                 const baseline = ZONES[(stationZones[m] || 1) - 1].dba;
-                const deltas = row.map(count => combinedDb(baseline, count, dbPerCraft) - baseline);
-                const accumulated = deltas.map((_, t) => deltas.slice(0, t + 1).reduce((a, b) => a + b, 0));
-                const total = accumulated[accumulated.length - 1];
+                const absLevels = row.map(count => combinedDb(baseline, count, dbPerCraft));
+                const peak = Math.max(...absLevels);
                 return (
                   <tr key={m}>
                     <td className="row-label">{m + 1}</td>
-                    {accumulated.map((acc, t) => (
+                    {absLevels.map((db, t) => (
                       <td key={t} className="noise-cell"
-                        style={{ background: noiseColor(acc) }}
-                        title={`stn ${m+1}, t=${t}: accumulated +${acc.toFixed(1)} dB`}>
-                        +{acc.toFixed(1)}
+                        style={{ background: noiseColor(db - baseline) }}
+                        title={`stn ${m+1}, t=${t}: ${db.toFixed(1)} dB (baseline ${baseline} dB)`}>
+                        {db.toFixed(1)}
                       </td>
                     ))}
-                    <td className="row-label noise-cell" style={{ background: noiseColor(total) }}
-                      title={`stn ${m+1} total: +${total.toFixed(1)} dB`}>
-                      +{total.toFixed(1)}
+                    <td className="row-label noise-cell" style={{ background: noiseColor(peak - baseline) }}
+                      title={`stn ${m+1} peak: ${peak.toFixed(1)} dB`}>
+                      {peak.toFixed(1)}
                     </td>
                   </tr>
                 );
