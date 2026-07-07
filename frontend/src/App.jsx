@@ -46,6 +46,8 @@ export default function App() {
             setAutoProportional={s.setAutoProportional} setAutoProtected={s.setAutoProtected}
             setProtectedStn={s.setProtectedStn} setProportionalStn={s.setProportionalStn}
             setWeightUtil={s.setWeightUtil} setWeightPrior={s.setWeightPrior} setWeightProp={s.setWeightProp}
+            hardT={s.hardT} tMax={s.tMax} weightTime={s.weightTime}
+            setHardT={s.setHardT} setTMax={s.setTMax} setWeightTime={s.setWeightTime}
           />
         )}
         {s.activeTab === "zones" && (
@@ -79,7 +81,9 @@ export default function App() {
             {s.status === "sat" && (
               <div>
                 <span className="status sat">
-                  ✓ sat — minimum T = {s.solvedT}
+                  ✓ sat — T_min = {s.solvedTMin ?? s.solvedT}
+                  {s.solvedTUsed != null && s.solvedTUsed !== (s.solvedTMin ?? s.solvedT)
+                    ? ` · T_used = ${s.solvedTUsed}` : ""}
                   {optLabel ? `  ·  ${optLabel} optimized` : ""}
                 </span>
                 {s.protectedNoiseVal != null && (

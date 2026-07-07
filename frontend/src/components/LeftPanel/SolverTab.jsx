@@ -6,6 +6,7 @@ export default function SolverTab({
   optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected,
   protectedStn, proportionalStn, stationZones, weightUtil, weightPrior, weightProp,
   handleN, handleM, setD, setU, toggleAdj, updateStartPos, updateEndPos,
+  hardT, tMax, weightTime, setHardT, setTMax, setWeightTime,
   setOptimizeUtil, setOptimizePrior, setOptimizeProp, setAutoProportional, setAutoProtected,
   setProtectedStn, setProportionalStn, setWeightUtil, setWeightPrior, setWeightProp,
 }) {
@@ -147,6 +148,29 @@ export default function SolverTab({
             <span className="wval">{weightProp.toFixed(1)}</span>
           </div>
         </div>
+        <label className="check-row" style={{ marginTop: "10px" }}>
+          <input type="checkbox" checked={!hardT} onChange={e => setHardT(!e.target.checked)} />
+          Soft T mode (allow extra timesteps)
+        </label>
+        {!hardT && (
+          <div className="opt-indent">
+            <div className="weight-row">
+              <span className="wlabel">T max</span>
+              <input type="number" min={2} step={1}
+                value={tMax ?? ""}
+                placeholder="auto"
+                style={{ width: "60px", padding: "3px 6px", fontSize: "13px", fontFamily: "inherit", border: "1px solid #d4cfc8", borderRadius: "4px", background: "#faf9f7", color: "#1c1917" }}
+                onChange={e => setTMax(e.target.value === "" ? null : Math.max(2, parseInt(e.target.value) || 2))}
+              />
+            </div>
+            <div className="weight-row" style={{ marginTop: "6px" }}>
+              <span className="wlabel">Weight</span>
+              <input type="range" min={0} max={2} step={0.1} value={weightTime}
+                onChange={e => setWeightTime(Number(e.target.value))} />
+              <span className="wval">{weightTime.toFixed(1)}</span>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

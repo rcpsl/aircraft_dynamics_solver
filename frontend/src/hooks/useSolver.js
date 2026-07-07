@@ -28,6 +28,9 @@ export function useSolver() {
   const [weightUtil,       setWeightUtil]       = useState(saved.weightUtil       ?? 1.0);
   const [weightPrior,      setWeightPrior]      = useState(saved.weightPrior      ?? 1.0);
   const [weightProp,       setWeightProp]       = useState(saved.weightProp       ?? 1.0);
+  const [hardT,            setHardT]            = useState(saved.hardT            ?? true);
+  const [tMax,             setTMax]             = useState(saved.tMax             ?? null);
+  const [weightTime,       setWeightTime]       = useState(saved.weightTime       ?? 1.0);
 
   const [status,            setStatus]            = useState("idle");
   const [solvedT,           setSolvedT]           = useState(null);
@@ -41,6 +44,8 @@ export function useSolver() {
   const [proportionalNoiseVal, setProportionalNoiseVal] = useState(null);
   const [solvedProportionalStn,setSolvedProportionalStn]= useState(null);
   const [warningMsg,           setWarningMsg]           = useState(null);
+  const [solvedTMin,           setSolvedTMin]           = useState(null);
+  const [solvedTUsed,          setSolvedTUsed]          = useState(null);
   const [optimizeUtil,         setOptimizeUtil]         = useState(false);
   const [optimizePrior,        setOptimizePrior]        = useState(false);
   const [optimizeProp,         setOptimizeProp]         = useState(false);
@@ -53,8 +58,9 @@ export function useSolver() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       N, M, D, U, adjacency, startPos, endPos,
       stationZones, dbPerCraft, protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
+      hardT, tMax, weightTime,
     }));
-  }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, protectedStn, proportionalStn, weightUtil, weightPrior, weightProp]);
+  }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, protectedStn, proportionalStn, weightUtil, weightPrior, weightProp, hardT, tMax, weightTime]);
 
   function handleN(newN) {
     setN(newN);
@@ -124,7 +130,7 @@ export function useSolver() {
     setSolvedStationZones(null); setSolvedDbPerCraft(null);
     setProtectedNoiseVal(null); setSolvedProtectedStn(null);
     setProportionalNoiseVal(null); setSolvedProportionalStn(null);
-    setWarningMsg(null);
+    setWarningMsg(null); setSolvedTMin(null); setSolvedTUsed(null);
     try {
       const res = await fetch("http://localhost:5050/solve", {
         method: "POST",
@@ -145,6 +151,9 @@ export function useSolver() {
           weightUtilitarian:     weightUtil,
           weightPrioritarian:    weightPrior,
           weightProportional:    weightProp,
+          hardT,
+          ...(!hardT && tMax != null ? { T_max: tMax } : {}),
+          ...(!hardT ? { weightTime } : {}),
         }),
       });
       if (!res.ok) throw new Error("HTTP " + res.status);
@@ -158,6 +167,8 @@ export function useSolver() {
         setProportionalNoiseVal(data.proportionalNoise ?? null);
         setSolvedProportionalStn(data.proportionalStations ?? null);
         setWarningMsg(data.warning ?? null);
+        setSolvedTMin(data.T_min ?? null);
+        setSolvedTUsed(data.T_used ?? null);
       } else {
         setStatus("unsat"); setUnstatDetail(data.detail || null);
       }
@@ -171,8 +182,10 @@ export function useSolver() {
     solvedStationZones, solvedDbPerCraft,
     protectedNoiseVal, solvedProtectedStn, proportionalNoiseVal, solvedProportionalStn, warningMsg,
     optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected, activeTab, fileInputRef,
+    hardT, tMax, weightTime, solvedTMin, solvedTUsed,
     setAutoProportional, setAutoProtected,
     setD, setU, setStationZones, setDbPerCraft,
+    setHardT, setTMax, setWeightTime,
     setWeightUtil, setWeightPrior, setWeightProp,
     setOptimizeUtil, setOptimizePrior, setOptimizeProp,
     setProtectedStn, setProportionalStn, setActiveTab,
