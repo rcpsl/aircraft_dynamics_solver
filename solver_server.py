@@ -175,7 +175,8 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions):
 def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions,
                         optimize_util, optimize_prior, optimize_prop,
                         protected_stations, proportional_stations,
-                        w_util, w_prior, w_prop):
+                        w_util, w_prior, w_prop,
+                        soft_T, w_time):
     """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
     minimize a weighted combination of transit time and protected-station noise.
 
@@ -194,10 +195,13 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     max_proportional  = len(proportional_stations) * T * D
 
     # After normalization, all coefficients are dimensionless and comparable,
-    # so w_util = w_prior = w_prop = 1.0 gives genuinely equal weighting.
+    # so w_util = w_prior = w_prop = w_time = 1.0 gives genuinely equal weighting.
     eff_w_util  = (w_util  / max_transit)      if (optimize_util  and max_transit      > 0) else 0.0
     eff_w_prior = (w_prior / max_protected)    if (optimize_prior and max_protected    > 0) else 0.0
     eff_w_prop  = (w_prop  / max_proportional) if (optimize_prop  and max_proportional > 0) else 0.0
+
+    max_T_penalty = N * (T - 1)
+    eff_w_time = (w_time / max_T_penalty) if (soft_T and max_T_penalty > 0) else 0.0
 
     def valid_next(src_1indexed):
         s0 = src_1indexed - 1
@@ -249,21 +253,26 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     protected_noise = None
     proportional_noise = None
 
+    # Build ha whenever utilitarian or soft-T needs it
+    ha = None
+    if eff_w_util > 0 or soft_T:
+        ha = [[Bool(f"o_ha_{i}_{t}") for t in range(T)] for i in range(N)]
+        for i in range(N):
+            opt.add(ha[i][0] == (L[i][0] == end_positions[i]))
+            for t in range(1, T):
+                opt.add(ha[i][t] == Or(ha[i][t - 1], L[i][t] == end_positions[i]))
+
     if eff_w_util > 0:
         # hm[i][t]: aircraft i has changed location at least once in t'=1..t
-        # ha[i][t]: aircraft i has reached end_positions[i] at some t'=0..t
         # it[i][t]: aircraft i is currently accumulating transit cost at time t
         hm = [[Bool(f"o_hm_{i}_{t}") for t in range(T)] for i in range(N)]
-        ha = [[Bool(f"o_ha_{i}_{t}") for t in range(T)] for i in range(N)]
         it = [[Bool(f"o_it_{i}_{t}") for t in range(T)] for i in range(N)]
 
         for i in range(N):
             opt.add(hm[i][0] == False)
-            opt.add(ha[i][0] == (L[i][0] == end_positions[i]))
             opt.add(it[i][0] == False)
             for t in range(1, T):
                 opt.add(hm[i][t] == Or(hm[i][t - 1], L[i][t] != L[i][t - 1]))
-                opt.add(ha[i][t] == Or(ha[i][t - 1], L[i][t] == end_positions[i]))
                 # Arrival timestep IS counted — gate on t-1 arrival, not t
                 opt.add(it[i][t] == And(hm[i][t], Not(ha[i][t - 1])))
 
@@ -287,6 +296,18 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         ])
         objective_terms.append(-eff_w_prop * proportional_noise)  # negative coefficient = maximize this term
 
+    if eff_w_time > 0:
+        # Arrival time proxy: counts pre-arrival timesteps per aircraft.
+        # Minimizing this pulls aircraft toward earliest feasible arrival.
+        # Sum(If(Not(ha[i][t]), 1, 0) for t in 0..T-1) equals the first timestep
+        # ha[i][t] becomes True (arrival time). Max value per aircraft = T - 1.
+        T_penalty = Sum([
+            If(Not(ha[i][t]), 1, 0)
+            for i in range(N)
+            for t in range(T)
+        ])
+        objective_terms.append(eff_w_time * T_penalty)
+
     opt.minimize(Sum(objective_terms))
 
     if opt.check() != sat:
@@ -303,6 +324,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     ]
 
     result = {"status": "sat", "T": T, "paths": paths, "noiseMatrix": noise_matrix}
+    result["T_used"] = T
 
     if eff_w_util > 0:
         result["transitTimes"] = [model.evaluate(transit[i]).as_long() for i in range(N)]
@@ -372,11 +394,51 @@ def solve():
         if any(b < 1 or b > M for b in proportional_stations):
             return jsonify({"error": f"proportionalStations must be between 1 and M={M}"}), 400
 
+    hard_T = data.get("hardT", True)
+    if not isinstance(hard_T, bool): hard_T = True
+    soft_T = not hard_T
+
+    T_max = None
+    if soft_T:
+        raw_T_max = data.get("T_max", None)
+        if raw_T_max is not None:
+            try:
+                T_max = int(raw_T_max)
+            except (TypeError, ValueError):
+                return jsonify({"error": "T_max must be an integer"}), 400
+            if T_max < 2:
+                return jsonify({"error": "T_max must be >= 2"}), 400
+        # If T_max is still None here, it will be auto-computed after Phase 1
+
+    try:
+        w_time = float(data.get("weightTime", 1.0))
+    except (TypeError, ValueError):
+        w_time = 1.0
+    if w_time < 0: w_time = 0.0
+
     result = find_min_T(N, M, D, U, adjacency, start_positions, end_positions)
 
-    should_optimize = optimize_util or optimize_prior or optimize_prop
+    if soft_T:
+        if result["status"] != "sat":
+            return jsonify(result)
+
+        T_lower = result["T"]
+
+        if T_max is None:
+            # Auto T_max: gives the optimizer at least as much extra room as the minimum T itself
+            T_max = max(T_lower * 2, T_lower + 5)
+        elif T_max < T_lower:
+            return jsonify({
+                "status": "unsat",
+                "reason": "T_max_too_small",
+                "detail": f"T_max={T_max} is smaller than the minimum feasible T={T_lower} — increase T_max or relax D/U"
+            })
+
+    should_optimize = optimize_util or optimize_prior or optimize_prop or soft_T
     if result["status"] != "sat" or not should_optimize:
         return jsonify(result)
+
+    T_for_phase2 = result["T"] if hard_T else T_max
 
     overlap_warning = None
     if optimize_prior and optimize_prop:
@@ -388,16 +450,18 @@ def solve():
             )
 
     opt_result = optimize_objectives(
-        N, result["T"], M, D, U, adjacency, start_positions, end_positions,
+        N, T_for_phase2, M, D, U, adjacency, start_positions, end_positions,
         optimize_util, optimize_prior, optimize_prop,
         protected_stations, proportional_stations,
-        w_util, w_prior, w_prop
+        w_util, w_prior, w_prop,
+        soft_T, w_time
     )
     if opt_result is None:
         # Phase-2 unexpectedly returned unsat — fall back to phase-1 result
         if overlap_warning:
             result["warning"] = overlap_warning
         return jsonify(result)
+    opt_result["T_min"] = result["T"]
     if overlap_warning:
         opt_result["warning"] = overlap_warning
     return jsonify(opt_result)
