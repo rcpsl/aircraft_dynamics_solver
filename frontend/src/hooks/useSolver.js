@@ -46,6 +46,9 @@ export function useSolver() {
   const [warningMsg,           setWarningMsg]           = useState(null);
   const [solvedTMin,           setSolvedTMin]           = useState(null);
   const [solvedTUsed,          setSolvedTUsed]          = useState(null);
+  const [solvedOptimizeUtil,   setSolvedOptimizeUtil]   = useState(null);
+  const [solvedOptimizePrior,  setSolvedOptimizePrior]  = useState(null);
+  const [solvedOptimizeProp,   setSolvedOptimizeProp]   = useState(null);
   const [optimizeUtil,         setOptimizeUtil]         = useState(saved.optimizeUtil      ?? false);
   const [optimizePrior,        setOptimizePrior]        = useState(saved.optimizePrior     ?? false);
   const [optimizeProp,         setOptimizeProp]         = useState(saved.optimizeProp      ?? false);
@@ -150,6 +153,7 @@ export function useSolver() {
     setProtectedNoiseVal(null); setSolvedProtectedStn(null);
     setProportionalNoiseVal(null); setSolvedProportionalStn(null);
     setWarningMsg(null); setSolvedTMin(null); setSolvedTUsed(null);
+    setSolvedOptimizeUtil(null); setSolvedOptimizePrior(null); setSolvedOptimizeProp(null);
     try {
       const res = await fetch("http://localhost:5050/solve", {
         method: "POST",
@@ -188,6 +192,9 @@ export function useSolver() {
         setWarningMsg(data.warning ?? null);
         setSolvedTMin(data.T_min ?? null);
         setSolvedTUsed(data.T_used ?? null);
+        setSolvedOptimizeUtil(optimizeUtil);
+        setSolvedOptimizePrior(optimizePrior);
+        setSolvedOptimizeProp(optimizeProp);
       } else {
         setStatus("unsat"); setUnstatDetail(data.detail || null);
       }
@@ -202,6 +209,7 @@ export function useSolver() {
     protectedNoiseVal, solvedProtectedStn, proportionalNoiseVal, solvedProportionalStn, warningMsg,
     optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected, activeTab, fileInputRef,
     hardT, tMax, weightTime, solvedTMin, solvedTUsed,
+    solvedOptimizeUtil, solvedOptimizePrior, solvedOptimizeProp,
     setAutoProportional, setAutoProtected,
     setD, setU, setStationZones, setDbPerCraft,
     setHardT, setTMax, setWeightTime,

@@ -12,9 +12,9 @@ export default function App() {
   const s = useSolver();
 
   const optLabel = [
-    s.optimizeUtil  ? "transit"       : null,
-    s.optimizePrior ? "prioritarian"  : null,
-    s.optimizeProp  ? "proportional"  : null,
+    s.solvedOptimizeUtil  ? "transit"       : null,
+    s.solvedOptimizePrior ? "prioritarian"  : null,
+    s.solvedOptimizeProp  ? "proportional"  : null,
   ].filter(Boolean).join(" + ");
 
   return (
