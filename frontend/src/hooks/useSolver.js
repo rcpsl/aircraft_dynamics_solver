@@ -46,11 +46,11 @@ export function useSolver() {
   const [warningMsg,           setWarningMsg]           = useState(null);
   const [solvedTMin,           setSolvedTMin]           = useState(null);
   const [solvedTUsed,          setSolvedTUsed]          = useState(null);
-  const [optimizeUtil,         setOptimizeUtil]         = useState(false);
-  const [optimizePrior,        setOptimizePrior]        = useState(false);
-  const [optimizeProp,         setOptimizeProp]         = useState(false);
-  const [autoProportional,     setAutoProportional]     = useState(false);
-  const [autoProtected,        setAutoProtected]        = useState(false);
+  const [optimizeUtil,         setOptimizeUtil]         = useState(saved.optimizeUtil      ?? false);
+  const [optimizePrior,        setOptimizePrior]        = useState(saved.optimizePrior     ?? false);
+  const [optimizeProp,         setOptimizeProp]         = useState(saved.optimizeProp      ?? false);
+  const [autoProportional,     setAutoProportional]     = useState(saved.autoProportional  ?? false);
+  const [autoProtected,        setAutoProtected]        = useState(saved.autoProtected     ?? false);
   const [activeTab,         setActiveTab]         = useState("solver");
   const fileInputRef = useRef(null);
 
@@ -59,8 +59,9 @@ export function useSolver() {
       N, M, D, U, adjacency, startPos, endPos,
       stationZones, dbPerCraft, protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
       hardT, tMax, weightTime,
+      optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected,
     }));
-  }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, protectedStn, proportionalStn, weightUtil, weightPrior, weightProp, hardT, tMax, weightTime]);
+  }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, protectedStn, proportionalStn, weightUtil, weightPrior, weightProp, hardT, tMax, weightTime, optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected]);
 
   function handleN(newN) {
     setN(newN);
@@ -95,7 +96,12 @@ export function useSolver() {
   }
 
   function handleExport() {
-    const blob = new Blob([JSON.stringify({ N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft }, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify({
+      N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft,
+      protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
+      optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected,
+      hardT, tMax, weightTime,
+    }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = "uam-config.json"; a.click();
@@ -113,11 +119,24 @@ export function useSolver() {
         if (c.M !== undefined) handleM(c.M);
         if (c.D !== undefined) setD(c.D);
         if (c.U !== undefined) setU(c.U);
-        if (c.adjacency    !== undefined) setAdjacency(c.adjacency);
-        if (c.startPos     !== undefined) setStartPos(c.startPos);
-        if (c.endPos       !== undefined) setEndPos(c.endPos);
-        if (c.stationZones !== undefined) setStationZones(c.stationZones);
-        if (c.dbPerCraft   !== undefined) setDbPerCraft(c.dbPerCraft);
+        if (c.adjacency         !== undefined) setAdjacency(c.adjacency);
+        if (c.startPos          !== undefined) setStartPos(c.startPos);
+        if (c.endPos            !== undefined) setEndPos(c.endPos);
+        if (c.stationZones      !== undefined) setStationZones(c.stationZones);
+        if (c.dbPerCraft        !== undefined) setDbPerCraft(c.dbPerCraft);
+        if (c.protectedStn      !== undefined) setProtectedStn(c.protectedStn);
+        if (c.proportionalStn   !== undefined) setProportionalStn(c.proportionalStn);
+        if (c.weightUtil        !== undefined) setWeightUtil(c.weightUtil);
+        if (c.weightPrior       !== undefined) setWeightPrior(c.weightPrior);
+        if (c.weightProp        !== undefined) setWeightProp(c.weightProp);
+        if (c.optimizeUtil      !== undefined) setOptimizeUtil(c.optimizeUtil);
+        if (c.optimizePrior     !== undefined) setOptimizePrior(c.optimizePrior);
+        if (c.optimizeProp      !== undefined) setOptimizeProp(c.optimizeProp);
+        if (c.autoProportional  !== undefined) setAutoProportional(c.autoProportional);
+        if (c.autoProtected     !== undefined) setAutoProtected(c.autoProtected);
+        if (c.hardT             !== undefined) setHardT(c.hardT);
+        if (c.tMax              !== undefined) setTMax(c.tMax);
+        if (c.weightTime        !== undefined) setWeightTime(c.weightTime);
       } catch { alert("Invalid config file."); }
     };
     reader.readAsText(file);

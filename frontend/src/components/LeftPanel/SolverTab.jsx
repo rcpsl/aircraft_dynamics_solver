@@ -17,7 +17,7 @@ export default function SolverTab({
         <Slider label="N  aircraft"  value={N} min={1} max={10} onChange={handleN} />
         <Slider label="M  stations"  value={M} min={2} max={10} onChange={handleM} />
         <Slider label="D  noise cap" value={D} min={0} max={10} onChange={setD} />
-        <Slider label="U  adj. diff" value={U} min={0} max={10} onChange={setU} />
+        <Slider label="U  global diff" value={U} min={0} max={10} onChange={setU} />
       </section>
 
       <section>

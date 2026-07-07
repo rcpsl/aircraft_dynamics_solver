@@ -78,9 +78,9 @@ export default function NoiseMatrix({ noiseMatrix, solvedT, M, stationZones, dbP
         </div>
       </section>
       <section>
-        <h2>Accumulated Noise Matrix</h2>
+        <h2>Total Noise Matrix</h2>
         <div className="noise-legend">
-          Rows = stations 1…{M}&nbsp;·&nbsp;Columns = timesteps 0…{solvedT - 1}&nbsp;·&nbsp;running total dB increase from t=0&nbsp;·&nbsp;scale 0–15 dB
+          Rows = stations 1…{M}&nbsp;·&nbsp;Columns = timesteps 0…{solvedT - 1}&nbsp;·&nbsp;total dB increase summed from t=0&nbsp;·&nbsp;scale 0–15 dB
         </div>
         <div className="table-wrap">
           <table>
