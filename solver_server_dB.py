@@ -290,11 +290,13 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     max_transit   = N * (T - 1)
     max_T_penalty = N * (T - 1)
 
-    max_dB_increase_per_station = max(
-        scaled_table[m][N] / SCALE for m in range(M)
-    )
-    max_protected_dB    = len(protected_stations)    * T * max_dB_increase_per_station
-    max_proportional_dB = len(proportional_stations) * T * max_dB_increase_per_station
+    # Use scaled (integer) units for dB normalization bounds so all objective
+    # terms live in the same numeric range as the Z3 dB expressions (×SCALE).
+    # Mixing unscaled dB bounds with scaled Z3 expressions would make the dB
+    # objectives SCALE× heavier than the count-based utilitarian term.
+    max_dB_scaled_per_station = max(scaled_table[m][N] for m in range(M))
+    max_protected_dB    = len(protected_stations)    * T * max_dB_scaled_per_station
+    max_proportional_dB = len(proportional_stations) * T * max_dB_scaled_per_station
 
     # After normalization, all coefficients are dimensionless and comparable,
     # so w_util = w_prior = w_prop = w_time = 1.0 gives genuinely equal weighting.
