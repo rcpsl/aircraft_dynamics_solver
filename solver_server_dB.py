@@ -468,6 +468,35 @@ def solve():
     except (KeyError, TypeError, ValueError) as e:
         return jsonify({"error": f"Bad input: {e}"}), 400
 
+    if N < 1:
+        return jsonify({"error": "N must be >= 1"}), 400
+    if M < 1:
+        return jsonify({"error": "M must be >= 1"}), 400
+    if D <= 0:
+        return jsonify({"error": "D must be > 0"}), 400
+    if U < 0:
+        return jsonify({"error": "U must be >= 0"}), 400
+    if aircraft_dB <= 0:
+        return jsonify({"error": "aircraftDB must be > 0"}), 400
+
+    if not isinstance(adjacency, list) or len(adjacency) != M or \
+            any(not isinstance(row, list) or len(row) != M for row in adjacency):
+        return jsonify({"error": f"adjacency must be an {M}×{M} matrix of 0/1 values"}), 400
+
+    if not isinstance(start_positions, list) or len(start_positions) != N:
+        return jsonify({"error": f"startPositions must be a list of N={N} integers"}), 400
+    if not isinstance(end_positions, list) or len(end_positions) != N:
+        return jsonify({"error": f"endPositions must be a list of N={N} integers"}), 400
+    try:
+        start_positions = [int(p) for p in start_positions]
+        end_positions   = [int(p) for p in end_positions]
+    except (TypeError, ValueError):
+        return jsonify({"error": "startPositions and endPositions must contain integers"}), 400
+    if any(p < 1 or p > M for p in start_positions):
+        return jsonify({"error": f"startPositions values must be in [1, M={M}]"}), 400
+    if any(p < 1 or p > M for p in end_positions):
+        return jsonify({"error": f"endPositions values must be in [1, M={M}]"}), 400
+
     baseline = data.get("baseline")
     if not isinstance(baseline, list) or len(baseline) != M:
         return jsonify({"error": f"baseline must be a list of M={M} floats"}), 400
@@ -518,6 +547,19 @@ def solve():
     hard_T = data.get("hardT", True)
     if not isinstance(hard_T, bool): hard_T = True
     soft_T = not hard_T
+
+    if soft_T:
+        no_loop = sorted({
+            end_positions[i] for i in range(N)
+            if adjacency[end_positions[i] - 1][end_positions[i] - 1] != 1
+        })
+        if no_loop:
+            return jsonify({
+                "error": (
+                    f"Soft T mode requires self-loops at all destination stations; "
+                    f"stations {no_loop} are missing self-loops in the adjacency matrix"
+                )
+            }), 400
 
     T_max = None
     if soft_T:
