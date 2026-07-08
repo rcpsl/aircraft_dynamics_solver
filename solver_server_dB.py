@@ -67,25 +67,40 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     scaled_table = build_scaled_table(M, N, baseline, aircraft_dB)
     D_scaled = round(D * SCALE)
     U_scaled = round(U * SCALE)
+    baseline_scaled = [round(b * SCALE) for b in baseline]
 
     # ── Algebraic pre-checks (exact or O(M²), no Z3 needed) ─────────────────
 
     # all_pairs needed below for U checks
     all_pairs = [(m1, m2) for m1 in range(M) for m2 in range(m1 + 1, M)]
 
-    # Pigeonhole: at every timestep some station must hold ≥⌈N/M⌉ aircraft.
-    # The best-case station for the D constraint is the one with the highest
-    # baseline (lowest dB increase per aircraft). If even that station exceeds D
-    # with ⌈N/M⌉ aircraft, no distribution can satisfy D.
+    # D is an absolute dB cap: baseline[m] + dB_increase[m] ≤ D at all times.
+    # If any station's bare baseline already exceeds D, no solution exists.
+    stations_over_D = [m + 1 for m in range(M) if baseline_scaled[m] > D_scaled]
+    if stations_over_D:
+        return {
+            "status": "unsat", "reason": "D_too_low",
+            "detail": (
+                f"D={D} dBA is below the ambient baseline of stations {stations_over_D}; "
+                f"increase D above the highest baseline ({max(baseline):.1f} dBA)"
+            )
+        }
+
+    # Pigeonhole: some station must hold ≥⌈N/M⌉ aircraft at every timestep.
+    # Best case for absolute D: the station whose combined level
+    # (baseline + dB increase for ⌈N/M⌉ aircraft) is lowest.
+    # If even that exceeds D, no distribution can satisfy the cap.
     min_forced_count = ceil(N / M)
-    best_m = min(range(M), key=lambda m: scaled_table[m][min_forced_count])
-    if scaled_table[best_m][min_forced_count] > D_scaled:
+    best_m = min(range(M), key=lambda m: baseline_scaled[m] + scaled_table[m][min_forced_count])
+    if baseline_scaled[best_m] + scaled_table[best_m][min_forced_count] > D_scaled:
+        level = (baseline_scaled[best_m] + scaled_table[best_m][min_forced_count]) / SCALE
         return {
             "status": "unsat", "reason": "noise_cap",
             "detail": (
                 f"Even distributing {N} aircraft across {M} stations forces ≥{min_forced_count} "
                 f"at some station; even the most tolerant station "
-                f"(baseline {baseline[best_m]:.1f} dBA) would exceed D={D} dBA"
+                f"(baseline {baseline[best_m]:.1f} dBA) would reach {level:.1f} dBA, "
+                f"exceeding D={D} dBA"
             )
         }
 
@@ -93,14 +108,14 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     start_counts = Counter(start_positions)
     start_dB = [scaled_table[m][start_counts.get(m + 1, 0)] for m in range(M)]
     for m, inc_scaled in enumerate(start_dB):
-        if inc_scaled > D_scaled:
+        if baseline_scaled[m] + inc_scaled > D_scaled:
             station = m + 1
+            level = (baseline_scaled[m] + inc_scaled) / SCALE
             return {
                 "status": "unsat", "reason": "start_conflict",
                 "detail": (
                     f"Station {station} has {start_counts[station]} aircraft at t=0, "
-                    f"causing a dB increase of {inc_scaled / SCALE:.1f} dBA "
-                    f"which exceeds D={D} dBA"
+                    f"reaching {level:.1f} dBA which exceeds D={D} dBA"
                 )
             }
     for (m1, m2) in all_pairs:
@@ -119,14 +134,14 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     end_counts = Counter(end_positions)
     end_dB = [scaled_table[m][end_counts.get(m + 1, 0)] for m in range(M)]
     for m, inc_scaled in enumerate(end_dB):
-        if inc_scaled > D_scaled:
+        if baseline_scaled[m] + inc_scaled > D_scaled:
             station = m + 1
+            level = (baseline_scaled[m] + inc_scaled) / SCALE
             return {
                 "status": "unsat", "reason": "end_conflict",
                 "detail": (
                     f"Station {station} has {end_counts[station]} aircraft at their final position, "
-                    f"causing a dB increase of {inc_scaled / SCALE:.1f} dBA "
-                    f"which exceeds D={D} dBA"
+                    f"reaching {level:.1f} dBA which exceeds D={D} dBA"
                 )
             }
     for (m1, m2) in all_pairs:
@@ -186,7 +201,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
         C_by_t.append(C_t)
         dB_exprs_t = [make_dB_expr(C_t[m], m, scaled_table, N) for m in range(M)]
         dB_by_t.append(dB_exprs_t)
-        s.add([dB_exprs_t[m] <= D_scaled for m in range(M)])
+        s.add([dB_exprs_t[m] <= D_scaled - baseline_scaled[m] for m in range(M)])
         for (m1, m2) in all_pairs:
             s.add(And(
                 dB_exprs_t[m1] - dB_exprs_t[m2] <= U_scaled,
@@ -252,7 +267,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
         C_by_t.append(C_new)
         dB_exprs_new = [make_dB_expr(C_new[m], m, scaled_table, N) for m in range(M)]
         dB_by_t.append(dB_exprs_new)
-        s.add([dB_exprs_new[m] <= D_scaled for m in range(M)])
+        s.add([dB_exprs_new[m] <= D_scaled - baseline_scaled[m] for m in range(M)])
         for (m1, m2) in all_pairs:
             s.add(And(
                 dB_exprs_new[m1] - dB_exprs_new[m2] <= U_scaled,
@@ -279,6 +294,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     scaled_table = build_scaled_table(M, N, baseline, aircraft_dB)
     D_scaled = round(D * SCALE)
     U_scaled = round(U * SCALE)
+    baseline_scaled = [round(b * SCALE) for b in baseline]
 
     # ── Metric normalization ──────────────────────────────────────────────────
     # All metrics are divided by their theoretical maximums so that weights
@@ -342,7 +358,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         C_by_t.append(C_t)
         dB_exprs_t = [make_dB_expr(C_t[m], m, scaled_table, N) for m in range(M)]
         dB_by_t.append(dB_exprs_t)
-        opt.add([dB_exprs_t[m] <= D_scaled for m in range(M)])
+        opt.add([dB_exprs_t[m] <= D_scaled - baseline_scaled[m] for m in range(M)])
         for (m1, m2) in all_pairs:
             opt.add(And(
                 dB_exprs_t[m1] - dB_exprs_t[m2] <= U_scaled,

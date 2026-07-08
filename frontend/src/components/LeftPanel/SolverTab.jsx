@@ -9,15 +9,32 @@ export default function SolverTab({
   hardT, tMax, weightTime, setHardT, setTMax, setWeightTime,
   setOptimizeUtil, setOptimizePrior, setOptimizeProp, setAutoProportional, setAutoProtected,
   setProtectedStn, setProportionalStn, setWeightUtil, setWeightPrior, setWeightProp,
+  useDbSolver, setUseDbSolver,
 }) {
   return (
     <div>
       <section>
+        <h2>Solver Mode</h2>
+        <label className="check-row">
+          <input type="checkbox" checked={useDbSolver}
+            onChange={e => { setUseDbSolver(e.target.checked); if (e.target.checked) setD(70); }} />
+          Use dB-based solver (port 5051)
+        </label>
+        {useDbSolver && (
+          <div className="adj-hint" style={{ marginTop: "4px" }}>
+            D = max absolute dB level at any station · U = max dB disparity between stations · baseline from zone assignments
+          </div>
+        )}
+      </section>
+
+      <section>
         <h2>Parameters</h2>
         <Slider label="N  aircraft"  value={N} min={1} max={10} onChange={handleN} />
         <Slider label="M  stations"  value={M} min={2} max={10} onChange={handleM} />
-        <Slider label="D  noise cap" value={D} min={0} max={10} onChange={setD} />
-        <Slider label="U  global diff" value={U} min={0} max={10} onChange={setU} />
+        <Slider label={useDbSolver ? "D  abs. dB limit" : "D  noise cap"}
+          value={D} min={useDbSolver ? 40 : 0} max={useDbSolver ? 90 : 10}
+          step={useDbSolver ? 1 : 1} onChange={setD} />
+        <Slider label="U  global diff" value={U} min={0} max={useDbSolver ? 30 : 10} step={useDbSolver ? 0.5 : 1} onChange={setU} />
       </section>
 
       <section>
