@@ -227,12 +227,17 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
                 [model[L[i][t]].as_long() for t in range(T_current)]
                 for i in range(N)
             ]
+            count_matrix = [
+                [model.evaluate(C_by_t[t][m]).as_long() for t in range(T_current)]
+                for m in range(M)
+            ]
             noise_matrix_dB = [
                 [model.evaluate(dB_by_t[t][m]).as_long() / SCALE for t in range(T_current)]
                 for m in range(M)
             ]
             s.pop()
-            return {"status": "sat", "T": T_current, "paths": paths, "noiseMatrix": noise_matrix_dB}
+            return {"status": "sat", "T": T_current, "paths": paths,
+                    "countMatrix": count_matrix, "noiseMatrix": noise_matrix_dB}
 
         # ── Suggestion 2: unsat-core early exit ─────────────────────────────
         # If no endpoint assumption appears in the core, the infeasibility is
@@ -446,12 +451,17 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         [model[L[i][t]].as_long() for t in range(T)]
         for i in range(N)
     ]
+    count_matrix = [
+        [model.evaluate(C_by_t[t][m]).as_long() for t in range(T)]
+        for m in range(M)
+    ]
     noise_matrix_dB = [
         [model.evaluate(dB_by_t[t][m]).as_long() / SCALE for t in range(T)]
         for m in range(M)
     ]
 
-    result = {"status": "sat", "T": T, "paths": paths, "noiseMatrix": noise_matrix_dB}
+    result = {"status": "sat", "T": T, "paths": paths,
+              "countMatrix": count_matrix, "noiseMatrix": noise_matrix_dB}
     result["T_used"] = T
 
     if eff_w_util > 0:
