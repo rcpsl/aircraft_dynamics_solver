@@ -43,6 +43,28 @@ def make_dB_expr(count_expr, m, scaled_table, N):
     return expr
 
 
+def _active_output_matrices(paths, start_positions, end_positions, N, M, T, baseline, aircraft_dB):
+    """Build count and dB matrices for output using the active-noise window:
+    departure timestep (last t at start before first move) through first arrival."""
+    count = [[0] * T for _ in range(M)]
+    for i in range(N):
+        s0, e0 = start_positions[i], end_positions[i]
+        if s0 == e0:
+            continue
+        p = paths[i]
+        t_fm = next((t for t in range(T) if p[t] != s0), None)
+        if t_fm is None:
+            continue
+        t_arr = next((t for t in range(T) if p[t] == e0), T - 1)
+        for t in range(t_fm - 1, t_arr + 1):
+            count[p[t] - 1][t] += 1
+    noise = [
+        [dB_increase(baseline[m], count[m][t], aircraft_dB) for t in range(T)]
+        for m in range(M)
+    ]
+    return count, noise
+
+
 def min_moves(adjacency, src, dst, M):
     """BFS: minimum moves from src to dst (1-indexed). Returns inf if unreachable."""
     if src == dst:
@@ -192,12 +214,28 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
                 dsts = valid_next(src)
                 s.add(Implies(L[i][t] == src, Or([L[i][t + 1] == dst for dst in dsts])))
 
+    # Active-noise tracking booleans
+    # moved[i][t]:   aircraft i has left its start station by time t
+    # arrived[i][t]: aircraft i has reached its end station by time t
+    # active[i][t]:  aircraft i contributes noise at t (moved and not yet arrived before t)
+    moved   = [[Bool(f"mv_{i}_{t}")  for t in range(T_lower)] for i in range(N)]
+    arrived = [[Bool(f"ar_{i}_{t}")  for t in range(T_lower)] for i in range(N)]
+    active  = [[Bool(f"act_{i}_{t}") for t in range(T_lower)] for i in range(N)]
+    for i in range(N):
+        s.add(moved[i][0]   == False)
+        s.add(arrived[i][0] == (start_positions[i] == end_positions[i]))
+        s.add(active[i][0]  == False)
+        for t in range(1, T_lower):
+            s.add(moved[i][t]   == Or(moved[i][t-1],   Not(L[i][t] == start_positions[i])))
+            s.add(arrived[i][t] == Or(arrived[i][t-1], L[i][t] == end_positions[i]))
+            s.add(active[i][t]  == And(moved[i][t], Not(arrived[i][t-1])))
+
     # Noise cap + global disparity for t = 0 … T_lower-1
-    # C_by_t[t][m] = symbolic aircraft count at station m at time t
+    # C_by_t[t][m] = active aircraft count at station m at time t
     C_by_t = []
     dB_by_t = []
     for t in range(T_lower):
-        C_t = [Sum([If(L[i][t] == m + 1, 1, 0) for i in range(N)]) for m in range(M)]
+        C_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), 1, 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_t)
         dB_exprs_t = [make_dB_expr(C_t[m], m, scaled_table, N) for m in range(M)]
         dB_by_t.append(dB_exprs_t)
@@ -227,14 +265,9 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
                 [model[L[i][t]].as_long() for t in range(T_current)]
                 for i in range(N)
             ]
-            count_matrix = [
-                [model.evaluate(C_by_t[t][m]).as_long() for t in range(T_current)]
-                for m in range(M)
-            ]
-            noise_matrix_dB = [
-                [model.evaluate(dB_by_t[t][m]).as_long() / SCALE for t in range(T_current)]
-                for m in range(M)
-            ]
+            count_matrix, noise_matrix_dB = _active_output_matrices(
+                paths, start_positions, end_positions, N, M, T_current, baseline, aircraft_dB
+            )
             s.pop()
             return {"status": "sat", "T": T_current, "paths": paths,
                     "countMatrix": count_matrix, "noiseMatrix": noise_matrix_dB}
@@ -260,6 +293,9 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
 
         for i in range(N):
             L[i].append(Int(f"L_{i}_{new_t}"))
+            moved[i].append(Bool(f"mv_{i}_{new_t}"))
+            arrived[i].append(Bool(f"ar_{i}_{new_t}"))
+            active[i].append(Bool(f"act_{i}_{new_t}"))
 
         s.add([And(1 <= L[i][new_t], L[i][new_t] <= M) for i in range(N)])
 
@@ -268,7 +304,12 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
                 dsts = valid_next(src)
                 s.add(Implies(L[i][new_t - 1] == src, Or([L[i][new_t] == dst for dst in dsts])))
 
-        C_new = [Sum([If(L[i][new_t] == m + 1, 1, 0) for i in range(N)]) for m in range(M)]
+        for i in range(N):
+            s.add(moved[i][new_t]   == Or(moved[i][new_t-1],   Not(L[i][new_t] == start_positions[i])))
+            s.add(arrived[i][new_t] == Or(arrived[i][new_t-1], L[i][new_t] == end_positions[i]))
+            s.add(active[i][new_t]  == And(moved[i][new_t], Not(arrived[i][new_t-1])))
+
+        C_new = [Sum([If(And(L[i][new_t] == m + 1, active[i][new_t]), 1, 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_new)
         dB_exprs_new = [make_dB_expr(C_new[m], m, scaled_table, N) for m in range(M)]
         dB_by_t.append(dB_exprs_new)
@@ -355,11 +396,24 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                 dsts = valid_next(src)
                 opt.add(Implies(L[i][t] == src, Or([L[i][t + 1] == dst for dst in dsts])))
 
-    # Noise cap and global disparity
+    # Active-noise tracking booleans (mirrors find_min_T logic)
+    ha     = [[Bool(f"o_ha_{i}_{t}")  for t in range(T)] for i in range(N)]
+    moved  = [[Bool(f"o_mv_{i}_{t}")  for t in range(T)] for i in range(N)]
+    active = [[Bool(f"o_act_{i}_{t}") for t in range(T)] for i in range(N)]
+    for i in range(N):
+        opt.add(ha[i][0]     == (L[i][0] == end_positions[i]))
+        opt.add(moved[i][0]  == False)
+        opt.add(active[i][0] == False)
+        for t in range(1, T):
+            opt.add(ha[i][t]     == Or(ha[i][t - 1],     L[i][t] == end_positions[i]))
+            opt.add(moved[i][t]  == Or(moved[i][t - 1],  Not(L[i][t] == start_positions[i])))
+            opt.add(active[i][t] == And(moved[i][t], Not(ha[i][t - 1])))
+
+    # Noise cap and global disparity (counting only active aircraft)
     C_by_t = []
     dB_by_t = []
     for t in range(T):
-        C_t = [Sum([If(L[i][t] == m + 1, 1, 0) for i in range(N)]) for m in range(M)]
+        C_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), 1, 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_t)
         dB_exprs_t = [make_dB_expr(C_t[m], m, scaled_table, N) for m in range(M)]
         dB_by_t.append(dB_exprs_t)
@@ -378,15 +432,6 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     total_transit = None
     protected_noise_dB = None
     proportional_noise_dB = None
-
-    # Build ha whenever utilitarian or soft-T needs it
-    ha = None
-    if eff_w_util > 0 or soft_T:
-        ha = [[Bool(f"o_ha_{i}_{t}") for t in range(T)] for i in range(N)]
-        for i in range(N):
-            opt.add(ha[i][0] == (L[i][0] == end_positions[i]))
-            for t in range(1, T):
-                opt.add(ha[i][t] == Or(ha[i][t - 1], L[i][t] == end_positions[i]))
 
     # Sticky arrival: once an aircraft reaches its destination it must stay there.
     # Without this, in soft mode aircraft can drift away between arrival and T-1.
@@ -451,14 +496,9 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         [model[L[i][t]].as_long() for t in range(T)]
         for i in range(N)
     ]
-    count_matrix = [
-        [model.evaluate(C_by_t[t][m]).as_long() for t in range(T)]
-        for m in range(M)
-    ]
-    noise_matrix_dB = [
-        [model.evaluate(dB_by_t[t][m]).as_long() / SCALE for t in range(T)]
-        for m in range(M)
-    ]
+    count_matrix, noise_matrix_dB = _active_output_matrices(
+        paths, start_positions, end_positions, N, M, T, baseline, aircraft_dB
+    )
 
     result = {"status": "sat", "T": T, "paths": paths,
               "countMatrix": count_matrix, "noiseMatrix": noise_matrix_dB}
