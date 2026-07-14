@@ -330,6 +330,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                         protected_stations, proportional_stations,
                         w_util, w_prior, w_prop,
                         soft_T, w_time,
+                        prop_alloc,
                         baseline, aircraft_dB):
     """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
     minimize a weighted combination of transit time and protected-station noise (dB).
@@ -486,6 +487,49 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         ])
         objective_terms.append(eff_w_time * T_penalty)
 
+    # ── Proportional allocation for benefits ──────────────────────────────────
+    # Soft ordering: stations with aircraft activity (start/end) should bear more
+    # noise than stations merely adjacent to them, which in turn should bear more
+    # than all other stations.  Implemented as a penalty on ordering violations
+    # across all timesteps, normalized to [0,1] like the other objectives.
+    prop_alloc_sets = None
+    if prop_alloc:
+        active_set = set()
+        for i in range(N):
+            active_set.add(start_positions[i] - 1)
+            active_set.add(end_positions[i] - 1)
+
+        adjacent_set = set()
+        for m in range(M):
+            if m not in active_set:
+                if any(adjacency[m][a] or adjacency[a][m] for a in active_set):
+                    adjacent_set.add(m)
+
+        none_set = set(range(M)) - active_set - adjacent_set
+
+        # (hi, lo): hi should have >= dB increase than lo at every timestep
+        order_pairs = (
+            [(a, adj) for a in active_set for adj in adjacent_set] +
+            [(a, n)   for a in active_set for n   in none_set]     +
+            [(adj, n) for adj in adjacent_set for n in none_set]
+        )
+
+        if order_pairs:
+            max_prop_alloc = max(1, len(order_pairs) * T * max_dB_scaled_per_station)
+            violation = Sum([
+                If(dB_by_t[t][hi] < dB_by_t[t][lo],
+                   dB_by_t[t][lo] - dB_by_t[t][hi], 0)
+                for (hi, lo) in order_pairs
+                for t in range(T)
+            ])
+            objective_terms.append((1.0 / max_prop_alloc) * violation)
+
+        prop_alloc_sets = {
+            "active":   sorted(s + 1 for s in active_set),
+            "adjacent": sorted(s + 1 for s in adjacent_set),
+            "none":     sorted(s + 1 for s in none_set),
+        }
+
     opt.minimize(Sum(objective_terms))
 
     if opt.check() != sat:
@@ -515,6 +559,9 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     if eff_w_prop > 0:
         result["proportionalNoise"]    = model.evaluate(proportional_noise_dB).as_long() / SCALE
         result["proportionalStations"] = proportional_stations
+
+    if prop_alloc_sets is not None:
+        result["stationCategories"] = prop_alloc_sets
 
     return result
 
@@ -663,7 +710,10 @@ def solve():
                 "detail": f"T_max={T_max} is smaller than the minimum feasible T={T_lower} — increase T_max or relax D/U"
             })
 
-    should_optimize = optimize_util or optimize_prior or optimize_prop or soft_T
+    prop_alloc = data.get("proportionalAllocation", False)
+    if not isinstance(prop_alloc, bool): prop_alloc = False
+
+    should_optimize = optimize_util or optimize_prior or optimize_prop or soft_T or prop_alloc
     if result["status"] != "sat" or not should_optimize:
         return jsonify(result)
 
@@ -684,6 +734,7 @@ def solve():
         protected_stations, proportional_stations,
         w_util, w_prior, w_prop,
         soft_T, w_time,
+        prop_alloc,
         baseline, aircraft_dB
     )
     if opt_result is None:
