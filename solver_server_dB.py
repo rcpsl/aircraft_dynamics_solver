@@ -85,6 +85,67 @@ def min_moves(adjacency, src, dst, M):
     return float('inf')
 
 
+def _compute_d_counts(M, N, baseline_scaled, D_scaled, scaled_table):
+    """Max active aircraft count per station satisfying the absolute dB cap D."""
+    result = []
+    for m in range(M):
+        cap = D_scaled - baseline_scaled[m]
+        max_n = 0
+        for n in range(1, N + 1):
+            if scaled_table[m][n] <= cap:
+                max_n = n
+            else:
+                break
+        result.append(max_n)
+    return result
+
+
+def _compute_u_ranges(M, N, U_scaled, scaled_table, D_count):
+    """
+    For each ordered pair (m1, m2) and count n1 ∈ [0, D_count[m1]], return the valid
+    [lo, hi] range of counts at m2 satisfying the dB disparity constraint |dB1 - dB2| ≤ U.
+    Returns u_ranges[(m1, m2)][n1] = (lo, hi) or (None, None) if no valid n2 exists.
+    Covers ALL ordered pairs so _add_noise_constraints enforces both directions.
+    """
+    u_ranges = {}
+    for m1 in range(M):
+        for m2 in range(M):
+            if m1 == m2:
+                continue
+            ranges = {}
+            for n1 in range(D_count[m1] + 1):
+                dB1 = scaled_table[m1][n1]
+                lo = hi = None
+                for n2 in range(D_count[m2] + 1):
+                    if abs(scaled_table[m2][n2] - dB1) <= U_scaled:
+                        if lo is None:
+                            lo = n2
+                        hi = n2
+                ranges[n1] = (lo, hi)
+            u_ranges[(m1, m2)] = ranges
+    return u_ranges
+
+
+def _add_noise_constraints(solver, cnt_vars, M, D_count, u_ranges):
+    """
+    Add count-based D-cap and U-disparity constraints.
+    cnt_vars[m] must be simple Z3 Int variables (not complex Sum expressions).
+    This replaces the make_dB_expr If-chain subtraction approach, which causes
+    O(N^2) case expansion inside Z3 and crashes with moderate N.
+    """
+    for m in range(M):
+        solver.add(And(0 <= cnt_vars[m], cnt_vars[m] <= D_count[m]))
+    for (m1, m2), ranges in u_ranges.items():
+        for n1, (lo, hi) in ranges.items():
+            if lo is None:
+                solver.add(cnt_vars[m1] != n1)
+            else:
+                solver.add(Implies(
+                    cnt_vars[m1] == n1,
+                    And(cnt_vars[m2] >= lo, cnt_vars[m2] <= hi)
+                ))
+
+
 def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, aircraft_dB):
     scaled_table = build_scaled_table(M, N, baseline, aircraft_dB)
     D_scaled = round(D * SCALE)
@@ -232,23 +293,22 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
 
     # Noise cap + global disparity for t = 0 … T_lower-1
     # C_by_t[t][m] = active aircraft count at station m at time t
+    # Precompute count-based D and U tables — avoids O(N^2) Z3 If-chain expansion
+    D_count = _compute_d_counts(M, N, baseline_scaled, D_scaled, scaled_table)
+    u_ranges = _compute_u_ranges(M, N, U_scaled, scaled_table, D_count)
+
     C_by_t = []
-    dB_by_t = []
     for t in range(T_lower):
         C_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), 1, 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_t)
-        dB_exprs_t = [make_dB_expr(C_t[m], m, scaled_table, N) for m in range(M)]
-        dB_by_t.append(dB_exprs_t)
-        s.add([dB_exprs_t[m] <= D_scaled - baseline_scaled[m] for m in range(M)])
-        for (m1, m2) in all_pairs:
-            s.add(And(
-                dB_exprs_t[m1] - dB_exprs_t[m2] <= U_scaled,
-                dB_exprs_t[m2] - dB_exprs_t[m1] <= U_scaled
-            ))
+        cnt_t = [Int(f"cnt_{m}_{t}") for m in range(M)]
+        for m in range(M):
+            s.add(cnt_t[m] == C_t[m])
+        _add_noise_constraints(s, cnt_t, M, D_count, u_ranges)
 
     T_current = T_lower
 
-    for _ in range(T_lower, 51):
+    for _ in range(T_lower, 26):
         # Assumption booleans — same names reused safely because the Implies
         # constraints referencing them are pushed/popped each iteration.
         end_asms = [Bool(f"end_{i}") for i in range(N)]
@@ -285,7 +345,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
                 "detail": "Constraints are unsatisfiable regardless of T — try relaxing D or U"
             }
 
-        if T_current >= 50:
+        if T_current >= 25:
             break
 
         # ── Suggestion 3: extend base by exactly one timestep ───────────────
@@ -311,18 +371,14 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
 
         C_new = [Sum([If(And(L[i][new_t] == m + 1, active[i][new_t]), 1, 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_new)
-        dB_exprs_new = [make_dB_expr(C_new[m], m, scaled_table, N) for m in range(M)]
-        dB_by_t.append(dB_exprs_new)
-        s.add([dB_exprs_new[m] <= D_scaled - baseline_scaled[m] for m in range(M)])
-        for (m1, m2) in all_pairs:
-            s.add(And(
-                dB_exprs_new[m1] - dB_exprs_new[m2] <= U_scaled,
-                dB_exprs_new[m2] - dB_exprs_new[m1] <= U_scaled
-            ))
+        cnt_new = [Int(f"cnt_{m}_{new_t}") for m in range(M)]
+        for m in range(M):
+            s.add(cnt_new[m] == C_new[m])
+        _add_noise_constraints(s, cnt_new, M, D_count, u_ranges)
 
         T_current += 1
 
-    return {"status": "unsat", "reason": "timeout", "detail": "No solution found within T=50"}
+    return {"status": "unsat", "reason": "timeout", "detail": "No solution found within T=25"}
 
 
 def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions,
@@ -372,9 +428,6 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         s0 = src_1indexed - 1
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
 
-    # Global disparity: all station pairs, not just adjacent ones
-    all_pairs = [(m1, m2) for m1 in range(M) for m2 in range(m1 + 1, M)]
-
     opt = Optimize()
 
     # Location variables — "o_" prefix avoids name clashes with phase-1 variables
@@ -411,19 +464,23 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
             opt.add(active[i][t] == And(moved[i][t], Not(ha[i][t - 1])))
 
     # Noise cap and global disparity (counting only active aircraft)
+    # Precompute count-based D and U tables — avoids O(N^2) Z3 If-chain expansion
+    D_count = _compute_d_counts(M, N, baseline_scaled, D_scaled, scaled_table)
+    u_ranges = _compute_u_ranges(M, N, U_scaled, scaled_table, D_count)
+
     C_by_t = []
     dB_by_t = []
     for t in range(T):
         C_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), 1, 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_t)
-        dB_exprs_t = [make_dB_expr(C_t[m], m, scaled_table, N) for m in range(M)]
+        # Auxiliary count variables: simple Z3 Int (not Sum expr) for D/U constraints
+        cnt_t = [Int(f"o_cnt_{m}_{t}") for m in range(M)]
+        for m in range(M):
+            opt.add(cnt_t[m] == C_t[m])
+        _add_noise_constraints(opt, cnt_t, M, D_count, u_ranges)
+        # dB expressions for objectives: If-chain over simple variable, not complex Sum
+        dB_exprs_t = [make_dB_expr(cnt_t[m], m, scaled_table, N) for m in range(M)]
         dB_by_t.append(dB_exprs_t)
-        opt.add([dB_exprs_t[m] <= D_scaled - baseline_scaled[m] for m in range(M)])
-        for (m1, m2) in all_pairs:
-            opt.add(And(
-                dB_exprs_t[m1] - dB_exprs_t[m2] <= U_scaled,
-                dB_exprs_t[m2] - dB_exprs_t[m1] <= U_scaled
-            ))
 
     # ── Build objective terms ─────────────────────────────────────────────────
     objective_terms = []
