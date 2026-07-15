@@ -43,9 +43,12 @@ def make_dB_expr(count_expr, m, scaled_table, N):
     return expr
 
 
-def _active_output_matrices(paths, start_positions, end_positions, N, M, T, baseline, aircraft_dB):
+def _active_output_matrices(paths, start_positions, end_positions, N, M, T, baseline, aircraft_dB,
+                            multipliers=None):
     """Build count and dB matrices for output using the active-noise window:
-    departure timestep (last t at start before first move) through first arrival."""
+    departure timestep (last t at start before first move) through first arrival.
+    multipliers[i] scales how many virtual aircraft aircraft i represents in the output."""
+    mult = multipliers if multipliers is not None else [1] * N
     count = [[0] * T for _ in range(M)]
     for i in range(N):
         s0, e0 = start_positions[i], end_positions[i]
@@ -57,7 +60,7 @@ def _active_output_matrices(paths, start_positions, end_positions, N, M, T, base
             continue
         t_arr = next((t for t in range(T) if p[t] == e0), T - 1)
         for t in range(t_fm - 1, t_arr + 1):
-            count[p[t] - 1][t] += 1
+            count[p[t] - 1][t] += mult[i]
     noise = [
         [dB_increase(baseline[m], count[m][t], aircraft_dB) for t in range(T)]
         for m in range(M)
@@ -146,7 +149,8 @@ def _add_noise_constraints(solver, cnt_vars, M, D_count, u_ranges):
                 ))
 
 
-def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, aircraft_dB):
+def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, aircraft_dB,
+               multipliers=None):
     scaled_table = build_scaled_table(M, N, baseline, aircraft_dB)
     D_scaled = round(D * SCALE)
     U_scaled = round(U * SCALE)
@@ -326,7 +330,8 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
                 for i in range(N)
             ]
             count_matrix, noise_matrix_dB = _active_output_matrices(
-                paths, start_positions, end_positions, N, M, T_current, baseline, aircraft_dB
+                paths, start_positions, end_positions, N, M, T_current, baseline, aircraft_dB,
+                multipliers=multipliers
             )
             s.pop()
             return {"status": "sat", "T": T_current, "paths": paths,
@@ -389,6 +394,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                         prop_alloc,
                         station_transit_weights,
                         util_noise_mode,
+                        aircraft_multipliers,
                         baseline, aircraft_dB):
     """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
     minimize a weighted combination of transit time and protected-station noise (dB).
@@ -400,6 +406,13 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     D_scaled = round(D * SCALE)
     U_scaled = round(U * SCALE)
     baseline_scaled = [round(b * SCALE) for b in baseline]
+
+    # Per-aircraft multipliers: how many virtual aircraft each real aircraft represents
+    # in soft objectives and output. Hard constraints always use actual counts.
+    int_mult = [max(1, round(m)) for m in aircraft_multipliers] if aircraft_multipliers else [1] * N
+    max_weighted_count = sum(int_mult)
+    # Weighted dB table covers 0..max_weighted_count aircraft
+    scaled_table_w = build_scaled_table(M, max_weighted_count, baseline, aircraft_dB)
 
     # ── Metric normalization ──────────────────────────────────────────────────
     # All metrics are divided by their theoretical maximums so that weights
@@ -416,14 +429,14 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     else:
         int_tw = None
         max_tw = W_SCALE  # uniform weight=1 → scaled = 100
-    max_transit   = N * (T - 1) * max(1, max_tw)
+    max_transit   = sum(int_mult) * (T - 1) * max(1, max_tw)
     max_T_penalty = N * (T - 1)
 
     # Use scaled (integer) units for dB normalization bounds so all objective
     # terms live in the same numeric range as the Z3 dB expressions (×SCALE).
     # Mixing unscaled dB bounds with scaled Z3 expressions would make the dB
     # objectives SCALE× heavier than the count-based utilitarian term.
-    max_dB_scaled_per_station = max(scaled_table[m][N] for m in range(M))
+    max_dB_scaled_per_station = max(scaled_table_w[m][max_weighted_count] for m in range(M))
     max_protected_dB    = len(protected_stations)    * T * max_dB_scaled_per_station
     max_proportional_dB = len(proportional_stations) * T * max_dB_scaled_per_station
     max_util_noise_dB   = M * T * max_dB_scaled_per_station
@@ -444,6 +457,9 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     def valid_next(src_1indexed):
         s0 = src_1indexed - 1
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
+
+    # Global disparity: all station pairs, not just adjacent ones
+    all_pairs = [(m1, m2) for m1 in range(M) for m2 in range(m1 + 1, M)]
 
     opt = Optimize()
 
@@ -486,18 +502,22 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     u_ranges = _compute_u_ranges(M, N, U_scaled, scaled_table, D_count)
 
     C_by_t = []
-    dB_by_t = []
+    wdB_by_t = []
     for t in range(T):
         C_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), 1, 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_t)
-        # Auxiliary count variables: simple Z3 Int (not Sum expr) for D/U constraints
+        # Auxiliary actual-count variables for D/U hard constraints (unweighted)
         cnt_t = [Int(f"o_cnt_{m}_{t}") for m in range(M)]
         for m in range(M):
             opt.add(cnt_t[m] == C_t[m])
         _add_noise_constraints(opt, cnt_t, M, D_count, u_ranges)
-        # dB expressions for objectives: If-chain over simple variable, not complex Sum
-        dB_exprs_t = [make_dB_expr(cnt_t[m], m, scaled_table, N) for m in range(M)]
-        dB_by_t.append(dB_exprs_t)
+        # Weighted-count variables for soft objectives and noise output
+        WC_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), int_mult[i], 0) for i in range(N)]) for m in range(M)]
+        wcnt_t = [Int(f"o_wcnt_{m}_{t}") for m in range(M)]
+        for m in range(M):
+            opt.add(wcnt_t[m] == WC_t[m])
+        wdB_exprs_t = [make_dB_expr(wcnt_t[m], m, scaled_table_w, max_weighted_count) for m in range(M)]
+        wdB_by_t.append(wdB_exprs_t)
 
     # ── Build objective terms ─────────────────────────────────────────────────
     objective_terms = []
@@ -518,11 +538,10 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
 
     if eff_w_util > 0:
         if util_noise_mode:
-            # Minimize sum of actual dB noise across all stations and timesteps.
-            # Only active (in-transit) aircraft contribute noise above baseline;
-            # baseline is a constant offset and does not affect which routes are chosen.
-            # The nonlinear dB table means concentrating aircraft is penalised correctly.
-            total_util_noise = Sum([dB_by_t[t][m] for t in range(T) for m in range(M)])
+            # Minimize weighted dB noise sum across all stations and timesteps.
+            # Uses wdB_by_t (multiplier-scaled counts) so each aircraft's
+            # virtual count affects the nonlinear dB lookup correctly.
+            total_util_noise = Sum([wdB_by_t[t][m] for t in range(T) for m in range(M)])
             objective_terms.append(eff_w_util * total_util_noise)
         else:
             # hm[i][t]: aircraft i has changed location at least once in t'=1..t
@@ -544,15 +563,15 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                     for m in range(1, M):
                         e = If(L_it == m + 1, weights[m], e)
                     return e
-                transit = [Sum([If(it[i][t], _tw_expr(L[i][t]), 0) for t in range(T)]) for i in range(N)]
+                transit = [Sum([If(it[i][t], _tw_expr(L[i][t]) * int_mult[i], 0) for t in range(T)]) for i in range(N)]
             else:
-                transit = [Sum([If(it[i][t], W_SCALE, 0) for t in range(T)]) for i in range(N)]
+                transit = [Sum([If(it[i][t], W_SCALE * int_mult[i], 0) for t in range(T)]) for i in range(N)]
             total_transit = Sum(transit)
             objective_terms.append(eff_w_util * total_transit)
 
     if eff_w_prior > 0:
         protected_noise_dB = Sum([
-            dB_by_t[t][p - 1]
+            wdB_by_t[t][p - 1]
             for p in protected_stations
             for t in range(T)
         ])
@@ -560,7 +579,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
 
     if eff_w_prop > 0:
         proportional_noise_dB = Sum([
-            dB_by_t[t][b - 1]
+            wdB_by_t[t][b - 1]
             for b in proportional_stations
             for t in range(T)
         ])
@@ -608,8 +627,8 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         if order_pairs:
             max_prop_alloc = max(1, len(order_pairs) * T * max_dB_scaled_per_station)
             violation = Sum([
-                If(dB_by_t[t][hi] < dB_by_t[t][lo],
-                   dB_by_t[t][lo] - dB_by_t[t][hi], 0)
+                If(wdB_by_t[t][hi] < wdB_by_t[t][lo],
+                   wdB_by_t[t][lo] - wdB_by_t[t][hi], 0)
                 for (hi, lo) in order_pairs
                 for t in range(T)
             ])
@@ -632,7 +651,8 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         for i in range(N)
     ]
     count_matrix, noise_matrix_dB = _active_output_matrices(
-        paths, start_positions, end_positions, N, M, T, baseline, aircraft_dB
+        paths, start_positions, end_positions, N, M, T, baseline, aircraft_dB,
+        multipliers=int_mult
     )
 
     result = {"status": "sat", "T": T, "paths": paths,
@@ -786,7 +806,15 @@ def solve():
         w_time = 1.0
     if w_time < 0: w_time = 0.0
 
-    result = find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, aircraft_dB)
+    try:
+        result = find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, aircraft_dB,
+                            multipliers=aircraft_multipliers)
+    except OSError as e:
+        return jsonify({
+            "error": f"Z3 internal error during phase-1 solve (N={N} may be too large for the dB solver): {e}"
+        }), 500
+    except Exception as e:
+        return jsonify({"error": f"Unexpected solver error: {e}"}), 500
 
     if soft_T:
         if result["status"] != "sat":
@@ -808,6 +836,18 @@ def solve():
     if not isinstance(prop_alloc, bool): prop_alloc = False
 
     util_noise_mode = bool(data.get("utilNoiseMode", False))
+
+    aircraft_multipliers = None
+    raw_mult = data.get("aircraftMultipliers")
+    if raw_mult is not None:
+        if not isinstance(raw_mult, list) or len(raw_mult) != N:
+            return jsonify({"error": f"aircraftMultipliers must be a list of length N={N}"}), 400
+        try:
+            aircraft_multipliers = [float(v) for v in raw_mult]
+        except (TypeError, ValueError):
+            return jsonify({"error": "aircraftMultipliers values must be numeric"}), 400
+        if any(v <= 0 for v in aircraft_multipliers):
+            return jsonify({"error": "aircraftMultipliers values must be positive"}), 400
 
     station_transit_weights = None
     if optimize_util and not util_noise_mode:
@@ -837,17 +877,26 @@ def solve():
                 " — solver will find weighted compromise"
             )
 
-    opt_result = optimize_objectives(
-        N, T_for_phase2, M, D, U, adjacency, start_positions, end_positions,
-        optimize_util, optimize_prior, optimize_prop,
-        protected_stations, proportional_stations,
-        w_util, w_prior, w_prop,
-        soft_T, w_time,
-        prop_alloc,
-        station_transit_weights,
-        util_noise_mode,
-        baseline, aircraft_dB
-    )
+    try:
+        opt_result = optimize_objectives(
+            N, T_for_phase2, M, D, U, adjacency, start_positions, end_positions,
+            optimize_util, optimize_prior, optimize_prop,
+            protected_stations, proportional_stations,
+            w_util, w_prior, w_prop,
+            soft_T, w_time,
+            prop_alloc,
+            station_transit_weights,
+            util_noise_mode,
+            aircraft_multipliers,
+            baseline, aircraft_dB
+        )
+    except OSError as e:
+        return jsonify({
+            "error": f"Z3 internal error during phase-2 optimization (N={N} may be too large): {e}"
+        }), 500
+    except Exception as e:
+        return jsonify({"error": f"Unexpected optimization error: {e}"}), 500
+
     if opt_result is None:
         # Phase-2 unexpectedly returned unsat — fall back to phase-1 result
         if overlap_warning:
