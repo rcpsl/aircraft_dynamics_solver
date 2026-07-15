@@ -387,6 +387,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                         w_util, w_prior, w_prop,
                         soft_T, w_time,
                         prop_alloc,
+                        station_transit_weights,
                         baseline, aircraft_dB):
     """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
     minimize a weighted combination of transit time and protected-station noise (dB).
@@ -406,7 +407,15 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     # Transit and T-penalty: count-based, unchanged from the count-based solver.
     # Prioritarian and proportional: dB-based; bounded by all-N-aircraft case
     # at the loudest station.
-    max_transit   = N * (T - 1)
+    # Station-weighted transit: scale floats to integers (0.01 precision).
+    W_SCALE = 100
+    if station_transit_weights is not None:
+        int_tw = [round(w * W_SCALE) for w in station_transit_weights]
+        max_tw = max(int_tw) if int_tw else W_SCALE
+    else:
+        int_tw = None
+        max_tw = W_SCALE  # uniform weight=1 → scaled = 100
+    max_transit   = N * (T - 1) * max(1, max_tw)
     max_T_penalty = N * (T - 1)
 
     # Use scaled (integer) units for dB normalization bounds so all objective
@@ -512,7 +521,15 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                 # Arrival timestep IS counted — gate on t-1 arrival, not t
                 opt.add(it[i][t] == And(hm[i][t], Not(ha[i][t - 1])))
 
-        transit       = [Sum([If(it[i][t], 1, 0) for t in range(T)]) for i in range(N)]
+        if int_tw is not None:
+            def _tw_expr(L_it, weights=int_tw):
+                e = weights[0]
+                for m in range(1, M):
+                    e = If(L_it == m + 1, weights[m], e)
+                return e
+            transit = [Sum([If(it[i][t], _tw_expr(L[i][t]), 0) for t in range(T)]) for i in range(N)]
+        else:
+            transit = [Sum([If(it[i][t], W_SCALE, 0) for t in range(T)]) for i in range(N)]
         total_transit = Sum(transit)
         objective_terms.append(eff_w_util * total_transit)
 
@@ -770,6 +787,19 @@ def solve():
     prop_alloc = data.get("proportionalAllocation", False)
     if not isinstance(prop_alloc, bool): prop_alloc = False
 
+    station_transit_weights = None
+    if optimize_util:
+        raw_stw = data.get("stationTransitWeights")
+        if raw_stw is not None:
+            if not isinstance(raw_stw, list) or len(raw_stw) != M:
+                return jsonify({"error": f"stationTransitWeights must be a list of length M={M}"}), 400
+            try:
+                station_transit_weights = [float(w) for w in raw_stw]
+            except (TypeError, ValueError):
+                return jsonify({"error": "stationTransitWeights values must be numeric"}), 400
+            if any(w < 0 for w in station_transit_weights):
+                return jsonify({"error": "stationTransitWeights values must be non-negative"}), 400
+
     should_optimize = optimize_util or optimize_prior or optimize_prop or soft_T or prop_alloc
     if result["status"] != "sat" or not should_optimize:
         return jsonify(result)
@@ -792,6 +822,7 @@ def solve():
         w_util, w_prior, w_prop,
         soft_T, w_time,
         prop_alloc,
+        station_transit_weights,
         baseline, aircraft_dB
     )
     if opt_result is None:
