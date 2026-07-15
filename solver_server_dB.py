@@ -388,6 +388,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                         soft_T, w_time,
                         prop_alloc,
                         station_transit_weights,
+                        util_noise_mode,
                         baseline, aircraft_dB):
     """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
     minimize a weighted combination of transit time and protected-station noise (dB).
@@ -425,10 +426,17 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     max_dB_scaled_per_station = max(scaled_table[m][N] for m in range(M))
     max_protected_dB    = len(protected_stations)    * T * max_dB_scaled_per_station
     max_proportional_dB = len(proportional_stations) * T * max_dB_scaled_per_station
+    max_util_noise_dB   = M * T * max_dB_scaled_per_station
 
     # After normalization, all coefficients are dimensionless and comparable,
     # so w_util = w_prior = w_prop = w_time = 1.0 gives genuinely equal weighting.
-    eff_w_util  = (w_util  / max_transit)         if (optimize_util  and max_transit         > 0) else 0.0
+    if optimize_util:
+        if util_noise_mode:
+            eff_w_util = (w_util / max_util_noise_dB) if max_util_noise_dB > 0 else 0.0
+        else:
+            eff_w_util = (w_util / max_transit)       if max_transit       > 0 else 0.0
+    else:
+        eff_w_util = 0.0
     eff_w_prior = (w_prior / max_protected_dB)    if (optimize_prior and max_protected_dB    > 0) else 0.0
     eff_w_prop  = (w_prop  / max_proportional_dB) if (optimize_prop  and max_proportional_dB > 0) else 0.0
     eff_w_time  = (w_time  / max_T_penalty)       if (soft_T         and max_T_penalty        > 0) else 0.0
@@ -497,6 +505,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     # Declare result variables in outer scope so the result block can read them
     transit = None
     total_transit = None
+    total_util_noise = None
     protected_noise_dB = None
     proportional_noise_dB = None
 
@@ -508,30 +517,38 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                 opt.add(Implies(ha[i][t], L[i][t + 1] == end_positions[i]))
 
     if eff_w_util > 0:
-        # hm[i][t]: aircraft i has changed location at least once in t'=1..t
-        # it[i][t]: aircraft i is currently accumulating transit cost at time t
-        hm = [[Bool(f"o_hm_{i}_{t}") for t in range(T)] for i in range(N)]
-        it = [[Bool(f"o_it_{i}_{t}") for t in range(T)] for i in range(N)]
-
-        for i in range(N):
-            opt.add(hm[i][0] == False)
-            opt.add(it[i][0] == False)
-            for t in range(1, T):
-                opt.add(hm[i][t] == Or(hm[i][t - 1], L[i][t] != L[i][t - 1]))
-                # Arrival timestep IS counted — gate on t-1 arrival, not t
-                opt.add(it[i][t] == And(hm[i][t], Not(ha[i][t - 1])))
-
-        if int_tw is not None:
-            def _tw_expr(L_it, weights=int_tw):
-                e = weights[0]
-                for m in range(1, M):
-                    e = If(L_it == m + 1, weights[m], e)
-                return e
-            transit = [Sum([If(it[i][t], _tw_expr(L[i][t]), 0) for t in range(T)]) for i in range(N)]
+        if util_noise_mode:
+            # Minimize sum of actual dB noise across all stations and timesteps.
+            # Only active (in-transit) aircraft contribute noise above baseline;
+            # baseline is a constant offset and does not affect which routes are chosen.
+            # The nonlinear dB table means concentrating aircraft is penalised correctly.
+            total_util_noise = Sum([dB_by_t[t][m] for t in range(T) for m in range(M)])
+            objective_terms.append(eff_w_util * total_util_noise)
         else:
-            transit = [Sum([If(it[i][t], W_SCALE, 0) for t in range(T)]) for i in range(N)]
-        total_transit = Sum(transit)
-        objective_terms.append(eff_w_util * total_transit)
+            # hm[i][t]: aircraft i has changed location at least once in t'=1..t
+            # it[i][t]: aircraft i is currently accumulating transit cost at time t
+            hm = [[Bool(f"o_hm_{i}_{t}") for t in range(T)] for i in range(N)]
+            it = [[Bool(f"o_it_{i}_{t}") for t in range(T)] for i in range(N)]
+
+            for i in range(N):
+                opt.add(hm[i][0] == False)
+                opt.add(it[i][0] == False)
+                for t in range(1, T):
+                    opt.add(hm[i][t] == Or(hm[i][t - 1], L[i][t] != L[i][t - 1]))
+                    # Arrival timestep IS counted — gate on t-1 arrival, not t
+                    opt.add(it[i][t] == And(hm[i][t], Not(ha[i][t - 1])))
+
+            if int_tw is not None:
+                def _tw_expr(L_it, weights=int_tw):
+                    e = weights[0]
+                    for m in range(1, M):
+                        e = If(L_it == m + 1, weights[m], e)
+                    return e
+                transit = [Sum([If(it[i][t], _tw_expr(L[i][t]), 0) for t in range(T)]) for i in range(N)]
+            else:
+                transit = [Sum([If(it[i][t], W_SCALE, 0) for t in range(T)]) for i in range(N)]
+            total_transit = Sum(transit)
+            objective_terms.append(eff_w_util * total_transit)
 
     if eff_w_prior > 0:
         protected_noise_dB = Sum([
@@ -623,8 +640,11 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     result["T_used"] = T
 
     if eff_w_util > 0:
-        result["transitTimes"] = [model.evaluate(transit[i]).as_long() for i in range(N)]
-        result["totalTransit"] = model.evaluate(total_transit).as_long()
+        if util_noise_mode:
+            result["totalUtilNoise"] = model.evaluate(total_util_noise).as_long() / SCALE
+        else:
+            result["transitTimes"] = [model.evaluate(transit[i]).as_long() for i in range(N)]
+            result["totalTransit"] = model.evaluate(total_transit).as_long()
 
     if eff_w_prior > 0:
         result["protectedNoise"]    = model.evaluate(protected_noise_dB).as_long() / SCALE
@@ -787,8 +807,10 @@ def solve():
     prop_alloc = data.get("proportionalAllocation", False)
     if not isinstance(prop_alloc, bool): prop_alloc = False
 
+    util_noise_mode = bool(data.get("utilNoiseMode", False))
+
     station_transit_weights = None
-    if optimize_util:
+    if optimize_util and not util_noise_mode:
         raw_stw = data.get("stationTransitWeights")
         if raw_stw is not None:
             if not isinstance(raw_stw, list) or len(raw_stw) != M:
@@ -823,6 +845,7 @@ def solve():
         soft_T, w_time,
         prop_alloc,
         station_transit_weights,
+        util_noise_mode,
         baseline, aircraft_dB
     )
     if opt_result is None:
