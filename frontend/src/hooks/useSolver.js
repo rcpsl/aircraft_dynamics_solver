@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   DEFAULT_N, DEFAULT_M, DEFAULT_D, DEFAULT_U,
   DEFAULT_ADJ, DEFAULT_START, DEFAULT_END, DEFAULT_ZONES,
-  DEFAULT_DB_PER_CRAFT, STORAGE_KEY, BENEFIT_ZONE_IDS, PROTECTED_ZONE_IDS, ZONES,
+  DEFAULT_DB_PER_CRAFT, STORAGE_KEY, RESULTS_STORAGE_KEY, BENEFIT_ZONE_IDS, PROTECTED_ZONE_IDS, ZONES,
 } from '../constants';
 import { resizeAdj, resizePos } from '../utils';
 
@@ -11,8 +11,14 @@ function loadSaved() {
   catch { return {}; }
 }
 
+function loadSavedResults() {
+  try { return JSON.parse(localStorage.getItem(RESULTS_STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
 export function useSolver() {
   const saved = loadSaved();
+  const savedResults = loadSavedResults();
 
   const [N,            setN]            = useState(saved.N            ?? DEFAULT_N);
   const [M,            setM]            = useState(saved.M            ?? DEFAULT_M);
@@ -34,30 +40,34 @@ export function useSolver() {
   const [tMax,             setTMax]             = useState(saved.tMax             ?? null);
   const [weightTime,       setWeightTime]       = useState(saved.weightTime       ?? 1.0);
 
-  const [status,            setStatus]            = useState("idle");
-  const [solvedT,           setSolvedT]           = useState(null);
-  const [paths,             setPaths]             = useState(null);
-  const [noiseMatrix,       setNoiseMatrix]       = useState(null);
-  const [countMatrix,       setCountMatrix]       = useState(null);
-  const [unstatDetail,      setUnstatDetail]      = useState(null);
-  const [solvedStationZones,   setSolvedStationZones]   = useState(null);
-  const [solvedDbPerCraft,     setSolvedDbPerCraft]     = useState(null);
-  const [solvedM,              setSolvedM]              = useState(null);
-  const [solvedUseDbSolver,    setSolvedUseDbSolver]    = useState(null);
-  const [protectedNoiseVal,    setProtectedNoiseVal]    = useState(null);
-  const [solvedProtectedStn,   setSolvedProtectedStn]   = useState(null);
-  const [proportionalNoiseVal, setProportionalNoiseVal] = useState(null);
-  const [solvedProportionalStn,setSolvedProportionalStn]= useState(null);
-  const [warningMsg,           setWarningMsg]           = useState(null);
+  // Restoring a stale "solving" status on reload would show a spinner for a
+  // request that no longer exists, so only sat/unsat carry over.
+  const [status,            setStatus]            = useState(
+    (savedResults.status === "sat" || savedResults.status === "unsat") ? savedResults.status : "idle"
+  );
+  const [solvedT,           setSolvedT]           = useState(savedResults.solvedT           ?? null);
+  const [paths,             setPaths]             = useState(savedResults.paths             ?? null);
+  const [noiseMatrix,       setNoiseMatrix]       = useState(savedResults.noiseMatrix       ?? null);
+  const [countMatrix,       setCountMatrix]       = useState(savedResults.countMatrix       ?? null);
+  const [unstatDetail,      setUnstatDetail]      = useState(savedResults.unstatDetail      ?? null);
+  const [solvedStationZones,   setSolvedStationZones]   = useState(savedResults.solvedStationZones   ?? null);
+  const [solvedDbPerCraft,     setSolvedDbPerCraft]     = useState(savedResults.solvedDbPerCraft     ?? null);
+  const [solvedM,              setSolvedM]              = useState(savedResults.solvedM              ?? null);
+  const [solvedUseDbSolver,    setSolvedUseDbSolver]    = useState(savedResults.solvedUseDbSolver    ?? null);
+  const [protectedNoiseVal,    setProtectedNoiseVal]    = useState(savedResults.protectedNoiseVal    ?? null);
+  const [solvedProtectedStn,   setSolvedProtectedStn]   = useState(savedResults.solvedProtectedStn   ?? null);
+  const [proportionalNoiseVal, setProportionalNoiseVal] = useState(savedResults.proportionalNoiseVal ?? null);
+  const [solvedProportionalStn,setSolvedProportionalStn]= useState(savedResults.solvedProportionalStn ?? null);
+  const [warningMsg,           setWarningMsg]           = useState(savedResults.warningMsg           ?? null);
   const [errorDetail,          setErrorDetail]          = useState(null);
-  const [solvedTMin,           setSolvedTMin]           = useState(null);
-  const [solvedTUsed,          setSolvedTUsed]          = useState(null);
-  const [solvedOptimizeUtil,   setSolvedOptimizeUtil]   = useState(null);
-  const [solvedOptimizePrior,  setSolvedOptimizePrior]  = useState(null);
-  const [solvedOptimizeProp,   setSolvedOptimizeProp]   = useState(null);
-  const [stationCategories,    setStationCategories]    = useState(null);
-  const [totalUtilNoise,       setTotalUtilNoise]       = useState(null);
-  const [solvedEndPos,         setSolvedEndPos]         = useState(null);
+  const [solvedTMin,           setSolvedTMin]           = useState(savedResults.solvedTMin           ?? null);
+  const [solvedTUsed,          setSolvedTUsed]          = useState(savedResults.solvedTUsed          ?? null);
+  const [solvedOptimizeUtil,   setSolvedOptimizeUtil]   = useState(savedResults.solvedOptimizeUtil   ?? null);
+  const [solvedOptimizePrior,  setSolvedOptimizePrior]  = useState(savedResults.solvedOptimizePrior  ?? null);
+  const [solvedOptimizeProp,   setSolvedOptimizeProp]   = useState(savedResults.solvedOptimizeProp   ?? null);
+  const [stationCategories,    setStationCategories]    = useState(savedResults.stationCategories    ?? null);
+  const [totalUtilNoise,       setTotalUtilNoise]       = useState(savedResults.totalUtilNoise       ?? null);
+  const [solvedEndPos,         setSolvedEndPos]         = useState(savedResults.solvedEndPos         ?? null);
   const [optimizeUtil,         setOptimizeUtil]         = useState(saved.optimizeUtil      ?? false);
   const [optimizePrior,        setOptimizePrior]        = useState(saved.optimizePrior     ?? false);
   const [optimizeProp,         setOptimizeProp]         = useState(saved.optimizeProp      ?? false);
@@ -84,6 +94,7 @@ export function useSolver() {
   const [useDbSolver,          setUseDbSolver]          = useState(saved.useDbSolver       ?? false);
   const [activeTab,         setActiveTab]         = useState("solver");
   const fileInputRef = useRef(null);
+  const resultsFileInputRef = useRef(null);
   const abortRef     = useRef(null);
 
   // Single source of truth for config save/load: [key, currentValue, setter] triples.
@@ -131,6 +142,38 @@ export function useSolver() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(configValues));
   });
+
+  // Same [key, currentValue, setter] pattern as configFields, but for the solved
+  // state the middle/right panel renders. Drives Save/Load Results (handleExportResults/
+  // handleImportResults below) and is also the field list handleSolve's sat branch
+  // uses to apply a fresh solve's snapshot to state in one loop.
+  const resultFields = [
+    ['status', status, setStatus],
+    ['solvedT', solvedT, setSolvedT],
+    ['paths', paths, setPaths],
+    ['noiseMatrix', noiseMatrix, setNoiseMatrix],
+    ['countMatrix', countMatrix, setCountMatrix],
+    ['unstatDetail', unstatDetail, setUnstatDetail],
+    ['solvedStationZones', solvedStationZones, setSolvedStationZones],
+    ['solvedDbPerCraft', solvedDbPerCraft, setSolvedDbPerCraft],
+    ['solvedM', solvedM, setSolvedM],
+    ['solvedUseDbSolver', solvedUseDbSolver, setSolvedUseDbSolver],
+    ['protectedNoiseVal', protectedNoiseVal, setProtectedNoiseVal],
+    ['solvedProtectedStn', solvedProtectedStn, setSolvedProtectedStn],
+    ['proportionalNoiseVal', proportionalNoiseVal, setProportionalNoiseVal],
+    ['solvedProportionalStn', solvedProportionalStn, setSolvedProportionalStn],
+    ['warningMsg', warningMsg, setWarningMsg],
+    ['solvedTMin', solvedTMin, setSolvedTMin],
+    ['solvedTUsed', solvedTUsed, setSolvedTUsed],
+    ['solvedOptimizeUtil', solvedOptimizeUtil, setSolvedOptimizeUtil],
+    ['solvedOptimizePrior', solvedOptimizePrior, setSolvedOptimizePrior],
+    ['solvedOptimizeProp', solvedOptimizeProp, setSolvedOptimizeProp],
+    ['stationCategories', stationCategories, setStationCategories],
+    ['totalUtilNoise', totalUtilNoise, setTotalUtilNoise],
+    ['solvedEndPos', solvedEndPos, setSolvedEndPos],
+  ];
+
+  const resultValues = Object.fromEntries(resultFields.map(([key, value]) => [key, value]));
 
   function handleN(newN) {
     setN(newN);
@@ -196,6 +239,45 @@ export function useSolver() {
           if (c[key] !== undefined) setter(c[key]);
         }
       } catch { alert("Invalid config file."); }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
+  // Results are wrapped in an envelope (distinct from the bare config JSON) so
+  // Load Results can tell a config file was dropped in by mistake, and so the
+  // config that produced a result travels with it for reference without being
+  // silently applied to the live left-panel state.
+  function handleExportResults() {
+    const envelope = {
+      kind: "uam-results", version: 1,
+      savedAt: new Date().toISOString(),
+      config: configValues,
+      results: resultValues,
+    };
+    const blob = new Blob([JSON.stringify(envelope, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `uam-results-${Date.now()}.json`; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleImportResults(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const envelope = JSON.parse(ev.target.result);
+        if (envelope.kind !== "uam-results" || !envelope.results) {
+          alert("This doesn't look like a results file — try Load Config instead?");
+          return;
+        }
+        for (const [key, , setter] of resultFields) {
+          if (envelope.results[key] !== undefined) setter(envelope.results[key]);
+        }
+        localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(envelope.results));
+      } catch { alert("Invalid results file."); }
     };
     reader.readAsText(file);
     e.target.value = "";
@@ -278,27 +360,34 @@ export function useSolver() {
       }
       const data = await res.json();
       if (data.status === "sat") {
-        setStatus("sat"); setSolvedT(data.T); setPaths(data.paths);
-        setCountMatrix(data.countMatrix);
-        setNoiseMatrix(useDbSolver ? data.noiseMatrix : data.countMatrix);
-        setUnstatDetail(null);
-        setSolvedStationZones(stationZones); setSolvedDbPerCraft(dbPerCraft);
-        setSolvedM(M); setSolvedUseDbSolver(useDbSolver);
-        setProtectedNoiseVal(data.protectedNoise ?? null);
-        setSolvedProtectedStn(data.protectedStations ?? null);
-        setProportionalNoiseVal(data.proportionalNoise ?? null);
-        setSolvedProportionalStn(data.proportionalStations ?? null);
-        setWarningMsg(data.warning ?? null);
-        setSolvedTMin(data.T_min ?? null);
-        setSolvedTUsed(data.T_used ?? null);
-        setSolvedOptimizeUtil(optimizeUtil);
-        setSolvedOptimizePrior(optimizePrior);
-        setSolvedOptimizeProp(optimizeProp);
-        setStationCategories(data.stationCategories ?? null);
-        setTotalUtilNoise(data.totalUtilNoise ?? null);
-        setSolvedEndPos(effectiveEndPos);
+        // Built once, then applied to state and persisted from the same object —
+        // see resultFields above for why this stays in sync with Save/Load Results.
+        const snapshot = {
+          status: "sat", solvedT: data.T, paths: data.paths,
+          noiseMatrix: useDbSolver ? data.noiseMatrix : data.countMatrix,
+          countMatrix: data.countMatrix,
+          unstatDetail: null,
+          solvedStationZones: stationZones, solvedDbPerCraft: dbPerCraft,
+          solvedM: M, solvedUseDbSolver: useDbSolver,
+          protectedNoiseVal: data.protectedNoise ?? null,
+          solvedProtectedStn: data.protectedStations ?? null,
+          proportionalNoiseVal: data.proportionalNoise ?? null,
+          solvedProportionalStn: data.proportionalStations ?? null,
+          warningMsg: data.warning ?? null,
+          solvedTMin: data.T_min ?? null,
+          solvedTUsed: data.T_used ?? null,
+          solvedOptimizeUtil: optimizeUtil,
+          solvedOptimizePrior: optimizePrior,
+          solvedOptimizeProp: optimizeProp,
+          stationCategories: data.stationCategories ?? null,
+          totalUtilNoise: data.totalUtilNoise ?? null,
+          solvedEndPos: effectiveEndPos,
+        };
+        for (const [key, , setter] of resultFields) setter(snapshot[key]);
+        localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(snapshot));
       } else {
         setStatus("unsat"); setUnstatDetail(data.detail || null);
+        localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify({ status: "unsat", unstatDetail: data.detail || null }));
       }
     } catch (err) {
       if (err.name === "AbortError") { setStatus("idle"); return; }
@@ -317,7 +406,7 @@ export function useSolver() {
     optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected, proportionalAlloc,
     stationWeightedTransit, stationTransitWeights, aircraftMultipliers, utilNoiseMode,
     useRouteMode, routeVertiports, routeN, effectiveN,
-    useDbSolver, activeTab, fileInputRef,
+    useDbSolver, activeTab, fileInputRef, resultsFileInputRef,
     stationCategories,
     hardT, tMax, weightTime, solvedTMin, solvedTUsed,
     solvedOptimizeUtil, solvedOptimizePrior, solvedOptimizeProp,
@@ -332,5 +421,6 @@ export function useSolver() {
     setProtectedStn, setProportionalStn, setActiveTab,
     handleN, handleM, toggleAdj, updateStartPos, updateEndPos, removeAircraft,
     handleExport, handleImport, handleSolve, handleCancel,
+    handleExportResults, handleImportResults,
   };
 }

@@ -15,6 +15,7 @@ export const DEFAULT_ZONES = [1, 1, 1, 1, 1];
 export const DEFAULT_DB_PER_CRAFT = 65;
 
 export const STORAGE_KEY = "uam-config";
+export const RESULTS_STORAGE_KEY = "uam-last-result";
 
 // Zones that benefit from UAM (transit access, economic activity, jobs) and
 // should therefore accept a proportional share of noise burden.

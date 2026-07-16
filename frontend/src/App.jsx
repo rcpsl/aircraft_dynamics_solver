@@ -71,6 +71,18 @@ export default function App() {
 
       {/* ── Right panel ── */}
       <div className="right-panel">
+        <div className="config-btns" style={{ marginBottom: "12px" }}>
+          <button className="config-btn" onClick={s.handleExportResults}
+            disabled={s.status !== "sat" && s.status !== "unsat"}>
+            Save Results
+          </button>
+          <button className="config-btn" onClick={() => s.resultsFileInputRef.current.click()}>
+            Load Results
+          </button>
+          <input ref={s.resultsFileInputRef} type="file" accept=".json"
+            style={{ display: "none" }} onChange={s.handleImportResults} />
+        </div>
+
         {s.status === "idle" && (
           <p className="idle-message">Configure parameters on the left and click <strong>Run Solver</strong>.</p>
         )}

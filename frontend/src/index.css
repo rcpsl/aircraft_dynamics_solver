@@ -264,6 +264,7 @@ section h2 {
 }
 
 .config-btn:hover { background: #f3f1ed; border-color: #a8a29e; }
+.config-btn:disabled { color: #c7c2ba; border-color: #e5e2db; cursor: not-allowed; background: transparent; }
 
 /* Tab bar */
 .tab-bar {
