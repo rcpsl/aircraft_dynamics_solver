@@ -88,15 +88,15 @@ export default function App() {
                 </span>
                 {s.protectedNoiseVal != null && (
                   <div style={{ fontSize: "13px", color: "#44403c", marginTop: "6px" }}>
-                    {s.useDbSolver ? "Total dB-weighted exposure at protected stations" : "Total aircraft visits to protected stations"}:{" "}
-                    <strong>{s.protectedNoiseVal}{s.useDbSolver ? " dB·t" : ""}</strong>
+                    {s.solvedUseDbSolver ? "Total dB-weighted exposure at protected stations" : "Total aircraft visits to protected stations"}:{" "}
+                    <strong>{s.protectedNoiseVal}{s.solvedUseDbSolver ? " dB·t" : ""}</strong>
                     {s.solvedProtectedStn?.length > 0 ? ` (stations ${s.solvedProtectedStn.join(", ")})` : ""}
                   </div>
                 )}
                 {s.proportionalNoiseVal != null && (
                   <div style={{ fontSize: "13px", color: "#44403c", marginTop: "6px" }}>
-                    {s.useDbSolver ? "Total dB-weighted exposure at burden stations" : "Total aircraft visits to burden stations"}:{" "}
-                    <strong>{s.proportionalNoiseVal}{s.useDbSolver ? " dB·t" : ""}</strong>
+                    {s.solvedUseDbSolver ? "Total dB-weighted exposure at burden stations" : "Total aircraft visits to burden stations"}:{" "}
+                    <strong>{s.proportionalNoiseVal}{s.solvedUseDbSolver ? " dB·t" : ""}</strong>
                     {s.solvedProportionalStn?.length > 0 ? ` (stations ${s.solvedProportionalStn.join(", ")})` : ""}
                   </div>
                 )}
@@ -127,8 +127,8 @@ export default function App() {
           <NoiseMatrix
             noiseMatrix={s.noiseMatrix.map(r => r.slice(0, effectiveT))}
             countMatrix={s.countMatrix ? s.countMatrix.map(r => r.slice(0, effectiveT)) : null}
-            solvedT={effectiveT} M={s.M}
-            stationZones={s.solvedStationZones} dbPerCraft={s.solvedDbPerCraft} isDbMode={s.useDbSolver} />
+            solvedT={effectiveT} M={s.solvedM}
+            stationZones={s.solvedStationZones} dbPerCraft={s.solvedDbPerCraft} isDbMode={s.solvedUseDbSolver} />
         )}
       </div>
 

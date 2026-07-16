@@ -42,6 +42,8 @@ export function useSolver() {
   const [unstatDetail,      setUnstatDetail]      = useState(null);
   const [solvedStationZones,   setSolvedStationZones]   = useState(null);
   const [solvedDbPerCraft,     setSolvedDbPerCraft]     = useState(null);
+  const [solvedM,              setSolvedM]              = useState(null);
+  const [solvedUseDbSolver,    setSolvedUseDbSolver]    = useState(null);
   const [protectedNoiseVal,    setProtectedNoiseVal]    = useState(null);
   const [solvedProtectedStn,   setSolvedProtectedStn]   = useState(null);
   const [proportionalNoiseVal, setProportionalNoiseVal] = useState(null);
@@ -216,6 +218,7 @@ export function useSolver() {
     setStatus("solving");
     setPaths(null); setNoiseMatrix(null); setCountMatrix(null); setSolvedT(null);
     setSolvedStationZones(null); setSolvedDbPerCraft(null);
+    setSolvedM(null); setSolvedUseDbSolver(null);
     setProtectedNoiseVal(null); setSolvedProtectedStn(null);
     setProportionalNoiseVal(null); setSolvedProportionalStn(null);
     setWarningMsg(null); setSolvedTMin(null); setSolvedTUsed(null); setErrorDetail(null);
@@ -272,6 +275,7 @@ export function useSolver() {
         setNoiseMatrix(useDbSolver ? data.noiseMatrix : data.countMatrix);
         setUnstatDetail(null);
         setSolvedStationZones(stationZones); setSolvedDbPerCraft(dbPerCraft);
+        setSolvedM(M); setSolvedUseDbSolver(useDbSolver);
         setProtectedNoiseVal(data.protectedNoise ?? null);
         setSolvedProtectedStn(data.protectedStations ?? null);
         setProportionalNoiseVal(data.proportionalNoise ?? null);
@@ -300,7 +304,7 @@ export function useSolver() {
     N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft,
     protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
     status, solvedT, paths, noiseMatrix, countMatrix, unstatDetail,
-    solvedStationZones, solvedDbPerCraft,
+    solvedStationZones, solvedDbPerCraft, solvedM, solvedUseDbSolver,
     protectedNoiseVal, solvedProtectedStn, proportionalNoiseVal, solvedProportionalStn, warningMsg, errorDetail, totalUtilNoise, solvedEndPos,
     optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected, proportionalAlloc,
     stationWeightedTransit, stationTransitWeights, aircraftMultipliers, utilNoiseMode,
