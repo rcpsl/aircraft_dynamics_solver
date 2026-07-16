@@ -1,5 +1,6 @@
 import { ZONE_COLORS } from './constants';
 import { useSolver } from './hooks/useSolver';
+import { buildZoneSummaryCSV, sanitizeFilename } from './utils';
 import GraphPanel from './components/GraphPanel';
 import SolverTab from './components/LeftPanel/SolverTab';
 import ZonesTab from './components/LeftPanel/ZonesTab';
@@ -20,6 +21,23 @@ export default function App() {
         return 1;
       }))
     : s.solvedT;
+
+  function handleExportZoneCSV() {
+    const csv = buildZoneSummaryCSV({
+      M: s.solvedM,
+      stationBaselines: s.solvedStationBaselines,
+      dbPerCraft: s.solvedDbPerCraft,
+      isDbMode: s.solvedUseDbSolver,
+      noiseMatrix: s.noiseMatrix.map(r => r.slice(0, effectiveT)),
+      countMatrix: s.countMatrix ? s.countMatrix.map(r => r.slice(0, effectiveT)) : null,
+    });
+    const name = s.resultName.trim() || s.defaultResultName;
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `${sanitizeFilename(name)}-by-zone.csv`; a.click();
+    URL.revokeObjectURL(url);
+  }
 
   const optLabel = [
     s.solvedOptimizeUtil  ? "utilitarian" : null,
@@ -82,6 +100,11 @@ export default function App() {
             <button className="config-btn" onClick={s.handleExportResults}
               disabled={s.status !== "sat" && s.status !== "unsat"}>
               Save Results
+            </button>
+            <button className="config-btn" onClick={handleExportZoneCSV}
+              disabled={s.status !== "sat"}
+              title="Export per-zone noise/aircraft summary (avg &amp; peak) as CSV">
+              Save Results (CSV)
             </button>
             <button className="config-btn" onClick={() => s.resultsFileInputRef.current.click()}
               title="Load only the saved results — leaves your current config untouched">

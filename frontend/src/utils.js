@@ -52,6 +52,40 @@ export function sanitizeFilename(name) {
   return name.trim().replace(/[^A-Za-z0-9-_+]+/g, "_").slice(0, 80) || "uam-results";
 }
 
+// Per-station noise/aircraft summary for CSV export — one row per station, labeled
+// "Zone" per the dashboard's terminology (each station is treated as its own zone).
+// Uses the same level formula as NoiseMatrix.jsx so the CSV matches what's shown on screen.
+export function buildZoneSummaryCSV({ M, stationBaselines, dbPerCraft, isDbMode, noiseMatrix, countMatrix }) {
+  const aircraftMatrix = countMatrix ?? noiseMatrix;
+
+  const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+  const peak = arr => Math.max(...arr);
+
+  const header = [
+    "Zone", "Avg Added dB", "Avg Total dB", "Peak Added dB", "Peak Total dB",
+    "Avg Aircraft", "Peak Aircraft",
+  ];
+  const rows = [];
+  for (let m = 0; m < M; m++) {
+    const baseline = stationBaselines[m];
+    const noiseRow = noiseMatrix[m], countRow = aircraftMatrix[m];
+    const addedDb = [], totalDb = [];
+    for (let t = 0; t < noiseRow.length; t++) {
+      const level = isDbMode ? baseline + noiseRow[t] : combinedDb(baseline, noiseRow[t], dbPerCraft);
+      addedDb.push(level - baseline);
+      totalDb.push(level);
+    }
+    rows.push([
+      `Zone ${m + 1}`,
+      avg(addedDb).toFixed(2), avg(totalDb).toFixed(2),
+      peak(addedDb).toFixed(2), peak(totalDb).toFixed(2),
+      avg(countRow).toFixed(2), peak(countRow),
+    ]);
+  }
+
+  return [header, ...rows].map(r => r.join(",")).join("\n");
+}
+
 export function computeTransitTime(path, endStation) {
   let firstMove = -1, firstArrival = -1;
   for (let t = 1; t < path.length; t++)
