@@ -193,10 +193,18 @@ export function useSolver() {
 
   const resultValues = Object.fromEntries(resultFields.map(([key, value]) => [key, value]));
 
-  // Live preview only (shown as the name input's placeholder before a solve exists
-  // to freeze values from) — handleExportResults recomputes this from the frozen
-  // solved* fields so the saved name always matches what was actually solved.
-  const defaultResultName = buildResultLabel({ N, M, D, U, optimizeUtil, optimizePrior, proportionalAlloc, useDbSolver });
+  // Derived from the frozen solved* fields (not live config) so the name only
+  // changes when a solve actually completes — not on every keystroke/click while
+  // the solver is running or the user is tweaking parameters for the next run.
+  function computeSolvedResultName() {
+    return buildResultLabel({
+      N: paths ? paths.length : N,
+      M: solvedM, D: solvedD, U: solvedU,
+      optimizeUtil: solvedOptimizeUtil, optimizePrior: solvedOptimizePrior,
+      proportionalAlloc: solvedProportionalAlloc, useDbSolver: solvedUseDbSolver,
+    });
+  }
+  const defaultResultName = computeSolvedResultName();
 
   function handleN(newN) {
     setN(newN);
@@ -291,14 +299,7 @@ export function useSolver() {
   // config that produced a result travels with it for reference without being
   // silently applied to the live left-panel state.
   function handleExportResults() {
-    // Named from the frozen solved* fields (not live config) so the name always
-    // matches what was actually solved, even if the left panel has since changed.
-    const name = resultName.trim() || buildResultLabel({
-      N: paths ? paths.length : N,
-      M: solvedM, D: solvedD, U: solvedU,
-      optimizeUtil: solvedOptimizeUtil, optimizePrior: solvedOptimizePrior,
-      proportionalAlloc: solvedProportionalAlloc, useDbSolver: solvedUseDbSolver,
-    });
+    const name = resultName.trim() || computeSolvedResultName();
     const envelope = {
       kind: "uam-results", version: 1,
       name,
