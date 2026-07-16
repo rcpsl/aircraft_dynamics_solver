@@ -21,10 +21,13 @@ export default function App() {
     : s.solvedT;
 
   const optLabel = [
-    s.solvedOptimizeUtil  ? "sufficientarian" : null,
+    s.solvedOptimizeUtil  ? "utilitarian" : null,
     s.solvedOptimizePrior ? "prioritarian"  : null,
     s.solvedOptimizeProp  ? "proportional"  : null,
   ].filter(Boolean).join(" + ");
+
+  // isSoftT: phase-2 ran with a window larger than T_min (soft-T mode)
+  const isSoftT = s.solvedTMin != null && s.solvedTUsed != null && s.solvedTUsed > s.solvedTMin;
 
   return (
     <div className="app">
@@ -40,25 +43,7 @@ export default function App() {
           ))}
         </div>
 
-        {s.activeTab === "solver" && (
-          <SolverTab
-            N={s.N} M={s.M} D={s.D} U={s.U} adjacency={s.adjacency}
-            startPos={s.startPos} endPos={s.endPos}
-            optimizeUtil={s.optimizeUtil} optimizePrior={s.optimizePrior} optimizeProp={s.optimizeProp}
-            autoProportional={s.autoProportional} autoProtected={s.autoProtected}
-            protectedStn={s.protectedStn} proportionalStn={s.proportionalStn}
-            stationZones={s.stationZones}
-            weightUtil={s.weightUtil} weightPrior={s.weightPrior} weightProp={s.weightProp}
-            handleN={s.handleN} handleM={s.handleM} setD={s.setD} setU={s.setU}
-            toggleAdj={s.toggleAdj} updateStartPos={s.updateStartPos} updateEndPos={s.updateEndPos}
-            setOptimizeUtil={s.setOptimizeUtil} setOptimizePrior={s.setOptimizePrior} setOptimizeProp={s.setOptimizeProp}
-            setAutoProportional={s.setAutoProportional} setAutoProtected={s.setAutoProtected}
-            setProtectedStn={s.setProtectedStn} setProportionalStn={s.setProportionalStn}
-            setWeightUtil={s.setWeightUtil} setWeightPrior={s.setWeightPrior} setWeightProp={s.setWeightProp}
-            hardT={s.hardT} tMax={s.tMax} weightTime={s.weightTime}
-            setHardT={s.setHardT} setTMax={s.setTMax} setWeightTime={s.setWeightTime}
-          />
-        )}
+        {s.activeTab === "solver" && <SolverTab {...s} />}
         {s.activeTab === "zones" && (
           <ZonesTab stationZones={s.stationZones} setStationZones={s.setStationZones} />
         )}
@@ -69,6 +54,12 @@ export default function App() {
         <button className="solve-btn" onClick={s.handleSolve} disabled={s.status === "solving"}>
           {s.status === "solving" ? "Solving…" : "Run Solver"}
         </button>
+        {s.status === "solving" && (
+          <button className="solve-btn" onClick={s.handleCancel}
+            style={{ background: "#b91c1c", marginTop: "6px" }}>
+            Stop
+          </button>
+        )}
 
         <div className="config-btns">
           <button className="config-btn" onClick={s.handleExport}>Save Config</button>
@@ -90,21 +81,28 @@ export default function App() {
             {s.status === "sat" && (
               <div>
                 <span className="status sat">
-                  ✓ sat — T_min = {s.solvedTMin ?? s.solvedT}
-                  {s.solvedTUsed != null && s.solvedTUsed !== (s.solvedTMin ?? s.solvedT)
-                    ? ` · T_used = ${s.solvedTUsed}` : ""}
+                  {isSoftT
+                    ? `✓ sat — T_min = ${s.solvedTMin}  ·  T_used = ${effectiveT}  ·  T_max = ${s.solvedTUsed}`
+                    : `✓ sat — T = ${s.solvedTMin ?? s.solvedT}`}
                   {optLabel ? `  ·  ${optLabel} optimized` : ""}
                 </span>
                 {s.protectedNoiseVal != null && (
                   <div style={{ fontSize: "13px", color: "#44403c", marginTop: "6px" }}>
-                    Total aircraft visits to protected stations: <strong>{s.protectedNoiseVal}</strong>
+                    {s.useDbSolver ? "Total dB-weighted exposure at protected stations" : "Total aircraft visits to protected stations"}:{" "}
+                    <strong>{s.protectedNoiseVal}{s.useDbSolver ? " dB·t" : ""}</strong>
                     {s.solvedProtectedStn?.length > 0 ? ` (stations ${s.solvedProtectedStn.join(", ")})` : ""}
                   </div>
                 )}
                 {s.proportionalNoiseVal != null && (
                   <div style={{ fontSize: "13px", color: "#44403c", marginTop: "6px" }}>
-                    Total aircraft visits to burden stations: <strong>{s.proportionalNoiseVal}</strong>
+                    {s.useDbSolver ? "Total dB-weighted exposure at burden stations" : "Total aircraft visits to burden stations"}:{" "}
+                    <strong>{s.proportionalNoiseVal}{s.useDbSolver ? " dB·t" : ""}</strong>
                     {s.solvedProportionalStn?.length > 0 ? ` (stations ${s.solvedProportionalStn.join(", ")})` : ""}
+                  </div>
+                )}
+                {s.totalUtilNoise != null && (
+                  <div style={{ fontSize: "13px", color: "#44403c", marginTop: "6px" }}>
+                    Total noise sum (utilitarian): <strong>{s.totalUtilNoise.toFixed(2)} dB·t</strong>
                   </div>
                 )}
                 {s.warningMsg && (
@@ -118,16 +116,19 @@ export default function App() {
               <span className="status unsat">✗ unsat — {s.unstatDetail || "try relaxing D or U"}</span>
             )}
             {s.status === "error" && (
-              <span className="status error">Connection error — is the server running on port 5050?</span>
+              <span className="status error">{s.errorDetail ?? `Connection error — is the server running on port ${s.useDbSolver ? 5051 : 5050}?`}</span>
             )}
           </div>
         )}
 
         {s.paths && <PathsTable paths={s.paths.map(p => p.slice(0, effectiveT))} solvedT={effectiveT} />}
-        {s.paths && <TransitTable paths={s.paths.map(p => p.slice(0, effectiveT))} endPos={s.endPos} />}
+        {s.paths && <TransitTable paths={s.paths.map(p => p.slice(0, effectiveT))} endPos={s.solvedEndPos ?? s.endPos} />}
         {s.noiseMatrix && (
-          <NoiseMatrix noiseMatrix={s.noiseMatrix.map(r => r.slice(0, effectiveT))} solvedT={effectiveT} M={s.M}
-            stationZones={s.solvedStationZones} dbPerCraft={s.solvedDbPerCraft} />
+          <NoiseMatrix
+            noiseMatrix={s.noiseMatrix.map(r => r.slice(0, effectiveT))}
+            countMatrix={s.countMatrix ? s.countMatrix.map(r => r.slice(0, effectiveT)) : null}
+            solvedT={effectiveT} M={s.M}
+            stationZones={s.solvedStationZones} dbPerCraft={s.solvedDbPerCraft} isDbMode={s.useDbSolver} />
         )}
       </div>
 

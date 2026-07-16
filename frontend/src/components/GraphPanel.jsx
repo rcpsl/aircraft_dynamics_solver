@@ -83,7 +83,7 @@ export default function GraphPanel({ M, adjacency, stationZones }) {
           );
         })}
         {positions.map(({ x, y }, idx) => {
-          const zone = ZONES[(stationZones?.[idx] || 1) - 1];
+          const zone = ZONES[(stationZones?.[idx] || 1) - 1] ?? ZONES[0];
           return (
             <g key={`n${idx}`} style={{ cursor: "grab" }} onMouseDown={e => startDrag(e, idx)}>
               <circle cx={x} cy={y} r={NODE_R} fill={ZONE_COLORS[zone.category]} stroke="#1c1917" strokeWidth="1.5" />

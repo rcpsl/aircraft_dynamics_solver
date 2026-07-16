@@ -18,28 +18,24 @@ export const STORAGE_KEY = "uam-config";
 
 // Zones that benefit from UAM (transit access, economic activity, jobs) and
 // should therefore accept a proportional share of noise burden.
-export const BENEFIT_ZONE_IDS = [1, 2, 8, 9];
+export const BENEFIT_ZONE_IDS = [3, 4, 5];   // Urban, Downtown, Airport
 
 // Zones that already carry cumulative disadvantage and should receive
 // prioritarian protection from additional UAM noise.
-export const PROTECTED_ZONE_IDS = [2, 4, 7, 9];
+export const PROTECTED_ZONE_IDS = [1, 2];     // Suburban, Rural
 
 export const ZONES = [
-  { id: 1, name: "Commercial Hub",      dba: 63, category: "Very Noisy Urban" },
-  { id: 2, name: "Mixed-Use Corridor",  dba: 52, category: "Urban"            },
-  { id: 3, name: "Affluent Enclave",    dba: 42, category: "Quiet Suburban"   },
-  { id: 4, name: "Sacrifice Zone",      dba: 55, category: "Urban"            },
-  { id: 5, name: "Institutional",       dba: 48, category: "Normal Suburban"  },
-  { id: 6, name: "Aging-in-Place",      dba: 40, category: "Quiet Suburban"   },
-  { id: 7, name: "Gentrifying",         dba: 58, category: "Noisy Urban"      },
-  { id: 8, name: "Growing / Future",    dba: 50, category: "Normal Suburban"  },
-  { id: 9, name: "Transit Double-Bind", dba: 50, category: "Normal Suburban"  },
+  { id: 1, name: "Suburban", dba: 45, category: "Suburban" },
+  { id: 2, name: "Rural",    dba: 30, category: "Rural"    },
+  { id: 3, name: "Urban",    dba: 65, category: "Urban"    },
+  { id: 4, name: "Downtown", dba: 68, category: "Downtown" },
+  { id: 5, name: "Airport",  dba: 70, category: "Airport"  },
 ];
 
 export const ZONE_COLORS = {
-  "Very Noisy Urban": "#b91c1c",
-  "Noisy Urban":      "#c2410c",
-  "Urban":            "#b45309",
-  "Normal Suburban":  "#1d4ed8",
-  "Quiet Suburban":   "#15803d",
+  "Downtown": "#b45309",
+  "Rural":    "#15803d",
+  "Suburban": "#1d4ed8",
+  "Airport":  "#b91c1c",
+  "Urban":    "#c2410c",
 };

@@ -207,6 +207,17 @@ section h2 {
   color: #1c1917;
 }
 
+.field-input {
+  padding: 3px 6px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid #d4cfc8;
+  border-radius: 4px;
+  background: #faf9f7;
+  color: #1c1917;
+  box-sizing: border-box;
+}
+
 .station-chips {
   display: flex;
   flex-wrap: wrap;

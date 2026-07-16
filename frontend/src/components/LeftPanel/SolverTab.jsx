@@ -5,10 +5,15 @@ export default function SolverTab({
   N, M, D, U, adjacency, startPos, endPos,
   optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected,
   protectedStn, proportionalStn, stationZones, weightUtil, weightPrior, weightProp,
-  handleN, handleM, setD, setU, toggleAdj, updateStartPos, updateEndPos,
+  handleN, handleM, setD, setU, toggleAdj, updateStartPos, updateEndPos, removeAircraft,
   hardT, tMax, weightTime, setHardT, setTMax, setWeightTime,
   setOptimizeUtil, setOptimizePrior, setOptimizeProp, setAutoProportional, setAutoProtected,
   setProtectedStn, setProportionalStn, setWeightUtil, setWeightPrior, setWeightProp,
+  proportionalAlloc, setProportionalAlloc,
+  stationWeightedTransit, setStationWeightedTransit, stationTransitWeights, setStationTransitWeights,
+  aircraftMultipliers, setAircraftMultipliers,
+  utilNoiseMode, setUtilNoiseMode,
+  useRouteMode, setUseRouteMode, routeVertiports, setRouteVertiports, routeN, setRouteN, effectiveN,
   useDbSolver, setUseDbSolver,
 }) {
   return (
@@ -29,37 +34,99 @@ export default function SolverTab({
 
       <section>
         <h2>Parameters</h2>
-        <Slider label="N  aircraft"  value={N} min={1} max={10} onChange={handleN} />
-        <Slider label="M  stations"  value={M} min={2} max={10} onChange={handleM} />
+
+        <label className="check-row" style={{ marginBottom: "10px" }}>
+          <input type="checkbox" checked={useRouteMode}
+            onChange={e => setUseRouteMode(e.target.checked)} />
+          Route mode
+        </label>
+        {useRouteMode && (
+          <div className="opt-indent" style={{ marginBottom: "10px" }}>
+            <div className="adj-hint" style={{ marginBottom: "5px" }}>Vertiports</div>
+            <div className="station-chips">
+              {Array.from({ length: M }, (_, idx) => {
+                const s = idx + 1;
+                const on = routeVertiports.includes(s);
+                return (
+                  <div key={s} className={`station-chip${on ? " on" : ""}`}
+                    onClick={() => on
+                      ? setRouteVertiports(vs => vs.filter(x => x !== s))
+                      : setRouteVertiports(vs => [...vs, s].sort((a, b) => a - b))}>
+                    {s}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="weight-row" style={{ marginTop: "6px" }}>
+              <span className="wlabel">N / dir</span>
+              <input type="number" min={1} max={10} value={routeN}
+                onChange={e => setRouteN(Math.max(1, parseInt(e.target.value) || 1))}
+                className="field-input" style={{ width: "52px" }} />
+            </div>
+            {routeVertiports.length >= 2 ? (
+              <div className="adj-hint" style={{ marginTop: "5px" }}>
+                {effectiveN} aircraft total &nbsp;·&nbsp; {routeVertiports.length} vertiports × {routeN} per direction
+              </div>
+            ) : (
+              <div className="adj-hint" style={{ marginTop: "5px", color: "#b91c1c" }}>
+                Select at least 2 vertiports
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={useRouteMode ? { opacity: 0.35, pointerEvents: "none" } : {}}>
+          <Slider label="N  aircraft" value={useRouteMode ? effectiveN : N} min={1} max={20} onChange={handleN} />
+        </div>
+        <Slider label="M  stations"  value={M} min={2} max={16} onChange={handleM} />
         <Slider label={useDbSolver ? "D  abs. dB limit" : "D  noise cap"}
           value={D} min={useDbSolver ? 40 : 0} max={useDbSolver ? 90 : 10}
           step={useDbSolver ? 1 : 1} onChange={setD} />
-        <Slider label="U  global diff" value={U} min={0} max={useDbSolver ? 30 : 10} step={useDbSolver ? 0.5 : 1} onChange={setU} />
+        <Slider label="U  global diff" value={U} min={0} max={useDbSolver ? 50 : 10} step={useDbSolver ? 0.5 : 1} onChange={setU} />
       </section>
 
-      <section>
-        <h2>Start Positions</h2>
-        <div className="pos-grid">
-          {startPos.map((p, i) => (
-            <div className="pos-cell" key={i}>
-              <span>A{i}</span>
-              <input type="number" min={1} max={M} value={p}
-                onChange={e => updateStartPos(i, e.target.value)} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>End Positions</h2>
-        <div className="pos-grid">
-          {endPos.map((p, i) => (
-            <div className="pos-cell" key={i}>
-              <span>A{i}</span>
-              <input type="number" min={1} max={M} value={p}
-                onChange={e => updateEndPos(i, e.target.value)} />
-            </div>
-          ))}
+      <section style={useRouteMode ? { opacity: 0.35, pointerEvents: "none" } : {}}>
+        <h2>Aircraft</h2>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: useDbSolver ? "28px 1fr 1fr 1fr 24px" : "28px 1fr 1fr 24px",
+          gap: "4px 6px",
+          alignItems: "center",
+        }}>
+          <div />
+          <div className="adj-hint" style={{ textAlign: "center" }}>Start</div>
+          <div className="adj-hint" style={{ textAlign: "center" }}>End</div>
+          {useDbSolver && <div className="adj-hint" style={{ textAlign: "center" }}>Mult</div>}
+          <div />
+          {startPos.flatMap((p, i) => [
+            <span key={`lbl-${i}`} style={{ fontSize: "12px", color: "#78716c" }}>A{i}</span>,
+            <input key={`s-${i}`} type="number" min={1} max={M} value={p}
+              onChange={e => updateStartPos(i, e.target.value)}
+              className="field-input" style={{ width: "100%" }} />,
+            <input key={`e-${i}`} type="number" min={1} max={M} value={endPos[i]}
+              onChange={e => updateEndPos(i, e.target.value)}
+              className="field-input" style={{ width: "100%" }} />,
+            ...(useDbSolver ? [
+              <input key={`m-${i}`} type="number" min={1} step={1} value={aircraftMultipliers[i]}
+                onChange={e => {
+                  const nv = Math.max(1, parseInt(e.target.value, 10) || 1);
+                  setAircraftMultipliers(ms => ms.map((x, j) => j === i ? nv : x));
+                }}
+                className="field-input" style={{ width: "100%" }} />,
+            ] : []),
+            <button key={`del-${i}`} type="button" onClick={() => removeAircraft(i)}
+              disabled={N <= 1} title="Remove aircraft"
+              style={{
+                width: "22px", height: "22px", padding: 0, lineHeight: 1,
+                border: "1px solid #d4cfc8", borderRadius: "4px",
+                background: N <= 1 ? "#f0efec" : "#faf9f7",
+                color: N <= 1 ? "#c7c2ba" : "#b91c1c",
+                cursor: N <= 1 ? "not-allowed" : "pointer",
+                fontSize: "14px",
+              }}>
+              ×
+            </button>,
+          ])}
         </div>
       </section>
 
@@ -92,6 +159,36 @@ export default function SolverTab({
               onChange={e => setWeightUtil(Number(e.target.value))} />
             <span className="wval">{weightUtil.toFixed(1)}</span>
           </div>
+          {useDbSolver && optimizeUtil && (
+            <>
+              <label className="check-row" style={{ marginTop: "8px" }}>
+                <input type="checkbox" checked={utilNoiseMode}
+                  onChange={e => setUtilNoiseMode(e.target.checked)} />
+                Use actual noise sum instead of transit time
+              </label>
+              <label className="check-row" style={{ marginTop: "6px" }}>
+                <input type="checkbox" checked={stationWeightedTransit}
+                  onChange={e => setStationWeightedTransit(e.target.checked)} />
+                Station-weighted transit cost
+              </label>
+              {stationWeightedTransit && (
+                <div style={{ marginTop: "4px" }}>
+                  {stationTransitWeights.map((w, m) => (
+                    <div key={m} className="weight-row" style={{ marginTop: "3px" }}>
+                      <span className="wlabel">Stn {m + 1}</span>
+                      <input
+                        type="number" min={0} step={0.1} value={w}
+                        onChange={e => {
+                          const v = Math.max(0, parseFloat(e.target.value) || 0);
+                          setStationTransitWeights(ws => ws.map((x, i) => i === m ? v : x));
+                        }}
+                        className="field-input" style={{ width: "60px" }} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         <label className="check-row" style={{ marginTop: "10px" }}>
@@ -176,7 +273,7 @@ export default function SolverTab({
               <input type="number" min={2} step={1}
                 value={tMax ?? ""}
                 placeholder="auto"
-                style={{ width: "60px", padding: "3px 6px", fontSize: "13px", fontFamily: "inherit", border: "1px solid #d4cfc8", borderRadius: "4px", background: "#faf9f7", color: "#1c1917" }}
+                className="field-input" style={{ width: "60px" }}
                 onChange={e => setTMax(e.target.value === "" ? null : Math.max(2, parseInt(e.target.value) || 2))}
               />
             </div>
@@ -187,6 +284,13 @@ export default function SolverTab({
               <span className="wval">{weightTime.toFixed(1)}</span>
             </div>
           </div>
+        )}
+        {useDbSolver && (
+          <label className="check-row" style={{ marginTop: "10px" }}>
+            <input type="checkbox" checked={proportionalAlloc}
+              onChange={e => setProportionalAlloc(e.target.checked)} />
+            Proportional allocation (active stations bear more noise than adjacent, then others)
+          </label>
         )}
       </section>
     </div>
