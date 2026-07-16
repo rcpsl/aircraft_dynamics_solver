@@ -1,9 +1,8 @@
-import { ZONES } from '../../constants';
 import { aircraftColor, noiseColor, combinedDb } from '../../utils';
 
-function levelRows(noiseMatrix, stationZones, dbPerCraft, isDbMode) {
+function levelRows(noiseMatrix, stationBaselines, dbPerCraft, isDbMode) {
   return noiseMatrix.map((row, m) => {
-    const baseline = ZONES[(stationZones[m] || 1) - 1].dba;
+    const baseline = stationBaselines[m];
     const levels = row.map(count => isDbMode ? baseline + count : combinedDb(baseline, count, dbPerCraft));
     const avg = levels.reduce((a, b) => a + b, 0) / levels.length;
     return { baseline, counts: row, levels, avg };
@@ -49,10 +48,10 @@ function LevelTable({ title, legend, rows, solvedT, format, tooltip }) {
   );
 }
 
-export default function NoiseMatrix({ noiseMatrix, countMatrix, solvedT, M, stationZones, dbPerCraft, isDbMode }) {
+export default function NoiseMatrix({ noiseMatrix, countMatrix, solvedT, M, stationBaselines, dbPerCraft, isDbMode }) {
   const counts = countMatrix ?? noiseMatrix;
   const maxVal = Math.max(1, ...counts.map(r => Math.max(...r)));
-  const rows = levelRows(noiseMatrix, stationZones, dbPerCraft, isDbMode);
+  const rows = levelRows(noiseMatrix, stationBaselines, dbPerCraft, isDbMode);
 
   return (
     <>

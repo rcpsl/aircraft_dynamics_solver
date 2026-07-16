@@ -45,7 +45,8 @@ export default function App() {
 
         {s.activeTab === "solver" && <SolverTab {...s} />}
         {s.activeTab === "zones" && (
-          <ZonesTab stationZones={s.stationZones} setStationZones={s.setStationZones} />
+          <ZonesTab stationZones={s.stationZones} stationBaselines={s.stationBaselines}
+            updateStationZone={s.updateStationZone} updateStationBaseline={s.updateStationBaseline} />
         )}
         {s.activeTab === "noise" && (
           <NoiseModelTab dbPerCraft={s.dbPerCraft} setDbPerCraft={s.setDbPerCraft} />
@@ -146,7 +147,7 @@ export default function App() {
             noiseMatrix={s.noiseMatrix.map(r => r.slice(0, effectiveT))}
             countMatrix={s.countMatrix ? s.countMatrix.map(r => r.slice(0, effectiveT)) : null}
             solvedT={effectiveT} M={s.solvedM}
-            stationZones={s.solvedStationZones} dbPerCraft={s.solvedDbPerCraft} isDbMode={s.solvedUseDbSolver} />
+            stationBaselines={s.solvedStationBaselines} dbPerCraft={s.solvedDbPerCraft} isDbMode={s.solvedUseDbSolver} />
         )}
       </div>
 

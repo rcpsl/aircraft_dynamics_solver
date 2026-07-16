@@ -30,6 +30,12 @@ export function useSolver() {
   const [stationZones, setStationZones] = useState(
     (saved.stationZones ?? DEFAULT_ZONES).map(z => (z >= 1 && z <= ZONES.length) ? z : 1)
   );
+  const [stationBaselines, setStationBaselines] = useState(() => {
+    const zones = (saved.stationZones ?? DEFAULT_ZONES).map(z => (z >= 1 && z <= ZONES.length) ? z : 1);
+    return Array.isArray(saved.stationBaselines) && saved.stationBaselines.length === zones.length
+      ? saved.stationBaselines
+      : zones.map(z => ZONES[z - 1].dba);
+  });
   const [dbPerCraft,   setDbPerCraft]   = useState(saved.dbPerCraft   ?? DEFAULT_DB_PER_CRAFT);
   const [protectedStn,     setProtectedStn]     = useState(saved.protectedStn     ?? []);
   const [proportionalStn,  setProportionalStn]  = useState(saved.proportionalStn  ?? []);
@@ -51,6 +57,7 @@ export function useSolver() {
   const [countMatrix,       setCountMatrix]       = useState(savedResults.countMatrix       ?? null);
   const [unstatDetail,      setUnstatDetail]      = useState(savedResults.unstatDetail      ?? null);
   const [solvedStationZones,   setSolvedStationZones]   = useState(savedResults.solvedStationZones   ?? null);
+  const [solvedStationBaselines, setSolvedStationBaselines] = useState(savedResults.solvedStationBaselines ?? null);
   const [solvedDbPerCraft,     setSolvedDbPerCraft]     = useState(savedResults.solvedDbPerCraft     ?? null);
   const [solvedM,              setSolvedM]              = useState(savedResults.solvedM              ?? null);
   const [solvedUseDbSolver,    setSolvedUseDbSolver]    = useState(savedResults.solvedUseDbSolver    ?? null);
@@ -113,6 +120,7 @@ export function useSolver() {
     ['startPos', startPos, setStartPos],
     ['endPos', endPos, setEndPos],
     ['stationZones', stationZones, setStationZones],
+    ['stationBaselines', stationBaselines, setStationBaselines],
     ['dbPerCraft', dbPerCraft, setDbPerCraft],
     ['protectedStn', protectedStn, setProtectedStn],
     ['proportionalStn', proportionalStn, setProportionalStn],
@@ -159,6 +167,7 @@ export function useSolver() {
     ['countMatrix', countMatrix, setCountMatrix],
     ['unstatDetail', unstatDetail, setUnstatDetail],
     ['solvedStationZones', solvedStationZones, setSolvedStationZones],
+    ['solvedStationBaselines', solvedStationBaselines, setSolvedStationBaselines],
     ['solvedDbPerCraft', solvedDbPerCraft, setSolvedDbPerCraft],
     ['solvedM', solvedM, setSolvedM],
     ['solvedUseDbSolver', solvedUseDbSolver, setSolvedUseDbSolver],
@@ -200,10 +209,24 @@ export function useSolver() {
     setStartPos(p => p.map(v => Math.min(v, newM)));
     setEndPos(p   => p.map(v => Math.min(v, newM)));
     setStationZones(z => newM <= z.length ? z.slice(0, newM) : z.concat(Array.from({ length: newM - z.length }, () => 1)));
+    setStationBaselines(b => newM <= b.length ? b.slice(0, newM) : b.concat(Array.from({ length: newM - b.length }, () => ZONES[0].dba)));
     setProtectedStn(ps => ps.filter(s => s <= newM));
     setProportionalStn(ps => ps.filter(s => s <= newM));
     setRouteVertiports(vs => vs.filter(s => s <= newM));
     setStationTransitWeights(w => newM <= w.length ? w.slice(0, newM) : [...w, ...Array(newM - w.length).fill(1.0)]);
+  }
+
+  // Changing a station's zone resets its baseline to that zone's default dBA;
+  // updateStationBaseline then lets the user fine-tune from there independently.
+  function updateStationZone(idx, zoneId) {
+    setStationZones(z => z.map((v, i) => i === idx ? zoneId : v));
+    setStationBaselines(b => b.map((v, i) => i === idx ? ZONES[zoneId - 1].dba : v));
+  }
+
+  function updateStationBaseline(idx, raw) {
+    const v = Number(raw);
+    if (Number.isNaN(v)) return;
+    setStationBaselines(b => b.map((x, i) => i === idx ? v : x));
   }
 
   function toggleAdj(i, j) {
@@ -329,7 +352,7 @@ export function useSolver() {
     abortRef.current = new AbortController();
     setStatus("solving");
     setPaths(null); setNoiseMatrix(null); setCountMatrix(null); setSolvedT(null);
-    setSolvedStationZones(null); setSolvedDbPerCraft(null);
+    setSolvedStationZones(null); setSolvedStationBaselines(null); setSolvedDbPerCraft(null);
     setSolvedM(null); setSolvedUseDbSolver(null);
     setSolvedD(null); setSolvedU(null); setSolvedProportionalAlloc(null);
     setProtectedNoiseVal(null); setSolvedProtectedStn(null);
@@ -363,7 +386,7 @@ export function useSolver() {
           ...(!hardT ? { weightTime } : {}),
           ...(useDbSolver ? {
             aircraftDB: dbPerCraft,
-            baseline: stationZones.map(z => ZONES[(z || 1) - 1].dba),
+            baseline: stationBaselines,
             proportionalAllocation: proportionalAlloc,
             ...(!useRouteMode ? { aircraftMultipliers } : {}),
             ...(stationWeightedTransit && optimizeUtil ? { stationTransitWeights } : {}),
@@ -390,7 +413,7 @@ export function useSolver() {
           noiseMatrix: useDbSolver ? data.noiseMatrix : data.countMatrix,
           countMatrix: data.countMatrix,
           unstatDetail: null,
-          solvedStationZones: stationZones, solvedDbPerCraft: dbPerCraft,
+          solvedStationZones: stationZones, solvedStationBaselines: stationBaselines, solvedDbPerCraft: dbPerCraft,
           solvedM: M, solvedUseDbSolver: useDbSolver,
           solvedD: D, solvedU: U, solvedProportionalAlloc: proportionalAlloc,
           protectedNoiseVal: data.protectedNoise ?? null,
@@ -422,10 +445,10 @@ export function useSolver() {
   }
 
   return {
-    N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft,
+    N, M, D, U, adjacency, startPos, endPos, stationZones, stationBaselines, dbPerCraft,
     protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
     status, solvedT, paths, noiseMatrix, countMatrix, unstatDetail,
-    solvedStationZones, solvedDbPerCraft, solvedM, solvedUseDbSolver, solvedD, solvedU, solvedProportionalAlloc,
+    solvedStationZones, solvedStationBaselines, solvedDbPerCraft, solvedM, solvedUseDbSolver, solvedD, solvedU, solvedProportionalAlloc,
     resultName, setResultName, defaultResultName,
     protectedNoiseVal, solvedProtectedStn, proportionalNoiseVal, solvedProportionalStn, warningMsg, errorDetail, totalUtilNoise, solvedEndPos,
     optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected, proportionalAlloc,
@@ -439,12 +462,13 @@ export function useSolver() {
     setStationWeightedTransit, setStationTransitWeights, setAircraftMultipliers, setUtilNoiseMode,
     setUseRouteMode, setRouteVertiports, setRouteN,
     setUseDbSolver,
-    setD, setU, setStationZones, setDbPerCraft,
+    setD, setU, setStationZones, setStationBaselines, setDbPerCraft,
     setHardT, setTMax, setWeightTime,
     setWeightUtil, setWeightPrior, setWeightProp,
     setOptimizeUtil, setOptimizePrior, setOptimizeProp,
     setProtectedStn, setProportionalStn, setActiveTab,
     handleN, handleM, toggleAdj, updateStartPos, updateEndPos, removeAircraft,
+    updateStationZone, updateStationBaseline,
     handleExport, handleImport, handleSolve, handleCancel,
     handleExportResults, handleImportResults,
   };
