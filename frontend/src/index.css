@@ -266,6 +266,41 @@ section h2 {
 .config-btn:hover { background: #f3f1ed; border-color: #a8a29e; }
 .config-btn:disabled { color: #c7c2ba; border-color: #e5e2db; cursor: not-allowed; background: transparent; }
 
+.config-btn-primary { background: #1c1917; color: #f8f6f2; border-color: #1c1917; }
+.config-btn-primary:hover { background: #292524; border-color: #292524; }
+
+/* Load Results confirmation modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 25, 23, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+.modal-box {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 24px 28px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 40px rgba(28, 25, 23, 0.25);
+}
+
+.modal-box h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1c1917;
+  margin-bottom: 8px;
+}
+
 /* Tab bar */
 .tab-bar {
   display: flex;

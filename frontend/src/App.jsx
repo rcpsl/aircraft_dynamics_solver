@@ -7,6 +7,7 @@ import NoiseModelTab from './components/LeftPanel/NoiseModelTab';
 import PathsTable from './components/RightPanel/PathsTable';
 import TransitTable from './components/RightPanel/TransitTable';
 import NoiseMatrix from './components/RightPanel/NoiseMatrix';
+import ResultsImportPreview from './components/RightPanel/ResultsImportPreview';
 
 export default function App() {
   const s = useSolver();
@@ -77,16 +78,25 @@ export default function App() {
             value={s.resultName} onChange={e => s.setResultName(e.target.value)}
             title="Optional name for Save Results — leave blank to auto-name from N, M, and active fairness principles"
             style={{ width: "100%", marginBottom: "6px", boxSizing: "border-box" }} />
-          <div className="config-btns">
+          <div className="config-btns" style={{ marginBottom: "6px" }}>
             <button className="config-btn" onClick={s.handleExportResults}
               disabled={s.status !== "sat" && s.status !== "unsat"}>
               Save Results
             </button>
-            <button className="config-btn" onClick={() => s.resultsFileInputRef.current.click()}>
+            <button className="config-btn" onClick={() => s.resultsFileInputRef.current.click()}
+              title="Load only the saved results — leaves your current config untouched">
               Load Results
             </button>
             <input ref={s.resultsFileInputRef} type="file" accept=".json"
               style={{ display: "none" }} onChange={s.handleImportResults} />
+          </div>
+          <div className="config-btns">
+            <button className="config-btn" onClick={() => s.resultsWithConfigFileInputRef.current.click()}
+              title="Load results and replace your current config — asks for confirmation first">
+              Load Results + Config
+            </button>
+            <input ref={s.resultsWithConfigFileInputRef} type="file" accept=".json"
+              style={{ display: "none" }} onChange={s.handleImportResultsWithConfig} />
           </div>
         </div>
 
@@ -150,6 +160,14 @@ export default function App() {
             stationBaselines={s.solvedStationBaselines} dbPerCraft={s.solvedDbPerCraft} isDbMode={s.solvedUseDbSolver} />
         )}
       </div>
+
+      {s.pendingResultsImport && (
+        <ResultsImportPreview
+          envelope={s.pendingResultsImport}
+          onConfirm={s.confirmImportResults}
+          onCancel={s.cancelImportResults}
+        />
+      )}
 
       {/* ── Graph panel ── */}
       <div className="graph-panel">

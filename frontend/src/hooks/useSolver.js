@@ -104,8 +104,10 @@ export function useSolver() {
   const [useDbSolver,          setUseDbSolver]          = useState(saved.useDbSolver       ?? false);
   const [activeTab,         setActiveTab]         = useState("solver");
   const [resultName,        setResultName]        = useState("");
+  const [pendingResultsImport, setPendingResultsImport] = useState(null);
   const fileInputRef = useRef(null);
   const resultsFileInputRef = useRef(null);
+  const resultsWithConfigFileInputRef = useRef(null);
   const abortRef     = useRef(null);
 
   // Single source of truth for config save/load: [key, currentValue, setter] triples.
@@ -311,26 +313,71 @@ export function useSolver() {
     URL.revokeObjectURL(url);
   }
 
+  function parseResultsEnvelope(ev) {
+    const envelope = JSON.parse(ev.target.result);
+    if (envelope.kind !== "uam-results" || !envelope.results) {
+      alert("This doesn't look like a results file — try Load Config instead?");
+      return null;
+    }
+    return envelope;
+  }
+
+  function applyResultsOnly(envelope) {
+    for (const [key, , setter] of resultFields) {
+      if (envelope.results[key] !== undefined) setter(envelope.results[key]);
+    }
+    if (envelope.name) setResultName(envelope.name);
+    localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(envelope.results));
+  }
+
+  // Results-only load: doesn't touch the live left-panel config, so it's safe
+  // to apply immediately without a confirmation step.
   function handleImportResults(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => {
       try {
-        const envelope = JSON.parse(ev.target.result);
-        if (envelope.kind !== "uam-results" || !envelope.results) {
-          alert("This doesn't look like a results file — try Load Config instead?");
-          return;
-        }
-        for (const [key, , setter] of resultFields) {
-          if (envelope.results[key] !== undefined) setter(envelope.results[key]);
-        }
-        if (envelope.name) setResultName(envelope.name);
-        localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(envelope.results));
+        const envelope = parseResultsEnvelope(ev);
+        if (envelope) applyResultsOnly(envelope);
       } catch { alert("Invalid results file."); }
     };
     reader.readAsText(file);
     e.target.value = "";
+  }
+
+  // Results + config load overwrites the live left-panel config, so it stages
+  // the parsed envelope for read-only review — only confirmImportResults
+  // actually writes it to state.
+  function handleImportResultsWithConfig(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const envelope = parseResultsEnvelope(ev);
+        if (envelope) setPendingResultsImport(envelope);
+      } catch { alert("Invalid results file."); }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
+  function confirmImportResults() {
+    if (!pendingResultsImport) return;
+    const envelope = pendingResultsImport;
+    const c = envelope.config || {};
+    if (c.N !== undefined) handleN(c.N);
+    if (c.M !== undefined) handleM(c.M);
+    for (const [key, , setter] of configFields) {
+      if (c[key] !== undefined) setter(c[key]);
+    }
+    applyResultsOnly(envelope);
+    setPendingResultsImport(null);
+  }
+
+  function cancelImportResults() {
+    setPendingResultsImport(null);
   }
 
   function handleCancel() {
@@ -455,11 +502,12 @@ export function useSolver() {
     status, solvedT, paths, noiseMatrix, countMatrix, unstatDetail,
     solvedStationZones, solvedStationBaselines, solvedDbPerCraft, solvedM, solvedUseDbSolver, solvedD, solvedU, solvedProportionalAlloc,
     resultName, setResultName, defaultResultName,
+    pendingResultsImport, confirmImportResults, cancelImportResults,
     protectedNoiseVal, solvedProtectedStn, proportionalNoiseVal, solvedProportionalStn, warningMsg, errorDetail, totalUtilNoise, solvedEndPos,
     optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected, proportionalAlloc,
     stationWeightedTransit, stationTransitWeights, aircraftMultipliers, utilNoiseMode,
     useRouteMode, routeVertiports, routeN, effectiveN,
-    useDbSolver, activeTab, fileInputRef, resultsFileInputRef,
+    useDbSolver, activeTab, fileInputRef, resultsFileInputRef, resultsWithConfigFileInputRef,
     stationCategories,
     hardT, tMax, weightTime, solvedTMin, solvedTUsed,
     solvedOptimizeUtil, solvedOptimizePrior, solvedOptimizeProp,
@@ -475,6 +523,6 @@ export function useSolver() {
     handleN, handleM, toggleAdj, updateStartPos, updateEndPos, removeAircraft,
     updateStationZone, updateStationBaseline,
     handleExport, handleImport, handleSolve, handleCancel,
-    handleExportResults, handleImportResults,
+    handleExportResults, handleImportResults, handleImportResultsWithConfig,
   };
 }
