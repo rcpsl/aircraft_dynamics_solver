@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   DEFAULT_N, DEFAULT_M, DEFAULT_D, DEFAULT_U,
   DEFAULT_ADJ, DEFAULT_START, DEFAULT_END, DEFAULT_ZONES,
-  DEFAULT_DB_PER_CRAFT, STORAGE_KEY, RESULTS_STORAGE_KEY, BENEFIT_ZONE_IDS, PROTECTED_ZONE_IDS, ZONES,
+  DEFAULT_DB_PER_CRAFT, STORAGE_KEY, RESULTS_STORAGE_KEY, BENEFIT_ZONE_IDS, PROTECTED_ZONE_IDS, ZONES, CUSTOM_ZONE_ID,
 } from '../constants';
 import { resizeAdj, resizePos, buildResultLabel, sanitizeFilename } from '../utils';
 
@@ -28,13 +28,13 @@ export function useSolver() {
   const [startPos,     setStartPos]     = useState(saved.startPos     ?? DEFAULT_START);
   const [endPos,       setEndPos]       = useState(saved.endPos       ?? DEFAULT_END);
   const [stationZones, setStationZones] = useState(
-    (saved.stationZones ?? DEFAULT_ZONES).map(z => (z >= 1 && z <= ZONES.length) ? z : 1)
+    (saved.stationZones ?? DEFAULT_ZONES).map(z => (z === CUSTOM_ZONE_ID || (z >= 1 && z <= ZONES.length)) ? z : 1)
   );
   const [stationBaselines, setStationBaselines] = useState(() => {
-    const zones = (saved.stationZones ?? DEFAULT_ZONES).map(z => (z >= 1 && z <= ZONES.length) ? z : 1);
+    const zones = (saved.stationZones ?? DEFAULT_ZONES).map(z => (z === CUSTOM_ZONE_ID || (z >= 1 && z <= ZONES.length)) ? z : 1);
     return Array.isArray(saved.stationBaselines) && saved.stationBaselines.length === zones.length
       ? saved.stationBaselines
-      : zones.map(z => ZONES[z - 1].dba);
+      : zones.map(z => z === CUSTOM_ZONE_ID ? ZONES[0].dba : ZONES[z - 1].dba);
   });
   const [dbPerCraft,   setDbPerCraft]   = useState(saved.dbPerCraft   ?? DEFAULT_DB_PER_CRAFT);
   const [protectedStn,     setProtectedStn]     = useState(saved.protectedStn     ?? []);
@@ -216,17 +216,22 @@ export function useSolver() {
     setStationTransitWeights(w => newM <= w.length ? w.slice(0, newM) : [...w, ...Array(newM - w.length).fill(1.0)]);
   }
 
-  // Changing a station's zone resets its baseline to that zone's default dBA;
-  // updateStationBaseline then lets the user fine-tune from there independently.
+  // Changing a station's zone resets its baseline to that zone's default dBA
+  // (picking "Custom" leaves the baseline as-is, since it has no preset default).
+  // Editing the baseline number directly flips the zone to "Custom" — the value
+  // no longer matches any preset, so the dropdown shouldn't claim it does.
   function updateStationZone(idx, zoneId) {
     setStationZones(z => z.map((v, i) => i === idx ? zoneId : v));
-    setStationBaselines(b => b.map((v, i) => i === idx ? ZONES[zoneId - 1].dba : v));
+    if (zoneId !== CUSTOM_ZONE_ID) {
+      setStationBaselines(b => b.map((v, i) => i === idx ? ZONES[zoneId - 1].dba : v));
+    }
   }
 
   function updateStationBaseline(idx, raw) {
     const v = Number(raw);
     if (Number.isNaN(v)) return;
     setStationBaselines(b => b.map((x, i) => i === idx ? v : x));
+    setStationZones(z => z.map((x, i) => i === idx ? CUSTOM_ZONE_ID : x));
   }
 
   function toggleAdj(i, j) {

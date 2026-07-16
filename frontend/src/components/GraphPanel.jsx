@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ZONES, ZONE_COLORS } from '../constants';
+import { ZONES, ZONE_COLORS, CUSTOM_ZONE_ID } from '../constants';
 
 const W = 300, H = 300, NODE_R = 16;
 
@@ -83,10 +83,13 @@ export default function GraphPanel({ M, adjacency, stationZones }) {
           );
         })}
         {positions.map(({ x, y }, idx) => {
-          const zone = ZONES[(stationZones?.[idx] || 1) - 1] ?? ZONES[0];
+          const zoneId = stationZones?.[idx] ?? 1;
+          const color = zoneId === CUSTOM_ZONE_ID
+            ? ZONE_COLORS["Custom"]
+            : ZONE_COLORS[(ZONES[zoneId - 1] ?? ZONES[0]).category];
           return (
             <g key={`n${idx}`} style={{ cursor: "grab" }} onMouseDown={e => startDrag(e, idx)}>
-              <circle cx={x} cy={y} r={NODE_R} fill={ZONE_COLORS[zone.category]} stroke="#1c1917" strokeWidth="1.5" />
+              <circle cx={x} cy={y} r={NODE_R} fill={color} stroke="#1c1917" strokeWidth="1.5" />
               <text x={x} y={y} textAnchor="middle" dominantBaseline="central"
                 fontSize="12" fontWeight="700" fill="#ffffff"
                 style={{ userSelect: "none", pointerEvents: "none" }}>

@@ -33,10 +33,15 @@ export const ZONES = [
   { id: 5, name: "Airport",  dba: 70, category: "Airport"  },
 ];
 
+// Sentinel zone id meaning "ambient level was hand-edited, no longer matches a
+// preset zone's default dBA" — the Zones dropdown switches to this automatically.
+export const CUSTOM_ZONE_ID = 0;
+
 export const ZONE_COLORS = {
   "Downtown": "#b45309",
   "Rural":    "#15803d",
   "Suburban": "#1d4ed8",
   "Airport":  "#b91c1c",
   "Urban":    "#c2410c",
+  "Custom":   "#57534e",
 };

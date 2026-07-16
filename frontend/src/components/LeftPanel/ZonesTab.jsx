@@ -1,4 +1,4 @@
-import { ZONES } from '../../constants';
+import { ZONES, CUSTOM_ZONE_ID } from '../../constants';
 
 export default function ZonesTab({ stationZones, stationBaselines, updateStationZone, updateStationBaseline }) {
   return (
@@ -13,6 +13,7 @@ export default function ZonesTab({ stationZones, stationBaselines, updateStation
             <label>S{m + 1}</label>
             <select value={zoneId}
               onChange={e => updateStationZone(m, Number(e.target.value))}>
+              <option value={CUSTOM_ZONE_ID}>Custom</option>
               {ZONES.map(z => (
                 <option key={z.id} value={z.id}>{z.id}. {z.name} ({z.dba} dBA)</option>
               ))}
