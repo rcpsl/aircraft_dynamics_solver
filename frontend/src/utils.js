@@ -30,6 +30,28 @@ export function noiseColor(deltaDB) {
   return `rgb(${Math.round(248 + t*(153-248))},${Math.round(246 + t*(27-246))},${Math.round(242 + t*(27-242))})`;
 }
 
+// Encodes solved-state config into a short, filesystem-safe label for Save Results:
+// N/M plus abbreviated fairness principles inferred from which constraints/objectives
+// were actually in play. D/U below their slider max signal a tightened constraint
+// (sufficientarian cap, equal-allocation disparity limit) even though the solver has
+// no separate "principle" flag for them.
+export function buildResultLabel({ N, M, D, U, optimizeUtil, optimizePrior, proportionalAlloc, useDbSolver }) {
+  const dMax = useDbSolver ? 90 : 10;
+  const uMax = useDbSolver ? 50 : 10;
+  const principles = [];
+  if (D != null && D < dMax) principles.push("Suff");
+  if (U != null && U < uMax) principles.push("Eq");
+  if (optimizeUtil)          principles.push("Util");
+  if (optimizePrior)         principles.push("Prior");
+  if (proportionalAlloc)     principles.push("PropAlloc");
+  const tag = principles.length ? principles.join("+") : "Base";
+  return `N${N ?? "?"}-M${M ?? "?"}-${tag}`;
+}
+
+export function sanitizeFilename(name) {
+  return name.trim().replace(/[^A-Za-z0-9-_+]+/g, "_").slice(0, 80) || "uam-results";
+}
+
 export function computeTransitTime(path, endStation) {
   let firstMove = -1, firstArrival = -1;
   for (let t = 1; t < path.length; t++)

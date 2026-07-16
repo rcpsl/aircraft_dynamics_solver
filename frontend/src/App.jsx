@@ -71,16 +71,22 @@ export default function App() {
 
       {/* ── Right panel ── */}
       <div className="right-panel">
-        <div className="config-btns" style={{ marginBottom: "12px" }}>
-          <button className="config-btn" onClick={s.handleExportResults}
-            disabled={s.status !== "sat" && s.status !== "unsat"}>
-            Save Results
-          </button>
-          <button className="config-btn" onClick={() => s.resultsFileInputRef.current.click()}>
-            Load Results
-          </button>
-          <input ref={s.resultsFileInputRef} type="file" accept=".json"
-            style={{ display: "none" }} onChange={s.handleImportResults} />
+        <div style={{ marginBottom: "12px" }}>
+          <input type="text" className="field-input" placeholder={s.defaultResultName}
+            value={s.resultName} onChange={e => s.setResultName(e.target.value)}
+            title="Optional name for Save Results — leave blank to auto-name from N, M, and active fairness principles"
+            style={{ width: "100%", marginBottom: "6px", boxSizing: "border-box" }} />
+          <div className="config-btns">
+            <button className="config-btn" onClick={s.handleExportResults}
+              disabled={s.status !== "sat" && s.status !== "unsat"}>
+              Save Results
+            </button>
+            <button className="config-btn" onClick={() => s.resultsFileInputRef.current.click()}>
+              Load Results
+            </button>
+            <input ref={s.resultsFileInputRef} type="file" accept=".json"
+              style={{ display: "none" }} onChange={s.handleImportResults} />
+          </div>
         </div>
 
         {s.status === "idle" && (

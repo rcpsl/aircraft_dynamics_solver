@@ -4,7 +4,7 @@ import {
   DEFAULT_ADJ, DEFAULT_START, DEFAULT_END, DEFAULT_ZONES,
   DEFAULT_DB_PER_CRAFT, STORAGE_KEY, RESULTS_STORAGE_KEY, BENEFIT_ZONE_IDS, PROTECTED_ZONE_IDS, ZONES,
 } from '../constants';
-import { resizeAdj, resizePos } from '../utils';
+import { resizeAdj, resizePos, buildResultLabel, sanitizeFilename } from '../utils';
 
 function loadSaved() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
@@ -54,6 +54,9 @@ export function useSolver() {
   const [solvedDbPerCraft,     setSolvedDbPerCraft]     = useState(savedResults.solvedDbPerCraft     ?? null);
   const [solvedM,              setSolvedM]              = useState(savedResults.solvedM              ?? null);
   const [solvedUseDbSolver,    setSolvedUseDbSolver]    = useState(savedResults.solvedUseDbSolver    ?? null);
+  const [solvedD,              setSolvedD]              = useState(savedResults.solvedD              ?? null);
+  const [solvedU,              setSolvedU]              = useState(savedResults.solvedU              ?? null);
+  const [solvedProportionalAlloc, setSolvedProportionalAlloc] = useState(savedResults.solvedProportionalAlloc ?? null);
   const [protectedNoiseVal,    setProtectedNoiseVal]    = useState(savedResults.protectedNoiseVal    ?? null);
   const [solvedProtectedStn,   setSolvedProtectedStn]   = useState(savedResults.solvedProtectedStn   ?? null);
   const [proportionalNoiseVal, setProportionalNoiseVal] = useState(savedResults.proportionalNoiseVal ?? null);
@@ -93,6 +96,7 @@ export function useSolver() {
   const [routeN,               setRouteN]               = useState(saved.routeN            ?? 1);
   const [useDbSolver,          setUseDbSolver]          = useState(saved.useDbSolver       ?? false);
   const [activeTab,         setActiveTab]         = useState("solver");
+  const [resultName,        setResultName]        = useState("");
   const fileInputRef = useRef(null);
   const resultsFileInputRef = useRef(null);
   const abortRef     = useRef(null);
@@ -158,6 +162,9 @@ export function useSolver() {
     ['solvedDbPerCraft', solvedDbPerCraft, setSolvedDbPerCraft],
     ['solvedM', solvedM, setSolvedM],
     ['solvedUseDbSolver', solvedUseDbSolver, setSolvedUseDbSolver],
+    ['solvedD', solvedD, setSolvedD],
+    ['solvedU', solvedU, setSolvedU],
+    ['solvedProportionalAlloc', solvedProportionalAlloc, setSolvedProportionalAlloc],
     ['protectedNoiseVal', protectedNoiseVal, setProtectedNoiseVal],
     ['solvedProtectedStn', solvedProtectedStn, setSolvedProtectedStn],
     ['proportionalNoiseVal', proportionalNoiseVal, setProportionalNoiseVal],
@@ -174,6 +181,11 @@ export function useSolver() {
   ];
 
   const resultValues = Object.fromEntries(resultFields.map(([key, value]) => [key, value]));
+
+  // Live preview only (shown as the name input's placeholder before a solve exists
+  // to freeze values from) — handleExportResults recomputes this from the frozen
+  // solved* fields so the saved name always matches what was actually solved.
+  const defaultResultName = buildResultLabel({ N, M, D, U, optimizeUtil, optimizePrior, proportionalAlloc, useDbSolver });
 
   function handleN(newN) {
     setN(newN);
@@ -249,8 +261,17 @@ export function useSolver() {
   // config that produced a result travels with it for reference without being
   // silently applied to the live left-panel state.
   function handleExportResults() {
+    // Named from the frozen solved* fields (not live config) so the name always
+    // matches what was actually solved, even if the left panel has since changed.
+    const name = resultName.trim() || buildResultLabel({
+      N: paths ? paths.length : N,
+      M: solvedM, D: solvedD, U: solvedU,
+      optimizeUtil: solvedOptimizeUtil, optimizePrior: solvedOptimizePrior,
+      proportionalAlloc: solvedProportionalAlloc, useDbSolver: solvedUseDbSolver,
+    });
     const envelope = {
       kind: "uam-results", version: 1,
+      name,
       savedAt: new Date().toISOString(),
       config: configValues,
       results: resultValues,
@@ -258,7 +279,7 @@ export function useSolver() {
     const blob = new Blob([JSON.stringify(envelope, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `uam-results-${Date.now()}.json`; a.click();
+    a.href = url; a.download = `${sanitizeFilename(name)}.json`; a.click();
     URL.revokeObjectURL(url);
   }
 
@@ -276,6 +297,7 @@ export function useSolver() {
         for (const [key, , setter] of resultFields) {
           if (envelope.results[key] !== undefined) setter(envelope.results[key]);
         }
+        if (envelope.name) setResultName(envelope.name);
         localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(envelope.results));
       } catch { alert("Invalid results file."); }
     };
@@ -309,6 +331,7 @@ export function useSolver() {
     setPaths(null); setNoiseMatrix(null); setCountMatrix(null); setSolvedT(null);
     setSolvedStationZones(null); setSolvedDbPerCraft(null);
     setSolvedM(null); setSolvedUseDbSolver(null);
+    setSolvedD(null); setSolvedU(null); setSolvedProportionalAlloc(null);
     setProtectedNoiseVal(null); setSolvedProtectedStn(null);
     setProportionalNoiseVal(null); setSolvedProportionalStn(null);
     setWarningMsg(null); setSolvedTMin(null); setSolvedTUsed(null); setErrorDetail(null);
@@ -369,6 +392,7 @@ export function useSolver() {
           unstatDetail: null,
           solvedStationZones: stationZones, solvedDbPerCraft: dbPerCraft,
           solvedM: M, solvedUseDbSolver: useDbSolver,
+          solvedD: D, solvedU: U, solvedProportionalAlloc: proportionalAlloc,
           protectedNoiseVal: data.protectedNoise ?? null,
           solvedProtectedStn: data.protectedStations ?? null,
           proportionalNoiseVal: data.proportionalNoise ?? null,
@@ -401,7 +425,8 @@ export function useSolver() {
     N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft,
     protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
     status, solvedT, paths, noiseMatrix, countMatrix, unstatDetail,
-    solvedStationZones, solvedDbPerCraft, solvedM, solvedUseDbSolver,
+    solvedStationZones, solvedDbPerCraft, solvedM, solvedUseDbSolver, solvedD, solvedU, solvedProportionalAlloc,
+    resultName, setResultName, defaultResultName,
     protectedNoiseVal, solvedProtectedStn, proportionalNoiseVal, solvedProportionalStn, warningMsg, errorDetail, totalUtilNoise, solvedEndPos,
     optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected, proportionalAlloc,
     stationWeightedTransit, stationTransitWeights, aircraftMultipliers, utilNoiseMode,
