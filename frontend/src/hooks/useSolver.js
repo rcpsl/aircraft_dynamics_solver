@@ -86,20 +86,46 @@ export function useSolver() {
   const fileInputRef = useRef(null);
   const abortRef     = useRef(null);
 
-  // Single source of truth for what gets persisted to localStorage and what
-  // Save/Load Config reads and writes — keeping one object means a field
-  // added here can't silently go missing from only one of the two paths.
+  // Single source of truth for config save/load: [key, currentValue, setter] triples.
+  // Both the save side (configValues, used by localStorage persistence and Save
+  // Config) and the load side (handleImport) are derived from this one array, so a
+  // field can never exist on one side and not the other. N and M are excluded here —
+  // they cascade-resize other fields via handleN/handleM, so handleImport applies
+  // them first and separately.
+  const configFields = [
+    ['D', D, setD], ['U', U, setU],
+    ['adjacency', adjacency, setAdjacency],
+    ['startPos', startPos, setStartPos],
+    ['endPos', endPos, setEndPos],
+    ['stationZones', stationZones, setStationZones],
+    ['dbPerCraft', dbPerCraft, setDbPerCraft],
+    ['protectedStn', protectedStn, setProtectedStn],
+    ['proportionalStn', proportionalStn, setProportionalStn],
+    ['weightUtil', weightUtil, setWeightUtil],
+    ['weightPrior', weightPrior, setWeightPrior],
+    ['weightProp', weightProp, setWeightProp],
+    ['hardT', hardT, setHardT],
+    ['tMax', tMax, setTMax],
+    ['weightTime', weightTime, setWeightTime],
+    ['optimizeUtil', optimizeUtil, setOptimizeUtil],
+    ['optimizePrior', optimizePrior, setOptimizePrior],
+    ['optimizeProp', optimizeProp, setOptimizeProp],
+    ['autoProportional', autoProportional, setAutoProportional],
+    ['autoProtected', autoProtected, setAutoProtected],
+    ['proportionalAlloc', proportionalAlloc, setProportionalAlloc],
+    ['stationWeightedTransit', stationWeightedTransit, setStationWeightedTransit],
+    ['stationTransitWeights', stationTransitWeights, setStationTransitWeights],
+    ['aircraftMultipliers', aircraftMultipliers, setAircraftMultipliers],
+    ['utilNoiseMode', utilNoiseMode, setUtilNoiseMode],
+    ['useRouteMode', useRouteMode, setUseRouteMode],
+    ['routeVertiports', routeVertiports, setRouteVertiports],
+    ['routeN', routeN, setRouteN],
+    ['useDbSolver', useDbSolver, setUseDbSolver],
+  ];
+
   const configValues = {
-    N, M, D, U, adjacency, startPos, endPos,
-    stationZones, dbPerCraft, protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
-    hardT, tMax, weightTime,
-    optimizeUtil, optimizePrior, optimizeProp, autoProportional, autoProtected,
-    proportionalAlloc,
-    stationWeightedTransit, stationTransitWeights,
-    aircraftMultipliers,
-    utilNoiseMode,
-    useRouteMode, routeVertiports, routeN,
-    useDbSolver,
+    N, M,
+    ...Object.fromEntries(configFields.map(([key, value]) => [key, value])),
   };
 
   useEffect(() => {
@@ -157,24 +183,6 @@ export function useSolver() {
     URL.revokeObjectURL(url);
   }
 
-  // N and M cascade-resize other fields (see handleN/handleM) so they're
-  // applied first and separately; every other field is a plain setter.
-  const importSetters = {
-    D: setD, U: setU, adjacency: setAdjacency, startPos: setStartPos, endPos: setEndPos,
-    stationZones: setStationZones, dbPerCraft: setDbPerCraft,
-    protectedStn: setProtectedStn, proportionalStn: setProportionalStn,
-    weightUtil: setWeightUtil, weightPrior: setWeightPrior, weightProp: setWeightProp,
-    hardT: setHardT, tMax: setTMax, weightTime: setWeightTime,
-    optimizeUtil: setOptimizeUtil, optimizePrior: setOptimizePrior, optimizeProp: setOptimizeProp,
-    autoProportional: setAutoProportional, autoProtected: setAutoProtected,
-    proportionalAlloc: setProportionalAlloc,
-    stationWeightedTransit: setStationWeightedTransit, stationTransitWeights: setStationTransitWeights,
-    aircraftMultipliers: setAircraftMultipliers,
-    utilNoiseMode: setUtilNoiseMode,
-    useRouteMode: setUseRouteMode, routeVertiports: setRouteVertiports, routeN: setRouteN,
-    useDbSolver: setUseDbSolver,
-  };
-
   function handleImport(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -184,7 +192,7 @@ export function useSolver() {
         const c = JSON.parse(ev.target.result);
         if (c.N !== undefined) handleN(c.N);
         if (c.M !== undefined) handleM(c.M);
-        for (const [key, setter] of Object.entries(importSetters)) {
+        for (const [key, , setter] of configFields) {
           if (c[key] !== undefined) setter(c[key]);
         }
       } catch { alert("Invalid config file."); }
