@@ -128,6 +128,26 @@ export default function SolverTab({
             </button>,
           ])}
         </div>
+
+        <div className="adj-hint" style={{ marginTop: "10px", marginBottom: "4px" }}>
+          Station traffic (↓ in · ↑ out)
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+          {Array.from({ length: M }, (_, idx) => {
+            const station = idx + 1;
+            const into = endPos.reduce((sum, p, i) => p === station ? sum + (aircraftMultipliers[i] ?? 1) : sum, 0);
+            const outOf = startPos.reduce((sum, p, i) => p === station ? sum + (aircraftMultipliers[i] ?? 1) : sum, 0);
+            return { station, into, outOf };
+          }).filter(t => t.into > 0 || t.outOf > 0).map(t => (
+            <div key={t.station} style={{
+              fontSize: "11px", padding: "3px 7px", borderRadius: "5px",
+              background: "#f3f1ed", border: "1px solid #e5e2db", color: "#44403c",
+              whiteSpace: "nowrap",
+            }}>
+              <strong>S{t.station}</strong> ↓{t.into} · ↑{t.outOf}
+            </div>
+          ))}
+        </div>
       </section>
 
       <section>
