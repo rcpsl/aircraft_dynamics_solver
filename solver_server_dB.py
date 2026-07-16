@@ -1,5 +1,6 @@
 # dB-based variant of solver_server.py — runs on port 5051
 import math
+import threading
 from math import ceil
 from collections import deque, Counter
 from flask import Flask, request, jsonify
@@ -8,6 +9,13 @@ from z3 import Int, And, Or, Not, Implies, Sum, If, Solver, Optimize, Bool, sat
 
 app = Flask(__name__)
 CORS(app)
+
+# Z3's default Context is process-global and not thread-safe. Two overlapping
+# requests (e.g. a double-click on "Run Solver" before the button disables)
+# can both call into Z3 at once and corrupt its internal AST state, crashing
+# with nondeterministic errors (access violations, "unreachable", "ast is not
+# an expression"). This lock serializes all Z3 access so that can't happen.
+_solve_lock = threading.Lock()
 
 SCALE = 100  # multiply all dB values by 100 and round to int for Z3 integer arithmetic
 
@@ -156,10 +164,16 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     U_scaled = round(U * SCALE)
     baseline_scaled = [round(b * SCALE) for b in baseline]
 
+    # Per-aircraft multipliers: D/U hard constraints must be checked against the
+    # same weighted counts used for the displayed noise matrix, or the shown
+    # dB levels can exceed D/U even though Z3's own (unweighted) constraints
+    # were satisfied.
+    int_mult = [max(1, round(m)) for m in multipliers] if multipliers else [1] * N
+    max_weighted_count = sum(int_mult)
+    scaled_table_w = build_scaled_table(M, max_weighted_count, baseline, aircraft_dB)
+
     # ── Algebraic pre-checks (exact or O(M²), no Z3 needed) ─────────────────
 
-    # all_pairs needed below for U checks
-    all_pairs = [(m1, m2) for m1 in range(M) for m2 in range(m1 + 1, M)]
 
     # D is an absolute dB cap: baseline[m] + dB_increase[m] ≤ D at all times.
     # If any station's bare baseline already exceeds D, no solution exists.
@@ -191,7 +205,9 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
             )
         }
 
-    # Start-position D + U check: t=0 positions are fixed, so dB profile is exact.
+    # Start-position D check only: t=0 aircraft are parked (active[i][0] = False always),
+    # so they produce zero noise and can never violate U. The solver can also delay departure
+    # to stagger active windows, so a U check on start positions would be overly strict.
     start_counts = Counter(start_positions)
     start_dB = [scaled_table[m][start_counts.get(m + 1, 0)] for m in range(M)]
     for m, inc_scaled in enumerate(start_dB):
@@ -203,17 +219,6 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
                 "detail": (
                     f"Station {station} has {start_counts[station]} aircraft at t=0, "
                     f"reaching {level:.1f} dBA which exceeds D={D} dBA"
-                )
-            }
-    for (m1, m2) in all_pairs:
-        diff = abs(start_dB[m1] - start_dB[m2])
-        if diff > U_scaled:
-            return {
-                "status": "unsat", "reason": "start_disparity",
-                "detail": (
-                    f"At t=0, stations {m1+1} and {m2+1} differ by {diff / SCALE:.1f} dBA "
-                    f"({start_dB[m1]/SCALE:.1f} vs {start_dB[m2]/SCALE:.1f}), "
-                    f"exceeding U={U} dBA"
                 )
             }
 
@@ -231,17 +236,9 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
                     f"reaching {level:.1f} dBA which exceeds D={D} dBA"
                 )
             }
-    for (m1, m2) in all_pairs:
-        diff = abs(end_dB[m1] - end_dB[m2])
-        if diff > U_scaled:
-            return {
-                "status": "unsat", "reason": "end_disparity",
-                "detail": (
-                    f"At the final timestep, stations {m1+1} and {m2+1} differ by {diff / SCALE:.1f} dBA "
-                    f"({end_dB[m1]/SCALE:.1f} vs {end_dB[m2]/SCALE:.1f}), "
-                    f"exceeding U={U} dBA"
-                )
-            }
+    # End-position U check removed: aircraft that arrive before T-1 are already silent
+    # (ha[i][T-2]=True → active[i][T-1]=False), so assuming all end positions are
+    # simultaneously active overstates the noise and produces false unsat rejections.
 
     # BFS reachability per aircraft
     individual_mins = [
@@ -260,9 +257,17 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
         s0 = src_1indexed - 1
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
 
+    # Conservative T cap: the constraint set grows O(T × M² × N) so large problems
+    # blow up Z3's internal DAG before T=25. Cap at T_lower + a budget that scales
+    # down with problem size to keep total constraints tractable.
+    complexity = N * M * M
+    T_budget = max(3, min(20, 200 // max(1, complexity // 10)))
+    T_hard_cap = T_lower + T_budget
+
     # Build permanent base state up to T_lower (Suggestion 3: encode once)
     L = [[Int(f"L_{i}_{t}") for t in range(T_lower)] for i in range(N)]
     s = Solver()
+    s.set("timeout", 100000)  # 100 s per check() call; yields unknown instead of crashing
 
     # Bounds
     for i in range(N):
@@ -296,14 +301,29 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
             s.add(active[i][t]  == And(moved[i][t], Not(arrived[i][t-1])))
 
     # Noise cap + global disparity for t = 0 … T_lower-1
-    # C_by_t[t][m] = active aircraft count at station m at time t
+    # C_by_t[t][m] = weighted active aircraft count at station m at time t
     # Precompute count-based D and U tables — avoids O(N^2) Z3 If-chain expansion
-    D_count = _compute_d_counts(M, N, baseline_scaled, D_scaled, scaled_table)
-    u_ranges = _compute_u_ranges(M, N, U_scaled, scaled_table, D_count)
+    D_count = _compute_d_counts(M, max_weighted_count, baseline_scaled, D_scaled, scaled_table_w)
+    u_ranges = _compute_u_ranges(M, max_weighted_count, U_scaled, scaled_table_w, D_count)
+
+    # Guard: same rationale as the phase-2 check — a generous D combined with large
+    # aircraft multipliers can blow up the O(T * M^2 * D_count) noise constraints.
+    max_d_count = max(D_count) if D_count else 0
+    if T_hard_cap * M * M * max_d_count > 150_000:
+        return {
+            "status": "unsat", "reason": "noise_domain_too_large",
+            "detail": (
+                f"Noise-constraint search space too large to solve reliably "
+                f"(stations can hold up to {max_d_count} weighted aircraft-units under "
+                f"the current D). This is usually caused by a generous D combined with "
+                f"large aircraft multipliers. Lower D, reduce aircraft multipliers, or "
+                f"reduce N/M to continue."
+            )
+        }
 
     C_by_t = []
     for t in range(T_lower):
-        C_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), 1, 0) for i in range(N)]) for m in range(M)]
+        C_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), int_mult[i], 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_t)
         cnt_t = [Int(f"cnt_{m}_{t}") for m in range(M)]
         for m in range(M):
@@ -312,7 +332,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
 
     T_current = T_lower
 
-    for _ in range(T_lower, 26):
+    for _ in range(T_lower, T_hard_cap + 1):
         # Assumption booleans — same names reused safely because the Implies
         # constraints referencing them are pushed/popped each iteration.
         end_asms = [Bool(f"end_{i}") for i in range(N)]
@@ -322,6 +342,16 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
             s.add(Implies(end_asms[i], L[i][T_current - 1] == end_positions[i]))
 
         result = s.check(*end_asms)
+
+        if str(result) == "unknown":
+            s.pop()
+            return {
+                "status": "unsat", "reason": "timeout",
+                "detail": (
+                    f"Solver timed out at T={T_current} — problem may be too large "
+                    f"(N={N}, M={M}). Try reducing N or M, or relaxing D/U."
+                )
+            }
 
         if result == sat:
             model = s.model()
@@ -350,7 +380,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
                 "detail": "Constraints are unsatisfiable regardless of T — try relaxing D or U"
             }
 
-        if T_current >= 25:
+        if T_current >= T_hard_cap:
             break
 
         # ── Suggestion 3: extend base by exactly one timestep ───────────────
@@ -374,7 +404,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
             s.add(arrived[i][new_t] == Or(arrived[i][new_t-1], L[i][new_t] == end_positions[i]))
             s.add(active[i][new_t]  == And(moved[i][new_t], Not(arrived[i][new_t-1])))
 
-        C_new = [Sum([If(And(L[i][new_t] == m + 1, active[i][new_t]), 1, 0) for i in range(N)]) for m in range(M)]
+        C_new = [Sum([If(And(L[i][new_t] == m + 1, active[i][new_t]), int_mult[i], 0) for i in range(N)]) for m in range(M)]
         C_by_t.append(C_new)
         cnt_new = [Int(f"cnt_{m}_{new_t}") for m in range(M)]
         for m in range(M):
@@ -383,7 +413,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
 
         T_current += 1
 
-    return {"status": "unsat", "reason": "timeout", "detail": "No solution found within T=25"}
+    return {"status": "unsat", "reason": "timeout", "detail": f"No solution found within T={T_hard_cap} — try reducing N or M, or relaxing D/U"}
 
 
 def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions,
@@ -402,13 +432,13 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     NOTE: z3.Optimize is slower than z3.Solver. For large N, T, or M this phase
     may take several seconds. T is fixed to the value found in phase 1.
     """
-    scaled_table = build_scaled_table(M, N, baseline, aircraft_dB)
     D_scaled = round(D * SCALE)
     U_scaled = round(U * SCALE)
     baseline_scaled = [round(b * SCALE) for b in baseline]
 
-    # Per-aircraft multipliers: how many virtual aircraft each real aircraft represents
-    # in soft objectives and output. Hard constraints always use actual counts.
+    # Per-aircraft multipliers: how many virtual aircraft each real aircraft represents.
+    # D/U hard constraints are checked against these same weighted counts (see below)
+    # so the displayed noise matrix can never exceed what's actually enforced.
     int_mult = [max(1, round(m)) for m in aircraft_multipliers] if aircraft_multipliers else [1] * N
     max_weighted_count = sum(int_mult)
     # Weighted dB table covers 0..max_weighted_count aircraft
@@ -497,25 +527,35 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
             opt.add(active[i][t] == And(moved[i][t], Not(ha[i][t - 1])))
 
     # Noise cap and global disparity (counting only active aircraft)
-    # Precompute count-based D and U tables — avoids O(N^2) Z3 If-chain expansion
-    D_count = _compute_d_counts(M, N, baseline_scaled, D_scaled, scaled_table)
-    u_ranges = _compute_u_ranges(M, N, U_scaled, scaled_table, D_count)
+    # Precompute count-based D and U tables — avoids O(N^2) Z3 If-chain expansion.
+    # Built from the weighted table so D/U hard constraints are checked against
+    # the same weighted counts used for the displayed noise matrix below.
+    D_count = _compute_d_counts(M, max_weighted_count, baseline_scaled, D_scaled, scaled_table_w)
+    u_ranges = _compute_u_ranges(M, max_weighted_count, U_scaled, scaled_table_w, D_count)
 
-    C_by_t = []
+    # Guard: a generous D combined with large aircraft multipliers can push D_count
+    # close to max_weighted_count for every station. _add_noise_constraints adds
+    # O(T * M^2 * D_count) Implies constraints, which has crashed Z3 with an access
+    # violation when this product gets too large.
+    max_d_count = max(D_count) if D_count else 0
+    if T * M * M * max_d_count > 150_000:
+        raise ValueError(
+            f"Noise-constraint search space too large for phase-2 optimization "
+            f"(stations can hold up to {max_d_count} weighted aircraft-units under "
+            f"the current D). This is usually caused by a generous D combined with "
+            f"large aircraft multipliers. Lower D, reduce aircraft multipliers, "
+            f"reduce T_max, or reduce N/M to continue."
+        )
+
     wdB_by_t = []
     for t in range(T):
-        C_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), 1, 0) for i in range(N)]) for m in range(M)]
-        C_by_t.append(C_t)
-        # Auxiliary actual-count variables for D/U hard constraints (unweighted)
-        cnt_t = [Int(f"o_cnt_{m}_{t}") for m in range(M)]
-        for m in range(M):
-            opt.add(cnt_t[m] == C_t[m])
-        _add_noise_constraints(opt, cnt_t, M, D_count, u_ranges)
-        # Weighted-count variables for soft objectives and noise output
+        # Weighted-count variables drive both the D/U hard constraints and the
+        # soft dB objectives/output, so displayed noise never exceeds what's enforced.
         WC_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), int_mult[i], 0) for i in range(N)]) for m in range(M)]
         wcnt_t = [Int(f"o_wcnt_{m}_{t}") for m in range(M)]
         for m in range(M):
             opt.add(wcnt_t[m] == WC_t[m])
+        _add_noise_constraints(opt, wcnt_t, M, D_count, u_ranges)
         wdB_exprs_t = [make_dB_expr(wcnt_t[m], m, scaled_table_w, max_weighted_count) for m in range(M)]
         wdB_by_t.append(wdB_exprs_t)
 
@@ -640,7 +680,8 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
             "none":     sorted(s + 1 for s in none_set),
         }
 
-    opt.minimize(Sum(objective_terms))
+    if objective_terms:
+        opt.minimize(Sum(objective_terms))
 
     if opt.check() != sat:
         return None  # should not happen: phase-1 already confirmed sat at this T
@@ -682,6 +723,11 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
 
 @app.route("/solve", methods=["POST"])
 def solve():
+    with _solve_lock:
+        return _solve_impl()
+
+
+def _solve_impl():
     data = request.get_json(force=True)
     try:
         N            = int(data["N"])
@@ -806,6 +852,18 @@ def solve():
         w_time = 1.0
     if w_time < 0: w_time = 0.0
 
+    aircraft_multipliers = None
+    raw_mult = data.get("aircraftMultipliers")
+    if raw_mult is not None:
+        if not isinstance(raw_mult, list) or len(raw_mult) != N:
+            return jsonify({"error": f"aircraftMultipliers must be a list of length N={N}"}), 400
+        try:
+            aircraft_multipliers = [float(v) for v in raw_mult]
+        except (TypeError, ValueError):
+            return jsonify({"error": "aircraftMultipliers values must be numeric"}), 400
+        if any(v <= 0 for v in aircraft_multipliers):
+            return jsonify({"error": "aircraftMultipliers values must be positive"}), 400
+
     try:
         result = find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, aircraft_dB,
                             multipliers=aircraft_multipliers)
@@ -836,18 +894,6 @@ def solve():
     if not isinstance(prop_alloc, bool): prop_alloc = False
 
     util_noise_mode = bool(data.get("utilNoiseMode", False))
-
-    aircraft_multipliers = None
-    raw_mult = data.get("aircraftMultipliers")
-    if raw_mult is not None:
-        if not isinstance(raw_mult, list) or len(raw_mult) != N:
-            return jsonify({"error": f"aircraftMultipliers must be a list of length N={N}"}), 400
-        try:
-            aircraft_multipliers = [float(v) for v in raw_mult]
-        except (TypeError, ValueError):
-            return jsonify({"error": "aircraftMultipliers values must be numeric"}), 400
-        if any(v <= 0 for v in aircraft_multipliers):
-            return jsonify({"error": "aircraftMultipliers values must be positive"}), 400
 
     station_transit_weights = None
     if optimize_util and not util_noise_mode:
@@ -890,6 +936,8 @@ def solve():
             aircraft_multipliers,
             baseline, aircraft_dB
         )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     except OSError as e:
         return jsonify({
             "error": f"Z3 internal error during phase-2 optimization (N={N} may be too large): {e}"
