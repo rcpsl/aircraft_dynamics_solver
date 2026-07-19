@@ -8,3 +8,10 @@ node_modules/
 babel_check.js
 frontend/dist/
 frontend/.vite/
+
+# Scratch/experiment artifacts - not part of the active pipeline
+uam-config_highstationcost.json
+run_prioritarian_demo.py
+uam-config_prioritarian_demo.json
+austin-demand-dashboard-v2.html
+route_3_5_11_results/
