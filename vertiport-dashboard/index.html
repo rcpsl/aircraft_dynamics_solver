@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Austin UAM Vertiport Placement — Solver Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #faf9f6; min-height: 100vh; padding: 22px; color: #1a1a1a;
+  }
+  .wrap { max-width: 1400px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #666; font-family: system-ui, sans-serif; text-align: center; margin-bottom: 18px; }
+
+  .layout { display: flex; gap: 22px; align-items: flex-start; }
+
+  /* ---------- left rail ---------- */
+  .rail-l { width: 250px; flex-shrink: 0; font-family: system-ui, sans-serif; }
+  .rail-l h4 { font-size: 12px; font-weight: 800; color: #333F48; margin: 0 0 6px 0; }
+  .rail-l p { font-size: 11.5px; color: #555; line-height: 1.55; margin-bottom: 12px; }
+  .rail-l .src { font-size: 10.5px; color: #777; line-height: 1.5; margin-bottom: 8px; }
+  .tag { display: inline-block; font-size: 8.5px; font-weight: 800; letter-spacing: 0.4px; padding: 1px 5px; border-radius: 7px; vertical-align: 1px; }
+  .tag.v { background: #d5efdc; color: #1e7a3c; }
+  .tag.p { background: #faeac3; color: #9a6d00; }
+
+  /* ---------- center ---------- */
+  .center { flex: 1; min-width: 0; }
+  .controls {
+    background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 10px; font-family: system-ui, sans-serif;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-top: 3px solid #2c7fb8;
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px;
+  }
+  .ctl { display: flex; flex-direction: column; gap: 4px; }
+  .ctl label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #999; }
+  .ctl input[type=number] {
+    font-family: system-ui, sans-serif; font-size: 13px; font-weight: 600;
+    padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; background: #fff; width: 64px;
+  }
+  .ctl .wrow { display: flex; align-items: center; gap: 6px; }
+  .ctl input[type=range] { width: 110px; }
+  .ctl .wval { font-size: 12px; font-weight: 700; color: #333; width: 26px; text-align: right; }
+  .runbtn {
+    font-family: system-ui, sans-serif; font-size: 13.5px; font-weight: 700;
+    padding: 9px 18px; border-radius: 7px; border: none;
+    background: #2c7fb8; color: #fff; cursor: pointer;
+  }
+  .runbtn:hover { background: #256a99; }
+  .runbtn:disabled { background: #aac4d6; cursor: default; }
+  .act-btn {
+    font-family: system-ui, sans-serif; font-size: 12.5px; font-weight: 600;
+    padding: 6px 12px; border-radius: 6px; border: 1px solid #ccc;
+    background: #fff; color: #444; cursor: pointer;
+  }
+  .act-btn:hover { border-color: #2c7fb8; color: #2c7fb8; }
+  .solver-status { font-size: 11.5px; font-family: system-ui, sans-serif; font-weight: 600; }
+  .solver-status.ok { color: #1e7a3c; }
+  .solver-status.err { color: #c0392b; }
+  .solver-status.busy { color: #9a6d00; }
+
+  /* ---------- the area-card map ---------- */
+  .mapbox { position: relative; display: inline-block; background: #eceae4; padding: 4px; border-radius: 8px; }
+  .map { display: grid; gap: 4px; position: relative; }
+  .cell {
+    border-radius: 6px; position: relative;
+    border: 2px solid rgba(0,0,0,0.05);
+    padding: 8px 9px; overflow: hidden;
+    display: flex; flex-direction: column; gap: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: box-shadow 0.12s ease;
+  }
+  .cell.vertiport { border-color: #2c7fb8; border-style: solid; }
+  .cell-type { font-size: 13.5px; font-weight: 800; font-family: system-ui, sans-serif; letter-spacing: 0.2px; }
+  .cell-id { font-size: 9px; color: #999; font-family: system-ui, sans-serif; font-weight: 700; }
+  .cell-stats { display: flex; flex-direction: column; gap: 2px; margin-top: auto; }
+  .stat {
+    font-size: 10.5px; font-family: system-ui, sans-serif; color: #555;
+    background: rgba(255,255,255,0.7); border-radius: 6px; padding: 1px 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .stat b { color: #222; font-size: 11px; }
+  .stat.level b { color: #2c7fb8; }
+  .stat.level.editable { cursor: pointer; }
+  .stat.level.editable:hover { background: #fff; box-shadow: 0 0 0 1.5px #2c7fb8; }
+  .stat.level.overridden { background: #fff3d6; }
+  .stat.level.overridden b { color: #9a6d00; }
+  .stat.noise-up { background: #c0392b; color: #fff; font-weight: 700; }
+  .stat.noise-up b { color: #fff; font-size: 11.5px; }
+  .vp-badge {
+    position: absolute; top: -2px; right: -2px;
+    background: #2c7fb8; color: white; font-size: 9.5px; font-weight: 800;
+    padding: 3px 7px; border-radius: 0 6px 0 8px;
+    font-family: system-ui, sans-serif; box-shadow: -1px 1px 3px rgba(0,0,0,0.2); z-index: 6;
+  }
+  .path-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 8; }
+
+  .maplegend { margin-top: 8px; font-family: system-ui, sans-serif; font-size: 10px; color: #777; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,0.08); vertical-align: -2px; }
+
+  /* ---------- right rail: results ---------- */
+  .rail-r { width: 330px; flex-shrink: 0; font-family: system-ui, sans-serif; }
+  .rail-r h3 { font-size: 15px; font-weight: 800; color: #333F48; text-align: center; margin-bottom: 10px; }
+  .goalcard {
+    background: #fff; border: 1.5px solid #999; border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 14px; font-size: 13px; line-height: 1.6; color: #333;
+  }
+  .goalcard.met { border-color: #1e7a3c; }
+  .goalcard.unmet { border-color: #c0392b; }
+  .goalcard b { font-weight: 800; }
+  .rescard {
+    background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .rescard h5 { font-size: 10.5px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; color: #999; margin-bottom: 8px; }
+  .resrow { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: #444; padding: 3px 0; border-bottom: 1px solid #f4f4f4; }
+  .resrow:last-child { border-bottom: none; }
+  .resrow .v { font-weight: 700; color: #111; white-space: nowrap; }
+  .resnote { font-size: 11px; color: #777; font-style: italic; margin-top: 6px; line-height: 1.5; }
+  .resnote.alert { color: #b03a2e; font-style: normal; font-weight: 600; }
+
+  .footnote { margin-top: 14px; font-size: 11px; color: #999; font-family: system-ui, sans-serif; font-style: italic; line-height: 1.5; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Austin UAM Vertiport Placement — Solver Dashboard</h1>
+  <p class="subtitle">Same 16-square Austin census board as the demand dashboard — but instead of placing vertiports by hand, a brute-force optimizer (<code>solver_server_vertiport.py</code>) picks where to put them, trading population access and job access against overflight noise.</p>
+
+  <div class="layout">
+    <!-- ============ LEFT RAIL ============ -->
+    <div class="rail-l">
+      <h4>How this works</h4>
+      <p>1. Set a <b>vertiport budget K</b> and three <b>weights</b> — how much the optimizer should value population access, job access, and (negatively) noise.<br>
+         2. Click a square's <b>👥 people</b> or <b>💼 jobs</b> level to cycle it 1→2→3→1 — the solver only sees these levels, so this is how you change what it thinks each zone is worth.<br>
+         3. Click <b>Run optimizer</b>. It asks the solver server for the placement of K vertiports that maximizes the weighted objective.<br>
+         4. The map highlights the chosen vertiports and draws the shortest-path corridor between every pair of them. Corridors overflying a square add to that square's noise count.<br>
+         5. Read <b>Results</b> — who gains access, who gets jobs, who hears the noise. Adjust weights, levels, or K and re-run.</p>
+
+      <h4>Assumptions</h4>
+      <p class="src">Zones are adjacent if they touch (including diagonally) on the 4×4 grid — that adjacency graph is what the solver routes flights through. A route between two placed vertiports takes the graph-shortest path, so it may fly over intermediate squares. Noise on a square = number of route-legs passing through it × that square's population level — so a route over a dense square costs more than the same route over a sparse one.</p>
+
+      <h4>Population &amp; jobs levels</h4>
+      <p class="src">The solver only understands three tiers (1 = low, 2 = medium, 3 = high) per square. Each square starts at the tier its real population and job counts rank into (tertiles across the 16 squares, same ACS/LODES data as the demand dashboard) — <b>click a level on the map to override it</b> and explore hypothetical zoning. Edited squares are marked <span class="tag p" style="vertical-align:1px">edited</span>.</p>
+
+      <h4>Solver server</h4>
+      <p class="src">This page POSTs to <code id="solverUrlText"></code>. Start it with:</p>
+      <p class="src"><code>python solver_server_vertiport.py</code></p>
+      <p class="src" id="srcMeta"></p>
+    </div>
+
+    <!-- ============ CENTER ============ -->
+    <div class="center">
+      <div class="controls">
+        <div class="ctl">
+          <label>Vertiport budget K</label>
+          <input type="number" id="kBudget" value="4" step="1" min="1" max="16" oninput="onControlsChanged()">
+        </div>
+        <div class="ctl">
+          <label>Weight — population</label>
+          <div class="wrow">
+            <input type="range" id="wPop" min="0" max="3" step="0.1" value="1" oninput="onControlsChanged()">
+            <span class="wval" id="wPopVal">1.0</span>
+          </div>
+        </div>
+        <div class="ctl">
+          <label>Weight — jobs</label>
+          <div class="wrow">
+            <input type="range" id="wJobs" min="0" max="3" step="0.1" value="1" oninput="onControlsChanged()">
+            <span class="wval" id="wJobsVal">1.0</span>
+          </div>
+        </div>
+        <div class="ctl">
+          <label>Weight — noise</label>
+          <div class="wrow">
+            <input type="range" id="wNoise" min="0" max="3" step="0.1" value="1" oninput="onControlsChanged()">
+            <span class="wval" id="wNoiseVal">1.0</span>
+          </div>
+        </div>
+        <div class="ctl">
+          <button class="runbtn" id="runBtn" onclick="runSolver()">▶ Run optimizer</button>
+        </div>
+        <div class="ctl">
+          <label>&nbsp;</label>
+          <button class="act-btn" id="resetLevelsBtn" onclick="resetLevels()">↺ Reset levels to census data</button>
+        </div>
+        <div class="ctl">
+          <label>&nbsp;</label>
+          <span class="solver-status" id="solverStatus">not run yet</span>
+        </div>
+      </div>
+
+      <div class="mapbox">
+        <div class="map" id="map"></div>
+      </div>
+      <div class="maplegend" id="maplegend"></div>
+    </div>
+
+    <!-- ============ RIGHT RAIL ============ -->
+    <div class="rail-r">
+      <h3>Results</h3>
+      <div class="goalcard" id="goalcard">Set weights and click <b>Run optimizer</b> to place vertiports.</div>
+      <div class="rescard" id="resVertiports" style="display:none"></div>
+      <div class="rescard" id="resRoutes" style="display:none"></div>
+      <div class="rescard" id="resBenefit" style="display:none"></div>
+      <div class="rescard" id="resNoise" style="display:none"></div>
+      <div class="rescard" id="resRouting" style="display:none"></div>
+    </div>
+  </div>
+
+  <p class="footnote">Board data shared with <b>austin-demand-dashboard-v2.html</b> (same ACS 2020–2024 + LODES 2022 build). Placement is computed by exact enumeration of all C(Z,K) subsets — brute-force is fast here because C(16,8) = 12,870.</p>
+</div>
+
+<script src="austin-data.js"></script>
+<script>
+/* ============================================================
+   Austin UAM Vertiport Placement — solver-backed dashboard.
+   Reuses AUSTIN census data (austin-data.js, shared with the
+   demand dashboard) and POSTs to solver_server_vertiport.py.
+   ============================================================ */
+const SOLVER_URL = "http://localhost:5052/solve";
+
+const AREA = {
+  rural:    { label: "Rural",    tint: "#f0f7ee", ink: "#4a7a3f" },
+  suburban: { label: "Suburban", tint: "#fbf7ec", ink: "#8a6d1a" },
+  urban:    { label: "Urban",    tint: "#eef3fa", ink: "#35618e" },
+  downtown: { label: "Downtown", tint: "#f3edf9", ink: "#6b4e8e" },
+  airport:  { label: "Airport",  tint: "#f7f0e8", ink: "#8a5a2a" },
+};
+
+if (typeof AUSTIN === "undefined") {
+  document.body.innerHTML = "<p style='font-family:system-ui;padding:40px'>austin-data.js failed to load.</p>";
+  throw new Error("no data");
+}
+
+const TILES = AUSTIN.tiles;                 // fixed order = zone index 0..Z-1
+const Z = TILES.length;
+const CELL_MI = AUSTIN.meta.cellMiles;
+
+document.getElementById("solverUrlText").textContent = SOLVER_URL;
+document.getElementById("srcMeta").textContent =
+  `Data build: ${AUSTIN.meta.generated} · ${AUSTIN.meta.totals.tiles} areas of ${AUSTIN.meta.cellMiles} mi.`;
+
+/* ---------- rank TILES pop/jobs into 3-tier levels for the solver ---------- */
+function tertileLevels(values) {
+  const order = values.map((v, i) => i).sort((a, b) => values[a] - values[b]);
+  const levels = new Array(values.length);
+  const third = Math.ceil(values.length / 3);
+  order.forEach((idx, rank) => {
+    levels[idx] = rank < third ? 1 : rank < 2 * third ? 2 : 3;
+  });
+  return levels;
+}
+const CENSUS_POP_LEVEL = tertileLevels(TILES.map(t => t.pop));
+const CENSUS_JOBS_LEVEL = tertileLevels(TILES.map(t => t.jobs));
+let popLevel = CENSUS_POP_LEVEL.slice();    // editable — click-to-cycle on the map
+let jobsLevel = CENSUS_JOBS_LEVEL.slice();
+
+/* ---------- adjacency: 8-connected grid graph (same neighborhood the
+   demand dashboard's straight-line corridors implicitly cross) ---------- */
+function buildAdjacency() {
+  const adj = Array.from({ length: Z }, () => new Array(Z).fill(0));
+  for (let i = 0; i < Z; i++) {
+    for (let j = 0; j < Z; j++) {
+      if (i === j) continue;
+      const dr = Math.abs(TILES[i].row - TILES[j].row);
+      const dc = Math.abs(TILES[i].col - TILES[j].col);
+      if (dr <= 1 && dc <= 1) adj[i][j] = 1;
+    }
+  }
+  return adj;
+}
+const ADJACENCY = buildAdjacency();
+
+/* ---------- grid geometry (mirrors austin-demand-dashboard-v2.html) ---------- */
+const R0 = Math.min(...TILES.map(t => t.row)), R1 = Math.max(...TILES.map(t => t.row));
+const C0 = Math.min(...TILES.map(t => t.col)), C1 = Math.max(...TILES.map(t => t.col));
+const NROWS = R1 - R0 + 1, NCOLS = C1 - C0 + 1;
+const CELL = Math.max(120, Math.min(168, Math.floor(680 / NCOLS)));
+
+const fmt = n => n.toLocaleString("en-US");
+const fmtK = n => n >= 1000 ? Math.round(n / 1000) + "k" : String(n);
+
+/* ---------- state ---------- */
+let lastResult = null;   // raw solver response
+let solving = false;
+
+function onControlsChanged() {
+  document.getElementById("wPopVal").textContent = parseFloat(document.getElementById("wPop").value).toFixed(1);
+  document.getElementById("wJobsVal").textContent = parseFloat(document.getElementById("wJobs").value).toFixed(1);
+  document.getElementById("wNoiseVal").textContent = parseFloat(document.getElementById("wNoise").value).toFixed(1);
+}
+onControlsChanged();
+
+function setStatus(msg, cls) {
+  const el = document.getElementById("solverStatus");
+  el.textContent = msg;
+  el.className = "solver-status " + (cls || "");
+}
+
+/* ---------- editable per-zone pop/jobs levels ---------- */
+function cycleLevel(idx, kind) {
+  const arr = kind === "pop" ? popLevel : jobsLevel;
+  arr[idx] = arr[idx] >= 3 ? 1 : arr[idx] + 1;
+  if (lastResult) {
+    lastResult = null;
+    setStatus("levels changed — re-run optimizer", "busy");
+  }
+  render();
+}
+function resetLevels() {
+  popLevel = CENSUS_POP_LEVEL.slice();
+  jobsLevel = CENSUS_JOBS_LEVEL.slice();
+  if (lastResult) {
+    lastResult = null;
+    setStatus("levels reset — re-run optimizer", "busy");
+  }
+  render();
+}
+
+async function runSolver() {
+  if (solving) return;
+  solving = true;
+  const btn = document.getElementById("runBtn");
+  btn.disabled = true;
+  setStatus("solving…", "busy");
+
+  const K = Math.max(1, Math.min(Z, Math.round(parseFloat(document.getElementById("kBudget").value) || 1)));
+  const weightPop = parseFloat(document.getElementById("wPop").value);
+  const weightJobs = parseFloat(document.getElementById("wJobs").value);
+  const weightNoise = parseFloat(document.getElementById("wNoise").value);
+
+  const body = {
+    Z, K,
+    adjacency: ADJACENCY,
+    popLevel, jobsLevel,
+    weightPop, weightJobs, weightNoise,
+  };
+
+  try {
+    const resp = await fetch(SOLVER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await resp.json();
+    if (!resp.ok || data.error) {
+      lastResult = null;
+      setStatus("error: " + (data.error || resp.statusText), "err");
+    } else if (data.status === "unsat") {
+      lastResult = null;
+      setStatus("unsat: " + (data.reason || "no feasible placement"), "err");
+    } else {
+      lastResult = data;
+      setStatus("sat — objective " + data.objective.toFixed(1), "ok");
+    }
+  } catch (e) {
+    lastResult = null;
+    setStatus("could not reach solver at " + SOLVER_URL + " — is it running?", "err");
+  }
+
+  btn.disabled = false;
+  solving = false;
+  render();
+}
+
+/* ---------- render ---------- */
+function render() {
+  renderMap();
+  drawRoutes();
+  renderLegend();
+  renderResults();
+}
+
+function noiseForTile(idx) {
+  if (!lastResult) return 0;
+  return lastResult.noisePerZone[idx] || 0;
+}
+
+/* routes come back directed (A->B and B->A, since pop/jobs benefit is
+   direction-dependent) but usually share the same path in reverse —
+   collapse to one row/line per unordered pair for display. */
+function uniqueRoutes(r) {
+  const seen = new Set();
+  const out = [];
+  r.routes.forEach(rt => {
+    const key = [rt.from, rt.to].sort((a, b) => a - b).join("-");
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(rt);
+  });
+  return out;
+}
+
+function renderMap() {
+  const map = document.getElementById("map");
+  map.innerHTML = "";
+  map.style.gridTemplateColumns = `repeat(${NCOLS}, ${CELL}px)`;
+  map.style.gridTemplateRows = `repeat(${NROWS}, ${Math.round(CELL * 0.92)}px)`;
+
+  const vpSet = new Set(lastResult ? lastResult.vertiports : []);
+  const maxNoise = lastResult ? Math.max(1, ...lastResult.noisePerZone) : 1;
+
+  TILES.forEach((t, idx) => {
+    const a = AREA[t.areaType] || AREA.suburban;
+    const nd = noiseForTile(idx);
+    const div = document.createElement("div");
+    let cls = "cell";
+    if (vpSet.has(idx)) cls += " vertiport";
+    div.className = cls;
+    div.style.gridRow = (t.row - R0 + 1);
+    div.style.gridColumn = (t.col - C0 + 1);
+    div.style.background = a.tint;
+    div.dataset.idx = idx;
+    if (nd > 0)
+      div.style.boxShadow = `inset 0 0 0 ${Math.min(7, 2 + 5 * nd / maxNoise)}px #c0392b`;
+
+    const popEdited = popLevel[idx] !== CENSUS_POP_LEVEL[idx];
+    const jobsEdited = jobsLevel[idx] !== CENSUS_JOBS_LEVEL[idx];
+
+    let html = "";
+    if (vpSet.has(idx)) html += `<div class="vp-badge">VP</div>`;
+    html += `<div><span class="cell-type" style="color:${a.ink}">${a.label}</span> <span class="cell-id">#${t.id}</span></div>`;
+    html += `<div class="cell-stats">`;
+    html += `<div class="stat level editable${popEdited ? " overridden" : ""}" data-idx="${idx}" data-kind="pop" title="Click to change this square's population level">👥 <b>${fmtK(t.pop)}</b> people · level ${popLevel[idx]}${popEdited ? " ✎" : ""}</div>`;
+    html += `<div class="stat level editable${jobsEdited ? " overridden" : ""}" data-idx="${idx}" data-kind="jobs" title="Click to change this square's jobs level">💼 <b>${fmtK(t.jobs)}</b> jobs · level ${jobsLevel[idx]}${jobsEdited ? " ✎" : ""}</div>`;
+    html += nd > 0
+      ? `<div class="stat noise-up">🔊 noise burden: <b>${nd}</b></div>`
+      : `<div class="stat">🔊 no overflight</div>`;
+    html += `</div>`;
+
+    div.innerHTML = html;
+    div.querySelectorAll(".stat.level.editable").forEach(el => {
+      el.onclick = (e) => { e.stopPropagation(); cycleLevel(Number(el.dataset.idx), el.dataset.kind); };
+    });
+    map.appendChild(div);
+  });
+}
+
+function drawRoutes() {
+  const map = document.getElementById("map");
+  const rect = map.getBoundingClientRect();
+  const centerOf = idx => {
+    const el = map.querySelector(`[data-idx="${idx}"]`);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { x: r.left - rect.left + r.width / 2, y: r.top - rect.top + r.height / 2 };
+  };
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "path-svg");
+  svg.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`);
+  const COLS = ["#2c7fb8", "#BF5700", "#7b3294", "#1a936f", "#c0392b", "#5e548e"];
+  let inner = "";
+
+  if (lastResult) {
+    uniqueRoutes(lastResult).forEach((r, i) => {
+      const pts = r.path.map(centerOf).filter(Boolean);
+      if (pts.length < 2) return;
+      const color = COLS[i % COLS.length];
+      const dd = pts.map((p, k) => (k ? "L" : "M") + p.x + "," + p.y).join(" ");
+      inner += `<path d="${dd}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>`;
+    });
+  }
+  svg.innerHTML = inner;
+  map.appendChild(svg);
+}
+
+function renderLegend() {
+  document.getElementById("maplegend").innerHTML =
+    Object.values(AREA).map(a => `<span><span class="legend-swatch" style="background:${a.tint}"></span> ${a.label}</span>`).join("") +
+    ` · <span><span class="legend-swatch" style="border:3px solid #c0392b"></span> route-legs overhead — thicker ring = more overflights</span>` +
+    ` · <span style="color:#2c7fb8;font-weight:700">VP</span> chosen vertiport`;
+}
+
+function vpName(idx, r) {
+  const i = r.vertiports.indexOf(idx);
+  return "VP-" + String.fromCharCode(65 + i);
+}
+
+function renderResults() {
+  const gc = document.getElementById("goalcard");
+  const vpCard = document.getElementById("resVertiports");
+  const rtCard = document.getElementById("resRoutes");
+  const beCard = document.getElementById("resBenefit");
+  const noCard = document.getElementById("resNoise");
+  const rtgCard = document.getElementById("resRouting");
+
+  if (!lastResult) {
+    gc.className = "goalcard";
+    gc.innerHTML = "Set weights and click <b>Run optimizer</b> to place vertiports.";
+    [vpCard, rtCard, beCard, noCard, rtgCard].forEach(c => c.style.display = "none");
+    return;
+  }
+  const r = lastResult;
+
+  gc.className = "goalcard met";
+  gc.innerHTML = `The optimizer placed <b>${r.vertiports.length}</b> vertiports, connected by <b>${r.routes.length}</b> corridors.<br>` +
+    `Weighted objective: <b>${r.objective.toFixed(1)}</b> (population + jobs benefit, minus noise).`;
+
+  vpCard.style.display = "block";
+  vpCard.innerHTML = `<h5>Chosen vertiports</h5>` + r.vertiports.map((idx, i) => {
+    const t = TILES[idx], a = AREA[t.areaType] || AREA.suburban;
+    return `<div class="resrow"><span><b>VP-${String.fromCharCode(65 + i)}</b> · <span style="color:${a.ink};font-weight:700">${a.label}</span> #${t.id}</span>
+      <span class="v">pop L${popLevel[idx]} · jobs L${jobsLevel[idx]}</span></div>`;
+  }).join("");
+
+  const uRoutes = uniqueRoutes(r);
+  rtCard.style.display = uRoutes.length ? "block" : "none";
+  if (uRoutes.length) {
+    rtCard.innerHTML = `<h5>Corridors (shortest path through adjacency graph)</h5>` +
+      uRoutes.map(rt => {
+        const hops = rt.path.length - 1;
+        return `<div class="resrow"><span>${vpName(rt.from, r)} ↔ ${vpName(rt.to, r)}</span><span class="v">${hops} hop${hops === 1 ? "" : "s"}</span></div>`;
+      }).join("");
+  }
+
+  beCard.style.display = "block";
+  beCard.innerHTML = `<h5>Access benefit</h5>` +
+    `<div class="resrow"><span>Population benefit (Σ pop level, routes departing a VP)</span><span class="v">${fmt(r.popBenefit)}</span></div>` +
+    `<div class="resrow"><span>Jobs benefit (Σ jobs level, routes arriving at a VP)</span><span class="v">${fmt(r.jobsBenefit)}</span></div>`;
+
+  noCard.style.display = "block";
+  const totalNoise = r.totalNoise;
+  const worst = r.noisePerZone
+    .map((n, idx) => ({ idx, n }))
+    .filter(x => x.n > 0)
+    .sort((a, b) => b.n - a.n)
+    .slice(0, 3);
+  let noiseHtml = `<h5>Noise burden</h5>` +
+    `<div class="resrow"><span>Total pop-weighted noise burden</span><span class="v">${fmt(totalNoise)}</span></div>`;
+  if (worst.length) {
+    noiseHtml += worst.map(w => {
+      const t = TILES[w.idx], a = AREA[t.areaType] || AREA.suburban;
+      return `<div class="resrow"><span><span style="color:${a.ink};font-weight:700">${a.label}</span> #${t.id} · ${fmt(t.pop)} people</span><span class="v" style="color:#c0392b">burden ${w.n}</span></div>`;
+    }).join("");
+    noiseHtml += `<div class="resnote">Is it fair that these squares carry the most overflight noise? Try raising the noise weight and re-running.</div>`;
+  } else {
+    noiseHtml += `<div class="resnote">No square is overflown by more than one corridor.</div>`;
+  }
+  noCard.innerHTML = noiseHtml;
+
+  renderRouting(r);
+}
+
+function copyAdjacencyJSON() {
+  const json = JSON.stringify(lastResult.stationAdjacency, null, 2);
+  navigator.clipboard.writeText(json);
+}
+
+function renderRouting(r) {
+  const rtgCard = document.getElementById("resRouting");
+  rtgCard.style.display = "block";
+  const K = r.vertiports.length;
+  const mapping = r.vertiports.map((idx, i) =>
+    `VP-${String.fromCharCode(65 + i)} = station ${i + 1} (zone #${TILES[idx].id})`
+  ).join(", ");
+  rtgCard.innerHTML = `<h5>Route to aircraft scheduler</h5>` +
+    `<div class="resnote" style="margin-top:0">These K vertiports become M=${K} stations for the dB routing solver (port 5051). The adjacency sub-matrix below is pre-computed from the zone graph — paste it into the routing dashboard's adjacency panel.</div>` +
+    `<pre style="margin-top:8px; font-size:10.5px; font-family:ui-monospace,Consolas,monospace; background:#f6f6f4; border-radius:6px; padding:8px; overflow-x:auto; white-space:pre;">${JSON.stringify(r.stationAdjacency, null, 2)}</pre>` +
+    `<button class="act-btn" style="margin-top:6px" onclick="copyAdjacencyJSON()">Copy adjacency JSON</button>` +
+    `<div class="resnote">${mapping}</div>`;
+}
+
+window.addEventListener("resize", () => { drawRoutes(); });
+
+render();
+</script>
+</body>
+</html>
