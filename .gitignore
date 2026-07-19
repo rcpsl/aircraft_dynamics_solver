@@ -15,3 +15,8 @@ run_prioritarian_demo.py
 uam-config_prioritarian_demo.json
 austin-demand-dashboard-v2.html
 route_3_5_11_results/
+
+# Parked/superseded code - already-tracked files here stay tracked (gitignore
+# doesn't untrack what's committed); this only stops new stray files from
+# being swept into this folder by a future broad `git add`.
+legacy_code/
