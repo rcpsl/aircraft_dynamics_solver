@@ -1,0 +1,69 @@
+config,U,status,reason,elapsed_s,avg_max_stn,peak_added_db
+N14_mult1,0.0,error,timed out,290.0,,
+N14_mult1,1.0,error,timed out,290.0,,
+N14_mult1,2.0,unsat,timeout,208.3,,
+N14_mult1,3.0,error,timed out,290.0,,
+N14_mult1,4.0,error,timed out,290.0,,
+N14_mult1,5.0,error,timed out,290.0,,
+N14_mult1,6.0,error,timed out,290.0,,
+N14_mult1,7.0,error,timed out,290.0,,
+N14_mult1,8.0,sat,,247.2,3.714664992862538,7.7815125038364386
+N14_mult1,9.0,error,timed out,290.0,,
+N14_mult1,10.0,error,timed out,290.0,,
+N14_mult1,11.0,error,timed out,290.0,,
+N14_mult1,12.0,error,timed out,290.0,,
+N14_mult1,13.0,error,timed out,290.0,,
+N14_mult1,14.0,sat,,10.9,4.515449934959719,9.030899869919438
+N14_mult1,15.0,error,timed out,290.0,,
+N14_mult1,16.0,error,timed out,290.0,,
+N4_mult1,0.0,error,timed out,290.0,,
+N4_mult1,1.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,122.3,,
+N4_mult1,2.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,103.7,,
+N4_mult1,3.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,91.6,,
+N4_mult1,4.0,sat,,3.0,1.204119982655925,3.0102999566398125
+N4_mult1,5.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,86.6,,
+N4_mult1,6.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,85.4,,
+N4_mult1,7.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,81.2,,
+N4_mult1,8.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,6.5,,
+N4_mult1,9.0,sat,,3.5,2.385606273598313,4.771212547196626
+N4_mult1,10.0,sat,,3.7,2.385606273598313,4.771212547196626
+N4_mult1,11.0,sat,,3.8,2.385606273598313,4.771212547196626
+N4_mult1,12.0,sat,,3.8,2.385606273598313,4.771212547196626
+N4_mult1,13.0,sat,,3.7,2.385606273598313,4.771212547196626
+N4_mult1,14.0,sat,,3.6,2.385606273598313,4.771212547196626
+N4_mult1,15.0,sat,,3.6,2.385606273598313,4.771212547196626
+N4_mult1,16.0,sat,,3.1,2.385606273598313,4.771212547196626
+N7_mult1,0.0,error,timed out,290.0,,
+N7_mult1,1.0,error,timed out,290.0,,
+N7_mult1,2.0,error,timed out,290.0,,
+N7_mult1,3.0,error,timed out,290.0,,
+N7_mult1,4.0,error,timed out,290.0,,
+N7_mult1,5.0,error,timed out,290.0,,
+N7_mult1,6.0,error,timed out,290.0,,
+N7_mult1,7.0,error,timed out,290.0,,
+N7_mult1,8.0,error,timed out,290.0,,
+N7_mult1,9.0,sat,,285.2,3.252574989159953,6.9897000433601875
+N7_mult1,10.0,error,timed out,290.0,,
+N7_mult1,11.0,error,timed out,290.0,,
+N7_mult1,12.0,error,timed out,290.0,,
+N7_mult1,13.0,error,timed out,290.0,,
+N7_mult1,14.0,error,timed out,290.0,,
+N7_mult1,15.0,sat,,5.4,3.252574989159953,6.9897000433601875
+N7_mult1,16.0,error,timed out,290.0,,
+baseline_mult,0.0,error,timed out,290.0,,
+baseline_mult,1.0,error,timed out,290.0,,
+baseline_mult,2.0,error,timed out,290.0,,
+baseline_mult,3.0,error,timed out,290.0,,
+baseline_mult,4.0,unsat,timeout,51.4,,
+baseline_mult,5.0,unsat,timeout,56.4,,
+baseline_mult,6.0,error,timed out,290.0,,
+baseline_mult,7.0,error,timed out,290.0,,
+baseline_mult,8.0,error,timed out,290.0,,
+baseline_mult,9.0,error,timed out,290.0,,
+baseline_mult,10.0,error,timed out,290.0,,
+baseline_mult,11.0,error,timed out,290.0,,
+baseline_mult,12.0,error,timed out,290.0,,
+baseline_mult,13.0,sat,,265.9,6.5773925211805135,12.552725051033065
+baseline_mult,14.0,error,timed out,290.0,,
+baseline_mult,15.0,error,timed out,290.0,,
+baseline_mult,16.0,error,timed out,290.0,,

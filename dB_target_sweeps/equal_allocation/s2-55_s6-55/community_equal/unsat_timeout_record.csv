@@ -1,0 +1,55 @@
+config,U,status,reason,elapsed_s
+N14_mult1,0.0,error,timed out,290.0
+N14_mult1,1.0,error,timed out,290.0
+N14_mult1,2.0,unsat,timeout,208.3
+N14_mult1,3.0,error,timed out,290.0
+N14_mult1,4.0,error,timed out,290.0
+N14_mult1,5.0,error,timed out,290.0
+N14_mult1,6.0,error,timed out,290.0
+N14_mult1,7.0,error,timed out,290.0
+N14_mult1,9.0,error,timed out,290.0
+N14_mult1,10.0,error,timed out,290.0
+N14_mult1,11.0,error,timed out,290.0
+N14_mult1,12.0,error,timed out,290.0
+N14_mult1,13.0,error,timed out,290.0
+N14_mult1,15.0,error,timed out,290.0
+N14_mult1,16.0,error,timed out,290.0
+N4_mult1,0.0,error,timed out,290.0
+N4_mult1,1.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,122.3
+N4_mult1,2.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,103.7
+N4_mult1,3.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,91.6
+N4_mult1,5.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,86.6
+N4_mult1,6.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,85.4
+N4_mult1,7.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,81.2
+N4_mult1,8.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,6.5
+N7_mult1,0.0,error,timed out,290.0
+N7_mult1,1.0,error,timed out,290.0
+N7_mult1,2.0,error,timed out,290.0
+N7_mult1,3.0,error,timed out,290.0
+N7_mult1,4.0,error,timed out,290.0
+N7_mult1,5.0,error,timed out,290.0
+N7_mult1,6.0,error,timed out,290.0
+N7_mult1,7.0,error,timed out,290.0
+N7_mult1,8.0,error,timed out,290.0
+N7_mult1,10.0,error,timed out,290.0
+N7_mult1,11.0,error,timed out,290.0
+N7_mult1,12.0,error,timed out,290.0
+N7_mult1,13.0,error,timed out,290.0
+N7_mult1,14.0,error,timed out,290.0
+N7_mult1,16.0,error,timed out,290.0
+baseline_mult,0.0,error,timed out,290.0
+baseline_mult,1.0,error,timed out,290.0
+baseline_mult,2.0,error,timed out,290.0
+baseline_mult,3.0,error,timed out,290.0
+baseline_mult,4.0,unsat,timeout,51.4
+baseline_mult,5.0,unsat,timeout,56.4
+baseline_mult,6.0,error,timed out,290.0
+baseline_mult,7.0,error,timed out,290.0
+baseline_mult,8.0,error,timed out,290.0
+baseline_mult,9.0,error,timed out,290.0
+baseline_mult,10.0,error,timed out,290.0
+baseline_mult,11.0,error,timed out,290.0
+baseline_mult,12.0,error,timed out,290.0
+baseline_mult,14.0,error,timed out,290.0
+baseline_mult,15.0,error,timed out,290.0
+baseline_mult,16.0,error,timed out,290.0

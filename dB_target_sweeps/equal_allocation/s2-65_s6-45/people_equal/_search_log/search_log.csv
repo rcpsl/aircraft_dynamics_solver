@@ -1,0 +1,69 @@
+config,U,status,reason,elapsed_s,avg_max_stn,peak_added_db
+N14_mult1,0.0,unsat,timeout,131.6,,
+N14_mult1,1.0,unsat,timeout,278.2,,
+N14_mult1,2.0,unsat,timeout,244.0,,
+N14_mult1,3.0,error,timed out,290.0,,
+N14_mult1,4.0,error,timed out,290.0,,
+N14_mult1,5.0,error,timed out,290.0,,
+N14_mult1,6.0,unsat,timeout,247.0,,
+N14_mult1,7.0,error,timed out,290.0,,
+N14_mult1,8.0,error,timed out,290.0,,
+N14_mult1,9.0,error,timed out,290.0,,
+N14_mult1,10.0,error,timed out,290.0,,
+N14_mult1,11.0,sat,,276.1,6.248356110949352,10.413926851582254
+N14_mult1,12.0,sat,,251.9,6.248356110949352,10.413926851582254
+N14_mult1,13.0,error,timed out,290.0,,
+N14_mult1,14.0,error,timed out,290.0,,
+N14_mult1,15.0,error,timed out,290.0,,
+N14_mult1,16.0,error,timed out,290.0,,
+N4_mult1,0.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,145.7,,
+N4_mult1,1.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,142.8,,
+N4_mult1,2.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,90.8,,
+N4_mult1,3.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,71.2,,
+N4_mult1,4.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,26.1,,
+N4_mult1,5.0,sat,,2.6,1.5904041823988753,4.771212547196626
+N4_mult1,6.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,4.3,,
+N4_mult1,7.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,5.2,,
+N4_mult1,8.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,5.9,,
+N4_mult1,9.0,error,<urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>,2.0,,
+N4_mult1,10.0,error,<urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>,2.0,,
+N4_mult1,11.0,error,<urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>,2.0,,
+N4_mult1,12.0,error,<urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>,2.0,,
+N4_mult1,13.0,error,<urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>,2.0,,
+N4_mult1,14.0,error,<urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>,2.0,,
+N4_mult1,15.0,error,<urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>,2.0,,
+N4_mult1,16.0,error,<urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>,2.0,,
+N7_mult1,0.0,error,timed out,290.0,,
+N7_mult1,1.0,error,timed out,290.0,,
+N7_mult1,2.0,error,timed out,290.0,,
+N7_mult1,3.0,error,timed out,290.0,,
+N7_mult1,4.0,error,timed out,290.0,,
+N7_mult1,5.0,error,timed out,290.0,,
+N7_mult1,6.0,sat,,225.4,2.0448053773699826,4.771212547196626
+N7_mult1,7.0,error,timed out,290.0,,
+N7_mult1,8.0,error,timed out,290.0,,
+N7_mult1,9.0,error,timed out,290.0,,
+N7_mult1,10.0,sat,,235.7,1.8061799739838875,9.030899869919438
+N7_mult1,11.0,error,timed out,290.0,,
+N7_mult1,12.0,sat,,13.1,6.248356110949352,10.413926851582254
+N7_mult1,13.0,sat,,278.8,6.248356110949352,10.413926851582254
+N7_mult1,14.0,error,timed out,290.0,,
+N7_mult1,15.0,error,[WinError 10054] 远程主机强迫关闭了一个现有的连接。,172.6,,
+N7_mult1,16.0,sat,,7.5,5.965446775337091,14.913616938342727
+baseline_mult,0.0,unsat,timeout,13.6,,
+baseline_mult,1.0,unsat,timeout,16.8,,
+baseline_mult,2.0,unsat,timeout,17.2,,
+baseline_mult,3.0,unsat,timeout,19.7,,
+baseline_mult,4.0,unsat,timeout,19.8,,
+baseline_mult,5.0,unsat,timeout,20.8,,
+baseline_mult,6.0,unsat,timeout,21.8,,
+baseline_mult,7.0,unsat,timeout,21.6,,
+baseline_mult,8.0,unsat,timeout,204.3,,
+baseline_mult,9.0,unsat,timeout,66.4,,
+baseline_mult,10.0,unsat,timeout,57.9,,
+baseline_mult,11.0,sat,,278.6,4.745954431903523,10.41392685158226
+baseline_mult,12.0,sat,,278.3,5.263937486825417,11.760912590556813
+baseline_mult,13.0,sat,,278.2,5.213998781196345,12.787536009528282
+baseline_mult,14.0,error,timed out,290.0,,
+baseline_mult,15.0,sat,,272.4,5.964542466079138,14.913616938342727
+baseline_mult,16.0,sat,,276.8,5.627161977136384,14.913616938342727

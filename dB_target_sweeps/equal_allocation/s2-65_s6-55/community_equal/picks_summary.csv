@@ -1,0 +1,7 @@
+target_dB,metric,config,U,value,note
+3,avg,N7_mult1,5.0,2.5105,
+3,peak,N4_mult1,4.0,3.0103,closest available (not strictly <3dB -- see note)
+8,avg,baseline_mult,12.0,7.5125,
+8,peak,N14_mult1,8.0,7.7815,
+18,avg,baseline_mult,12.0,7.5125,
+18,peak,baseline_mult,16.0,14.7712,

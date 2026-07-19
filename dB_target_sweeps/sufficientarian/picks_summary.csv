@@ -1,0 +1,17 @@
+combo,weighted,D,variant,N,out_path
+s2-65_s6-55,False,18,V1_N14_origMult,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-55\unweighted\D18.csv
+s2-65_s6-55,True,18,V1_N14_origMult,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-55\weighted\D18.csv
+s2-65_s6-45,True,18,V1_N14_origMult,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-45\weighted\D18.csv
+s2-65_s6-45,False,18,V1_N14_origMult,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-45\unweighted\D18.csv
+s2-65_s6-45,False,8,V2_N14_mult1,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-45\unweighted\D8.csv
+s2-55_s6-55,False,18,V1_N14_origMult,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-55\unweighted\D18.csv
+s2-55_s6-55,False,8,V2_N14_mult1,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-55\unweighted\D8.csv
+s2-55_s6-55,True,18,V1_N14_origMult,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-55\weighted\D18.csv
+s2-55_s6-55,True,8,V2_N14_mult1,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-55\weighted\D8.csv
+s2-65_s6-55,False,8,V2_N14_mult1,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-55\unweighted\D8.csv
+s2-65_s6-55,True,8,V2_N14_mult1,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-55\weighted\D8.csv
+s2-55_s6-45,False,8,V2_N14_mult1,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-45\unweighted\D8.csv
+s2-55_s6-45,True,18,V1_N14_origMult,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-45\weighted\D18.csv
+s2-65_s6-45,True,8,V2_N14_mult1,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-45\weighted\D8.csv
+s2-55_s6-45,False,18,V1_N14_origMult,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-45\unweighted\D18.csv
+s2-55_s6-45,True,8,V2_N14_mult1,14,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-45\weighted\D8.csv
