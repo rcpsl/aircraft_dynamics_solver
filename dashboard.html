@@ -330,6 +330,22 @@
       cursor: pointer;
     }
 
+    .custom-dba-input {
+      width: 48px;
+      padding: 3px 5px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      border: 1px solid #d4cfc8;
+      border-radius: 4px;
+      background: #faf9f7;
+      text-align: center;
+      color: #1c1917;
+      flex-shrink: 0;
+      -moz-appearance: textfield;
+    }
+    .custom-dba-input::-webkit-inner-spin-button,
+    .custom-dba-input::-webkit-outer-spin-button { opacity: 1; }
+
     /* Zone color legend */
     .zone-legend {
       display: flex;
@@ -508,6 +524,7 @@
       "Urban":            "#b45309",
       "Normal Suburban":  "#1d4ed8",
       "Quiet Suburban":   "#15803d",
+      "Custom":           "#6b7280",
     };
 
     function combinedDb(rawDb, nTotal, dbPerCraft) {
@@ -673,7 +690,7 @@
 
             {positions.map(({ x, y }, idx) => {
               var zoneId    = stationZones ? stationZones[idx] : 1;
-              var zone      = ZONES[(zoneId || 1) - 1];
+              var zone      = zoneId === 0 ? { category: "Custom" } : ZONES[(zoneId || 1) - 1];
               var fillColor = ZONE_COLORS[zone.category];
               return (
                 <g key={"n" + idx} style={{ cursor: "grab" }}
@@ -718,6 +735,7 @@
       const [endPos,       setEndPos]       = useState(saved.endPos      != null ? saved.endPos      : DEFAULT_END);
       const [stationZones, setStationZones] = useState(saved.stationZones != null ? saved.stationZones : DEFAULT_ZONES);
       const [dbPerCraft,   setDbPerCraft]   = useState(saved.dbPerCraft  != null ? saved.dbPerCraft  : DEFAULT_DB_PER_CRAFT);
+      const [customDba,    setCustomDba]    = useState(saved.customDba   != null ? saved.customDba   : Array(DEFAULT_M).fill(50));
 
       const [status,            setStatus]            = useState("idle");
       const [solvedT,           setSolvedT]           = useState(null);
@@ -736,8 +754,8 @@
 
       // ── A: auto-save to localStorage on every config change ──────────────
       useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, protectedStn, weightUtil, weightPrior }));
-      }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, protectedStn, weightUtil, weightPrior]);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, customDba, protectedStn, weightUtil, weightPrior }));
+      }, [N, M, D, U, adjacency, startPos, endPos, stationZones, dbPerCraft, customDba, protectedStn, weightUtil, weightPrior]);
 
       function handleN(newN) {
         setN(newN);
@@ -753,6 +771,10 @@
         setStationZones(z => {
           if (newM <= z.length) return z.slice(0, newM);
           return z.concat(Array.from({length: newM - z.length}, function() { return 1; }));
+        });
+        setCustomDba(cd => {
+          if (newM <= cd.length) return cd.slice(0, newM);
+          return cd.concat(Array.from({length: newM - cd.length}, function() { return 50; }));
         });
         setProtectedStn(ps => ps.filter(s => s <= newM));
       }
@@ -801,6 +823,12 @@
         };
         reader.readAsText(file);
         e.target.value = "";   // allow re-importing the same file
+      }
+
+      function getBaseline(m) {
+        var zoneId = stationZones[m];
+        if (zoneId === 0) return customDba[m] != null ? customDba[m] : 50;
+        return ZONES[(zoneId || 1) - 1].dba;
       }
 
       async function handleSolve() {
@@ -975,7 +1003,14 @@
                         {ZONES.map(z => (
                           <option key={z.id} value={z.id}>{z.id}. {z.name} ({z.dba} dBA)</option>
                         ))}
+                        <option value={0}>Custom</option>
                       </select>
+                      {zoneId === 0 && (
+                        <input type="number" className="custom-dba-input"
+                          min={20} max={90} value={customDba[m]}
+                          onChange={e => setCustomDba(cd => cd.map((v, i) => i === m ? Math.max(20, Math.min(90, Number(e.target.value) || 50)) : v))}
+                          title="Custom baseline dBA (20–90)" />
+                      )}
                     </div>
                   ))}
                 </section>
@@ -1148,7 +1183,7 @@
                     </thead>
                     <tbody>
                       {noiseMatrix.map((row, m) => {
-                        var zoneBaseline = ZONES[(stationZones[m] || 1) - 1].dba;
+                        var zoneBaseline = getBaseline(m);
                         return (
                           <tr key={m}>
                             <td className="row-label">{m + 1}</td>

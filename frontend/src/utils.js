@@ -55,7 +55,7 @@ export function sanitizeFilename(name) {
 // Per-station noise/aircraft summary for CSV export — one row per station, labeled
 // "Zone" per the dashboard's terminology (each station is treated as its own zone).
 // Uses the same level formula as NoiseMatrix.jsx so the CSV matches what's shown on screen.
-export function buildZoneSummaryCSV({ M, stationBaselines, dbPerCraft, isDbMode, noiseMatrix, countMatrix }) {
+export function buildZoneSummaryCSV({ T, M, stationBaselines, dbPerCraft, isDbMode, noiseMatrix, countMatrix }) {
   const aircraftMatrix = countMatrix ?? noiseMatrix;
 
   const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
@@ -83,7 +83,7 @@ export function buildZoneSummaryCSV({ M, stationBaselines, dbPerCraft, isDbMode,
     ]);
   }
 
-  return [header, ...rows].map(r => r.join(",")).join("\n");
+  return `Time Steps (T),${T}\n\n` + [header, ...rows].map(r => r.join(",")).join("\n");
 }
 
 export function computeTransitTime(path, endStation) {

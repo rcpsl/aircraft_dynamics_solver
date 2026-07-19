@@ -22,12 +22,12 @@ export default function SolverTab({
         <h2>Solver Mode</h2>
         <label className="check-row">
           <input type="checkbox" checked={useDbSolver}
-            onChange={e => { setUseDbSolver(e.target.checked); if (e.target.checked) setD(70); }} />
+            onChange={e => { setUseDbSolver(e.target.checked); if (e.target.checked) setD(15); }} />
           Use dB-based solver (port 5051)
         </label>
         {useDbSolver && (
           <div className="adj-hint" style={{ marginTop: "4px" }}>
-            D = max absolute dB level at any station · U = max dB disparity between stations · baseline from zone assignments
+            D = max dB increase (from aircraft) at any station · U = max dB disparity between stations · baseline from zone assignments
           </div>
         )}
       </section>
@@ -79,14 +79,19 @@ export default function SolverTab({
           <Slider label="N  aircraft" value={useRouteMode ? effectiveN : N} min={1} max={20} onChange={handleN} />
         </div>
         <Slider label="M  stations"  value={M} min={2} max={16} onChange={handleM} />
-        <Slider label={useDbSolver ? "D  abs. dB limit" : "D  noise cap"}
-          value={D} min={useDbSolver ? 40 : 0} max={useDbSolver ? 90 : 10}
-          step={useDbSolver ? 1 : 1} onChange={setD} />
+        <Slider label={useDbSolver ? "D  dB increase cap" : "D  noise cap"}
+          value={D} min={0} max={useDbSolver ? 40 : 10}
+          step={useDbSolver ? 0.5 : 1} onChange={setD} />
         <Slider label="U  global diff" value={U} min={0} max={useDbSolver ? 50 : 10} step={useDbSolver ? 0.5 : 1} onChange={setU} />
       </section>
 
       <section style={useRouteMode ? { opacity: 0.35, pointerEvents: "none" } : {}}>
-        <h2>Aircraft</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <h2 style={{ marginBottom: "10px" }}>Aircraft</h2>
+          <span className="adj-hint" title="Sum of per-aircraft multipliers">
+            Total: {aircraftMultipliers.reduce((sum, v) => sum + (v ?? 1), 0)}
+          </span>
+        </div>
         <div style={{
           display: "grid",
           gridTemplateColumns: useDbSolver ? "28px 1fr 1fr 1fr 24px" : "28px 1fr 1fr 24px",
@@ -193,13 +198,18 @@ export default function SolverTab({
               </label>
               {stationWeightedTransit && (
                 <div style={{ marginTop: "4px" }}>
+                  <button type="button"
+                    onClick={() => setStationTransitWeights(ws => ws.map(() => 1))}
+                    className="config-btn" style={{ marginBottom: "4px", padding: "3px 10px", fontSize: "11px" }}>
+                    Reset weights
+                  </button>
                   {stationTransitWeights.map((w, m) => (
                     <div key={m} className="weight-row" style={{ marginTop: "3px" }}>
                       <span className="wlabel">Stn {m + 1}</span>
                       <input
-                        type="number" min={0} step={0.1} value={w}
+                        type="number" min={0} step={1} value={w}
                         onChange={e => {
-                          const v = Math.max(0, parseFloat(e.target.value) || 0);
+                          const v = Math.max(0, parseInt(e.target.value, 10) || 0);
                           setStationTransitWeights(ws => ws.map((x, i) => i === m ? v : x));
                         }}
                         className="field-input" style={{ width: "60px" }} />

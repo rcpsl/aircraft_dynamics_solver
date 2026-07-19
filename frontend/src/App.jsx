@@ -24,6 +24,7 @@ export default function App() {
 
   function handleExportZoneCSV() {
     const csv = buildZoneSummaryCSV({
+      T: effectiveT,
       M: s.solvedM,
       stationBaselines: s.solvedStationBaselines,
       dbPerCraft: s.solvedDbPerCraft,
@@ -79,6 +80,16 @@ export default function App() {
             style={{ background: "#b91c1c", marginTop: "6px" }}>
             Stop
           </button>
+        )}
+        {s.status === "solving" && s.solveProgress && (
+          <div style={{ fontSize: "12px", color: "#78716c", marginTop: "6px" }}>
+            {s.solveProgress.phase === "phase1"
+              ? `Phase 1 — searching for min T · trying T=${s.solveProgress.T} (range ${s.solveProgress.T_min}–${s.solveProgress.T_max})`
+              : `Phase 2 — optimizing at T=${s.solveProgress.T}`}
+            {s.solveProgress.elapsed_s != null
+              ? ` · ${s.solveProgress.elapsed_s}s / ${s.solveProgress.timeout_s}s`
+              : ""}
+          </div>
         )}
 
         <div className="config-btns">

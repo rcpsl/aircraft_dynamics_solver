@@ -89,13 +89,13 @@ export function useSolver() {
     const initM = saved.M ?? DEFAULT_M;
     return Array.isArray(saved.stationTransitWeights) && saved.stationTransitWeights.length === initM
       ? saved.stationTransitWeights
-      : Array(initM).fill(1.0);
+      : Array(initM).fill(1);
   });
   const [aircraftMultipliers,    setAircraftMultipliers]    = useState(() => {
     const initN = saved.N ?? DEFAULT_N;
     return Array.isArray(saved.aircraftMultipliers) && saved.aircraftMultipliers.length === initN
       ? saved.aircraftMultipliers
-      : Array(initN).fill(1.0);
+      : Array(initN).fill(1);
   });
   const [utilNoiseMode,          setUtilNoiseMode]          = useState(saved.utilNoiseMode          ?? false);
   const [useRouteMode,           setUseRouteMode]           = useState(saved.useRouteMode            ?? false);
@@ -105,10 +105,12 @@ export function useSolver() {
   const [activeTab,         setActiveTab]         = useState("solver");
   const [resultName,        setResultName]        = useState("");
   const [pendingResultsImport, setPendingResultsImport] = useState(null);
+  const [solveProgress,     setSolveProgress]     = useState(null);
   const fileInputRef = useRef(null);
   const resultsFileInputRef = useRef(null);
   const resultsWithConfigFileInputRef = useRef(null);
   const abortRef     = useRef(null);
+  const progressTimerRef = useRef(null);
 
   // Single source of truth for config save/load: [key, currentValue, setter] triples.
   // Both the save side (configValues, used by localStorage persistence and Save
@@ -196,12 +198,16 @@ export function useSolver() {
   // Derived from the frozen solved* fields (not live config) so the name only
   // changes when a solve actually completes — not on every keystroke/click while
   // the solver is running or the user is tweaking parameters for the next run.
+  // Falls back to live config only when nothing has ever been solved yet (solved*
+  // is still null at that point, so there's nothing to freeze).
   function computeSolvedResultName() {
     return buildResultLabel({
       N: paths ? paths.length : N,
-      M: solvedM, D: solvedD, U: solvedU,
-      optimizeUtil: solvedOptimizeUtil, optimizePrior: solvedOptimizePrior,
-      proportionalAlloc: solvedProportionalAlloc, useDbSolver: solvedUseDbSolver,
+      M: solvedM ?? M, D: solvedD ?? D, U: solvedU ?? U,
+      optimizeUtil: solvedOptimizeUtil ?? optimizeUtil,
+      optimizePrior: solvedOptimizePrior ?? optimizePrior,
+      proportionalAlloc: solvedProportionalAlloc ?? proportionalAlloc,
+      useDbSolver: solvedUseDbSolver ?? useDbSolver,
     });
   }
   const defaultResultName = computeSolvedResultName();
@@ -223,7 +229,7 @@ export function useSolver() {
     setProtectedStn(ps => ps.filter(s => s <= newM));
     setProportionalStn(ps => ps.filter(s => s <= newM));
     setRouteVertiports(vs => vs.filter(s => s <= newM));
-    setStationTransitWeights(w => newM <= w.length ? w.slice(0, newM) : [...w, ...Array(newM - w.length).fill(1.0)]);
+    setStationTransitWeights(w => newM <= w.length ? w.slice(0, newM) : [...w, ...Array(newM - w.length).fill(1)]);
   }
 
   // Changing a station's zone resets its baseline to that zone's default dBA
@@ -383,6 +389,8 @@ export function useSolver() {
 
   function handleCancel() {
     abortRef.current?.abort();
+    if (progressTimerRef.current) { clearInterval(progressTimerRef.current); progressTimerRef.current = null; }
+    setSolveProgress(null);
   }
 
   // Route-mode derived values — recomputed every render so handleSolve captures fresh values
@@ -404,14 +412,29 @@ export function useSolver() {
   async function handleSolve() {
     abortRef.current = new AbortController();
     setStatus("solving");
+    setSolveProgress(null);
+    if (useDbSolver) {
+      progressTimerRef.current = setInterval(async () => {
+        try {
+          const r = await fetch('/api/db/progress');
+          if (r.ok) {
+            const p = await r.json();
+            setSolveProgress(p.phase ? p : null);
+          }
+        } catch { /* ignore — next poll will retry */ }
+      }, 400);
+    }
+    // Note: solvedM/D/U, solvedUseDbSolver, solvedOptimizeUtil/Prior, and
+    // solvedProportionalAlloc are deliberately NOT reset here — they back the
+    // Save Results default name (see computeSolvedResultName above), and clearing
+    // them on every solve start would flash it back to "M?" mid-solve instead of
+    // holding the previous solve's name until the new one lands.
     setPaths(null); setNoiseMatrix(null); setCountMatrix(null); setSolvedT(null);
     setSolvedStationZones(null); setSolvedStationBaselines(null); setSolvedDbPerCraft(null);
-    setSolvedM(null); setSolvedUseDbSolver(null);
-    setSolvedD(null); setSolvedU(null); setSolvedProportionalAlloc(null);
     setProtectedNoiseVal(null); setSolvedProtectedStn(null);
     setProportionalNoiseVal(null); setSolvedProportionalStn(null);
     setWarningMsg(null); setSolvedTMin(null); setSolvedTUsed(null); setErrorDetail(null);
-    setSolvedOptimizeUtil(null); setSolvedOptimizePrior(null); setSolvedOptimizeProp(null);
+    setSolvedOptimizeProp(null);
     setStationCategories(null); setTotalUtilNoise(null); setSolvedEndPos(null);
     try {
       const res = await fetch(useDbSolver ? '/api/db/solve' : '/api/count/solve', {
@@ -494,13 +517,16 @@ export function useSolver() {
       console.error("Solve error:", err);
       setErrorDetail(err.message || "Cannot reach server — is it running?");
       setStatus("error");
+    } finally {
+      if (progressTimerRef.current) { clearInterval(progressTimerRef.current); progressTimerRef.current = null; }
+      setSolveProgress(null);
     }
   }
 
   return {
     N, M, D, U, adjacency, startPos, endPos, stationZones, stationBaselines, dbPerCraft,
     protectedStn, proportionalStn, weightUtil, weightPrior, weightProp,
-    status, solvedT, paths, noiseMatrix, countMatrix, unstatDetail,
+    status, solvedT, paths, noiseMatrix, countMatrix, unstatDetail, solveProgress,
     solvedStationZones, solvedStationBaselines, solvedDbPerCraft, solvedM, solvedUseDbSolver, solvedD, solvedU, solvedProportionalAlloc,
     resultName, setResultName, defaultResultName,
     pendingResultsImport, confirmImportResults, cancelImportResults,
