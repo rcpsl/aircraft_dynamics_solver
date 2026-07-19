@@ -1,14 +1,19 @@
 # dB-based variant of solver_server.py — runs on port 5051
 import math
 import threading
+import time
 from math import ceil
 from collections import deque, Counter
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from z3 import Int, And, Or, Not, Implies, Sum, If, Solver, Optimize, Bool, sat
+from z3 import Int, And, Or, Not, Implies, Sum, If, Solver, Optimize, Bool, sat, unknown
 
 app = Flask(__name__)
 CORS(app)
+
+# Shared by both phases' Z3 timeout and by /progress's elapsed/max display,
+# so the two can never drift apart.
+SOLVE_TIMEOUT_MS = 240000
 
 # Z3's default Context is process-global and not thread-safe. Two overlapping
 # requests (e.g. a double-click on "Run Solver" before the button disables)
@@ -16,6 +21,26 @@ CORS(app)
 # with nondeterministic errors (access violations, "unreachable", "ast is not
 # an expression"). This lock serializes all Z3 access so that can't happen.
 _solve_lock = threading.Lock()
+
+# Progress reporting for the frontend: /solve blocks for the whole solve, so a
+# separate /progress GET (served on another thread — see threaded=True below)
+# lets the UI poll what T the solver is currently on. Plain dict + lock rather
+# than anything fancier since there's only ever one solve in flight at a time.
+# started_at is a time.monotonic() timestamp for the current check() call, used
+# to compute elapsed time on demand in the /progress route.
+_progress_lock = threading.Lock()
+_progress = {"phase": None, "T": None, "T_min": None, "T_max": None, "started_at": None}
+
+
+def _set_progress(**kwargs):
+    with _progress_lock:
+        _progress.update(kwargs)
+
+
+def _clear_progress():
+    with _progress_lock:
+        _progress.update({"phase": None, "T": None, "T_min": None, "T_max": None, "started_at": None})
+
 
 SCALE = 100  # multiply all dB values by 100 and round to int for Z3 integer arithmetic
 
@@ -54,7 +79,9 @@ def make_dB_expr(count_expr, m, scaled_table, N):
 def _active_output_matrices(paths, start_positions, end_positions, N, M, T, baseline, aircraft_dB,
                             multipliers=None):
     """Build count and dB matrices for output using the active-noise window:
-    departure timestep (last t at start before first move) through first arrival.
+    first move timestep through first arrival — matches the Z3 active[i][t] =
+    moved[i][t] AND NOT arrived[i][t-1] definition exactly (moved[] flips true
+    at t_fm, arrived[] flips true at t_arr, so active is true for t in [t_fm, t_arr]).
     multipliers[i] scales how many virtual aircraft aircraft i represents in the output."""
     mult = multipliers if multipliers is not None else [1] * N
     count = [[0] * T for _ in range(M)]
@@ -67,7 +94,7 @@ def _active_output_matrices(paths, start_positions, end_positions, N, M, T, base
         if t_fm is None:
             continue
         t_arr = next((t for t in range(T) if p[t] == e0), T - 1)
-        for t in range(t_fm - 1, t_arr + 1):
+        for t in range(t_fm, t_arr + 1):
             count[p[t] - 1][t] += mult[i]
     noise = [
         [dB_increase(baseline[m], count[m][t], aircraft_dB) for t in range(T)]
@@ -96,14 +123,14 @@ def min_moves(adjacency, src, dst, M):
     return float('inf')
 
 
-def _compute_d_counts(M, N, baseline_scaled, D_scaled, scaled_table):
-    """Max active aircraft count per station satisfying the absolute dB cap D."""
+def _compute_d_counts(M, N, D_scaled, scaled_table):
+    """Max active aircraft count per station satisfying the dB-increase cap D
+    (baseline-independent — D bounds the aircraft-caused increase, not the total level)."""
     result = []
     for m in range(M):
-        cap = D_scaled - baseline_scaled[m]
         max_n = 0
         for n in range(1, N + 1):
-            if scaled_table[m][n] <= cap:
+            if scaled_table[m][n] <= D_scaled:
                 max_n = n
             else:
                 break
@@ -162,7 +189,6 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     scaled_table = build_scaled_table(M, N, baseline, aircraft_dB)
     D_scaled = round(D * SCALE)
     U_scaled = round(U * SCALE)
-    baseline_scaled = [round(b * SCALE) for b in baseline]
 
     # Per-aircraft multipliers: D/U hard constraints must be checked against the
     # same weighted counts used for the displayed noise matrix, or the shown
@@ -174,34 +200,26 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
 
     # ── Algebraic pre-checks (exact or O(M²), no Z3 needed) ─────────────────
 
-
-    # D is an absolute dB cap: baseline[m] + dB_increase[m] ≤ D at all times.
-    # If any station's bare baseline already exceeds D, no solution exists.
-    stations_over_D = [m + 1 for m in range(M) if baseline_scaled[m] > D_scaled]
-    if stations_over_D:
-        return {
-            "status": "unsat", "reason": "D_too_low",
-            "detail": (
-                f"D={D} dBA is below the ambient baseline of stations {stations_over_D}; "
-                f"increase D above the highest baseline ({max(baseline):.1f} dBA)"
-            )
-        }
+    # D is an absolute dB-INCREASE cap: dB_increase[m] ≤ D at all times, independent
+    # of that station's ambient baseline. (Baseline is never compared against D —
+    # a station with 0 aircraft has 0 increase and can never violate D on its own.)
 
     # Pigeonhole: some station must hold ≥⌈N/M⌉ aircraft at every timestep.
-    # Best case for absolute D: the station whose combined level
-    # (baseline + dB increase for ⌈N/M⌉ aircraft) is lowest.
+    # Best case: the station whose dB increase for ⌈N/M⌉ aircraft is lowest
+    # (this is baseline-dependent — a louder station's added aircraft noise is
+    # masked more by its own ambient level, so it can yield a *lower* increase).
     # If even that exceeds D, no distribution can satisfy the cap.
     min_forced_count = ceil(N / M)
-    best_m = min(range(M), key=lambda m: baseline_scaled[m] + scaled_table[m][min_forced_count])
-    if baseline_scaled[best_m] + scaled_table[best_m][min_forced_count] > D_scaled:
-        level = (baseline_scaled[best_m] + scaled_table[best_m][min_forced_count]) / SCALE
+    best_m = min(range(M), key=lambda m: scaled_table[m][min_forced_count])
+    if scaled_table[best_m][min_forced_count] > D_scaled:
+        level = scaled_table[best_m][min_forced_count] / SCALE
         return {
             "status": "unsat", "reason": "noise_cap",
             "detail": (
                 f"Even distributing {N} aircraft across {M} stations forces ≥{min_forced_count} "
                 f"at some station; even the most tolerant station "
-                f"(baseline {baseline[best_m]:.1f} dBA) would reach {level:.1f} dBA, "
-                f"exceeding D={D} dBA"
+                f"(baseline {baseline[best_m]:.1f} dBA) would see a {level:.1f} dB increase, "
+                f"exceeding D={D} dB"
             )
         }
 
@@ -211,14 +229,14 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     start_counts = Counter(start_positions)
     start_dB = [scaled_table[m][start_counts.get(m + 1, 0)] for m in range(M)]
     for m, inc_scaled in enumerate(start_dB):
-        if baseline_scaled[m] + inc_scaled > D_scaled:
+        if inc_scaled > D_scaled:
             station = m + 1
-            level = (baseline_scaled[m] + inc_scaled) / SCALE
+            level = inc_scaled / SCALE
             return {
                 "status": "unsat", "reason": "start_conflict",
                 "detail": (
                     f"Station {station} has {start_counts[station]} aircraft at t=0, "
-                    f"reaching {level:.1f} dBA which exceeds D={D} dBA"
+                    f"a {level:.1f} dB increase which exceeds D={D} dB"
                 )
             }
 
@@ -226,14 +244,14 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     end_counts = Counter(end_positions)
     end_dB = [scaled_table[m][end_counts.get(m + 1, 0)] for m in range(M)]
     for m, inc_scaled in enumerate(end_dB):
-        if baseline_scaled[m] + inc_scaled > D_scaled:
+        if inc_scaled > D_scaled:
             station = m + 1
-            level = (baseline_scaled[m] + inc_scaled) / SCALE
+            level = inc_scaled / SCALE
             return {
                 "status": "unsat", "reason": "end_conflict",
                 "detail": (
                     f"Station {station} has {end_counts[station]} aircraft at their final position, "
-                    f"reaching {level:.1f} dBA which exceeds D={D} dBA"
+                    f"a {level:.1f} dB increase which exceeds D={D} dB"
                 )
             }
     # End-position U check removed: aircraft that arrive before T-1 are already silent
@@ -257,17 +275,38 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
         s0 = src_1indexed - 1
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
 
-    # Conservative T cap: the constraint set grows O(T × M² × N) so large problems
-    # blow up Z3's internal DAG before T=25. Cap at T_lower + a budget that scales
-    # down with problem size to keep total constraints tractable.
-    complexity = N * M * M
-    T_budget = max(3, min(20, 200 // max(1, complexity // 10)))
-    T_hard_cap = T_lower + T_budget
+    # Precompute count-based D and U tables now (they only depend on M/D/baseline,
+    # not on T) so max_d_count is known before sizing the T search budget below.
+    D_count = _compute_d_counts(M, max_weighted_count, D_scaled, scaled_table_w)
+    u_ranges = _compute_u_ranges(M, max_weighted_count, U_scaled, scaled_table_w, D_count)
+    max_d_count = max(D_count) if D_count else 0
+
+    # T search budget: sized from the same constraint-volume metric that guards
+    # against Z3 blowing up (T * M^2 * max_d_count Implies constraints). A flat
+    # budget crashed Z3 with an out-of-memory error for large N (e.g. N=30, M=16
+    # reached ~246k constraints at T_hard_cap=32 and OOM'd), so the budget must
+    # shrink for problems where each extra timestep is expensive, while still
+    # giving small problems plenty of room to search for feasibility.
+    SAFE_CONSTRAINT_VOLUME = 80_000
+    per_timestep_cost = max(1, M * M * max_d_count)
+    T_hard_cap_by_memory = SAFE_CONSTRAINT_VOLUME // per_timestep_cost
+    if T_hard_cap_by_memory < T_lower:
+        return {
+            "status": "unsat", "reason": "noise_domain_too_large",
+            "detail": (
+                f"Noise-constraint search space too large to solve reliably even at the "
+                f"minimum feasible T={T_lower} (stations can hold up to {max_d_count} "
+                f"weighted aircraft-units under the current D). This is usually caused by "
+                f"a generous D combined with large N or aircraft multipliers. Lower D, "
+                f"reduce aircraft multipliers, or reduce N/M to continue."
+            )
+        }
+    T_hard_cap = min(T_lower + 40, max(T_lower + 3, T_hard_cap_by_memory))
 
     # Build permanent base state up to T_lower (Suggestion 3: encode once)
     L = [[Int(f"L_{i}_{t}") for t in range(T_lower)] for i in range(N)]
     s = Solver()
-    s.set("timeout", 100000)  # 100 s per check() call; yields unknown instead of crashing
+    s.set("timeout", SOLVE_TIMEOUT_MS)  # yields unknown instead of crashing
 
     # Bounds
     for i in range(N):
@@ -302,25 +341,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
 
     # Noise cap + global disparity for t = 0 … T_lower-1
     # C_by_t[t][m] = weighted active aircraft count at station m at time t
-    # Precompute count-based D and U tables — avoids O(N^2) Z3 If-chain expansion
-    D_count = _compute_d_counts(M, max_weighted_count, baseline_scaled, D_scaled, scaled_table_w)
-    u_ranges = _compute_u_ranges(M, max_weighted_count, U_scaled, scaled_table_w, D_count)
-
-    # Guard: same rationale as the phase-2 check — a generous D combined with large
-    # aircraft multipliers can blow up the O(T * M^2 * D_count) noise constraints.
-    max_d_count = max(D_count) if D_count else 0
-    if T_hard_cap * M * M * max_d_count > 150_000:
-        return {
-            "status": "unsat", "reason": "noise_domain_too_large",
-            "detail": (
-                f"Noise-constraint search space too large to solve reliably "
-                f"(stations can hold up to {max_d_count} weighted aircraft-units under "
-                f"the current D). This is usually caused by a generous D combined with "
-                f"large aircraft multipliers. Lower D, reduce aircraft multipliers, or "
-                f"reduce N/M to continue."
-            )
-        }
-
+    # (D_count/u_ranges/max_d_count were already computed above, before T_hard_cap sizing)
     C_by_t = []
     for t in range(T_lower):
         C_t = [Sum([If(And(L[i][t] == m + 1, active[i][t]), int_mult[i], 0) for i in range(N)]) for m in range(M)]
@@ -333,6 +354,8 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     T_current = T_lower
 
     for _ in range(T_lower, T_hard_cap + 1):
+        _set_progress(phase="phase1", T=T_current, T_min=T_lower, T_max=T_hard_cap, started_at=time.monotonic())
+
         # Assumption booleans — same names reused safely because the Implies
         # constraints referencing them are pushed/popped each iteration.
         end_asms = [Bool(f"end_{i}") for i in range(N)]
@@ -432,9 +455,10 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     NOTE: z3.Optimize is slower than z3.Solver. For large N, T, or M this phase
     may take several seconds. T is fixed to the value found in phase 1.
     """
+    _set_progress(phase="phase2", T=T, T_min=None, T_max=None, started_at=time.monotonic())
+
     D_scaled = round(D * SCALE)
     U_scaled = round(U * SCALE)
-    baseline_scaled = [round(b * SCALE) for b in baseline]
 
     # Per-aircraft multipliers: how many virtual aircraft each real aircraft represents.
     # D/U hard constraints are checked against these same weighted counts (see below)
@@ -469,7 +493,10 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     max_dB_scaled_per_station = max(scaled_table_w[m][max_weighted_count] for m in range(M))
     max_protected_dB    = len(protected_stations)    * T * max_dB_scaled_per_station
     max_proportional_dB = len(proportional_stations) * T * max_dB_scaled_per_station
-    max_util_noise_dB   = M * T * max_dB_scaled_per_station
+    # When station-weighted, each term in total_util_noise is additionally scaled by
+    # int_tw[m] (see below), so the normalization bound needs the same max_tw factor
+    # the transit-cost path already applies to max_transit.
+    max_util_noise_dB   = M * T * max_dB_scaled_per_station * (max(1, max_tw) if int_tw is not None else 1)
 
     # After normalization, all coefficients are dimensionless and comparable,
     # so w_util = w_prior = w_prop = w_time = 1.0 gives genuinely equal weighting.
@@ -492,6 +519,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     all_pairs = [(m1, m2) for m1 in range(M) for m2 in range(m1 + 1, M)]
 
     opt = Optimize()
+    opt.set("timeout", SOLVE_TIMEOUT_MS)  # cap; without this Optimize() can hang indefinitely
 
     # Location variables — "o_" prefix avoids name clashes with phase-1 variables
     L = [[Int(f"o_L_{i}_{t}") for t in range(T)] for i in range(N)]
@@ -530,7 +558,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     # Precompute count-based D and U tables — avoids O(N^2) Z3 If-chain expansion.
     # Built from the weighted table so D/U hard constraints are checked against
     # the same weighted counts used for the displayed noise matrix below.
-    D_count = _compute_d_counts(M, max_weighted_count, baseline_scaled, D_scaled, scaled_table_w)
+    D_count = _compute_d_counts(M, max_weighted_count, D_scaled, scaled_table_w)
     u_ranges = _compute_u_ranges(M, max_weighted_count, U_scaled, scaled_table_w, D_count)
 
     # Guard: a generous D combined with large aircraft multipliers can push D_count
@@ -581,7 +609,12 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
             # Minimize weighted dB noise sum across all stations and timesteps.
             # Uses wdB_by_t (multiplier-scaled counts) so each aircraft's
             # virtual count affects the nonlinear dB lookup correctly.
-            total_util_noise = Sum([wdB_by_t[t][m] for t in range(T) for m in range(M)])
+            # Station-weighted transit cost (int_tw) applies here too, the same
+            # way it scales the per-station cost in the transit-time branch below.
+            if int_tw is not None:
+                total_util_noise = Sum([wdB_by_t[t][m] * int_tw[m] for t in range(T) for m in range(M)])
+            else:
+                total_util_noise = Sum([wdB_by_t[t][m] for t in range(T) for m in range(M)])
             objective_terms.append(eff_w_util * total_util_noise)
         else:
             # hm[i][t]: aircraft i has changed location at least once in t'=1..t
@@ -683,8 +716,14 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     if objective_terms:
         opt.minimize(Sum(objective_terms))
 
-    if opt.check() != sat:
-        return None  # should not happen: phase-1 already confirmed sat at this T
+    check_result = opt.check()
+    if check_result != sat:
+        # Distinguish a timed-out search (unknown — Z3 ran out of the SOLVE_TIMEOUT_MS
+        # budget without an answer) from a genuine unsat (which "should not happen":
+        # phase-1 already confirmed sat at this T, ignoring objectives/weights).
+        # Callers must not treat this as a normal phase-1 fallback silently — the
+        # caller is expected to surface why phase-2 didn't produce a weighted result.
+        return {"status": "phase2_failed", "reason": "timeout" if check_result == unknown else "unsat_unexpected"}
 
     model = opt.model()
     paths = [
@@ -702,7 +741,8 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
 
     if eff_w_util > 0:
         if util_noise_mode:
-            result["totalUtilNoise"] = model.evaluate(total_util_noise).as_long() / SCALE
+            raw_util_noise = model.evaluate(total_util_noise).as_long()
+            result["totalUtilNoise"] = raw_util_noise / SCALE / W_SCALE if int_tw is not None else raw_util_noise / SCALE
         else:
             result["transitTimes"] = [model.evaluate(transit[i]).as_long() for i in range(N)]
             result["totalTransit"] = model.evaluate(total_transit).as_long()
@@ -724,7 +764,23 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
 @app.route("/solve", methods=["POST"])
 def solve():
     with _solve_lock:
-        return _solve_impl()
+        _clear_progress()
+        try:
+            return _solve_impl()
+        finally:
+            _clear_progress()
+
+
+@app.route("/progress", methods=["GET"])
+def progress():
+    # Deliberately outside _solve_lock — this must respond immediately while
+    # a solve is in flight on another thread (see threaded=True below).
+    with _progress_lock:
+        p = dict(_progress)
+    started_at = p.pop("started_at", None)
+    p["elapsed_s"] = round(time.monotonic() - started_at, 1) if started_at is not None else None
+    p["timeout_s"] = SOLVE_TIMEOUT_MS / 1000
+    return jsonify(p)
 
 
 def _solve_impl():
@@ -896,7 +952,7 @@ def _solve_impl():
     util_noise_mode = bool(data.get("utilNoiseMode", False))
 
     station_transit_weights = None
-    if optimize_util and not util_noise_mode:
+    if optimize_util:
         raw_stw = data.get("stationTransitWeights")
         if raw_stw is not None:
             if not isinstance(raw_stw, list) or len(raw_stw) != M:
@@ -945,10 +1001,27 @@ def _solve_impl():
     except Exception as e:
         return jsonify({"error": f"Unexpected optimization error: {e}"}), 500
 
-    if opt_result is None:
-        # Phase-2 unexpectedly returned unsat — fall back to phase-1 result
-        if overlap_warning:
-            result["warning"] = overlap_warning
+    if opt_result["status"] == "phase2_failed":
+        # Fall back to phase-1's plain (unweighted, unoptimized) feasible result so
+        # the user still gets a route — but flag it clearly: silently serving this
+        # without a warning would make it look like the weighted optimization ran
+        # and simply chose to ignore the weights/objectives, when actually it never
+        # produced a result at all.
+        if opt_result["reason"] == "timeout":
+            detail = (
+                f"Phase-2 optimization timed out (after {SOLVE_TIMEOUT_MS // 1000}s) at "
+                f"T={T_for_phase2} without finding a weighted solution — showing the plain "
+                f"feasible route instead, which does NOT reflect your weights or objectives. "
+                f"Try tightening D/U, lowering T_max, reducing the station weight, or reducing "
+                f"N/aircraft multipliers."
+            )
+        else:
+            detail = (
+                f"Phase-2 optimization unexpectedly found no solution at T={T_for_phase2} "
+                f"despite phase-1 confirming feasibility — showing the plain feasible route "
+                f"instead, which does NOT reflect your weights or objectives."
+            )
+        result["warning"] = f"{overlap_warning} · {detail}" if overlap_warning else detail
         return jsonify(result)
     opt_result["T_min"] = result["T"]
     if overlap_warning:
@@ -957,4 +1030,7 @@ def _solve_impl():
 
 
 if __name__ == "__main__":
-    app.run(port=5051, debug=True)
+    # threaded=True so GET /progress can be served while a POST /solve is in
+    # flight. This is safe: /progress never touches Z3 or _solve_lock, only
+    # the separate lightweight _progress_lock.
+    app.run(port=5051, debug=True, threaded=True)
