@@ -20,3 +20,14 @@ route_3_5_11_results/
 # doesn't untrack what's committed); this only stops new stray files from
 # being swept into this folder by a future broad `git add`.
 legacy_code/
+
+# Packaging snapshots. Every zip in this repo is a handoff bundle of files that
+# are already tracked individually (dB_target_sweeps/archive/*.zip,
+# dB45_collection/dB45_collection.zip). They stay on disk for sharing; the tree
+# is the source of truth, so committing them would just duplicate it.
+*.zip
+
+# Exception to `*.log` above: the 45 dB collection's solver run captures are the
+# provenance for the resolved/unresolved gaps documented in
+# dB45_collection/INTEGRATION_HANDOFF.md, so that folder is versioned whole.
+!dB45_collection/logs/*.log
