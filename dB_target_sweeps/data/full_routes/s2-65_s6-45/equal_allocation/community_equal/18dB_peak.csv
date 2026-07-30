@@ -1,0 +1,57 @@
+# domain,equal_allocation
+# combo,s2-65_s6-45
+# mode,community_equal
+# target_dB,18
+# metric,peak
+# variant,baseline_mult
+# D,50
+# U,16.0
+# hardT,False
+# T_max,7
+# weightTime,0.1
+# solver_optimize_util,False
+# historicalValue,15.9106
+# reproducedValue,14.9136
+# matchesHistorical,False
+# note,Tied-optimal scenario (see equal_allocation/README.md sec 9 non-monotonic-U finding / prioritarian REPORT.md); this run found a different but equally valid solution than the originally published value - not an error.
+# N,14
+# aircraftMultipliers,[2, 5, 5, 5, 5, 5, 5, 5, 5, 2, 5, 3, 2, 2]
+# totalTraffic,56
+# maxTraffic,56
+# demandFulfilledPct,100.0
+Time Steps (T),7
+
+Routing (station per aircraft per timestep):
+Aircraft,Multiplier,Start,End,T0,T1,T2,T3,T4,T5,T6
+1,2,1,16,1,2,7,11,16,16,16
+2,5,1,16,1,2,7,12,16,16,16
+3,5,1,16,1,5,10,15,16,16,16
+4,5,1,16,1,5,10,15,16,16,16
+5,5,16,1,16,15,10,5,1,1,1
+6,5,16,1,16,12,7,2,1,1,1
+7,5,16,1,16,12,7,2,1,1,1
+8,5,16,1,16,11,10,5,1,1,1
+9,5,16,1,16,11,7,2,1,1,1
+10,2,16,1,16,11,10,5,1,1,1
+11,5,1,16,1,5,10,15,16,16,16
+12,3,1,16,1,6,11,16,16,16,16
+13,2,1,16,1,5,10,15,16,16,16
+14,2,16,1,16,11,6,1,1,1,1
+
+Zone,Avg Added dB,Avg Total dB,Peak Added dB,Peak Total dB,Avg Aircraft,Peak Aircraft
+Zone 1,0.92,65.92,5.68,70.68,4.14,27
+Zone 2,0.90,65.90,3.98,68.98,3.14,15
+Zone 3,0.00,55.00,0.00,55.00,0.00,0
+Zone 4,0.00,45.00,0.00,45.00,0.00,0
+Zone 5,3.38,58.38,12.55,67.55,4.14,17
+Zone 6,4.02,49.02,14.91,59.91,0.71,3
+Zone 7,1.95,56.95,13.62,68.62,3.14,22
+Zone 8,0.00,55.00,0.00,55.00,0.00,0
+Zone 9,0.00,55.00,0.00,55.00,0.00,0
+Zone 10,2.11,57.11,14.77,69.77,4.14,29
+Zone 11,3.22,58.22,11.76,66.76,2.71,14
+Zone 12,0.68,65.68,3.01,68.01,2.14,10
+Zone 13,0.00,45.00,0.00,45.00,0.00,0
+Zone 14,0.00,45.00,0.00,45.00,0.00,0
+Zone 15,0.87,65.87,4.31,69.31,3.14,17
+Zone 16,0.92,65.92,5.31,70.31,3.86,24

@@ -1,0 +1,46 @@
+# domain,equal_allocation
+# combo,s2-65_s6-55
+# mode,community_equal
+# target_dB,3
+# metric,peak
+# variant,N4_mult1
+# D,50
+# U,4.0
+# hardT,False
+# T_max,7
+# weightTime,0.1
+# solver_optimize_util,False
+# historicalValue,3.0103
+# reproducedValue,3.0103
+# matchesHistorical,True
+# N,4
+# aircraftMultipliers,[1, 1, 1, 1]
+# totalTraffic,4
+# maxTraffic,56
+# demandFulfilledPct,7.14
+Time Steps (T),7
+
+Routing (station per aircraft per timestep):
+Aircraft,Multiplier,Start,End,T0,T1,T2,T3,T4,T5,T6
+1,1,1,16,1,2,7,12,16,16,16
+2,1,1,16,1,6,11,16,16,16,16
+3,1,16,1,16,11,6,1,1,1,1
+4,1,16,1,16,15,10,5,1,1,1
+
+Zone,Avg Added dB,Avg Total dB,Peak Added dB,Peak Total dB,Avg Aircraft,Peak Aircraft
+Zone 1,0.12,65.12,0.41,65.41,0.29,1
+Zone 2,0.06,65.06,0.41,65.41,0.14,1
+Zone 3,0.00,55.00,0.00,55.00,0.00,0
+Zone 4,0.00,45.00,0.00,45.00,0.00,0
+Zone 5,0.43,55.43,3.01,58.01,0.14,1
+Zone 6,0.86,55.86,3.01,58.01,0.29,1
+Zone 7,0.43,55.43,3.01,58.01,0.14,1
+Zone 8,0.00,55.00,0.00,55.00,0.00,0
+Zone 9,0.00,55.00,0.00,55.00,0.00,0
+Zone 10,0.43,55.43,3.01,58.01,0.14,1
+Zone 11,0.86,55.86,3.01,58.01,0.29,1
+Zone 12,0.06,65.06,0.41,65.41,0.14,1
+Zone 13,0.00,45.00,0.00,45.00,0.00,0
+Zone 14,0.00,45.00,0.00,45.00,0.00,0
+Zone 15,0.06,65.06,0.41,65.41,0.14,1
+Zone 16,0.12,65.12,0.41,65.41,0.29,1
