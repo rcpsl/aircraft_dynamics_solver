@@ -1,0 +1,10 @@
+phase-2 timeout overridden: 240000 -> 900000 ms
+
+=== s2-55_s6-45 / weighted ===
+  skip D3.csv (exists)
+  D=8.0   baseline_mult  phase2 retry seed=1 -> phase2_failed (924s)
+  D=8.0   baseline_mult  phase2 retry seed=7 -> phase2_failed (930s)
+  D=8.0   baseline_mult  phase2 retry seed=42 -> phase2_failed (921s)
+  D=8.0   baseline_mult  PHASE-2 UNRESOLVED at 100.0% demand -- feasible but not optimizable in budget; NOT cutting demand
+  skip D18.csv (exists)
+=== s2-55_s6-45/weighted done in 3703s ===

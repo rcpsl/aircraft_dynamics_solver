@@ -1,0 +1,129 @@
+cyoSelection,st2,st6,st11,st13,combo,mode,lens,protectedStations,gainedFromCyo,file
+0000,0,0,0,0,s2-55_s6-55,community,low_income,"[3, 8, 10, 11, 12, 15, 16]","[11]",s2-55_s6-55/prioritarian_cyo/community/low_income__gain_11.csv
+0000,0,0,0,0,s2-55_s6-55,community,people_of_color,"[2, 6, 8, 11, 12]","[2, 6, 11]",s2-55_s6-55/prioritarian_cyo/community/people_of_color__gain_2_6_11.csv
+0000,0,0,0,0,s2-55_s6-55,community,transit_desert,"[8, 12, 15]","[]",s2-55_s6-55/prioritarian_cyo/community/transit_desert__gain_none.csv
+0000,0,0,0,0,s2-55_s6-55,community,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-55_s6-55/prioritarian_cyo/community/few_jobs__gain_13.csv
+0000,0,0,0,0,s2-55_s6-55,people,low_income,"[3, 8, 10, 11, 12, 15, 16]","[11]",s2-55_s6-55/prioritarian_cyo/people/low_income__gain_11.csv
+0000,0,0,0,0,s2-55_s6-55,people,people_of_color,"[2, 6, 8, 11, 12]","[2, 6, 11]",s2-55_s6-55/prioritarian_cyo/people/people_of_color__gain_2_6_11.csv
+0000,0,0,0,0,s2-55_s6-55,people,transit_desert,"[8, 12, 15]","[]",s2-55_s6-55/prioritarian_cyo/people/transit_desert__gain_none.csv
+0000,0,0,0,0,s2-55_s6-55,people,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-55_s6-55/prioritarian_cyo/people/few_jobs__gain_13.csv
+0001,0,0,0,1,s2-55_s6-55,community,low_income,"[3, 8, 10, 11, 12, 13, 15, 16]","[11, 13]",s2-55_s6-55/prioritarian_cyo/community/low_income__gain_11_13.csv
+0001,0,0,0,1,s2-55_s6-55,community,people_of_color,"[2, 6, 8, 11, 12]","[2, 6, 11]",s2-55_s6-55/prioritarian_cyo/community/people_of_color__gain_2_6_11.csv
+0001,0,0,0,1,s2-55_s6-55,community,transit_desert,"[8, 12, 13, 15]","[13]",s2-55_s6-55/prioritarian_cyo/community/transit_desert__gain_13.csv
+0001,0,0,0,1,s2-55_s6-55,community,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-55_s6-55/prioritarian_cyo/community/few_jobs__gain_13.csv
+0001,0,0,0,1,s2-55_s6-55,people,low_income,"[3, 8, 10, 11, 12, 13, 15, 16]","[11, 13]",s2-55_s6-55/prioritarian_cyo/people/low_income__gain_11_13.csv
+0001,0,0,0,1,s2-55_s6-55,people,people_of_color,"[2, 6, 8, 11, 12]","[2, 6, 11]",s2-55_s6-55/prioritarian_cyo/people/people_of_color__gain_2_6_11.csv
+0001,0,0,0,1,s2-55_s6-55,people,transit_desert,"[8, 12, 13, 15]","[13]",s2-55_s6-55/prioritarian_cyo/people/transit_desert__gain_13.csv
+0001,0,0,0,1,s2-55_s6-55,people,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-55_s6-55/prioritarian_cyo/people/few_jobs__gain_13.csv
+0010,0,0,1,0,s2-55_s6-55,community,low_income,"[3, 8, 10, 12, 15, 16]","[]",s2-55_s6-55/prioritarian_cyo/community/low_income__gain_none.csv
+0010,0,0,1,0,s2-55_s6-55,community,people_of_color,"[2, 6, 8, 12]","[2, 6]",s2-55_s6-55/prioritarian_cyo/community/people_of_color__gain_2_6.csv
+0010,0,0,1,0,s2-55_s6-55,community,transit_desert,"[8, 12, 15]","[]",s2-55_s6-55/prioritarian_cyo/community/transit_desert__gain_none.csv
+0010,0,0,1,0,s2-55_s6-55,community,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-55_s6-55/prioritarian_cyo/community/few_jobs__gain_13.csv
+0010,0,0,1,0,s2-55_s6-55,people,low_income,"[3, 8, 10, 12, 15, 16]","[]",s2-55_s6-55/prioritarian_cyo/people/low_income__gain_none.csv
+0010,0,0,1,0,s2-55_s6-55,people,people_of_color,"[2, 6, 8, 12]","[2, 6]",s2-55_s6-55/prioritarian_cyo/people/people_of_color__gain_2_6.csv
+0010,0,0,1,0,s2-55_s6-55,people,transit_desert,"[8, 12, 15]","[]",s2-55_s6-55/prioritarian_cyo/people/transit_desert__gain_none.csv
+0010,0,0,1,0,s2-55_s6-55,people,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-55_s6-55/prioritarian_cyo/people/few_jobs__gain_13.csv
+0011,0,0,1,1,s2-55_s6-55,community,low_income,"[3, 8, 10, 12, 13, 15, 16]","[13]",s2-55_s6-55/prioritarian_cyo/community/low_income__gain_13.csv
+0011,0,0,1,1,s2-55_s6-55,community,people_of_color,"[2, 6, 8, 12]","[2, 6]",s2-55_s6-55/prioritarian_cyo/community/people_of_color__gain_2_6.csv
+0011,0,0,1,1,s2-55_s6-55,community,transit_desert,"[8, 12, 13, 15]","[13]",s2-55_s6-55/prioritarian_cyo/community/transit_desert__gain_13.csv
+0011,0,0,1,1,s2-55_s6-55,community,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-55_s6-55/prioritarian_cyo/community/few_jobs__gain_13.csv
+0011,0,0,1,1,s2-55_s6-55,people,low_income,"[3, 8, 10, 12, 13, 15, 16]","[13]",s2-55_s6-55/prioritarian_cyo/people/low_income__gain_13.csv
+0011,0,0,1,1,s2-55_s6-55,people,people_of_color,"[2, 6, 8, 12]","[2, 6]",s2-55_s6-55/prioritarian_cyo/people/people_of_color__gain_2_6.csv
+0011,0,0,1,1,s2-55_s6-55,people,transit_desert,"[8, 12, 13, 15]","[13]",s2-55_s6-55/prioritarian_cyo/people/transit_desert__gain_13.csv
+0011,0,0,1,1,s2-55_s6-55,people,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-55_s6-55/prioritarian_cyo/people/few_jobs__gain_13.csv
+0100,0,1,0,0,s2-55_s6-45,community,low_income,"[3, 8, 10, 11, 12, 15, 16]","[11]",s2-55_s6-45/prioritarian_cyo/community/low_income__gain_11.csv
+0100,0,1,0,0,s2-55_s6-45,community,people_of_color,"[2, 8, 11, 12]","[2, 11]",s2-55_s6-45/prioritarian_cyo/community/people_of_color__gain_2_11.csv
+0100,0,1,0,0,s2-55_s6-45,community,transit_desert,"[6, 8, 12, 15]","[6]",s2-55_s6-45/prioritarian_cyo/community/transit_desert__gain_6.csv
+0100,0,1,0,0,s2-55_s6-45,community,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-55_s6-45/prioritarian_cyo/community/few_jobs__gain_6_13.csv
+0100,0,1,0,0,s2-55_s6-45,people,low_income,"[3, 8, 10, 11, 12, 15, 16]","[11]",s2-55_s6-45/prioritarian_cyo/people/low_income__gain_11.csv
+0100,0,1,0,0,s2-55_s6-45,people,people_of_color,"[2, 8, 11, 12]","[2, 11]",s2-55_s6-45/prioritarian_cyo/people/people_of_color__gain_2_11.csv
+0100,0,1,0,0,s2-55_s6-45,people,transit_desert,"[6, 8, 12, 15]","[6]",s2-55_s6-45/prioritarian_cyo/people/transit_desert__gain_6.csv
+0100,0,1,0,0,s2-55_s6-45,people,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-55_s6-45/prioritarian_cyo/people/few_jobs__gain_6_13.csv
+0101,0,1,0,1,s2-55_s6-45,community,low_income,"[3, 8, 10, 11, 12, 13, 15, 16]","[11, 13]",s2-55_s6-45/prioritarian_cyo/community/low_income__gain_11_13.csv
+0101,0,1,0,1,s2-55_s6-45,community,people_of_color,"[2, 8, 11, 12]","[2, 11]",s2-55_s6-45/prioritarian_cyo/community/people_of_color__gain_2_11.csv
+0101,0,1,0,1,s2-55_s6-45,community,transit_desert,"[6, 8, 12, 13, 15]","[6, 13]",s2-55_s6-45/prioritarian_cyo/community/transit_desert__gain_6_13.csv
+0101,0,1,0,1,s2-55_s6-45,community,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-55_s6-45/prioritarian_cyo/community/few_jobs__gain_6_13.csv
+0101,0,1,0,1,s2-55_s6-45,people,low_income,"[3, 8, 10, 11, 12, 13, 15, 16]","[11, 13]",s2-55_s6-45/prioritarian_cyo/people/low_income__gain_11_13.csv
+0101,0,1,0,1,s2-55_s6-45,people,people_of_color,"[2, 8, 11, 12]","[2, 11]",s2-55_s6-45/prioritarian_cyo/people/people_of_color__gain_2_11.csv
+0101,0,1,0,1,s2-55_s6-45,people,transit_desert,"[6, 8, 12, 13, 15]","[6, 13]",s2-55_s6-45/prioritarian_cyo/people/transit_desert__gain_6_13.csv
+0101,0,1,0,1,s2-55_s6-45,people,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-55_s6-45/prioritarian_cyo/people/few_jobs__gain_6_13.csv
+0110,0,1,1,0,s2-55_s6-45,community,low_income,"[3, 8, 10, 12, 15, 16]","[]",s2-55_s6-45/prioritarian_cyo/community/low_income__gain_none.csv
+0110,0,1,1,0,s2-55_s6-45,community,people_of_color,"[2, 8, 12]","[2]",s2-55_s6-45/prioritarian_cyo/community/people_of_color__gain_2.csv
+0110,0,1,1,0,s2-55_s6-45,community,transit_desert,"[6, 8, 12, 15]","[6]",s2-55_s6-45/prioritarian_cyo/community/transit_desert__gain_6.csv
+0110,0,1,1,0,s2-55_s6-45,community,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-55_s6-45/prioritarian_cyo/community/few_jobs__gain_6_13.csv
+0110,0,1,1,0,s2-55_s6-45,people,low_income,"[3, 8, 10, 12, 15, 16]","[]",s2-55_s6-45/prioritarian_cyo/people/low_income__gain_none.csv
+0110,0,1,1,0,s2-55_s6-45,people,people_of_color,"[2, 8, 12]","[2]",s2-55_s6-45/prioritarian_cyo/people/people_of_color__gain_2.csv
+0110,0,1,1,0,s2-55_s6-45,people,transit_desert,"[6, 8, 12, 15]","[6]",s2-55_s6-45/prioritarian_cyo/people/transit_desert__gain_6.csv
+0110,0,1,1,0,s2-55_s6-45,people,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-55_s6-45/prioritarian_cyo/people/few_jobs__gain_6_13.csv
+0111,0,1,1,1,s2-55_s6-45,community,low_income,"[3, 8, 10, 12, 13, 15, 16]","[13]",s2-55_s6-45/prioritarian_cyo/community/low_income__gain_13.csv
+0111,0,1,1,1,s2-55_s6-45,community,people_of_color,"[2, 8, 12]","[2]",s2-55_s6-45/prioritarian_cyo/community/people_of_color__gain_2.csv
+0111,0,1,1,1,s2-55_s6-45,community,transit_desert,"[6, 8, 12, 13, 15]","[6, 13]",s2-55_s6-45/prioritarian_cyo/community/transit_desert__gain_6_13.csv
+0111,0,1,1,1,s2-55_s6-45,community,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-55_s6-45/prioritarian_cyo/community/few_jobs__gain_6_13.csv
+0111,0,1,1,1,s2-55_s6-45,people,low_income,"[3, 8, 10, 12, 13, 15, 16]","[13]",s2-55_s6-45/prioritarian_cyo/people/low_income__gain_13.csv
+0111,0,1,1,1,s2-55_s6-45,people,people_of_color,"[2, 8, 12]","[2]",s2-55_s6-45/prioritarian_cyo/people/people_of_color__gain_2.csv
+0111,0,1,1,1,s2-55_s6-45,people,transit_desert,"[6, 8, 12, 13, 15]","[6, 13]",s2-55_s6-45/prioritarian_cyo/people/transit_desert__gain_6_13.csv
+0111,0,1,1,1,s2-55_s6-45,people,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-55_s6-45/prioritarian_cyo/people/few_jobs__gain_6_13.csv
+1000,1,0,0,0,s2-65_s6-55,community,low_income,"[3, 8, 10, 11, 12, 15, 16]","[11]",s2-65_s6-55/prioritarian_cyo/community/low_income__gain_11.csv
+1000,1,0,0,0,s2-65_s6-55,community,people_of_color,"[6, 8, 11, 12]","[6, 11]",s2-65_s6-55/prioritarian_cyo/community/people_of_color__gain_6_11.csv
+1000,1,0,0,0,s2-65_s6-55,community,transit_desert,"[8, 12, 15]","[]",s2-65_s6-55/prioritarian_cyo/community/transit_desert__gain_none.csv
+1000,1,0,0,0,s2-65_s6-55,community,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-65_s6-55/prioritarian_cyo/community/few_jobs__gain_13.csv
+1000,1,0,0,0,s2-65_s6-55,people,low_income,"[3, 8, 10, 11, 12, 15, 16]","[11]",s2-65_s6-55/prioritarian_cyo/people/low_income__gain_11.csv
+1000,1,0,0,0,s2-65_s6-55,people,people_of_color,"[6, 8, 11, 12]","[6, 11]",s2-65_s6-55/prioritarian_cyo/people/people_of_color__gain_6_11.csv
+1000,1,0,0,0,s2-65_s6-55,people,transit_desert,"[8, 12, 15]","[]",s2-65_s6-55/prioritarian_cyo/people/transit_desert__gain_none.csv
+1000,1,0,0,0,s2-65_s6-55,people,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-65_s6-55/prioritarian_cyo/people/few_jobs__gain_13.csv
+1001,1,0,0,1,s2-65_s6-55,community,low_income,"[3, 8, 10, 11, 12, 13, 15, 16]","[11, 13]",s2-65_s6-55/prioritarian_cyo/community/low_income__gain_11_13.csv
+1001,1,0,0,1,s2-65_s6-55,community,people_of_color,"[6, 8, 11, 12]","[6, 11]",s2-65_s6-55/prioritarian_cyo/community/people_of_color__gain_6_11.csv
+1001,1,0,0,1,s2-65_s6-55,community,transit_desert,"[8, 12, 13, 15]","[13]",s2-65_s6-55/prioritarian_cyo/community/transit_desert__gain_13.csv
+1001,1,0,0,1,s2-65_s6-55,community,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-65_s6-55/prioritarian_cyo/community/few_jobs__gain_13.csv
+1001,1,0,0,1,s2-65_s6-55,people,low_income,"[3, 8, 10, 11, 12, 13, 15, 16]","[11, 13]",s2-65_s6-55/prioritarian_cyo/people/low_income__gain_11_13.csv
+1001,1,0,0,1,s2-65_s6-55,people,people_of_color,"[6, 8, 11, 12]","[6, 11]",s2-65_s6-55/prioritarian_cyo/people/people_of_color__gain_6_11.csv
+1001,1,0,0,1,s2-65_s6-55,people,transit_desert,"[8, 12, 13, 15]","[13]",s2-65_s6-55/prioritarian_cyo/people/transit_desert__gain_13.csv
+1001,1,0,0,1,s2-65_s6-55,people,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-65_s6-55/prioritarian_cyo/people/few_jobs__gain_13.csv
+1010,1,0,1,0,s2-65_s6-55,community,low_income,"[3, 8, 10, 12, 15, 16]","[]",s2-65_s6-55/prioritarian_cyo/community/low_income__gain_none.csv
+1010,1,0,1,0,s2-65_s6-55,community,people_of_color,"[6, 8, 12]","[6]",s2-65_s6-55/prioritarian_cyo/community/people_of_color__gain_6.csv
+1010,1,0,1,0,s2-65_s6-55,community,transit_desert,"[8, 12, 15]","[]",s2-65_s6-55/prioritarian_cyo/community/transit_desert__gain_none.csv
+1010,1,0,1,0,s2-65_s6-55,community,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-65_s6-55/prioritarian_cyo/community/few_jobs__gain_13.csv
+1010,1,0,1,0,s2-65_s6-55,people,low_income,"[3, 8, 10, 12, 15, 16]","[]",s2-65_s6-55/prioritarian_cyo/people/low_income__gain_none.csv
+1010,1,0,1,0,s2-65_s6-55,people,people_of_color,"[6, 8, 12]","[6]",s2-65_s6-55/prioritarian_cyo/people/people_of_color__gain_6.csv
+1010,1,0,1,0,s2-65_s6-55,people,transit_desert,"[8, 12, 15]","[]",s2-65_s6-55/prioritarian_cyo/people/transit_desert__gain_none.csv
+1010,1,0,1,0,s2-65_s6-55,people,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-65_s6-55/prioritarian_cyo/people/few_jobs__gain_13.csv
+1011,1,0,1,1,s2-65_s6-55,community,low_income,"[3, 8, 10, 12, 13, 15, 16]","[13]",s2-65_s6-55/prioritarian_cyo/community/low_income__gain_13.csv
+1011,1,0,1,1,s2-65_s6-55,community,people_of_color,"[6, 8, 12]","[6]",s2-65_s6-55/prioritarian_cyo/community/people_of_color__gain_6.csv
+1011,1,0,1,1,s2-65_s6-55,community,transit_desert,"[8, 12, 13, 15]","[13]",s2-65_s6-55/prioritarian_cyo/community/transit_desert__gain_13.csv
+1011,1,0,1,1,s2-65_s6-55,community,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-65_s6-55/prioritarian_cyo/community/few_jobs__gain_13.csv
+1011,1,0,1,1,s2-65_s6-55,people,low_income,"[3, 8, 10, 12, 13, 15, 16]","[13]",s2-65_s6-55/prioritarian_cyo/people/low_income__gain_13.csv
+1011,1,0,1,1,s2-65_s6-55,people,people_of_color,"[6, 8, 12]","[6]",s2-65_s6-55/prioritarian_cyo/people/people_of_color__gain_6.csv
+1011,1,0,1,1,s2-65_s6-55,people,transit_desert,"[8, 12, 13, 15]","[13]",s2-65_s6-55/prioritarian_cyo/people/transit_desert__gain_13.csv
+1011,1,0,1,1,s2-65_s6-55,people,few_jobs,"[4, 8, 12, 13, 14]","[13]",s2-65_s6-55/prioritarian_cyo/people/few_jobs__gain_13.csv
+1100,1,1,0,0,s2-65_s6-45,community,low_income,"[3, 8, 10, 11, 12, 15, 16]","[11]",s2-65_s6-45/prioritarian_cyo/community/low_income__gain_11.csv
+1100,1,1,0,0,s2-65_s6-45,community,people_of_color,"[8, 11, 12]","[11]",s2-65_s6-45/prioritarian_cyo/community/people_of_color__gain_11.csv
+1100,1,1,0,0,s2-65_s6-45,community,transit_desert,"[6, 8, 12, 15]","[6]",s2-65_s6-45/prioritarian_cyo/community/transit_desert__gain_6.csv
+1100,1,1,0,0,s2-65_s6-45,community,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-65_s6-45/prioritarian_cyo/community/few_jobs__gain_6_13.csv
+1100,1,1,0,0,s2-65_s6-45,people,low_income,"[3, 8, 10, 11, 12, 15, 16]","[11]",s2-65_s6-45/prioritarian_cyo/people/low_income__gain_11.csv
+1100,1,1,0,0,s2-65_s6-45,people,people_of_color,"[8, 11, 12]","[11]",s2-65_s6-45/prioritarian_cyo/people/people_of_color__gain_11.csv
+1100,1,1,0,0,s2-65_s6-45,people,transit_desert,"[6, 8, 12, 15]","[6]",s2-65_s6-45/prioritarian_cyo/people/transit_desert__gain_6.csv
+1100,1,1,0,0,s2-65_s6-45,people,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-65_s6-45/prioritarian_cyo/people/few_jobs__gain_6_13.csv
+1101,1,1,0,1,s2-65_s6-45,community,low_income,"[3, 8, 10, 11, 12, 13, 15, 16]","[11, 13]",s2-65_s6-45/prioritarian_cyo/community/low_income__gain_11_13.csv
+1101,1,1,0,1,s2-65_s6-45,community,people_of_color,"[8, 11, 12]","[11]",s2-65_s6-45/prioritarian_cyo/community/people_of_color__gain_11.csv
+1101,1,1,0,1,s2-65_s6-45,community,transit_desert,"[6, 8, 12, 13, 15]","[6, 13]",s2-65_s6-45/prioritarian_cyo/community/transit_desert__gain_6_13.csv
+1101,1,1,0,1,s2-65_s6-45,community,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-65_s6-45/prioritarian_cyo/community/few_jobs__gain_6_13.csv
+1101,1,1,0,1,s2-65_s6-45,people,low_income,"[3, 8, 10, 11, 12, 13, 15, 16]","[11, 13]",s2-65_s6-45/prioritarian_cyo/people/low_income__gain_11_13.csv
+1101,1,1,0,1,s2-65_s6-45,people,people_of_color,"[8, 11, 12]","[11]",s2-65_s6-45/prioritarian_cyo/people/people_of_color__gain_11.csv
+1101,1,1,0,1,s2-65_s6-45,people,transit_desert,"[6, 8, 12, 13, 15]","[6, 13]",s2-65_s6-45/prioritarian_cyo/people/transit_desert__gain_6_13.csv
+1101,1,1,0,1,s2-65_s6-45,people,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-65_s6-45/prioritarian_cyo/people/few_jobs__gain_6_13.csv
+1110,1,1,1,0,s2-65_s6-45,community,low_income,"[3, 8, 10, 12, 15, 16]","[]",s2-65_s6-45/prioritarian_cyo/community/low_income__gain_none.csv
+1110,1,1,1,0,s2-65_s6-45,community,people_of_color,"[8, 12]","[]",s2-65_s6-45/prioritarian_cyo/community/people_of_color__gain_none.csv
+1110,1,1,1,0,s2-65_s6-45,community,transit_desert,"[6, 8, 12, 15]","[6]",s2-65_s6-45/prioritarian_cyo/community/transit_desert__gain_6.csv
+1110,1,1,1,0,s2-65_s6-45,community,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-65_s6-45/prioritarian_cyo/community/few_jobs__gain_6_13.csv
+1110,1,1,1,0,s2-65_s6-45,people,low_income,"[3, 8, 10, 12, 15, 16]","[]",s2-65_s6-45/prioritarian_cyo/people/low_income__gain_none.csv
+1110,1,1,1,0,s2-65_s6-45,people,people_of_color,"[8, 12]","[]",s2-65_s6-45/prioritarian_cyo/people/people_of_color__gain_none.csv
+1110,1,1,1,0,s2-65_s6-45,people,transit_desert,"[6, 8, 12, 15]","[6]",s2-65_s6-45/prioritarian_cyo/people/transit_desert__gain_6.csv
+1110,1,1,1,0,s2-65_s6-45,people,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-65_s6-45/prioritarian_cyo/people/few_jobs__gain_6_13.csv
+1111,1,1,1,1,s2-65_s6-45,community,low_income,"[3, 8, 10, 12, 13, 15, 16]","[13]",s2-65_s6-45/prioritarian_cyo/community/low_income__gain_13.csv
+1111,1,1,1,1,s2-65_s6-45,community,people_of_color,"[8, 12]","[]",s2-65_s6-45/prioritarian_cyo/community/people_of_color__gain_none.csv
+1111,1,1,1,1,s2-65_s6-45,community,transit_desert,"[6, 8, 12, 13, 15]","[6, 13]",s2-65_s6-45/prioritarian_cyo/community/transit_desert__gain_6_13.csv
+1111,1,1,1,1,s2-65_s6-45,community,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-65_s6-45/prioritarian_cyo/community/few_jobs__gain_6_13.csv
+1111,1,1,1,1,s2-65_s6-45,people,low_income,"[3, 8, 10, 12, 13, 15, 16]","[13]",s2-65_s6-45/prioritarian_cyo/people/low_income__gain_13.csv
+1111,1,1,1,1,s2-65_s6-45,people,people_of_color,"[8, 12]","[]",s2-65_s6-45/prioritarian_cyo/people/people_of_color__gain_none.csv
+1111,1,1,1,1,s2-65_s6-45,people,transit_desert,"[6, 8, 12, 13, 15]","[6, 13]",s2-65_s6-45/prioritarian_cyo/people/transit_desert__gain_6_13.csv
+1111,1,1,1,1,s2-65_s6-45,people,few_jobs,"[4, 6, 8, 12, 13, 14]","[6, 13]",s2-65_s6-45/prioritarian_cyo/people/few_jobs__gain_6_13.csv

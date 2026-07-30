@@ -1,0 +1,11 @@
+subdomain,mode,D,status,reason,elapsed_s
+utilitarian,no_weight,12.0,sat,,29.8
+utilitarian,weighted,12.0,sat,,31.9
+utilitarian_peak,no_weight,2.0,phase2_failed,timeout,422.0
+utilitarian_peak,no_weight,2.0,phase2_failed,seed1:timeout,360.1
+utilitarian_peak,no_weight,2.0,phase2_failed,seed7:timeout,304.3
+utilitarian_peak,no_weight,2.0,phase2_failed,seed42:timeout,332.9
+utilitarian_peak,weighted,2.0,phase2_failed,timeout,317.1
+utilitarian_peak,weighted,2.0,phase2_failed,seed1:timeout,343.8
+utilitarian_peak,weighted,2.0,phase2_failed,seed7:timeout,330.5
+utilitarian_peak,weighted,2.0,phase2_failed,seed42:timeout,312.7

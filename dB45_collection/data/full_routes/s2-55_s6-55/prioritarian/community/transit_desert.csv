@@ -1,0 +1,66 @@
+# domain,prioritarian
+# combo,s2-55_s6-55
+# mode,community
+# lens,transit_desert
+# protectedStations,[8, 12, 15]
+# lensSelector,Transport == Desert
+# protectedNoise,0.0
+# protectedNoiseDegenerate,True
+# D,18.0
+# Dbinding,False
+# Drole,non-binding by construction (max added dB at 45 dB/craft is 17.56)
+# U,50.0
+# Ubinding,False
+# hardT,False
+# T_max,5
+# weightTime,0.1
+# optimizePrioritarian,True
+# weightPrioritarian,1.0
+# optimizeUtilitarian,False
+# maxAvgAddedDb,2.3185
+# maxPeakAddedDb,5.9106
+# dbPerCraft,45
+# N,14
+# aircraftMultipliers,[2, 5, 5, 5, 5, 5, 5, 5, 5, 2, 5, 3, 2, 2]
+# totalTraffic,56
+# maxTraffic,56
+# demandFulfilledPct,100.0
+# avgTravelTimeWeighted,3.0
+# minTravelTime,3
+# maxTravelTime,3
+Time Steps (T),5
+
+Routing (station per aircraft per timestep):
+Aircraft,Multiplier,Start,End,T0,T1,T2,T3,T4
+1,2,1,16,1,6,11,16,16
+2,5,1,16,1,6,11,16,16
+3,5,1,16,1,6,11,16,16
+4,5,1,16,1,6,11,16,16
+5,5,16,1,16,11,6,1,1
+6,5,16,1,16,11,6,1,1
+7,5,16,1,16,11,6,1,1
+8,5,16,1,16,11,6,1,1
+9,5,16,1,16,11,6,1,1
+10,2,16,1,16,11,6,1,1
+11,5,1,16,1,6,11,16,16
+12,3,1,16,1,6,11,16,16
+13,2,1,16,1,6,11,16,16
+14,2,16,1,16,11,6,1,1
+
+Zone,Avg Added dB,Avg Total dB,Peak Added dB,Peak Total dB,Avg Aircraft,Peak Aircraft
+Zone 1,0.22,65.22,1.11,66.11,5.80,29
+Zone 2,0.00,55.00,0.00,55.00,0.00,0
+Zone 3,0.00,55.00,0.00,55.00,0.00,0
+Zone 4,0.00,45.00,0.00,45.00,0.00,0
+Zone 5,0.00,55.00,0.00,55.00,0.00,0
+Zone 6,2.32,57.32,5.91,60.91,11.20,29
+Zone 7,0.00,55.00,0.00,55.00,0.00,0
+Zone 8,0.00,55.00,0.00,55.00,0.00,0
+Zone 9,0.00,55.00,0.00,55.00,0.00,0
+Zone 10,0.00,55.00,0.00,55.00,0.00,0
+Zone 11,2.32,57.32,5.91,60.91,11.20,29
+Zone 12,0.00,65.00,0.00,65.00,0.00,0
+Zone 13,0.00,45.00,0.00,45.00,0.00,0
+Zone 14,0.00,45.00,0.00,45.00,0.00,0
+Zone 15,0.00,65.00,0.00,65.00,0.00,0
+Zone 16,0.21,65.21,1.04,66.04,5.40,27

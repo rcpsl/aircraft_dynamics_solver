@@ -1,0 +1,17 @@
+
+=== s2-65_s6-45 / unweighted ===
+  D=3.0   baseline_mult  unsat/timeout (28s) -> stepping down (genuine infeasibility)
+  D=3.0   N14_mult1      avg= 0.365 peak= 2.553 T=7 demand=25.0% travel=4.0 (8s)  [DEMAND CUT]
+  D=8.0   baseline_mult  avg= 5.558 peak= 7.782 T=7 demand=100.0% travel=4.089 (96s)
+  D=18.0  baseline_mult  avg= 4.178 peak=14.771 T=7 demand=100.0% travel=3.0 (28s)
+=== s2-65_s6-45/unweighted done in 160s ===
+
+=== s2-65_s6-45 / weighted ===
+  D=3.0   baseline_mult  unsat/timeout (25s) -> stepping down (genuine infeasibility)
+  D=3.0   N14_mult1      avg= 0.650 peak= 2.788 T=7 demand=25.0% travel=4.357 (12s)  [DEMAND CUT]
+  D=8.0   baseline_mult  phase2 retry seed=1 -> phase2_failed (262s)
+  D=8.0   baseline_mult  phase2 retry seed=7 -> phase2_failed (264s)
+  D=8.0   baseline_mult  phase2 retry seed=42 -> phase2_failed (263s)
+  D=8.0   baseline_mult  PHASE-2 UNRESOLVED at 100.0% demand -- feasible but not optimizable in budget; NOT cutting demand
+  D=18.0  baseline_mult  avg= 4.178 peak=14.771 T=7 demand=100.0% travel=3.0 (24s)
+=== s2-65_s6-45/weighted done in 1113s ===

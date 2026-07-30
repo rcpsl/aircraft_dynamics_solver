@@ -1,0 +1,4 @@
+mode,D,variant,N,totalTraffic,demandPct,status,reason,elapsed_s
+unweighted,3.0,baseline_mult,14,56,100.0,sat,,45.9
+unweighted,8.0,baseline_mult,14,56,100.0,sat,,25.1
+unweighted,18.0,baseline_mult,14,56,100.0,sat,,30.4

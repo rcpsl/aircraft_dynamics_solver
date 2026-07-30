@@ -1,0 +1,15 @@
+
+=== s2-55_s6-55 / unweighted ===
+  D=3.0   baseline_mult  avg= 1.413 peak= 2.788 T=7 demand=100.0% travel=4.268 (42s)
+  D=8.0   baseline_mult  avg= 1.656 peak= 5.911 T=7 demand=100.0% travel=3.0 (25s)
+  D=18.0  baseline_mult  avg= 1.656 peak= 5.911 T=7 demand=100.0% travel=3.0 (31s)
+=== s2-55_s6-55/unweighted done in 98s ===
+
+=== s2-55_s6-55 / weighted ===
+  D=3.0   baseline_mult  phase2 retry seed=1 -> phase2_failed (255s)
+  D=3.0   baseline_mult  phase2 retry seed=7 -> phase2_failed (259s)
+  D=3.0   baseline_mult  phase2 retry seed=42 -> phase2_failed (254s)
+  D=3.0   baseline_mult  PHASE-2 UNRESOLVED at 100.0% demand -- feasible but not optimizable in budget; NOT cutting demand
+  D=8.0   baseline_mult  avg= 1.656 peak= 5.911 T=7 demand=100.0% travel=3.0 (26s)
+  D=18.0  baseline_mult  avg= 1.656 peak= 5.911 T=7 demand=100.0% travel=3.0 (30s)
+=== s2-55_s6-55/weighted done in 1080s ===

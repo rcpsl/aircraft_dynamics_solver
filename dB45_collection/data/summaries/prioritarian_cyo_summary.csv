@@ -1,0 +1,73 @@
+combo,mode,variant,lens,gainedFromCyo,protectedStations,protectedNoise,routingVsUnconstrained,effect,maxAvgAddedDb,maxPeakAddedDb,T,demandFulfilledPct,avgTravelTimeWeighted
+s2-65_s6-55,community,few_jobs__gain_13,few_jobs,[13],"[4, 8, 12, 13, 14]",0.0,same,no-op,2.3185,5.9106,5,100.0,3.0
+s2-65_s6-55,community,low_income__gain_11,low_income,[11],"[3, 8, 10, 11, 12, 15, 16]",12.63,same,forced,2.3185,5.9106,5,100.0,3.0
+s2-65_s6-55,community,low_income__gain_11_13,low_income,"[11, 13]","[3, 8, 10, 11, 12, 13, 15, 16]",12.63,same,forced,2.3185,5.9106,5,100.0,3.0
+s2-65_s6-55,community,low_income__gain_13,low_income,[13],"[3, 8, 10, 12, 13, 15, 16]",1.04,same,forced,2.3185,5.9106,5,100.0,3.0
+s2-65_s6-55,community,low_income__gain_none,low_income,[],"[3, 8, 10, 12, 15, 16]",1.04,same,forced,2.3185,5.9106,5,100.0,3.0
+s2-65_s6-55,community,people_of_color__gain_6,people_of_color,[6],"[6, 8, 12]",0.0,differs,succeeded,1.6232,6.2325,5,100.0,4.0
+s2-65_s6-55,community,people_of_color__gain_6_11,people_of_color,"[6, 11]","[6, 8, 11, 12]",0.0,differs,succeeded,2.3185,8.1954,5,100.0,4.0
+s2-65_s6-55,community,transit_desert__gain_13,transit_desert,[13],"[8, 12, 13, 15]",0.0,same,no-op,2.3185,5.9106,5,100.0,3.0
+s2-65_s6-55,community,transit_desert__gain_none,transit_desert,[],"[8, 12, 15]",0.0,same,no-op,2.3185,5.9106,5,100.0,3.0
+s2-65_s6-55,people,few_jobs__gain_13,few_jobs,[13],"[4, 8, 12, 13, 14]",0.0,same,no-op,2.8982,5.9106,4,100.0,3.0
+s2-65_s6-55,people,low_income__gain_11,low_income,[11],"[3, 8, 10, 11, 12, 15, 16]",12.63,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-65_s6-55,people,low_income__gain_11_13,low_income,"[11, 13]","[3, 8, 10, 11, 12, 13, 15, 16]",12.63,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-65_s6-55,people,low_income__gain_13,low_income,[13],"[3, 8, 10, 12, 13, 15, 16]",1.04,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-65_s6-55,people,low_income__gain_none,low_income,[],"[3, 8, 10, 12, 15, 16]",1.04,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-65_s6-55,people,people_of_color__gain_6,people_of_color,[6],"[6, 8, 12]",11.59,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-65_s6-55,people,people_of_color__gain_6_11,people_of_color,"[6, 11]","[6, 8, 11, 12]",23.18,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-65_s6-55,people,transit_desert__gain_13,transit_desert,[13],"[8, 12, 13, 15]",0.0,same,no-op,2.8982,5.9106,4,100.0,3.0
+s2-65_s6-55,people,transit_desert__gain_none,transit_desert,[],"[8, 12, 15]",0.0,same,no-op,2.8982,5.9106,4,100.0,3.0
+s2-65_s6-45,community,few_jobs__gain_6_13,few_jobs,"[6, 13]","[4, 6, 8, 12, 13, 14]",0.0,differs,succeeded,1.9645,6.2325,5,100.0,4.0
+s2-65_s6-45,community,low_income__gain_11,low_income,[11],"[3, 8, 10, 11, 12, 15, 16]",12.63,same,forced,5.8486,14.7712,5,100.0,3.0
+s2-65_s6-45,community,low_income__gain_11_13,low_income,"[11, 13]","[3, 8, 10, 11, 12, 13, 15, 16]",12.63,same,forced,5.8486,14.7712,5,100.0,3.0
+s2-65_s6-45,community,low_income__gain_13,low_income,[13],"[3, 8, 10, 12, 13, 15, 16]",1.04,same,forced,5.8486,14.7712,5,100.0,3.0
+s2-65_s6-45,community,low_income__gain_none,low_income,[],"[3, 8, 10, 12, 15, 16]",1.04,same,forced,5.8486,14.7712,5,100.0,3.0
+s2-65_s6-45,community,people_of_color__gain_11,people_of_color,[11],"[8, 11, 12]",0.0,differs,succeeded,4.9188,12.5527,5,100.0,4.0
+s2-65_s6-45,community,people_of_color__gain_none,people_of_color,[],"[8, 12]",0.0,same,no-op,5.8486,14.7712,5,100.0,3.0
+s2-65_s6-45,community,transit_desert__gain_6,transit_desert,[6],"[6, 8, 12, 15]",0.0,differs,succeeded,2.3185,7.7085,5,100.0,4.0
+s2-65_s6-45,community,transit_desert__gain_6_13,transit_desert,"[6, 13]","[6, 8, 12, 13, 15]",0.0,differs,succeeded,2.3185,7.8533,5,100.0,4.0
+s2-65_s6-45,people,few_jobs__gain_6_13,few_jobs,"[6, 13]","[4, 6, 8, 12, 13, 14]",29.24,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-65_s6-45,people,low_income__gain_11,low_income,[11],"[3, 8, 10, 11, 12, 15, 16]",12.63,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-65_s6-45,people,low_income__gain_11_13,low_income,"[11, 13]","[3, 8, 10, 11, 12, 13, 15, 16]",12.63,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-65_s6-45,people,low_income__gain_13,low_income,[13],"[3, 8, 10, 12, 13, 15, 16]",1.04,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-65_s6-45,people,low_income__gain_none,low_income,[],"[3, 8, 10, 12, 15, 16]",1.04,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-65_s6-45,people,people_of_color__gain_11,people_of_color,[11],"[8, 11, 12]",11.59,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-65_s6-45,people,people_of_color__gain_none,people_of_color,[],"[8, 12]",0.0,same,no-op,7.3107,14.7712,4,100.0,3.0
+s2-65_s6-45,people,transit_desert__gain_6,transit_desert,[6],"[6, 8, 12, 15]",29.24,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-65_s6-45,people,transit_desert__gain_6_13,transit_desert,"[6, 13]","[6, 8, 12, 13, 15]",29.24,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-55_s6-55,community,few_jobs__gain_13,few_jobs,[13],"[4, 8, 12, 13, 14]",0.0,same,no-op,2.3185,5.9106,5,100.0,3.0
+s2-55_s6-55,community,low_income__gain_11,low_income,[11],"[3, 8, 10, 11, 12, 15, 16]",12.63,same,forced,2.3185,5.9106,5,100.0,3.0
+s2-55_s6-55,community,low_income__gain_11_13,low_income,"[11, 13]","[3, 8, 10, 11, 12, 13, 15, 16]",12.63,same,forced,2.3185,5.9106,5,100.0,3.0
+s2-55_s6-55,community,low_income__gain_13,low_income,[13],"[3, 8, 10, 12, 13, 15, 16]",1.04,same,forced,2.3185,5.9106,5,100.0,3.0
+s2-55_s6-55,community,low_income__gain_none,low_income,[],"[3, 8, 10, 12, 15, 16]",1.04,same,forced,2.3185,5.9106,5,100.0,3.0
+s2-55_s6-55,community,people_of_color__gain_2_6,people_of_color,"[2, 6]","[2, 6, 8, 12]",0.0,differs,succeeded,2.3185,8.1954,5,100.0,4.0
+s2-55_s6-55,community,people_of_color__gain_2_6_11,people_of_color,"[2, 6, 11]","[2, 6, 8, 11, 12]",0.0,differs,succeeded,2.3185,8.1954,5,100.0,4.0
+s2-55_s6-55,community,transit_desert__gain_13,transit_desert,[13],"[8, 12, 13, 15]",0.0,same,no-op,2.3185,5.9106,5,100.0,3.0
+s2-55_s6-55,community,transit_desert__gain_none,transit_desert,[],"[8, 12, 15]",0.0,same,no-op,2.3185,5.9106,5,100.0,3.0
+s2-55_s6-55,people,few_jobs__gain_13,few_jobs,[13],"[4, 8, 12, 13, 14]",0.0,same,no-op,2.8982,5.9106,4,100.0,3.0
+s2-55_s6-55,people,low_income__gain_11,low_income,[11],"[3, 8, 10, 11, 12, 15, 16]",12.63,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-55_s6-55,people,low_income__gain_11_13,low_income,"[11, 13]","[3, 8, 10, 11, 12, 13, 15, 16]",12.63,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-55_s6-55,people,low_income__gain_13,low_income,[13],"[3, 8, 10, 12, 13, 15, 16]",1.04,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-55_s6-55,people,low_income__gain_none,low_income,[],"[3, 8, 10, 12, 15, 16]",1.04,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-55_s6-55,people,people_of_color__gain_2_6,people_of_color,"[2, 6]","[2, 6, 8, 12]",11.59,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-55_s6-55,people,people_of_color__gain_2_6_11,people_of_color,"[2, 6, 11]","[2, 6, 8, 11, 12]",23.18,same,forced,2.8982,5.9106,4,100.0,3.0
+s2-55_s6-55,people,transit_desert__gain_13,transit_desert,[13],"[8, 12, 13, 15]",0.0,same,no-op,2.8982,5.9106,4,100.0,3.0
+s2-55_s6-55,people,transit_desert__gain_none,transit_desert,[],"[8, 12, 15]",0.0,same,no-op,2.8982,5.9106,4,100.0,3.0
+s2-55_s6-45,community,few_jobs__gain_6_13,few_jobs,"[6, 13]","[4, 6, 8, 12, 13, 14]",0.0,differs,succeeded,1.9645,6.2325,5,100.0,4.0
+s2-55_s6-45,community,low_income__gain_11,low_income,[11],"[3, 8, 10, 11, 12, 15, 16]",12.63,same,forced,5.8486,14.7712,5,100.0,3.0
+s2-55_s6-45,community,low_income__gain_11_13,low_income,"[11, 13]","[3, 8, 10, 11, 12, 13, 15, 16]",12.63,same,forced,5.8486,14.7712,5,100.0,3.0
+s2-55_s6-45,community,low_income__gain_13,low_income,[13],"[3, 8, 10, 12, 13, 15, 16]",1.04,same,forced,5.8486,14.7712,5,100.0,3.0
+s2-55_s6-45,community,low_income__gain_none,low_income,[],"[3, 8, 10, 12, 15, 16]",1.04,same,forced,5.8486,14.7712,5,100.0,3.0
+s2-55_s6-45,community,people_of_color__gain_2,people_of_color,[2],"[2, 8, 12]",0.0,same,no-op,5.8486,14.7712,5,100.0,3.0
+s2-55_s6-45,community,people_of_color__gain_2_11,people_of_color,"[2, 11]","[2, 8, 11, 12]",0.0,differs,succeeded,3.7147,9.5424,5,100.0,4.0
+s2-55_s6-45,community,transit_desert__gain_6,transit_desert,[6],"[6, 8, 12, 15]",0.0,differs,succeeded,2.3185,7.7085,5,100.0,4.0
+s2-55_s6-45,community,transit_desert__gain_6_13,transit_desert,"[6, 13]","[6, 8, 12, 13, 15]",0.0,differs,succeeded,2.3185,7.8533,5,100.0,4.0
+s2-55_s6-45,people,few_jobs__gain_6_13,few_jobs,"[6, 13]","[4, 6, 8, 12, 13, 14]",29.24,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-55_s6-45,people,low_income__gain_11,low_income,[11],"[3, 8, 10, 11, 12, 15, 16]",12.63,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-55_s6-45,people,low_income__gain_11_13,low_income,"[11, 13]","[3, 8, 10, 11, 12, 13, 15, 16]",12.63,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-55_s6-45,people,low_income__gain_13,low_income,[13],"[3, 8, 10, 12, 13, 15, 16]",1.04,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-55_s6-45,people,low_income__gain_none,low_income,[],"[3, 8, 10, 12, 15, 16]",1.04,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-55_s6-45,people,people_of_color__gain_2,people_of_color,[2],"[2, 8, 12]",0.0,same,no-op,7.3107,14.7712,4,100.0,3.0
+s2-55_s6-45,people,people_of_color__gain_2_11,people_of_color,"[2, 11]","[2, 8, 11, 12]",11.59,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-55_s6-45,people,transit_desert__gain_6,transit_desert,[6],"[6, 8, 12, 15]",29.24,same,forced,7.3107,14.7712,4,100.0,3.0
+s2-55_s6-45,people,transit_desert__gain_6_13,transit_desert,"[6, 13]","[6, 8, 12, 13, 15]",29.24,same,forced,7.3107,14.7712,4,100.0,3.0

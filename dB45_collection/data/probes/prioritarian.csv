@@ -1,0 +1,13 @@
+combo,fleet,lens,protectedStations,N,demandPct,status,protectedNoise,degenerate,maxAvgAdded,maxPeakAdded,T,elapsed_s
+s2-65_s6-55,community_N14,low_income,"[3, 6, 10, 12, 15, 16]",14,100.0,sat,12.63,no,2.3185,5.9106,5,120.3
+s2-65_s6-55,community_N14,people_of_color,"[6, 12]",14,100.0,sat,0.0,YES,1.8588,6.0206,5,49.7
+s2-65_s6-55,community_N14,transit_desert,"[6, 12, 15]",14,100.0,sat,0.0,YES,2.3185,7.8533,5,49.3
+s2-65_s6-55,community_N14,few_jobs,"[4, 6, 12, 14]",14,100.0,sat,0.0,YES,1.6586,6.2325,5,79.4
+s2-65_s6-55,people_N7,low_income,"[3, 6, 10, 12, 15, 16]",7,12.5,sat,2.77,no,0.5201,1.4613,5,99.0
+s2-65_s6-55,people_N7,people_of_color,"[6, 12]",7,12.5,sat,0.0,YES,0.5201,2.3045,5,103.6
+s2-65_s6-55,people_N7,transit_desert,"[6, 12, 15]",7,12.5,sat,2.6,no,0.5201,1.4613,5,110.4
+s2-65_s6-55,people_N7,few_jobs,"[4, 6, 12, 14]",7,12.5,sat,2.6,no,0.5201,1.4613,5,117.2
+s2-65_s6-55,people_N14,low_income,"[3, 6, 10, 12, 15, 16]",14,100.0,phase2_failed/timeout,,,,,,254.0
+s2-65_s6-55,people_N14,people_of_color,"[6, 12]",14,100.0,phase2_failed/timeout,,,,,,254.2
+s2-65_s6-55,people_N14,transit_desert,"[6, 12, 15]",14,100.0,phase2_failed/timeout,,,,,,254.6
+s2-65_s6-55,people_N14,few_jobs,"[4, 6, 12, 14]",14,100.0,phase2_failed/timeout,,,,,,254.1

@@ -1,0 +1,5 @@
+mode,lens,protectedStations,N,demandPct,status,reason,protectedNoise,elapsed_s
+people,low_income,"[3, 8, 10, 12, 15, 16]",14,100.0,sat,,1.04,26.2
+people,people_of_color,"[8, 12]",14,100.0,sat,,0.0,30.9
+people,transit_desert,"[8, 12, 15]",14,100.0,sat,,0.0,26.6
+people,few_jobs,"[4, 8, 12, 14]",14,100.0,sat,,0.0,25.0

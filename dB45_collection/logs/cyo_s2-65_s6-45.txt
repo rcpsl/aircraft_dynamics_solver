@@ -1,0 +1,28 @@
+
+=== s2-65_s6-45 / community: 9 distinct variants (N=14, T_max=5, demand=100.0%) ===
+  few_jobs__gain_6_13                protNoise=0.0      avg= 1.965 peak= 6.232 T=5 (45s)  [DEGENERATE]
+  low_income__gain_11_13             protNoise=12.63    avg= 5.849 peak=14.771 T=5 (169s)
+  low_income__gain_11                retry seed=1 -> phase2_failed
+  low_income__gain_11                retry seed=7 -> phase2_failed
+  low_income__gain_11                retry seed=42 -> phase2_failed
+  low_income__gain_11                PHASE-2 UNRESOLVED -- not written, demand NOT cut
+  low_income__gain_13                protNoise=1.04     avg= 5.849 peak=14.771 T=5 (21s)
+  low_income__gain_none              protNoise=1.04     avg= 5.849 peak=14.771 T=5 (21s)
+  people_of_color__gain_11           protNoise=0.0      avg= 4.919 peak=12.553 T=5 (54s)  [DEGENERATE]
+  people_of_color__gain_none         protNoise=0.0      avg= 5.849 peak=14.771 T=5 (18s)  [DEGENERATE]
+  transit_desert__gain_6_13          protNoise=0.0      avg= 2.319 peak= 7.853 T=5 (50s)  [DEGENERATE]
+  transit_desert__gain_6             protNoise=0.0      avg= 2.319 peak= 7.709 T=5 (51s)  [DEGENERATE]
+=== s2-65_s6-45/community done in 1457s ===
+
+=== s2-65_s6-45 / people: 9 distinct variants (N=14, T_max=4, demand=100.0%) ===
+  few_jobs__gain_6_13                protNoise=29.24    avg= 7.311 peak=14.771 T=4 (14s)
+  low_income__gain_11_13             protNoise=12.63    avg= 7.311 peak=14.771 T=4 (14s)
+  low_income__gain_11                protNoise=12.63    avg= 7.311 peak=14.771 T=4 (14s)
+  low_income__gain_13                protNoise=1.04     avg= 7.311 peak=14.771 T=4 (14s)
+  low_income__gain_none              protNoise=1.04     avg= 7.311 peak=14.771 T=4 (14s)
+  people_of_color__gain_11           protNoise=11.59    avg= 7.311 peak=14.771 T=4 (13s)
+  people_of_color__gain_none         protNoise=0.0      avg= 7.311 peak=14.771 T=4 (13s)  [DEGENERATE]
+  transit_desert__gain_6_13          protNoise=29.24    avg= 7.311 peak=14.771 T=4 (13s)
+  transit_desert__gain_6             protNoise=29.24    avg= 7.311 peak=14.771 T=4 (13s)
+=== s2-65_s6-45/people done in 124s ===
+-> D:\Documents\EECS_199_Shoukry\dB45_collection\data\summaries\cyo_selection_map.csv (128 selections mapped)

@@ -1,0 +1,13 @@
+mode,lens,protectedStations,status,reason,protectedNoise,elapsed_s
+community,few_jobs,"[4, 6, 8, 12, 13, 14]",sat,,0.0,46.6
+community,low_income,"[3, 8, 10, 11, 12, 13, 15, 16]",sat,,12.63,169.4
+community,low_income,"[3, 8, 10, 11, 12, 15, 16]",phase2_failed,timeout,,257.1
+community,low_income,"[3, 8, 10, 11, 12, 15, 16]",phase2_failed,seed1:timeout,,257.2
+community,low_income,"[3, 8, 10, 11, 12, 15, 16]",phase2_failed,seed7:timeout,,257.0
+community,low_income,"[3, 8, 10, 11, 12, 15, 16]",phase2_failed,seed42:timeout,,256.9
+community,low_income,"[3, 8, 10, 12, 13, 15, 16]",sat,,1.04,22.3
+community,low_income,"[3, 8, 10, 12, 15, 16]",sat,,1.04,23.7
+community,people_of_color,"[2, 8, 11, 12]",sat,,0.0,63.3
+community,people_of_color,"[2, 8, 12]",sat,,0.0,19.0
+community,transit_desert,"[6, 8, 12, 13, 15]",sat,,0.0,37.1
+community,transit_desert,"[6, 8, 12, 15]",sat,,0.0,52.2

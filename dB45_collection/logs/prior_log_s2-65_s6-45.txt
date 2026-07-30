@@ -1,0 +1,14 @@
+
+=== s2-65_s6-45 / community (N=14, demand=100.0%) ===
+  low_income       protectedNoise=1.04     avg= 5.849 peak=14.771 T=5 demand=100.0% travel=3.0 (50s)
+  people_of_color  protectedNoise=0.0      avg= 5.849 peak=14.771 T=5 demand=100.0% travel=3.0 (32s)  [DEGENERATE: protectedNoise=0]
+  transit_desert   protectedNoise=0.0      avg= 5.849 peak=14.771 T=5 demand=100.0% travel=3.0 (34s)  [DEGENERATE: protectedNoise=0]
+  few_jobs         protectedNoise=0.0      avg= 5.849 peak=14.771 T=5 demand=100.0% travel=3.0 (38s)  [DEGENERATE: protectedNoise=0]
+=== s2-65_s6-45/community done in 153s ===
+
+=== s2-65_s6-45 / people (N=7, demand=12.5%) ===
+  low_income       protectedNoise=0.17     avg= 2.602 peak= 6.990 T=5 demand=12.5% travel=3.0 (20s)
+  people_of_color  protectedNoise=0.0      avg= 2.602 peak= 6.990 T=5 demand=12.5% travel=3.0 (5s)  [DEGENERATE: protectedNoise=0]
+  transit_desert   protectedNoise=0.0      avg= 2.602 peak= 6.990 T=5 demand=12.5% travel=3.0 (5s)  [DEGENERATE: protectedNoise=0]
+  few_jobs         protectedNoise=0.0      avg= 2.602 peak= 6.990 T=5 demand=12.5% travel=3.0 (5s)  [DEGENERATE: protectedNoise=0]
+=== s2-65_s6-45/people done in 35s ===
