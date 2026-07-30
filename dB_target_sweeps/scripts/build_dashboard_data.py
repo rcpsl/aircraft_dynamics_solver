@@ -10,7 +10,7 @@ import json
 import re
 from pathlib import Path
 
-ROOT = Path(__file__).parent
+from _paths import AGG as ROOT, DATA, DASHBOARDS
 COMBOS = ["s2-65_s6-55", "s2-65_s6-45", "s2-55_s6-55", "s2-55_s6-45"]
 MODES = ["community", "people"]
 
@@ -141,7 +141,7 @@ def build():
 
 
 def inject(blob_text):
-    html_path = ROOT / "fairness-dashboard-v2.html"
+    html_path = DASHBOARDS / "fairness-dashboard-v2.html"
     if not html_path.exists():
         return False
     html = html_path.read_text(encoding="utf-8")
@@ -156,7 +156,7 @@ def inject(blob_text):
 if __name__ == "__main__":
     data = build()
     blob = json.dumps(data, separators=(",", ":"))
-    (ROOT / "dashboard_data.json").write_text(blob, encoding="utf-8")
+    (DATA / "dashboard_data.json").write_text(blob, encoding="utf-8")
     print(f"dashboard_data.json written ({len(blob)/1024:.0f} KB)")
     if inject(blob):
         print("re-injected into fairness-dashboard-v2.html")

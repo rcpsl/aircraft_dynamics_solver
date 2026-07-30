@@ -1,7 +1,7 @@
-# combo,s2-55_s6-55
-# lens,low_income
+# combo,s2-55_s6-45
+# lens,few_jobs
 # mode,people
-# protectedStations,[6, 12]
+# protectedStations,[4, 6, 12, 14]
 # hardT,False
 # T_max,5
 # D,18
@@ -9,6 +9,7 @@
 # weightPrioritarian,1.0
 # weightUtilitarian,1.0
 # weightTime,0.1
+# stationTransitWeights,[10, 5, 10, 5, 10, 10, 5, 5, 5, 10, 5, 5, 5, 5, 1, 5]
 # aircraftMultipliers,[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 # N,7
 # protectedNoise,0.0
@@ -21,7 +22,7 @@ Zone 2,2.60,57.60,6.99,61.99,1.40,4
 Zone 3,0.00,55.00,0.00,55.00,0.00,0
 Zone 4,0.00,45.00,0.00,45.00,0.00,0
 Zone 5,0.00,55.00,0.00,55.00,0.00,0
-Zone 6,0.00,55.00,0.00,55.00,0.00,0
+Zone 6,0.00,45.00,0.00,45.00,0.00,0
 Zone 7,1.81,56.81,9.03,64.03,1.40,7
 Zone 8,0.00,55.00,0.00,55.00,0.00,0
 Zone 9,0.00,55.00,0.00,55.00,0.00,0
