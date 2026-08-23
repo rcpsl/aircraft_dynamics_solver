@@ -31,3 +31,10 @@ legacy_code/
 # provenance for the resolved/unresolved gaps documented in
 # dB45_collection/INTEGRATION_HANDOFF.md, so that folder is versioned whole.
 !dB45_collection/logs/*.log
+
+# Timestamped .bak snapshots taken before risky edits. Same reasoning as the
+# zips above: these duplicate states that git already holds (or, for files being
+# committed for the first time, states git holds from that commit onward), so
+# versioning them would store the history twice. They stay on disk as a local
+# undo buffer.
+backups/
