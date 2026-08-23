@@ -14,7 +14,36 @@ CORS(app)
 
 # Shared by both phases' Z3 timeout and by /progress's elapsed/max display,
 # so the two can never drift apart.
-SOLVE_TIMEOUT_MS = 240000
+# 2026-07-30: raised from 240s. At 4 minutes phase 2 was giving up on configs it
+# could still have solved, and a phase-2 timeout is not a slow answer — it falls
+# back to phase 1's UNWEIGHTED route, so the group is shown a routing that ignores
+# the choices they just made. Waiting longer is much cheaper than that, now that
+# /cancel means nobody is trapped by a long wait.
+SOLVE_TIMEOUT_MS = 600000
+SOLVE_TIMEOUT_CAP_MS = 1800000   # ceiling for the per-request override
+# Each request may send "timeoutMs" to override the default. Only one solve runs
+# at a time (_solve_lock), so a module-level "currently active" value is
+# unambiguous and avoids threading a parameter through both phases' long
+# signatures — which bench scripts call directly.
+_active_timeout_ms = SOLVE_TIMEOUT_MS
+
+
+def _timeout_ms():
+    return _active_timeout_ms
+
+
+def _set_timeout(raw):
+    """Apply a request's timeoutMs, ignoring anything unusable rather than
+    failing the solve over it. Clamped so a typo cannot wedge the single solve
+    lock for hours, and floored at 5s so it cannot be set to something that
+    times out before Z3 has started."""
+    global _active_timeout_ms
+    try:
+        ms = int(raw)
+    except (TypeError, ValueError):
+        _active_timeout_ms = SOLVE_TIMEOUT_MS
+        return
+    _active_timeout_ms = max(5000, min(SOLVE_TIMEOUT_CAP_MS, ms))
 
 # Z3's default Context is process-global and not thread-safe. Two overlapping
 # requests (e.g. a double-click on "Run Solver" before the button disables)
@@ -400,7 +429,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     # extends it by a single timestep per iteration instead of re-encoding.
     L = [[Int(f"L_{i}_{t}") for t in range(T_lower)] for i in range(N)]
     s = Solver()
-    s.set("timeout", SOLVE_TIMEOUT_MS)  # yields unknown instead of crashing
+    s.set("timeout", _timeout_ms())  # yields unknown instead of crashing
 
     # Bounds
     for i in range(N):
@@ -623,7 +652,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
 
     opt = Optimize()
-    opt.set("timeout", SOLVE_TIMEOUT_MS)  # cap; without this Optimize() can hang indefinitely
+    opt.set("timeout", _timeout_ms())  # cap; without this Optimize() can hang indefinitely
 
     # Location variables — "o_" prefix avoids name clashes with phase-1 variables
     L = [[Int(f"o_L_{i}_{t}") for t in range(T)] for i in range(N)]
@@ -879,6 +908,7 @@ def solve():
         body = request.get_json(silent=True) or {}
         _clear_progress()
         _drain_interrupt()
+        _set_timeout(body.get("timeoutMs"))
         gen = _begin_solve(body.get("clientRequestId"))
         try:
             return _solve_impl()
@@ -935,7 +965,7 @@ def progress():
         p = dict(_progress)
     started_at = p.pop("started_at", None)
     p["elapsed_s"] = round(time.monotonic() - started_at, 1) if started_at is not None else None
-    p["timeout_s"] = SOLVE_TIMEOUT_MS / 1000
+    p["timeout_s"] = _timeout_ms() / 1000
     return jsonify(p)
 
 
@@ -1167,19 +1197,24 @@ def _solve_impl():
         # without a warning would make it look like the weighted optimization ran
         # and simply chose to ignore the weights/objectives, when actually it never
         # produced a result at all.
+        # These lead with the consequence, not the cause. The dashboard collapses
+        # long messages to their first sentence, and more to the point a reader
+        # skimming a warning must not have to reach sentence three to learn that
+        # the map in front of them ignores the choices they just made.
         if opt_result["reason"] == "timeout":
             detail = (
-                f"Phase-2 optimization timed out (after {SOLVE_TIMEOUT_MS // 1000}s) at "
-                f"T={T_for_phase2} without finding a weighted solution — showing the plain "
-                f"feasible route instead, which does NOT reflect your weights or objectives. "
-                f"Try tightening D/U, lowering T_max, reducing the station weight, or reducing "
-                f"N/aircraft multipliers."
+                f"This routing does NOT reflect your fairness choices. "
+                f"Phase-2 optimization ran out of time after {_timeout_ms() // 1000}s at "
+                f"T={T_for_phase2} without finding a weighted solution, so the map shows a "
+                f"plain feasible route instead. Raise the time limit in Admin, or tighten D/U, "
+                f"lower T_max, reduce the station weight, or reduce N/aircraft multipliers."
             )
         else:
             detail = (
+                f"This routing does NOT reflect your fairness choices. "
                 f"Phase-2 optimization unexpectedly found no solution at T={T_for_phase2} "
-                f"despite phase-1 confirming feasibility — showing the plain feasible route "
-                f"instead, which does NOT reflect your weights or objectives."
+                f"despite phase-1 confirming feasibility, so the map shows a plain feasible "
+                f"route instead."
             )
         result["warning"] = f"{overlap_warning} · {detail}" if overlap_warning else detail
         return jsonify(result)
