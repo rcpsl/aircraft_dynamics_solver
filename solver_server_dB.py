@@ -221,6 +221,54 @@ def _active_output_matrices(paths, start_positions, end_positions, N, M, T, base
     return count, noise
 
 
+def proximity_weights_from_vertiports(adjacency, vertiport_stations, M, base, max_layer=None):
+    """Derive per-station proximity weights by BFS layering outward from the vertiports.
+
+    Layer 0 is the vertiports themselves, layer k the stations first reachable in k
+    moves; station weight is base**layer, so vertiports are the *cheapest* tiles and
+    cost grows with distance.  Minimizing occupancy x weight therefore pulls traffic
+    inward and concentrates burden on the tiles nearest the vertiports.
+
+    BFS follows out-edges ("stations a vertiport tile can directly go to"), matching
+    how the principle is specified.  On a symmetric grid that is the same as an
+    undirected walk; clients needing a different metric (e.g. Manhattan rather than
+    the 8-neighbour flight adjacency) should pass an explicit weight vector instead.
+
+    `max_layer`, if given, clamps the exponent so deep graphs cannot blow the weights
+    up exponentially.  Stations unreachable from every vertiport sit one layer beyond
+    the deepest reachable one (clamped the same way), making them the most expensive.
+
+    Returns (weights, layers), both length-M lists indexed 0-based.
+    """
+    layers = [None] * M
+    frontier = []
+    for v in vertiport_stations:
+        if layers[v - 1] is None:
+            layers[v - 1] = 0
+            frontier.append(v - 1)
+
+    depth = 0
+    while frontier:
+        depth += 1
+        nxt = []
+        for a in frontier:
+            for b in range(M):
+                # self-loops are ubiquitous here (soft T requires them) and would
+                # otherwise re-enter the source; the visited check absorbs them.
+                if adjacency[a][b] and layers[b] is None:
+                    layers[b] = depth
+                    nxt.append(b)
+        frontier = nxt
+
+    reachable = [l for l in layers if l is not None]
+    unreachable_layer = (max(reachable) + 1) if reachable else 0
+    layers = [unreachable_layer if l is None else l for l in layers]
+    if max_layer is not None:
+        layers = [min(l, max_layer) for l in layers]
+
+    return [float(base) ** l for l in layers], layers
+
+
 def min_moves(adjacency, src, dst, M, allowed=None):
     """BFS: minimum moves from src to dst (1-indexed). Returns inf if unreachable.
 
@@ -605,11 +653,10 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
 
 
 def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions,
-                        optimize_util, optimize_prior, optimize_prop,
-                        protected_stations, proportional_stations,
-                        w_util, w_prior, w_prop,
+                        optimize_util, optimize_prior, optimize_prox,
+                        protected_stations, proximity_weights,
+                        w_util, w_prior, w_prox,
                         soft_T, w_time,
-                        prop_alloc,
                         station_transit_weights,
                         util_noise_mode,
                         aircraft_multipliers,
@@ -643,7 +690,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     # operate on a comparable scale regardless of N, T, M, D.
     #
     # Transit and T-penalty: count-based, unchanged from the count-based solver.
-    # Prioritarian and proportional: dB-based; bounded by all-N-aircraft case
+    # Prioritarian: dB-based; bounded by all-N-aircraft case
     # at the loudest station.
     # Station-weighted transit: scale floats to integers (0.01 precision).
     W_SCALE = 100
@@ -656,20 +703,31 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     max_transit   = sum(int_mult) * (T - 1) * max(1, max_tw)
     max_T_penalty = N * (T - 1)
 
+    # Proximity: occupancy x per-station weight. Weights arrive as floats (base**layer,
+    # or a client-supplied vector), so scale them to integers the same way the
+    # station-weighted transit path does, keeping the Z3 term in integer arithmetic.
+    P_SCALE = 100
+    if proximity_weights is not None:
+        int_pw = [round(w * P_SCALE) for w in proximity_weights]
+    else:
+        int_pw = None
+    # Every aircraft-unit occupies exactly one station per active timestep, for at
+    # most T timesteps, at worst on the costliest station — that product is the bound.
+    max_proximity = sum(int_mult) * T * max(int_pw) if int_pw else 0
+
     # Use scaled (integer) units for dB normalization bounds so all objective
     # terms live in the same numeric range as the Z3 dB expressions (×SCALE).
     # Mixing unscaled dB bounds with scaled Z3 expressions would make the dB
     # objectives SCALE× heavier than the count-based utilitarian term.
     max_dB_scaled_per_station = max(scaled_table_w[m][max_weighted_count] for m in range(M))
     max_protected_dB    = len(protected_stations)    * T * max_dB_scaled_per_station
-    max_proportional_dB = len(proportional_stations) * T * max_dB_scaled_per_station
     # When station-weighted, each term in total_util_noise is additionally scaled by
     # int_tw[m] (see below), so the normalization bound needs the same max_tw factor
     # the transit-cost path already applies to max_transit.
     max_util_noise_dB   = M * T * max_dB_scaled_per_station * (max(1, max_tw) if int_tw is not None else 1)
 
     # After normalization, all coefficients are dimensionless and comparable,
-    # so w_util = w_prior = w_prop = w_time = 1.0 gives genuinely equal weighting.
+    # so w_util = w_prior = w_time = 1.0 gives genuinely equal weighting.
     if optimize_util:
         if util_noise_mode:
             eff_w_util = (w_util / max_util_noise_dB) if max_util_noise_dB > 0 else 0.0
@@ -678,7 +736,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     else:
         eff_w_util = 0.0
     eff_w_prior = (w_prior / max_protected_dB)    if (optimize_prior and max_protected_dB    > 0) else 0.0
-    eff_w_prop  = (w_prop  / max_proportional_dB) if (optimize_prop  and max_proportional_dB > 0) else 0.0
+    eff_w_prox  = (w_prox  / max_proximity)       if (optimize_prox  and max_proximity        > 0) else 0.0
     eff_w_time  = (w_time  / max_T_penalty)       if (soft_T         and max_T_penalty        > 0) else 0.0
 
     def valid_next(src_1indexed):
@@ -744,6 +802,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         )
 
     wdB_by_t = []
+    wcnt_by_t = []
     for t in range(T):
         # Weighted-count variables drive both the D/U hard constraints and the
         # soft dB objectives/output, so displayed noise never exceeds what's enforced.
@@ -757,6 +816,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         wdB_exprs_t = [make_dB_expr(wcnt_t[m], m, scaled_table_w, D_count[m]) for m in range(M)]
         _add_noise_constraints(opt, wcnt_t, wdB_exprs_t, M, D_count, U_scaled, f"p2_{t}")
         wdB_by_t.append(wdB_exprs_t)
+        wcnt_by_t.append(wcnt_t)
 
     # ── Build objective terms ─────────────────────────────────────────────────
     objective_terms = []
@@ -766,7 +826,7 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     total_transit = None
     total_util_noise = None
     protected_noise_dB = None
-    proportional_noise_dB = None
+    proximity_cost = None
 
     # Sticky arrival: once an aircraft reaches its destination it must stay there.
     # Without this, in soft mode aircraft can drift away between arrival and T-1.
@@ -821,13 +881,19 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         ])
         objective_terms.append(eff_w_prior * protected_noise_dB)
 
-    if eff_w_prop > 0:
-        proportional_noise_dB = Sum([
-            wdB_by_t[t][b - 1]
-            for b in proportional_stations
+    if eff_w_prox > 0:
+        # wcnt_by_t[t][m] is the multiplier-weighted count of *active* aircraft on
+        # station m at t — the same variable that drives the D/U caps and the
+        # displayed count matrix, so the burden being priced here is exactly the
+        # burden being reported. Each aircraft-unit-timestep on m costs int_pw[m],
+        # which is what "1 time step on a tile costs that tile's weight" means once
+        # aircraft multipliers are folded in.
+        proximity_cost = Sum([
+            wcnt_by_t[t][m] * int_pw[m]
             for t in range(T)
+            for m in range(M)
         ])
-        objective_terms.append(-eff_w_prop * proportional_noise_dB)  # negative coefficient = maximize this term
+        objective_terms.append(eff_w_prox * proximity_cost)
 
     if eff_w_time > 0:
         # Arrival time proxy: counts pre-arrival timesteps per aircraft.
@@ -840,49 +906,6 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
             for t in range(T)
         ])
         objective_terms.append(eff_w_time * T_penalty)
-
-    # ── Proportional allocation for benefits ──────────────────────────────────
-    # Soft ordering: stations with aircraft activity (start/end) should bear more
-    # noise than stations merely adjacent to them, which in turn should bear more
-    # than all other stations.  Implemented as a penalty on ordering violations
-    # across all timesteps, normalized to [0,1] like the other objectives.
-    prop_alloc_sets = None
-    if prop_alloc:
-        active_set = set()
-        for i in range(N):
-            active_set.add(start_positions[i] - 1)
-            active_set.add(end_positions[i] - 1)
-
-        adjacent_set = set()
-        for m in range(M):
-            if m not in active_set:
-                if any(adjacency[m][a] or adjacency[a][m] for a in active_set):
-                    adjacent_set.add(m)
-
-        none_set = set(range(M)) - active_set - adjacent_set
-
-        # (hi, lo): hi should have >= dB increase than lo at every timestep
-        order_pairs = (
-            [(a, adj) for a in active_set for adj in adjacent_set] +
-            [(a, n)   for a in active_set for n   in none_set]     +
-            [(adj, n) for adj in adjacent_set for n in none_set]
-        )
-
-        if order_pairs:
-            max_prop_alloc = max(1, len(order_pairs) * T * max_dB_scaled_per_station)
-            violation = Sum([
-                If(wdB_by_t[t][hi] < wdB_by_t[t][lo],
-                   wdB_by_t[t][lo] - wdB_by_t[t][hi], 0)
-                for (hi, lo) in order_pairs
-                for t in range(T)
-            ])
-            objective_terms.append((1.0 / max_prop_alloc) * violation)
-
-        prop_alloc_sets = {
-            "active":   sorted(s + 1 for s in active_set),
-            "adjacent": sorted(s + 1 for s in adjacent_set),
-            "none":     sorted(s + 1 for s in none_set),
-        }
 
     if objective_terms:
         opt.minimize(Sum(objective_terms))
@@ -926,12 +949,8 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         result["protectedNoise"]    = model.evaluate(protected_noise_dB).as_long() / SCALE
         result["protectedStations"] = protected_stations
 
-    if eff_w_prop > 0:
-        result["proportionalNoise"]    = model.evaluate(proportional_noise_dB).as_long() / SCALE
-        result["proportionalStations"] = proportional_stations
-
-    if prop_alloc_sets is not None:
-        result["stationCategories"] = prop_alloc_sets
+    if eff_w_prox > 0:
+        result["proximityCost"] = model.evaluate(proximity_cost).as_long() / P_SCALE
 
     return result
 
@@ -1056,20 +1075,20 @@ def _solve_impl():
 
     optimize_util  = data.get("optimizeUtilitarian",  False)
     optimize_prior = data.get("optimizePrioritarian", False)
-    optimize_prop  = data.get("optimizeProportional", False)
+    optimize_prox  = data.get("optimizeProximity",    False)
     if not isinstance(optimize_util,  bool): optimize_util  = False
     if not isinstance(optimize_prior, bool): optimize_prior = False
-    if not isinstance(optimize_prop,  bool): optimize_prop  = False
+    if not isinstance(optimize_prox,  bool): optimize_prox  = False
 
     try:
         w_util  = float(data.get("weightUtilitarian",  1.0))
         w_prior = float(data.get("weightPrioritarian", 1.0))
-        w_prop  = float(data.get("weightProportional", 1.0))
+        w_prox  = float(data.get("weightProximity",    1.0))
     except (TypeError, ValueError):
-        w_util, w_prior, w_prop = 1.0, 1.0, 1.0
+        w_util, w_prior, w_prox = 1.0, 1.0, 1.0
     if w_util  < 0: w_util  = 0.0
     if w_prior < 0: w_prior = 0.0
-    if w_prop  < 0: w_prop  = 0.0
+    if w_prox  < 0: w_prox  = 0.0
 
     protected_stations = data.get("protectedStations", [])
     if optimize_prior:
@@ -1082,16 +1101,66 @@ def _solve_impl():
         if any(p < 1 or p > M for p in protected_stations):
             return jsonify({"error": f"protectedStations must be between 1 and M={M}"}), 400
 
-    proportional_stations = data.get("proportionalStations", [])
-    if optimize_prop:
-        if not isinstance(proportional_stations, list) or len(proportional_stations) == 0:
-            return jsonify({"error": "proportionalStations must be a non-empty list when optimizeProportional is true"}), 400
-        try:
-            proportional_stations = [int(b) for b in proportional_stations]
-        except (TypeError, ValueError):
-            return jsonify({"error": "proportionalStations must be a list of integers"}), 400
-        if any(b < 1 or b > M for b in proportional_stations):
-            return jsonify({"error": f"proportionalStations must be between 1 and M={M}"}), 400
+    # ── Proximity weights ─────────────────────────────────────────────────────
+    # Two ways in, explicit wins: a client-supplied per-station vector, or a
+    # vertiport list the server layers outward from with base**layer. The explicit
+    # form is what a frontend uses when it wants a different distance metric than
+    # the flight adjacency (Manhattan, say) — the solver never needs to know which.
+    proximity_weights  = None
+    derived_proximity  = False
+    if optimize_prox:
+        raw_pw = data.get("proximityWeights")
+        if raw_pw is not None:
+            if not isinstance(raw_pw, list) or len(raw_pw) != M:
+                return jsonify({"error": f"proximityWeights must be a list of length M={M}"}), 400
+            try:
+                proximity_weights = [float(w) for w in raw_pw]
+            except (TypeError, ValueError):
+                return jsonify({"error": "proximityWeights values must be numeric"}), 400
+            if any(w < 0 for w in proximity_weights):
+                return jsonify({"error": "proximityWeights values must be non-negative"}), 400
+        else:
+            vertiport_stations = data.get("vertiportStations", [])
+            if not isinstance(vertiport_stations, list) or len(vertiport_stations) == 0:
+                return jsonify({"error": "vertiportStations must be a non-empty list when optimizeProximity is true (or pass proximityWeights directly)"}), 400
+            try:
+                vertiport_stations = [int(v) for v in vertiport_stations]
+            except (TypeError, ValueError):
+                return jsonify({"error": "vertiportStations must be a list of integers"}), 400
+            if any(v < 1 or v > M for v in vertiport_stations):
+                return jsonify({"error": f"vertiportStations must be between 1 and M={M}"}), 400
+
+            try:
+                prox_base = float(data.get("proximityBase", 3.0))
+            except (TypeError, ValueError):
+                return jsonify({"error": "proximityBase must be numeric"}), 400
+            if prox_base <= 0:
+                return jsonify({"error": "proximityBase must be > 0"}), 400
+
+            raw_ml = data.get("proximityMaxLayer", None)
+            prox_max_layer = None
+            if raw_ml is not None:
+                try:
+                    prox_max_layer = int(raw_ml)
+                except (TypeError, ValueError):
+                    return jsonify({"error": "proximityMaxLayer must be an integer"}), 400
+                if prox_max_layer < 0:
+                    return jsonify({"error": "proximityMaxLayer must be >= 0"}), 400
+
+            proximity_weights, proximity_layers = proximity_weights_from_vertiports(
+                adjacency, vertiport_stations, M, prox_base, prox_max_layer
+            )
+            derived_proximity = True
+
+        # base**layer grows fast on a deep graph; a runaway vector would swamp every
+        # other objective and bloat the Z3 coefficients rather than fail outright.
+        if max(proximity_weights) > 1e7:
+            return jsonify({
+                "error": (
+                    f"proximity weights reach {max(proximity_weights):.3g}, which would dominate all "
+                    f"other objectives — lower proximityBase or set proximityMaxLayer"
+                )
+            }), 400
 
     hard_T = data.get("hardT", True)
     if not isinstance(hard_T, bool): hard_T = True
@@ -1168,9 +1237,6 @@ def _solve_impl():
                 "detail": f"T_max={T_max} is smaller than the minimum feasible T={T_lower} — increase T_max or relax D/U"
             })
 
-    prop_alloc = data.get("proportionalAllocation", False)
-    if not isinstance(prop_alloc, bool): prop_alloc = False
-
     util_noise_mode = bool(data.get("utilNoiseMode", False))
 
     station_transit_weights = None
@@ -1186,29 +1252,19 @@ def _solve_impl():
             if any(w < 0 for w in station_transit_weights):
                 return jsonify({"error": "stationTransitWeights values must be non-negative"}), 400
 
-    should_optimize = optimize_util or optimize_prior or optimize_prop or soft_T or prop_alloc
+    should_optimize = optimize_util or optimize_prior or optimize_prox or soft_T
     if result["status"] != "sat" or not should_optimize:
         return jsonify(result)
 
     T_for_phase2 = result["T"] if hard_T else T_max
 
-    overlap_warning = None
-    if optimize_prior and optimize_prop:
-        overlap = sorted(set(protected_stations) & set(proportional_stations))
-        if overlap:
-            overlap_warning = (
-                f"protectedStations and proportionalStations overlap at stations {overlap}"
-                " — solver will find weighted compromise"
-            )
-
     try:
         opt_result = optimize_objectives(
             N, T_for_phase2, M, D, U, adjacency, start_positions, end_positions,
-            optimize_util, optimize_prior, optimize_prop,
-            protected_stations, proportional_stations,
-            w_util, w_prior, w_prop,
+            optimize_util, optimize_prior, optimize_prox,
+            protected_stations, proximity_weights,
+            w_util, w_prior, w_prox,
             soft_T, w_time,
-            prop_alloc,
             station_transit_weights,
             util_noise_mode,
             aircraft_multipliers,
@@ -1250,11 +1306,14 @@ def _solve_impl():
                 f"despite phase-1 confirming feasibility, so the map shows a plain feasible "
                 f"route instead."
             )
-        result["warning"] = f"{overlap_warning} · {detail}" if overlap_warning else detail
+        result["warning"] = detail
         return jsonify(result)
     opt_result["T_min"] = result["T"]
-    if overlap_warning:
-        opt_result["warning"] = overlap_warning
+    if derived_proximity and opt_result.get("status") == "sat":
+        # Only for the server-derived path: with a client-supplied vector the caller
+        # already knows the weights, but here it otherwise cannot see what was priced.
+        opt_result["proximityWeights"] = proximity_weights
+        opt_result["proximityLayers"]  = proximity_layers
     return jsonify(opt_result)
 
 
