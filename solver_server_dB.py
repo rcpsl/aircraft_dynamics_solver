@@ -56,7 +56,9 @@ def dB_increase(baseline_val, n, aircraft_dB):
 def build_scaled_table(M, N, baseline, aircraft_dB):
     """
     scaled_table[m][n] = round(dB_increase(baseline[m], n, aircraft_dB) * SCALE)
-    Covers n = 0..N (maximum possible count at any station is N aircraft total).
+    Covers n = 0..N, where N is the largest count a station could ever hold. With
+    per-aircraft multipliers that is sum(int_mult), not the aircraft count, which
+    is why callers pass max_weighted_count rather than N.
     """
     return [
         [round(dB_increase(baseline[m], n, aircraft_dB) * SCALE) for n in range(N + 1)]
@@ -150,22 +152,18 @@ def _add_noise_constraints(solver, cnt_vars, dB_exprs, M, D_count, U_scaled, tag
     bounding the count at D_count[m] is exactly equivalent to bounding the increase
     at D, and costs M constraints.
 
-    U was previously a table over every ordered station pair and every count value —
-    O(M^2 * D_count) Implies per timestep, which accounted for roughly 95% of all
-    constraints in the model and was why 5x5-sized problems timed out. It is replaced
-    here by a max/min encoding, using the identity
+    U uses a max/min encoding, from the identity
 
         |dB(m1) - dB(m2)| <= U  for every pair   <=>   max(dB) - min(dB) <= U
 
-    so two auxiliary integers and 2M+1 constraints say the same thing. This is sound
-    and complete: dbmax is forced at or above the true maximum and dbmin at or below
-    the true minimum, so bounding their difference bounds the true spread; conversely
-    any assignment whose true spread fits within U is satisfiable by pinning the two
-    auxiliaries to the actual extremes.
-
-    (The earlier note that make_dB_expr causes O(N^2) case expansion referred to
-    subtracting two If-chains for every station pair. Nothing here does that: each
-    dB expression appears in exactly two comparisons and never against another chain.)
+    so two auxiliary integers and 2M+1 constraints replace what used to be a table
+    over every ordered station pair and every count value — O(M^2 * D_count) Implies
+    per timestep, roughly 95% of all constraints in the model, and the reason
+    5x5-sized problems timed out. The encoding is sound and complete: dbmax is forced
+    at or above the true maximum and dbmin at or below the true minimum, so bounding
+    their difference bounds the true spread; conversely any assignment whose true
+    spread fits within U is satisfiable by pinning the two auxiliaries to the actual
+    extremes.
 
     cnt_vars[m] must be simple Z3 Int variables (not complex Sum expressions).
     dB_exprs[m] is the scaled dB increase at station m implied by cnt_vars[m].
@@ -287,19 +285,18 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     # OOM'd), so the budget must shrink for problems where each extra timestep is
     # expensive, while still giving small problems plenty of room to search.
     #
-    # Per timestep the model now emits O(M * max_d_count) If-chain nodes for the dB
-    # expressions plus O(M * N) terms for the weighted count sums. It used to emit
-    # O(M^2 * max_d_count) Implies for the pairwise U table, so this metric dropped
-    # by roughly a factor of M when that table was replaced by the max/min encoding
-    # in _add_noise_constraints — which is why problems that used to be rejected as
-    # noise_domain_too_large now fit comfortably.
+    # Per timestep the model emits O(M * max_d_count) If-chain nodes for the dB
+    # expressions plus O(M * N) terms for the weighted count sums. The pairwise U
+    # table that made this O(M^2 * max_d_count) is gone (see _add_noise_constraints),
+    # which is why problems that used to be rejected as noise_domain_too_large now
+    # fit comfortably.
     #
-    # The volume ceiling was lowered from 80_000 to 40_000 alongside that change.
-    # The old number was tuned against the old (M^2) cost model, and keeping it with
-    # the new metric would have admitted roughly 628 weighted aircraft-units at
-    # M=25 — far beyond anything that has actually been solved. 40_000 still admits
-    # ~308 units against the 25 the old formula allowed, so the workshop gains the
-    # headroom it needs while the accepted range stays inside tested territory.
+    # The ceiling is 40_000 against that metric, not the 80_000 tuned for the old
+    # M^2 cost model: keeping the old number would have admitted roughly 628 weighted
+    # aircraft-units at M=25, far beyond anything that has actually been solved.
+    # 40_000 admits ~308 against the 25 the old formula allowed, so the workshop
+    # gains the headroom it needs while the accepted range stays inside tested
+    # territory.
     SAFE_CONSTRAINT_VOLUME = 40_000
     per_timestep_cost = max(1, M * (max_d_count + N))
     T_hard_cap_by_memory = SAFE_CONSTRAINT_VOLUME // per_timestep_cost
@@ -316,7 +313,8 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
         }
     T_hard_cap = min(T_lower + 40, max(T_lower + 3, T_hard_cap_by_memory))
 
-    # Build permanent base state up to T_lower (Suggestion 3: encode once)
+    # Build the permanent base state up to T_lower once. The search loop below
+    # extends it by a single timestep per iteration instead of re-encoding.
     L = [[Int(f"L_{i}_{t}") for t in range(T_lower)] for i in range(N)]
     s = Solver()
     s.set("timeout", SOLVE_TIMEOUT_MS)  # yields unknown instead of crashing
@@ -404,7 +402,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
             return {"status": "sat", "T": T_current, "paths": paths,
                     "countMatrix": count_matrix, "noiseMatrix": noise_matrix_dB}
 
-        # ── Suggestion 2: unsat-core early exit ─────────────────────────────
+        # ── unsat-core early exit ───────────────────────────────────────────
         # If no endpoint assumption appears in the core, the infeasibility is
         # structural (noise/movement constraints alone conflict) and increasing
         # T will never help — stop immediately.
@@ -420,7 +418,7 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
         if T_current >= T_hard_cap:
             break
 
-        # ── Suggestion 3: extend base by exactly one timestep ───────────────
+        # ── extend the base encoding by exactly one timestep ────────────────
         new_t = T_current  # 0-indexed new final timestep
 
         for i in range(N):
@@ -467,8 +465,13 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
     minimize a weighted combination of transit time and protected-station noise (dB).
 
-    NOTE: z3.Optimize is slower than z3.Solver. For large N, T, or M this phase
-    may take several seconds. T is fixed to the value found in phase 1.
+    T is fixed for this phase, but not always to phase 1's answer: _solve_impl passes
+    phase 1's minimum under hard T and T_max under soft T, where sticky arrival lets
+    aircraft finish early inside a longer horizon.
+
+    NOTE: z3.Optimize is slower than z3.Solver and this phase carries the objective
+    terms as well, so at large N, T, or M it dominates the wall clock — it is the
+    phase that runs the timeout budget out.
     """
     _set_progress(phase="phase2", T=T, T_min=None, T_max=None, started_at=time.monotonic())
 
@@ -530,9 +533,6 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         s0 = src_1indexed - 1
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
 
-    # Global disparity: all station pairs, not just adjacent ones
-    all_pairs = [(m1, m2) for m1 in range(M) for m2 in range(m1 + 1, M)]
-
     opt = Optimize()
     opt.set("timeout", SOLVE_TIMEOUT_MS)  # cap; without this Optimize() can hang indefinitely
 
@@ -576,12 +576,11 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
 
     # Guard: a generous D combined with large aircraft multipliers can push D_count
     # close to max_weighted_count for every station. Per timestep the model emits
-    # O(M * D_count) If-chain nodes plus O(M * N) count-sum terms; the old pairwise
-    # U table made this O(M^2 * D_count), which crashed Z3 with an access violation
-    # when the product got too large. The metric now reflects what is actually
-    # emitted, and the ceiling is lowered from 150_000 to 75_000 to match — see the
-    # note on SAFE_CONSTRAINT_VOLUME in find_min_T for why the old number would have
-    # been far too permissive under the new cost model.
+    # O(M * D_count) If-chain nodes plus O(M * N) count-sum terms; back when the
+    # pairwise U table made this O(M^2 * D_count), too large a product crashed Z3
+    # with an access violation. The metric reflects what is actually emitted, and
+    # the 75_000 ceiling matches it — see the note on SAFE_CONSTRAINT_VOLUME in
+    # find_min_T for why the old 150_000 would be far too permissive here.
     max_d_count = max(D_count) if D_count else 0
     if T * M * (max_d_count + N) > 75_000:
         raise ValueError(
@@ -600,9 +599,9 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         wcnt_t = [Int(f"o_wcnt_{m}_{t}") for m in range(M)]
         for m in range(M):
             opt.add(wcnt_t[m] == WC_t[m])
-        # These dB expressions were already needed for the soft objectives below, so
-        # the U constraint now reuses them instead of building a separate pairwise
-        # table — the disparity encoding costs 2M+1 constraints on top of zero new terms.
+        # These dB expressions are needed for the soft objectives below anyway, and
+        # the U constraint reuses them rather than building a table of its own, so
+        # the disparity encoding costs 2M+1 constraints and no new terms.
         wdB_exprs_t = [make_dB_expr(wcnt_t[m], m, scaled_table_w, D_count[m]) for m in range(M)]
         _add_noise_constraints(opt, wcnt_t, wdB_exprs_t, M, D_count, U_scaled, f"p2_{t}")
         wdB_by_t.append(wdB_exprs_t)
