@@ -3,7 +3,7 @@ import math
 import threading
 import time
 from math import ceil
-from collections import deque, Counter
+from collections import deque
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from z3 import (Int, And, Or, Not, Implies, Sum, If, Solver, Optimize, Bool, sat, unknown,
@@ -221,10 +221,21 @@ def _active_output_matrices(paths, start_positions, end_positions, N, M, T, base
     return count, noise
 
 
-def min_moves(adjacency, src, dst, M):
-    """BFS: minimum moves from src to dst (1-indexed). Returns inf if unreachable."""
+def min_moves(adjacency, src, dst, M, allowed=None):
+    """BFS: minimum moves from src to dst (1-indexed). Returns inf if unreachable.
+
+    `allowed`, if given, is a predicate on 1-indexed stations that every node
+    *after* the source must satisfy. The source itself is exempt: an aircraft
+    sitting on its start station has moved[i][t] False, so it is not active and
+    adds no noise there. That exemption ends the moment it departs — moved[] is
+    sticky — so a station the walk returns to must satisfy `allowed` like any
+    other, which is why the filter is applied on arrival at a node rather than
+    on departure from it. The destination is included: active[i][t] is still
+    True on the arrival timestep (arrived[i][t-1] has not flipped yet).
+    """
     if src == dst:
         return 0
+    ok = allowed if allowed is not None else (lambda _m: True)
     visited = [False] * (M + 1)
     visited[src] = True
     queue = deque([(src, 0)])
@@ -233,7 +244,7 @@ def min_moves(adjacency, src, dst, M):
         for nb in range(1, M + 1):
             if nb == node:
                 continue
-            if adjacency[node - 1][nb - 1] == 1 and not visited[nb]:
+            if adjacency[node - 1][nb - 1] == 1 and not visited[nb] and ok(nb):
                 if nb == dst:
                     return moves + 1
                 visited[nb] = True
@@ -334,50 +345,78 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
             )
         }
 
-    # Start-position D check only: t=0 aircraft are parked (active[i][0] = False always),
-    # so they produce zero noise and can never violate U. The solver can also delay departure
-    # to stagger active windows, so a U check on start positions would be overly strict.
-    start_counts = Counter(start_positions)
-    start_dB = [scaled_table[m][start_counts.get(m + 1, 0)] for m in range(M)]
-    for m, inc_scaled in enumerate(start_dB):
-        if inc_scaled > D_scaled:
-            station = m + 1
-            level = inc_scaled / SCALE
-            return {
-                "status": "unsat", "reason": "start_conflict",
-                "detail": (
-                    f"Station {station} has {start_counts[station]} aircraft at t=0, "
-                    f"a {level:.1f} dB increase which exceeds D={D} dB"
-                )
-            }
+    # There is deliberately no start- or end-position D pre-check.
+    #
+    # Both used to exist and both contradicted the active-noise model. A start
+    # station never accumulates noise — an aircraft that has not departed has
+    # moved[i][t] False, hence active[i][t] False — so the start check fired on a
+    # quantity the model never computes, and rejected every realistic vertiport
+    # layout, where a corridor's whole fleet shares one origin. Aircraft that arrive
+    # before T-1 are already silent (ha[i][T-2] True → active[i][T-1] False), so the
+    # end check overstated destination noise; under soft T, where arriving early is
+    # the norm, it was wrong more often still. Neither is a sound necessary
+    # condition, so neither has a weaker version worth keeping.
+    #
+    # The per-aircraft D-admissible reachability test below replaces them: same
+    # O(M²) cost, but it only asserts things the model actually enforces. It earns
+    # its keep on more than error quality — without it a tight D turns into a
+    # multi-minute Z3 search that ends in a timeout rather than a usable answer.
 
-    # End-position D + U check: final-timestep positions are also fixed.
-    end_counts = Counter(end_positions)
-    end_dB = [scaled_table[m][end_counts.get(m + 1, 0)] for m in range(M)]
-    for m, inc_scaled in enumerate(end_dB):
-        if inc_scaled > D_scaled:
-            station = m + 1
-            level = inc_scaled / SCALE
-            return {
-                "status": "unsat", "reason": "end_conflict",
-                "detail": (
-                    f"Station {station} has {end_counts[station]} aircraft at their final position, "
-                    f"a {level:.1f} dB increase which exceeds D={D} dB"
-                )
-            }
-    # End-position U check removed: aircraft that arrive before T-1 are already silent
-    # (ha[i][T-2]=True → active[i][T-1]=False), so assuming all end positions are
-    # simultaneously active overstates the noise and produces false unsat rejections.
+    # Precompute the count-based D table now (it only depends on M/D/baseline, not
+    # on T) so it is available to the reachability check below and max_d_count is
+    # known before sizing the T search budget further down.
+    D_count = _compute_d_counts(M, max_weighted_count, D_scaled, scaled_table_w)
+    max_d_count = max(D_count) if D_count else 0
 
-    # BFS reachability per aircraft
-    individual_mins = [
+    # BFS reachability per aircraft, restricted to D-admissible stations.
+    #
+    # D_count[m] == 0 means station m cannot host even one weighted aircraft-unit
+    # without breaching D, so no active aircraft may ever occupy it; more generally
+    # aircraft i alone needs D_count[m] >= int_mult[i]. Routing each aircraft over
+    # the subgraph of stations that clear its own multiplier is a sound *necessary*
+    # condition — it ignores every interaction between aircraft, so it can only
+    # under-constrain, never reject a feasible instance. That is what the deleted
+    # start/end pre-checks got wrong: they asserted co-location facts the model
+    # never computes. This one asserts only what the model does enforce.
+    #
+    # It also tightens T_lower, since a detour around an inadmissible station is a
+    # genuine lower bound on that aircraft's move count.
+    plain_mins = [
         min_moves(adjacency, start_positions[i], end_positions[i], M)
         for i in range(N)
     ]
-    if any(m == float('inf') for m in individual_mins):
+    if any(m == float('inf') for m in plain_mins):
         return {
             "status": "unsat", "reason": "unreachable",
             "detail": "One or more aircraft cannot reach their destination via the given adjacency"
+        }
+
+    individual_mins = [
+        min_moves(adjacency, start_positions[i], end_positions[i], M,
+                  allowed=lambda m, need=int_mult[i]: D_count[m - 1] >= need)
+        for i in range(N)
+    ]
+    if any(m == float('inf') for m in individual_mins):
+        i = next(i for i in range(N) if individual_mins[i] == float('inf'))
+        dest = end_positions[i]
+        need = int_mult[i]
+        if D_count[dest - 1] < need:
+            why = (
+                f"its destination station {dest} (baseline {baseline[dest-1]:.1f} dBA) "
+                f"admits at most {D_count[dest-1]} weighted aircraft-units under D={D} dB, "
+                f"but the aircraft carries {need}. An aircraft is still active on the "
+                f"timestep it arrives, so the destination must be able to hold it."
+            )
+        else:
+            blocked = sum(1 for m in range(M) if D_count[m] < need)
+            why = (
+                f"every route from station {start_positions[i]} to station {dest} passes "
+                f"through a station that cannot hold it: {blocked} of {M} stations admit "
+                f"fewer than {need} weighted aircraft-units under D={D} dB."
+            )
+        return {
+            "status": "unsat", "reason": "noise_cap",
+            "detail": f"Aircraft {i + 1} has no route that respects D: {why} Raise D to continue."
         }
 
     T_lower = max(2, max(individual_mins) + 1)
@@ -385,11 +424,6 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     def valid_next(src_1indexed):
         s0 = src_1indexed - 1
         return [dst + 1 for dst in range(M) if adjacency[s0][dst] == 1]
-
-    # Precompute the count-based D table now (it only depends on M/D/baseline, not
-    # on T) so max_d_count is known before sizing the T search budget below.
-    D_count = _compute_d_counts(M, max_weighted_count, D_scaled, scaled_table_w)
-    max_d_count = max(D_count) if D_count else 0
 
     # T search budget: sized from the same constraint-volume metric that guards
     # against Z3 blowing up. A flat budget crashed Z3 with an out-of-memory error
