@@ -6,7 +6,8 @@ from math import ceil
 from collections import deque, Counter
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from z3 import Int, And, Or, Not, Implies, Sum, If, Solver, Optimize, Bool, sat, unknown
+from z3 import (Int, And, Or, Not, Implies, Sum, If, Solver, Optimize, Bool, sat, unknown,
+                main_ctx)
 
 app = Flask(__name__)
 CORS(app)
@@ -40,6 +41,88 @@ def _set_progress(**kwargs):
 def _clear_progress():
     with _progress_lock:
         _progress.update({"phase": None, "T": None, "T_min": None, "T_max": None, "started_at": None})
+
+
+# ---------------------------------------------------------------------------
+# Cancellation (2026-07-30). A workshop participant who changes their mind while
+# a multi-minute solve is running should not have to wait it out — and, more importantly,
+# their next choice should not queue behind a solve nobody wants any more, since
+# _solve_lock serializes everything.
+#
+# /cancel must never take _solve_lock (the doomed solve is holding it), so it
+# reaches the running solve two ways, and both are needed:
+#   1. main_ctx().interrupt() — makes the check() currently executing inside Z3
+#      give up and return unknown. Without this, a cancel during a long check
+#      would not be noticed until that check finished, which is the whole wait.
+#   2. _cancel_gen — polled between Z3 calls. Covers the gaps the interrupt
+#      cannot reach: phase 1's T-increment loop, and the handover to phase 2.
+#
+# Generation-stamped so a cancel that lands just as its solve finishes cannot
+# carry over and kill the next request queued behind it.
+# ---------------------------------------------------------------------------
+_cancel_lock = threading.Lock()
+_solve_gen = 0        # bumped when a solve starts; identifies "the current solve"
+_cancel_gen = -1      # the generation a client asked to abandon
+_in_check = False     # True only while Z3 is inside a check() call
+_solve_running = False
+_solve_client_id = None   # the clientRequestId of the solve currently running
+
+
+class SolveCancelled(Exception):
+    """Raised on the solve thread once the client has abandoned this request."""
+
+
+def _begin_solve(client_id=None):
+    global _solve_gen, _solve_running, _solve_client_id
+    with _cancel_lock:
+        _solve_gen += 1
+        _solve_running = True
+        _solve_client_id = client_id
+        return _solve_gen
+
+
+def _end_solve():
+    global _solve_running, _solve_client_id
+    with _cancel_lock:
+        _solve_running = False
+        _solve_client_id = None
+
+
+def _check_cancelled():
+    """Bail out if this solve has been cancelled. Safe to call anywhere on the
+    solve thread: _solve_lock guarantees only one solve exists at a time, so
+    'the current generation' is unambiguous."""
+    with _cancel_lock:
+        cancelled = _cancel_gen == _solve_gen
+    if cancelled:
+        raise SolveCancelled()
+
+
+def _guarded_check(fn):
+    """Run a Z3 check, flagging to /cancel that an interrupt would land on
+    something. Interrupting while no check is running would leave the context's
+    cancel flag set with nothing to consume it — see _drain_interrupt."""
+    global _in_check
+    with _cancel_lock:
+        _in_check = True
+    try:
+        return fn()
+    finally:
+        with _cancel_lock:
+            _in_check = False
+
+
+def _drain_interrupt():
+    """Absorb a stray interrupt before starting a solve.
+
+    /cancel decides to interrupt and then calls into Z3; if the running check
+    finishes in between, the cancel flag stays set on the context and would kill
+    the first check of the NEXT solve, which would surface as a bogus timeout.
+    A throwaway check on an empty solver consumes it in microseconds."""
+    try:
+        Solver().check()
+    except Exception:
+        pass
 
 
 SCALE = 100  # multiply all dB values by 100 and round to int for Z3 integer arithmetic
@@ -366,6 +449,8 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
     T_current = T_lower
 
     for _ in range(T_lower, T_hard_cap + 1):
+        # Between checks the interrupt has nothing to land on, so poll instead.
+        _check_cancelled()
         _set_progress(phase="phase1", T=T_current, T_min=T_lower, T_max=T_hard_cap, started_at=time.monotonic())
 
         # Assumption booleans — same names reused safely because the Implies
@@ -376,10 +461,14 @@ def find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, 
         for i in range(N):
             s.add(Implies(end_asms[i], L[i][T_current - 1] == end_positions[i]))
 
-        result = s.check(*end_asms)
+        result = _guarded_check(lambda: s.check(*end_asms))
 
         if str(result) == "unknown":
             s.pop()
+            # An interrupt also surfaces as unknown, so ask before blaming the
+            # clock — reporting a cancel as a timeout would send the dashboard
+            # off to retry at reduced demand for a solve nobody is waiting on.
+            _check_cancelled()
             return {
                 "status": "unsat", "reason": "timeout",
                 "detail": (
@@ -735,8 +824,12 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     if objective_terms:
         opt.minimize(Sum(objective_terms))
 
-    check_result = opt.check()
+    # Building the phase-2 encoding above is itself slow at large N; check before
+    # committing to the search rather than after.
+    _check_cancelled()
+    check_result = _guarded_check(opt.check)
     if check_result != sat:
+        _check_cancelled()   # an interrupt reads as unknown; don't call it a timeout
         # Distinguish a timed-out search (unknown — Z3 ran out of the SOLVE_TIMEOUT_MS
         # budget without an answer) from a genuine unsat (which "should not happen":
         # phase-1 already confirmed sat at this T, ignoring objectives/weights).
@@ -783,11 +876,55 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
 @app.route("/solve", methods=["POST"])
 def solve():
     with _solve_lock:
+        body = request.get_json(silent=True) or {}
         _clear_progress()
+        _drain_interrupt()
+        gen = _begin_solve(body.get("clientRequestId"))
         try:
             return _solve_impl()
+        except SolveCancelled:
+            # 200, not an error status: the client asked for this. It has usually
+            # dropped the connection by now, but bench scripts and curl still get
+            # a straight answer instead of a stack trace.
+            return jsonify({
+                "status": "cancelled", "reason": "cancelled", "generation": gen,
+                "detail": "Solve cancelled at the client's request",
+            })
         finally:
+            _end_solve()
             _clear_progress()
+
+
+@app.route("/cancel", methods=["POST"])
+def cancel():
+    """Abandon the solve currently running. Deliberately outside _solve_lock —
+    that lock is held by the very solve being cancelled, so waiting for it would
+    deadlock until the solve finished, which is exactly what this avoids.
+
+    Optional body {"clientRequestId": "..."} names the solve the caller means to
+    stop. This matters: the client fires /cancel and then sends its replacement
+    /solve, and if the doomed solve happens to finish in between, an unqualified
+    cancel would land on the innocent replacement instead. With an id, a mismatch
+    is simply refused."""
+    global _cancel_gen
+    want = (request.get_json(silent=True) or {}).get("clientRequestId")
+    with _cancel_lock:
+        if not _solve_running:
+            return jsonify({"cancelled": False, "detail": "no solve in flight"})
+        if want is not None and _solve_client_id is not None and want != _solve_client_id:
+            return jsonify({"cancelled": False,
+                            "detail": "the solve now running is a different request"})
+        if _cancel_gen == _solve_gen:
+            return jsonify({"cancelled": True, "generation": _solve_gen,
+                            "detail": "already cancelled; it is unwinding"})
+        _cancel_gen = _solve_gen
+        gen, interrupt_now = _solve_gen, _in_check
+    # Only interrupt if Z3 is actually inside a check. Otherwise the flag would
+    # sit on the context unconsumed; the _check_cancelled() polls will catch this
+    # one at the next gap, and _drain_interrupt clears up any that slips through.
+    if interrupt_now:
+        main_ctx().interrupt()
+    return jsonify({"cancelled": True, "generation": gen})
 
 
 @app.route("/progress", methods=["GET"])
@@ -942,6 +1079,8 @@ def _solve_impl():
     try:
         result = find_min_T(N, M, D, U, adjacency, start_positions, end_positions, baseline, aircraft_dB,
                             multipliers=aircraft_multipliers)
+    except SolveCancelled:
+        raise   # not an error — must reach solve()'s handler, not become a 500
     except OSError as e:
         return jsonify({
             "error": f"Z3 internal error during phase-1 solve (N={N} may be too large for the dB solver): {e}"
@@ -1011,6 +1150,8 @@ def _solve_impl():
             aircraft_multipliers,
             baseline, aircraft_dB
         )
+    except SolveCancelled:
+        raise   # not an error — must reach solve()'s handler, not become a 500
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except OSError as e:
