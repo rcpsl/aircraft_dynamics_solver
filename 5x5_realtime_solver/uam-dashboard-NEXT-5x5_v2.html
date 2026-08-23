@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UAM Fairness Dashboard — 5×5</title>
+<style>
+  :root{
+    --ink:#1f2430; --muted:#6b7280; --line:#e2e5ea; --bg:#f6f7f9; --panel:#ffffff;
+    --quiet:#3f7d4e; --moderate:#c8892a; --loud:#c0453e;
+    --accent:#2563eb; --heat:#e2701d; --cyo:#4338ca; --cyo-bg:#e0e7ff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
+  header{background:#fff;border-bottom:1px solid var(--line);padding:8px 16px;display:flex;align-items:center;gap:12px;flex:0 0 auto;}
+  header h1{font-size:15px;font-weight:650;}
+  header .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:2px 8px;}
+  header .spacer{flex:1;}
+  header label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  header input{width:52px;border:1px solid var(--line);border-radius:6px;padding:3px 6px;font-size:13px;text-align:center;}
+  .btn{font-size:12px;border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 10px;cursor:pointer;}
+  .btn:hover{border-color:#b9bec7;}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .goal{flex:0 0 auto;background:#eef4ff;border-bottom:1px solid var(--line);padding:6px 16px;font-size:12.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .goal strong{font-weight:650;}
+  .chip{font-size:11px;background:#fff;border:1px solid var(--line);border-radius:99px;padding:2px 9px;color:var(--muted);white-space:nowrap;}
+  main{flex:1 1 auto;display:flex;min-height:0;}
+  /* left rail */
+  .rail{flex:0 0 252px;background:var(--panel);border-right:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
+  .rail h2{font-size:12px;font-weight:650;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
+  .plist{display:flex;flex-direction:column;gap:5px;}
+  .pbtn{text-align:left;font-size:13px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;cursor:pointer;}
+  .pbtn.active{border-color:var(--accent);background:#eef4ff;font-weight:600;}
+  .rulebox{font-size:12px;background:#f8f9fb;border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:7px;}
+  .rulebox .note{color:var(--muted);line-height:1.45;}
+  .seg{display:flex;border:1px solid var(--line);border-radius:7px;}
+  .seg button:first-child{border-radius:6px 0 0 6px;}
+  .seg button:last-child{border-radius:0 6px 6px 0;}
+  .seg button{flex:1;font-size:12px;padding:5px 0;background:#fff;border:none;cursor:pointer;}
+  .seg button.on{background:var(--accent);color:#fff;}
+  /* The metric selector lives above each map, not in the rail: it drives that map's
+     colour and its fairness comparison, and in compare mode the rail is hidden, so a
+     rail-only control left side B unreachable. */
+  .metricbar{display:flex;align-items:center;gap:8px;flex:0 0 auto;background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:11px;color:var(--muted);}
+  .metricbar strong{color:var(--ink);font-size:11.5px;white-space:nowrap;}
+  .metricbar .seg{flex:1;max-width:520px;}
+  .metricbar .seg button{padding:5px 7px;}
+  .metricbar .assumption{margin-left:auto;font-size:10.5px;white-space:nowrap;}
+  .mrow{display:flex;flex-direction:column;gap:4px;font-size:12px;}
+  .mrow span.lbl{color:var(--muted);}
+  /* Proportional factor ranking (styling adopted from the upstream ranking prototype) */
+  .proprank{display:flex;flex-direction:column;gap:5px;}
+  .proprow{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:6px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 6px;}
+  .proprow:first-child{border-color:#8aa5e8;box-shadow:inset 3px 0 0 var(--accent);}
+  .proprow.prop-excluded{margin-top:3px;background:#f8f9fb;border-style:dashed;color:var(--muted);box-shadow:none;}
+  .propnum{display:flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:50%;background:#eef4ff;color:#1e3a8a;font-weight:650;}
+  .prop-excluded .propnum{background:#fff;color:var(--muted);border:1px solid var(--line);}
+  .propname{font-weight:600;line-height:1.15;}
+  .propactions{display:flex;align-items:center;gap:3px;}
+  .propactions button{width:25px;height:25px;border:1px solid var(--line);border-radius:5px;background:#fff;cursor:pointer;color:var(--ink);}
+  .propactions button:disabled{opacity:.28;cursor:default;}
+  .propswitch{display:inline-flex;align-items:center;margin-left:2px;cursor:pointer;}
+  .propswitch input{appearance:none;width:32px;height:19px;margin:0;border:1px solid #9aa3b2;border-radius:99px;background:#9aa3b2;position:relative;cursor:pointer;}
+  .propswitch input:after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s ease;}
+  .propswitch input:checked{background:var(--accent);border-color:var(--accent);}
+  .propswitch input:checked:after{transform:translateX(13px);}
+  .propswitch input:focus-visible{outline:3px solid rgba(37,99,235,.22);outline-offset:2px;}
+  .propexcludedlabel{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;}
+  .proporder{font-size:10.5px;color:var(--muted);line-height:1.35;margin-top:5px;}
+  /* All three noise outcomes on every tile, with the one driving the map bolded */
+  .tilemetrics{display:grid;gap:0;margin-top:2px;font-variant-numeric:tabular-nums;}
+  .tilemetric{display:flex;align-items:baseline;justify-content:space-between;gap:4px;font-size:9.5px;line-height:1.08;}
+  .tilemetric .mk{color:var(--muted);white-space:nowrap;}
+  .tilemetric .mv{color:var(--ink);font-weight:650;text-align:right;white-space:nowrap;}
+  .tilemetric .metricdelta{font-size:8.5px;color:var(--muted);font-weight:600;}
+  .tilemetric.active .mk,.tilemetric.active .mv{color:#9a3412;font-weight:700;}
+  .tilemetric.active .metricdelta{color:#9a3412;}
+  .hovermark{align-self:flex-start;margin-top:2px;border:1px dashed #7c3aed;border-radius:99px;padding:1px 4px;background:#f5f3ff;color:#5b21b6;font-size:9px;font-weight:700;line-height:1.15;}
+  .rank .hoversummary{color:#5b21b6;font-weight:700;}
+  .protchips{display:flex;flex-wrap:wrap;gap:4px;}
+  .protchips .chip{background:#fef3c7;border-color:#f0d48a;color:#92600a;cursor:pointer;}
+  /* map area */
+  .maparea{flex:1 1 auto;display:flex;min-width:0;position:relative;}
+  .side{flex:1 1 0;display:flex;flex-direction:column;min-width:0;padding:10px 12px;gap:8px;}
+  .side + .side{border-left:1px solid var(--line);}
+  .sidehead{display:none;gap:6px;align-items:center;font-size:12px;flex-wrap:wrap;}
+  .compare .sidehead{display:flex;}
+  .sidehead select{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:3px 5px;background:#fff;}
+  .stats{display:flex;gap:8px;flex:0 0 auto;padding-bottom:10px;border-bottom:2px solid var(--line);}
+  .stat{flex:1;background:#fff;border:1px solid var(--line);border-radius:9px;padding:7px 10px;min-width:0;}
+  .stat .k{font-size:10.5px;color:var(--muted);line-height:1.3;}
+  .stat .v{font-size:16px;font-weight:650;margin-top:2px;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+  .stat .delta{font-size:11px;font-weight:600;}
+  .delta.down{color:var(--loud);} .delta.up{color:var(--loud);} .delta.good{color:var(--quiet);}
+  .stat .note{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.3;}
+  .gridwrap{flex:1 1 auto;min-height:0;position:relative;}
+  .grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:6px;}
+  /* 2026-07-28 session: total-noise color stripe removed from the left edge —
+     one color system per map (tile fill = added noise). Names bigger. */
+  .tile{position:relative;background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 7px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;min-width:0;overflow:hidden;}
+  .tile:hover{border-color:#a9b0bb;}
+  .tile.cyo{border:2px dashed var(--cyo);background:var(--cyo-bg);}
+  .tile.cyo .nm{color:#312e81;}
+  .tile.vp{border:2px solid var(--accent);}
+  .tile.vp .nm{padding-right:78px;}
+  .tile.vp::after{content:"✈ Vertiport";position:absolute;top:5px;right:6px;font-size:10px;font-weight:600;background:var(--accent);color:#fff;border-radius:99px;padding:2px 8px;}
+  .tile.protected{outline:2px solid #d97706;outline-offset:-2px;}
+  .tile .nm{font-size:13px;font-weight:600;line-height:1.25;padding-right:4px;}
+  .tile .band{font-size:10px;color:var(--muted);}
+  .tile .ba{font-size:11.5px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;}
+  .tile .chg{font-size:14px;font-weight:700;align-self:flex-end;}
+  .tile .chg.zero{color:var(--muted);font-weight:500;}
+  .tile .star{position:absolute;bottom:5px;left:7px;font-size:11px;color:#d97706;}
+  svg.paths{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+  svg.paths path.corr{stroke:#334155;stroke-opacity:.35;stroke-width:2;stroke-dasharray:6 5;fill:none;}
+  .legend{flex:0 0 auto;display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted);}
+  .legend .ramp{width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,#fff, #f7c495, var(--heat));border:1px solid var(--line);}
+  /* details drawer */
+  .drawer{position:absolute;top:0;right:0;bottom:0;width:270px;background:#fff;border-left:1px solid var(--line);box-shadow:-6px 0 18px rgba(15,23,42,.08);padding:12px 14px;overflow-y:auto;z-index:30;display:none;}
+  .drawer.open{display:block;}
+  .drawer h3{font-size:14px;font-weight:650;margin-bottom:2px;padding-right:20px;}
+  .drawer .sub{font-size:11px;color:var(--muted);margin-bottom:8px;}
+  .drawer .close{position:absolute;top:8px;right:10px;border:none;background:none;font-size:15px;cursor:pointer;color:var(--muted);}
+  .attrs{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;font-size:12px;margin-bottom:10px;}
+  .attrs .a{background:#f8f9fb;border-radius:6px;padding:5px 7px;}
+  .attrs .a .k{font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);}
+  .attrs .a .v{font-weight:600;font-size:12px;}
+  .drawer .actions{display:flex;flex-direction:column;gap:6px;}
+  .noisebar{font-size:12px;background:#fff7ed;border:1px solid #f0d9bd;border-radius:8px;padding:7px 9px;margin-bottom:10px;line-height:1.45;}
+  /* cyo form */
+  .cform{display:grid;grid-template-columns:1fr;gap:7px;font-size:12px;}
+  .cform label{display:flex;flex-direction:column;gap:3px;}
+  .cform span{color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;}
+  .cform input,.cform select{border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:12.5px;background:#fff;}
+  .warn{font-size:11px;color:#92600a;background:#fef3c7;border-radius:6px;padding:5px 8px;display:none;}
+  /* 2026-07-28 session: measurement descriptions live in a bigger hover, not on the rail */
+  [data-hint]{position:relative;}
+  [data-hint]:is(:hover,:focus)::after{content:attr(data-hint);position:absolute;left:0;top:calc(100% + 5px);z-index:60;width:max-content;max-width:190px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-size:12px;font-weight:400;line-height:1.35;text-align:left;white-space:normal;box-shadow:0 6px 16px rgba(15,23,42,.14);pointer-events:none;}
+  /* right-side seg buttons anchor their hover to the right so it stays inside the rail */
+  .seg [data-hint]:last-child:is(:hover,:focus)::after{left:auto;right:0;}
+  /* 2026-07-28 session: burden ranking strip above the map */
+  .rank{flex:0 0 auto;font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 10px;}
+  .rank strong{color:var(--ink);font-weight:600;}
+  /* 2026-07-28 session: compare hides the left rail for a bigger map */
+  main.hiderail .rail{display:none;}
+  .quickstart{font-size:11.5px;line-height:1.45;color:#334155;background:#f0f7ff;border:1px solid #bfd5f5;border-radius:9px;padding:8px 9px;}
+  .quickstart strong{color:#1e3a8a;}
+  .savedchips{display:flex;flex-direction:column;gap:5px;font-size:11.5px;}
+  .savedrow{display:flex;align-items:stretch;gap:4px;}
+  .savedsetup{flex:1;text-align:left;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#334155;padding:5px 7px;cursor:pointer;font:inherit;line-height:1.3;}
+  .savedsetup:hover{border-color:var(--accent);background:#eef4ff;}
+  .unsave{flex:0 0 27px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--muted);cursor:pointer;}
+  .emptysaved{font-size:11px;color:var(--muted);line-height:1.35;}
+  .comparebar{display:none;position:absolute;z-index:24;top:8px;left:12px;right:12px;height:52px;align-items:center;gap:7px;padding:6px 8px;background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:0 4px 12px rgba(15,23,42,.08);overflow-x:auto;}
+  .comparebar .barlabel{position:sticky;left:0;z-index:2;align-self:stretch;display:flex;align-items:center;background:#fff;font-size:11px;font-weight:650;color:var(--muted);padding-right:4px;white-space:nowrap;}
+  .comparebar .savedcard{display:flex;align-items:center;gap:4px;flex:0 0 auto;border:1px solid #cbd5e1;border-radius:7px;padding:4px 6px;background:#f8fafc;font-size:11px;white-space:nowrap;}
+  .comparebar .loadside{border:1px solid #b9c6d8;border-radius:5px;background:#fff;color:#1e3a8a;font-size:10.5px;font-weight:650;padding:3px 5px;cursor:pointer;}
+  .comparebar .loadside:hover{background:#dbeafe;border-color:var(--accent);}
+  .maparea.compare .comparebar{display:flex;}
+  .maparea.compare .side{padding-top:70px;}
+  /* 2026-07-29 session (Whit + Jeff): admin set-up page — demand per vertiport
+     pair and the vertiport noise assumption, set before the workshop */
+  .adminwrap{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:90;display:none;align-items:center;justify-content:center;}
+  .adminwrap.open{display:flex;}
+  .admin{background:#fff;border-radius:12px;box-shadow:0 18px 50px rgba(15,23,42,.25);width:380px;max-height:86vh;overflow-y:auto;padding:16px 18px;position:relative;}
+  .admin h3{font-size:15px;font-weight:650;}
+  .admin .sub{font-size:11.5px;color:var(--muted);margin:2px 0 12px;}
+  .admin h4{font-size:11px;font-weight:650;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:12px 0 6px;}
+  .admin .arow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;}
+  .admin .arow input{width:64px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:13px;text-align:center;}
+  .admin .arow select{border:1px solid var(--line);border-radius:6px;padding:4px 5px;font-size:12px;background:#fff;}
+  .admin .unit{font-size:11px;color:var(--muted);margin-left:4px;}
+  .admin .anote{font-size:11px;color:var(--muted);line-height:1.4;margin-top:2px;}
+  .admin .close{position:absolute;top:10px;right:12px;border:none;background:none;font-size:15px;cursor:pointer;color:var(--muted);}
+  .admin .apply{margin-top:14px;width:100%;}
+  .protectwrap{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:95;display:none;align-items:center;justify-content:center;}
+  .protectwrap.open{display:flex;}
+  .protectpanel{position:relative;width:520px;max-width:92vw;max-height:82vh;overflow-y:auto;background:#fff;border-radius:12px;box-shadow:0 18px 50px rgba(15,23,42,.25);padding:16px 18px;}
+  .protectpanel h3{font-size:15px;font-weight:650;margin-bottom:10px;}
+  .protectpanel .close{position:absolute;top:10px;right:12px;border:none;background:none;font-size:15px;cursor:pointer;color:var(--muted);}
+  .protectlist{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:12px;}
+  .protectoption{display:flex;align-items:flex-start;gap:7px;border:1px solid var(--line);border-radius:7px;padding:7px 8px;font-size:12px;line-height:1.25;cursor:pointer;}
+  .protectoption:has(input:checked){border-color:#d97706;background:#fffbeb;}
+  .protectoption:has(input:disabled){opacity:.5;cursor:default;}
+  /* 2026-07-30 session: live solver status + the gate that blocks solving while
+     create-your-own slots are still empty */
+  #solveStatus{background:#eef4ff;border-color:#c7d8fb;color:#1d4ed8;}
+  #solveStatus.busy{background:#fef3c7;border-color:#f0d48a;color:#92600a;}
+  #stopSolveBtn{background:#fef2f2;border-color:#f6c9c6;color:#912f2a;cursor:pointer;font:inherit;}
+  #stopSolveBtn:hover{background:#fee2e2;}
+  .gate{flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .gate .card{max-width:420px;background:#fff;border:1px solid #f0d48a;background:#fffbeb;
+    border-radius:12px;padding:16px 18px;font-size:13px;line-height:1.5;}
+  .gate .card h3{font-size:14px;font-weight:650;margin-bottom:6px;}
+  .gate .card ul{margin:8px 0 0 18px;color:var(--muted);}
+  /* 2026-07-30: these messages are several sentences by necessity — a phase-2
+     timeout has to explain that the routing on screen is NOT the weighted one.
+     Printed in full they took half the panel and pushed the map off screen, so
+     only the opening clause shows until the reader asks for the rest. */
+  .solveerr,.solvewarn{font-size:11.5px;border-radius:8px;padding:6px 9px;margin-bottom:6px;line-height:1.4;}
+  .solveerr{background:#fef2f2;border:1px solid #f6c9c6;color:#912f2a;}
+  .solvewarn{background:#fef3c7;border:1px solid #f0d48a;color:#92600a;}
+  details.solveerr>summary,details.solvewarn>summary{cursor:pointer;list-style:none;}
+  details.solveerr>summary::-webkit-details-marker,
+  details.solvewarn>summary::-webkit-details-marker{display:none;}
+  details.solveerr>summary::after,details.solvewarn>summary::after{content:' more ▾';opacity:.65;}
+  details[open].solveerr>summary::after,details[open].solvewarn>summary::after{content:' less ▴';}
+  .solveerr .more,.solvewarn .more{margin-top:5px;max-height:110px;overflow-y:auto;}
+</style>
+</head>
+<body>
+<header>
+  <h1>UAM Fairness Dashboard</h1>
+  <span class="spacer"></span>
+  <label>Group <input id="group" maxlength="3" value="A"></label>
+  <button class="btn" id="adminBtn" title="Scenario assumptions and optional community prefills">Facilitator set-up</button>
+  <button class="btn" id="exitCompareBtn" style="display:none">Exit compare</button>
+</header>
+
+<div class="goal">
+  <strong>Your group's goal:</strong> find the fairest routing while serving as many riders as possible.
+  <span class="chip">Three routes, flights both directions</span>
+  <span class="chip">The solver picks the flight paths</span>
+  <span class="chip" id="demandChip" title="This is a scenario assumption. The facilitator can change it in Facilitator set-up.">Scenario demand: 8 aircraft aloft per direction · facilitator setting</span>
+  <span class="chip" id="solveStatus" style="display:none"></span>
+  <button class="chip" id="stopSolveBtn" style="display:none"
+    title="Abandon this solve. The solver stops work on it too, so the next choice starts straight away.">■ Stop solving</button>
+</div>
+
+<!-- 2026-07-29 session (Whit + Jeff): admin set-up. Demand is one number per
+     vertiport pair, per direction — see the ADMIN block for what it means.
+     Vertiport noise is added AFTER solving, not inside the solver. -->
+<div class="adminwrap" id="adminwrap">
+  <div class="admin">
+    <button class="close" id="adminClose">✕</button>
+    <h3>Facilitator set-up</h3>
+    <div class="sub">Set the workshop scenario before participants begin. These assumptions remain editable.</div>
+    <h4>Demand: aircraft in the air on each corridor, per direction</h4>
+    <div class="arow"><span>Downtown ↔ Airport</span><span><input id="ad_d0" type="number" min="1" max="12" value="4"></span></div>
+    <div class="arow"><span>Commuter Town ↔ Downtown</span><span><input id="ad_d1" type="number" min="1" max="12" value="2"></span></div>
+    <div class="arow"><span>Commuter Town ↔ Airport</span><span><input id="ad_d2" type="number" min="1" max="12" value="2"></span></div>
+    <div class="anote">A count, not a rate — how many aircraft are aloft on that corridor at
+      one time, each way. This is what the noise model needs: two aircraft over a tile at
+      the same moment is what raises its level, and it avoids inventing a trip-duration
+      figure to convert flights-per-hour into a count. Bigger counts slow the solve.</div>
+    <div class="arow"><span>How flights are sent</span><span><select id="ad_streams">
+      <option value="individual">Each flight on its own</option>
+      <option value="split">Grouped into 1/3 + 2/3 streams</option>
+    </select></span></div>
+    <div class="anote" id="ad_streamnote"></div>
+    <h4>Noise assumptions</h4>
+    <div class="arow"><span>Aircraft in flight</span><span><input id="ad_ac" type="number" min="30" max="90" value="45"><span class="unit">dB</span></span></div>
+    <div class="arow"><span>Vertiport takeoff and landing</span><span><input id="ad_vp" type="number" min="0" max="90" value="65"><span class="unit">dB</span></span></div>
+    <h4>Create your own: facilitator prefill</h4>
+    <div class="arow"><span>Slot 1</span><span><select id="ad_cp0"><option value="">Population</option><option>Low</option><option>Medium</option><option>High</option></select> <select id="ad_cn0"><option value="">Noise</option><option value="45">45 dB</option><option value="55">55 dB</option><option value="65">65 dB</option></select></span></div>
+    <div class="arow"><span>Slot 2</span><span><select id="ad_cp1"><option value="">Population</option><option>Low</option><option>Medium</option><option>High</option></select> <select id="ad_cn1"><option value="">Noise</option><option value="45">45 dB</option><option value="55">55 dB</option><option value="65">65 dB</option></select></span></div>
+    <div class="arow"><span>Slot 3</span><span><select id="ad_cp2"><option value="">Population</option><option>Low</option><option>Medium</option><option>High</option></select> <select id="ad_cn2"><option value="">Noise</option><option value="45">45 dB</option><option value="55">55 dB</option><option value="65">65 dB</option></select></span></div>
+    <div class="arow"><span>Slot 4</span><span><select id="ad_cp3"><option value="">Population</option><option>Low</option><option>Medium</option><option>High</option></select> <select id="ad_cn3"><option value="">Noise</option><option value="45">45 dB</option><option value="55">55 dB</option><option value="65">65 dB</option></select></span></div>
+    <div class="anote">Optional: prefill the solver inputs before the activity. Participants can complete, edit, or reset these communities from the map.</div>
+    <h4>Solver</h4>
+    <div class="arow"><span>Use the real solver</span><span><select id="ad_use"><option value="1">Yes</option><option value="0">No — offline estimate</option></select></span></div>
+    <div class="arow"><span>Address</span><span><input id="ad_url" type="text" style="width:160px" value="http://127.0.0.1:5051"></span></div>
+    <div class="anote">Start it first with <strong>python solver_server_dB.py</strong> — it listens on
+      port 5051. If it is not running the map falls back to a rough offline estimate and says so;
+      the offline numbers are not the solver's.</div>
+    <div class="arow"><span>Extra time steps</span><span><input id="ad_slack" type="number" min="0" max="2" value="1"></span></div>
+    <div class="anote">Extra time steps let aircraft wait instead of all crossing at once, which
+      lowers the loudest moment. Measured on this map: 0 extra gave a +6.99 dB peak, 1 extra
+      gave +4.77 dB, and 2 extra changed nothing while tripling the wait. Leave this at 1.
+      Each step costs roughly 2–5× the solve time, and at 3 the solver ran out its whole
+      budget and returned no answer at all — which is why 2 is the maximum here.</div>
+    <div class="arow"><span>Give up after</span><span><input id="ad_timeout" type="number" min="1" max="30" value="10"><span class="unit">min</span></span></div>
+    <div class="anote">How long each of the solver's two phases may search. Running out is worse
+      than waiting: the map then shows a plain feasible route that ignores the group's fairness
+      choices, labelled with a warning. Raised from 4 to 10 minutes for that reason — you can
+      always press <strong>Stop solving</strong> if a wait is not worth it. A whole solve can
+      take up to twice this.</div>
+    <button class="btn primary apply" id="adminApply">Apply</button>
+  </div>
+</div>
+
+<div class="protectwrap" id="protectwrap">
+  <div class="protectpanel" role="dialog" aria-modal="true" aria-labelledby="protectTitle">
+    <button class="close" id="protectClose" aria-label="Close">✕</button>
+    <h3 id="protectTitle">Choose up to 3 communities to protect</h3>
+    <div class="protectlist" id="protectList"></div>
+    <button class="btn primary" id="protectDone">Done</button>
+  </div>
+</div>
+
+<main id="main">
+  <div class="rail">
+    <div class="quickstart">Hover over a choice for details. Click a community to view or protect it.</div>
+    <div>
+      <h2>Choose a fairness principle</h2>
+      <div class="plist" id="plist"></div>
+    </div>
+    <div class="rulebox" id="rulebox"></div>
+    <!-- 2026-07-28 session: clearer question wording ported from the workshop
+         dashboard; descriptions moved into a bigger hover -->
+    <div>
+      <h2>Measurement</h2>
+      <div class="mrow"><span class="lbl"><strong>Who counts?</strong></span>
+        <div class="seg" id="whoSeg">
+          <button data-v="communities" class="on" data-hint="Every community counts the same.">Communities</button>
+          <button data-v="people" data-hint="Bigger communities count more.">People</button>
+        </div>
+      </div>
+    </div>
+    <!-- Saved set-ups stay available as navigation shortcuts and appear first
+         in compare mode, before the manual controls for sides A and B. -->
+    <div>
+      <h2>Saved set-ups</h2>
+      <div class="savedchips" id="savedchips"></div>
+      <button class="btn" id="saveBtn" style="margin-top:6px;width:100%">Save this set-up</button>
+      <button class="btn" id="compareBtn" style="margin-top:6px;width:100%">Compare side by side</button>
+    </div>
+  </div>
+
+  <div class="maparea" id="maparea">
+    <div class="comparebar" id="comparebar" aria-label="Saved set-ups for comparison"></div>
+    <div class="side" id="side0">
+      <div class="sidehead" data-side="0"></div>
+      <div class="metricbar" data-metricbar="0"></div>
+      <div class="stats" data-stats="0"></div>
+      <div class="rank" data-rank="0"></div>
+      <div class="gridwrap"><div class="grid" data-grid="0"></div><svg class="paths" data-svg="0" preserveAspectRatio="none"></svg></div>
+      <div class="legend" data-legend="0"><span>Cumulative noise:</span><span>lower</span><span class="ramp"></span><span>higher</span></div>
+    </div>
+    <div class="side" id="side1" style="display:none">
+      <div class="sidehead" data-side="1"></div>
+      <div class="metricbar" data-metricbar="1"></div>
+      <div class="stats" data-stats="1"></div>
+      <div class="rank" data-rank="1"></div>
+      <div class="gridwrap"><div class="grid" data-grid="1"></div><svg class="paths" data-svg="1" preserveAspectRatio="none"></svg></div>
+      <div class="legend" data-legend="1"><span>Cumulative noise:</span><span>lower</span><span class="ramp"></span><span>higher</span></div>
+    </div>
+    <div class="drawer" id="drawer"></div>
+  </div>
+</main>
+
+
+<script>
+// ---------------------------------------------------------------------------
+// Data: the fixed 5×5 roster (canonical source: the communities spreadsheet)
+// col 0-4 = A-E, row 0-4 = 1-5
+// ---------------------------------------------------------------------------
+const BANDS = {45:'Quiet', 55:'Moderate', 65:'Loud'};
+const POPW = {Low:1, Medium:2, High:3};
+function C(name, base, col, row, attrs, flags={}){
+  return Object.assign({name, base, col, row, attrs, cyo:false, vp:null}, flags);
+}
+const COMMUNITIES = [
+  C('Rural-Suburban Outskirts',45,0,0,{Population:'Medium',Income:'Medium',Race:'Mixed','Life stage':'Families',Housing:'Owners',Transport:'Some',Employment:'Few local jobs','Land use':'Residential',Landmarks:'Schools, Parks'}),
+  C('Suburban Tech Campus',55,1,0,{Population:'Low',Income:'High',Race:'Mixed','Life stage':'Younger adults',Housing:'Renters',Transport:'Some',Employment:'Hub','Land use':'Commercial',Landmarks:'Business'}),
+  {name:'Create Your Own 1', cyo:true, col:2,row:0, base:null, attrs:null, vp:null, slotNote:'open slot'},
+  C('University',55,3,0,{Population:'High',Income:'Low',Race:'Mixed','Life stage':'Younger adults',Housing:'Renters',Transport:'Oasis',Employment:'Hub','Land use':'Mixed',Landmarks:'University, Hospital'}),
+  C('Exurban Commuter Town',45,4,0,{Population:'Medium',Income:'Medium',Race:'Mixed','Life stage':'Families',Housing:'Owners',Transport:'Desert',Employment:'Few local jobs','Land use':'Residential',Landmarks:'Schools, Parks'},{vp:'Community'}),
+  C('Quiet Rural Low-Income Community',45,0,1,{Population:'Low',Income:'Low',Race:'Mixed','Life stage':'Families',Housing:'Mixed',Transport:'Desert',Employment:'Few local jobs','Land use':'Residential',Landmarks:'Schools'}),
+  C('Affluent Suburban Neighborhood',45,1,1,{Population:'Medium',Income:'High',Race:'Mostly white','Life stage':'Families',Housing:'Owners',Transport:'Oasis',Employment:'Few local jobs','Land use':'Residential',Landmarks:'Schools, Parks'}),
+  C('Working-Class Homeowner Neighborhood',45,2,1,{Population:'Medium',Income:'Low',Race:'Mostly Hispanic','Life stage':'Families',Housing:'Owners',Transport:'Some',Employment:'Balance','Land use':'Residential',Landmarks:'Schools'}),
+  {name:'Create Your Own 2', cyo:true, col:3,row:1, base:null, attrs:null, vp:null, slotNote:'on flight path'},
+  C('Greenbelt Edge',45,4,1,{Population:'Low',Income:'Medium',Race:'Mixed','Life stage':'Mixed ages',Housing:'Owners',Transport:'Desert',Employment:'Few local jobs','Land use':'Residential',Landmarks:'Park / nature preserve'}),
+  C('Airport',65,0,2,{Population:'Medium',Income:'Low',Race:'Mixed','Life stage':'Mixed',Housing:'Renters',Transport:'Some',Employment:'Hub','Land use':'Industrial',Landmarks:'Airport'},{vp:'Airport'}),
+  {name:'Create Your Own 3', cyo:true, col:1,row:2, base:null, attrs:null, vp:null, slotNote:'on flight path'},
+  C('Popular Urban Residence with Shops',55,2,2,{Population:'Medium',Income:'High',Race:'Mostly white','Life stage':'Mixed ages',Housing:'Mixed',Transport:'Oasis',Employment:'Balance','Land use':'Mixed',Landmarks:'Retail, Entertainment'}),
+  C('Lower-Income Urban Neighborhood',45,3,2,{Population:'High',Income:'Low',Race:'Mostly Hispanic','Life stage':'Families',Housing:'Mixed',Transport:'Desert',Employment:'Few local jobs','Land use':'Residential',Landmarks:'Schools, Parks'}),
+  C('International District',55,4,2,{Population:'Medium',Income:'Medium',Race:'Mostly Asian','Life stage':'Families',Housing:'Mixed',Transport:'Some',Employment:'Balance','Land use':'Mixed',Landmarks:'Schools, Business'}),
+  C('Underdeveloped Neighborhood',65,0,3,{Population:'Medium',Income:'Low',Race:'Mostly Hispanic','Life stage':'Families',Housing:'Mixed',Transport:'Desert',Employment:'Few local jobs','Land use':'Residential',Landmarks:'Airport, Schools'}),
+  C('Retirement Community',45,1,3,{Population:'Low',Income:'Medium',Race:'Mixed','Life stage':'Mostly older adults',Housing:'Owners',Transport:'Some',Employment:'Few local jobs','Land use':'Residential',Landmarks:'Hospital, Parks'}),
+  C('Downtown',65,2,3,{Population:'High',Income:'High',Race:'Mixed','Life stage':'Younger adults',Housing:'Renters',Transport:'Oasis',Employment:'Hub','Land use':'Commercial',Landmarks:'Business, Retail, Entertainment'},{vp:'Downtown'}),
+  C('Historic Black Neighborhood',55,3,3,{Population:'Medium',Income:'Medium',Race:'Mostly Black','Life stage':'Mixed ages',Housing:'Mixed',Transport:'Some',Employment:'Balance','Land use':'Mixed',Landmarks:'Schools, Parks'}),
+  C('New High-Density Development',65,4,3,{Population:'High',Income:'Medium',Race:'Mixed','Life stage':'Younger adults',Housing:'Renters',Transport:'Some',Employment:'Balance','Land use':'Mixed',Landmarks:'Retail'}),
+  C('Retail and Entertainment Center',55,0,4,{Population:'High',Income:'High',Race:'Mostly white','Life stage':'Younger adults',Housing:'Renters',Transport:'Some',Employment:'Hub','Land use':'Commercial',Landmarks:'Business, Retail, Entertainment'}),
+  C('Mixed Urban Community',55,1,4,{Population:'High',Income:'Low',Race:'Mixed','Life stage':'Families',Housing:'Renters',Transport:'Some',Employment:'Balance','Land use':'Mixed',Landmarks:'School, Business'}),
+  C('Gentrifying Neighborhood',55,2,4,{Population:'Medium',Income:'Medium',Race:'Mixed','Life stage':'Mixed ages',Housing:'Mixed',Transport:'Some',Employment:'Balance','Land use':'Mixed',Landmarks:'Parks, Schools'}),
+  {name:'Create Your Own 4', cyo:true, col:3,row:4, base:null, attrs:null, vp:null, slotNote:'peripheral slot'},
+  C('Industrial Center',65,4,4,{Population:'Low',Income:'Low',Race:'Mixed','Life stage':'Mixed',Housing:'Renters',Transport:'Desert',Employment:'Hub','Land use':'Industrial',Landmarks:'Factory'}),
+];
+// Keep the original slot label so a facilitator or participant can reset and
+// redo a community without reloading the whole dashboard.
+COMMUNITIES.forEach(c=>{ if(c.cyo) c.slotName = c.name; });
+const idxAt = (col,row) => COMMUNITIES.findIndex(c => c.col===col && c.row===row);
+
+// ---------------------------------------------------------------------------
+// 2026-07-29 session (Whit + Jeff): admin-set inputs, and the numbers the solver
+// request is built from.
+//
+// demand[r] is a COUNT, not a rate: how many aircraft are aloft on that corridor
+// at one time, PER DIRECTION. Both directions always fly, so demand [4,2,2] puts
+// 16 flights in the air. (An earlier note here called these total flights per
+// hour, matching the dead `flights:` fields in ROUTES below. Nothing has read
+// them that way since the solver was wired in — a per-timestep noise model needs
+// simultaneity, not a rate.)
+//
+// Vertiport takeoff/landing noise is a post-solve display layer, NOT a solver
+// constraint. cyo holds the solver attributes for the four create-your-own slots.
+// streamMode: 'individual' gives every flight its own solver aircraft at
+// multiplier 1; 'split' packs each direction into two 1/3/2/3 streams. See
+// buildStreams for what each costs.
+const ADMIN = { demand:[4,2,2], aircraft:45, vpNoise:65, cyo:[null,null,null,null],
+                streamMode:'individual' };
+
+// ---------------------------------------------------------------------------
+// Physical time constants. The solver's timesteps are dimensionless hop counts;
+// these give them a duration. That is what turns a per-timestep noise matrix
+// into a cumulative exposure figure, and a takeoff into an event rather than a
+// permanent tone.
+//
+// TIMESTEP_SECONDS is the single source of truth for the "3-minute period"
+// wording in the Noise Event Count metric — the number is interpolated into
+// those labels rather than restated, so the two can never drift apart.
+//
+// It also pins the implied geometry, which is worth knowing before changing it:
+// at 150–200 km/h cruise, a 3-minute hop is 7.5–10 km. That is much larger than
+// the 500 m reference distance the 45 dBA figure is quoted at, so a tile is
+// treated as uniformly exposed over an area where the real level would fall off
+// considerably. Shortening the timestep shrinks the tile and narrows that gap.
+// ---------------------------------------------------------------------------
+const TIMESTEP_SECONDS = 180;   // one solver hop = 3 minutes
+const VP_EVENT_SECONDS = 45;    // one takeoff, or one landing
+const PERIOD_SECONDS   = 3600;  // the reporting period: one hour
+
+// ---------------------------------------------------------------------------
+// 2026-07-30 session: bridge to the real Z3 solver (solver_server_dB.py).
+// The solver is NOT modified by this dashboard — every choice below is expressed
+// through fields the /solve endpoint already accepts.
+// ---------------------------------------------------------------------------
+const SOLVER = {
+  url: 'http://127.0.0.1:5051',
+  enabled: true,
+  // Soft T. The solver gives aircraft room to stagger arrivals instead of all
+  // being airborne at once, which is what actually lowers the peak increase.
+  // Measured on this map (counts 4/2/2): slack 0 -> peak +6.99 dB in 15.7s;
+  // slack 1 -> peak +4.77 dB in 79.9s. Each extra timestep is expensive, so the
+  // default is deliberately small; raise it in Admin if you can afford the wait.
+  // The dB figures are properties of the model, but the SOLVE TIMES have not been
+  // re-measured since solver_server_dB replaced its pairwise U table with the
+  // max/min encoding, which cut the per-timestep constraint count sharply. Treat
+  // every timing quoted in this file as an upper bound until it is re-run.
+  slack: 1,
+  // D/U are per-station caps on the dB INCREASE. A principle that does not use
+  // one of them sends this wide value rather than omitting it (the solver
+  // requires D > 0 and U >= 0). 30 dB is far above anything reachable here.
+  wideCap: 30,
+  // "People" forces the transit objective on at this weight (workshop decision).
+  peopleWeight: 0.3,
+  // Per-phase Z3 budget, sent to the server so it can be changed without a
+  // restart. Raised from 240s: a phase-2 timeout does not mean "slow", it means
+  // the group is shown phase 1's UNWEIGHTED route, which ignores the choices they
+  // just made. Since Stop exists, a longer wait costs nothing that cannot be
+  // undone, while a premature fallback quietly misinforms the room.
+  timeoutMs: 600000,
+};
+
+// Grid <-> solver station numbering. COMMUNITIES is stored row-major, so the
+// array index IS the station index: station = index + 1. Spot-check against the
+// solver bench: Airport idx10 -> 11, Downtown idx17 -> 18, Commuter idx4 -> 5.
+const stationOf = i => i + 1;
+const indexOfStation = s => s - 1;
+
+// 8-neighbour adjacency WITH self-loops. Self-loops are mandatory for soft T:
+// solver_server_dB rejects the request outright if any destination station lacks
+// one, because an arrived aircraft has to be able to stay put while others finish.
+function buildAdjacency(){
+  const M = 25, A = Array.from({length:M}, ()=> new Array(M).fill(0));
+  for(let a=0;a<M;a++){
+    const ca=a%5, ra=(a-ca)/5;
+    for(let b=0;b<M;b++){
+      const cb=b%5, rb=(b-cb)/5;
+      if(Math.max(Math.abs(ca-cb), Math.abs(ra-rb)) <= 1) A[a][b] = 1; // includes a===b
+    }
+  }
+  return A;
+}
+
+// Proportional weights (solver: optimizeProximity, path B — explicit vector).
+//
+// The principle is BENEFIT CARRIES BURDEN. The weight sent per tile is a PRICE the
+// solver pays for each aircraft-timestep spent over it, and the solver minimises the
+// total, so:
+//
+//        HIGH weight  =  expensive to overfly  =  MORE protected
+//        LOW  weight  =  cheap to overfly      =  carries MORE noise
+//
+// Participants rank four plain-language factors. Each factor scores every tile on a
+// shared 0..3 "ring-equivalent" scale where 0 means "fly over it freely" and 3 means
+// "protect it hard". The ranks become 40/30/20/10 (or 45/35/20 with Population off),
+// which always sum to 1, so the blended exponent stays in [0,3] and the weight in
+// [1,125] — the same envelope as the pure-distance rule this replaces.
+//
+//        weight[m] = 5 ^ ( SUM over factors of rank_f * score_f[m] )
+//                  = PRODUCT over factors of 5^(rank_f * score_f[m])
+//
+// so each variable contributes its own multiplicative factor to the tile's price.
+//
+// DIRECTION OF THE DISTANCE FACTOR. This is the one place the upstream ranking
+// prototype and this file deliberately disagree. That prototype scored distance as
+// "closer to a vertiport = more protection". Under benefit-carries-burden the sign
+// is the other way: the tiles nearest a vertiport are the ones enjoying the access,
+// so they are the ones that pay. Distance therefore scores the Manhattan ring count
+// directly — ring 0 (a vertiport) scores 0 and is cheapest to overfly; ring 3 scores
+// 3 and is dearest. With distance ranked alone at weight 1 this reduces exactly to
+// the 5^ring rule.
+//
+// Manhattan, not the 8-neighbour flight adjacency, is deliberate. Layering on the
+// flight graph gives only 3 tiers here (max Chebyshev ring is 2, the three
+// vertiports saturate the board); Manhattan gives 4. This is why the solver takes an
+// explicit weight vector — it would otherwise derive the coarser Chebyshev map.
+const PROX_BASE = 5;
+const PROP_SCALE = 3;            // ring-equivalent range: 0..3, matching Manhattan rings
+const DEFAULT_PROP_ORDER = ['income','ambient','distance','population'];
+const PROP_RANK_WEIGHTS_WITH_POPULATION = [0.40,0.30,0.20,0.10];
+const PROP_RANK_WEIGHTS_WITHOUT_POPULATION = [0.45,0.35,0.20];
+const PROP_FACTORS = {
+  income:    {label:'Income',            hint:'Lower-income communities are protected; higher-income ones carry more noise.'},
+  ambient:   {label:'Ambient noise',     hint:'Communities that are quieter today are protected; already-loud ones carry more noise.'},
+  distance:  {label:'Vertiport distance',hint:'Communities far from a vertiport are protected; those closest benefit most, so they carry the noise.'},
+  population:{label:'Population',        hint:'Communities with more people are protected; sparser ones carry more noise.'},
+};
+// 0 = fly over it freely, PROP_SCALE = protect it hard. Unset (an unclaimed
+// Create Your Own tile) sits at the neutral midpoint rather than at either extreme.
+const PROP_INCOME     = {Low:PROP_SCALE, Medium:PROP_SCALE/2, High:0};
+const PROP_POPULATION = {Low:0, Medium:PROP_SCALE/2, High:PROP_SCALE};
+const PROP_NEUTRAL    = PROP_SCALE/2;
+
+function vertiportIndices(){
+  return COMMUNITIES.map((c,i)=> c.vp ? i : -1).filter(i=> i>=0);
+}
+function proximityRing(i){
+  const vps = vertiportIndices().map(v=>[Math.floor(v/5), v%5]);
+  const r = Math.floor(i/5), col = i%5;
+  return Math.min(...vps.map(([vr,vc]) => Math.abs(r-vr) + Math.abs(col-vc)));
+}
+function cleanPropOrder(order){
+  const clean = [...new Set(Array.isArray(order) ? order : [])].filter(k=>PROP_FACTORS[k]);
+  DEFAULT_PROP_ORDER.forEach(k=>{ if(!clean.includes(k)) clean.push(k); });
+  return clean.slice(0,4);
+}
+function ensurePropOrder(conf){ conf.propOrder = cleanPropOrder(conf.propOrder); return conf.propOrder; }
+function activePropOrder(conf){
+  const order = ensurePropOrder(conf);
+  return conf.propPopulation===false ? order.filter(k=>k!=='population') : order;
+}
+// Per-tile score for each factor, all on the same 0..PROP_SCALE protection scale.
+function propFactorScores(){
+  return COMMUNITIES.map((c,i)=>({
+    income:     PROP_INCOME[c.attrs?.Income] ?? PROP_NEUTRAL,
+    // Quietest tile on this map is 45 dB and the loudest 65, so (65-base)/20 spans
+    // the full range; clamped so an admin-set Create Your Own cannot push it out.
+    ambient:    Math.max(0, Math.min(1, (65-(c.base ?? 55))/20)) * PROP_SCALE,
+    distance:   proximityRing(i),
+    population: PROP_POPULATION[c.attrs?.Population] ?? PROP_NEUTRAL,
+  }));
+}
+function proportionalModel(order, includePopulation=true){
+  const ranked = cleanPropOrder(order).filter(k=>includePopulation || k!=='population');
+  const rankWeights = includePopulation ? PROP_RANK_WEIGHTS_WITH_POPULATION
+                                        : PROP_RANK_WEIGHTS_WITHOUT_POPULATION;
+  const weights = Object.fromEntries(DEFAULT_PROP_ORDER.map(k=>[k,0]));
+  ranked.forEach((k,i)=>{ weights[k] = rankWeights[i]; });
+  const scores = propFactorScores();
+  // Each factor's own multiplier, so a tile's price can be read as a product of the
+  // four choices rather than one opaque number.
+  const factorMultipliers = scores.map(s =>
+    Object.fromEntries(ranked.map(k=>[k, Math.pow(PROX_BASE, weights[k]*s[k])])));
+  const tileWeights = scores.map(s =>
+    +Math.pow(PROX_BASE, ranked.reduce((sum,k)=> sum + weights[k]*s[k], 0)).toFixed(4));
+  return {order:ranked, rankWeights:weights, scores, factorMultipliers, weights:tileWeights};
+}
+
+// The three OD pairs, as community indices. Both directions always fly.
+function odPairs(){
+  const airport = COMMUNITIES.findIndex(c=>c.vp==='Airport');
+  const downtown = COMMUNITIES.findIndex(c=>c.vp==='Downtown');
+  const commuter = COMMUNITIES.findIndex(c=>c.vp==='Community');
+  return [[downtown,airport],[commuter,downtown],[commuter,airport]]; // order matches ADMIN.demand
+}
+
+// Demand -> aircraft. ADMIN.demand[r] is the number of aircraft aloft on that
+// corridor PER DIRECTION. Two ways to hand that to the solver, chosen in Admin:
+//
+//   'individual' (default) -- one solver aircraft per flight, every multiplier 1.
+//     Demand [4,2,2] gives N=16. Each aircraft routes freely and independently,
+//     so flights on the same corridor can genuinely diverge, and no single tile
+//     ever receives a whole stream's noise at once.
+//
+//   'split' -- the original packing: each direction carried by two streams at
+//     1/3 and 2/3 of the count, so a corridor with 4 sends multipliers 1 and 3.
+//     N stays 12 whatever the counts are, because the count rides in the
+//     multiplier rather than inflating the search space. Faster, but coarser:
+//     the multiplier-3 stream lands 3 aircraft on one tile simultaneously, which
+//     is what made D=5 unsat at a 45 dB destination even though 3 independent
+//     aircraft could have spread themselves across neighbouring tiles.
+//
+// The shortest-path transit floor is identical either way (lo + hi == C), so
+// trip-length percentages stay comparable across the toggle.
+function buildStreams(demandFactor=1){
+  const starts=[], ends=[], mult=[];
+  const split = ADMIN.streamMode === 'split';
+  odPairs().forEach(([a,b],r)=>{
+    const C = Math.max(1, Math.round((ADMIN.demand[r]||0) * demandFactor));
+    [[a,b],[b,a]].forEach(([s,e])=>{
+      if(split){
+        const lo = Math.max(1, Math.round(C/3)), hi = Math.max(1, C - lo);
+        [lo,hi].forEach(m =>{ starts.push(stationOf(s)); ends.push(stationOf(e)); mult.push(m); });
+      } else {
+        for(let k=0;k<C;k++){ starts.push(stationOf(s)); ends.push(stationOf(e)); mult.push(1); }
+      }
+    });
+  });
+  return {starts, ends, mult};
+}
+
+// Client-side lower bound on T. With 8-neighbour moves the minimum hop count is
+// the Chebyshev distance, so T >= max(dist) + 1. The solver may find a LARGER
+// true minimum (a tight D can force detours), which is why callSolver retries
+// when it answers T_max_too_small rather than trusting this number blindly.
+function chebyshevTLower(starts, ends){
+  let d = 0;
+  for(let i=0;i<starts.length;i++){
+    const a=indexOfStation(starts[i]), b=indexOfStation(ends[i]);
+    d = Math.max(d, Math.max(Math.abs(a%5 - b%5), Math.abs(((a-a%5)/5) - ((b-b%5)/5))));
+  }
+  return Math.max(2, d + 1);
+}
+
+// ---------------------------------------------------------------------------
+// Fixed corridor geometry for the OFFLINE FALLBACK only — three fixed variants
+// per OD pair (lists of [col,row]), enumerated by solve() when the solver is off
+// or unreachable. When the solver is running it picks its own paths and none of
+// this is consulted.
+//
+// The `flights:` numbers are vestigial and unread: computeChanges takes its
+// traffic from ADMIN.demand.
+// ---------------------------------------------------------------------------
+const ROUTES = [
+  { name:'Downtown ↔ Airport', flights:56, variants:[
+      [[2,3],[1,2],[0,2]],
+      [[2,3],[1,3],[0,3],[0,2]],
+      [[2,3],[2,2],[1,1],[0,1],[0,2]],
+  ]},
+  { name:'Commuter Town ↔ Downtown', flights:24, variants:[
+      [[4,0],[3,1],[2,2],[2,3]],
+      [[4,0],[3,1],[3,2],[2,3]],
+      [[4,0],[4,1],[4,2],[3,3],[2,3]],
+  ]},
+  { name:'Commuter Town ↔ Airport', flights:16, variants:[
+      [[4,0],[3,1],[2,1],[1,2],[0,2]],
+      [[4,0],[3,1],[2,2],[1,2],[0,2]],
+      [[4,0],[3,0],[2,0],[1,0],[0,1],[0,2]],
+  ]},
+];
+
+// The offline fallback's own noise model, unrelated to the solver's: a corridor
+// carrying n aircraft contributes aircraft dB + 10*log10(n) - 1 over the tiles it
+// crosses and 10 dB less one tile to the side. Tile total = energy sum with its
+// baseline; change = total - baseline. It has no time axis at all, so its numbers
+// answer none of the three metrics exactly — which is why every result built from
+// it is labelled as an offline estimate.
+function corridorLevel(n){ return n <= 0 ? -99 : (ADMIN.aircraft - 1) + 10*Math.log10(n); }
+function energyAdd(...levels){
+  const e = levels.reduce((s,L)=> s + (L > -90 ? Math.pow(10, L/10) : 0), 0);
+  return e > 0 ? 10*Math.log10(e) : -99;
+}
+// 2026-07-29 session (Whit + Jeff): includeVp adds the vertiport takeoff and
+// landing noise at vertiport tiles. The solver never sees it (includeVp=false
+// for constraints and scoring); the map and stats show it (includeVp=true).
+function computeChanges(variantChoice, demandFactor, includeVp=false){
+  const exposure = COMMUNITIES.map(()=>[]); // list of levels per tile
+  ROUTES.forEach((r,ri)=>{
+    const n = ADMIN.demand[ri] * demandFactor;
+    const L = corridorLevel(n);
+    const path = r.variants[variantChoice[ri]];
+    const overhead = new Set(), lateral = new Set();
+    path.forEach(([c,w])=>{ const i = idxAt(c,w); if(i>=0) overhead.add(i);
+      [[c+1,w],[c-1,w],[c,w+1],[c,w-1]].forEach(([c2,w2])=>{ const j = idxAt(c2,w2); if(j>=0) lateral.add(j); });
+    });
+    overhead.forEach(i => exposure[i].push(L));
+    lateral.forEach(i => { if(!overhead.has(i)) exposure[i].push(L-10); });
+  });
+  return COMMUNITIES.map((c,i)=>{
+    const base = c.base ?? 55; // unclaimed CYO tiles treated as 55 but excluded from stats
+    const levels = exposure[i].slice();
+    if(includeVp && c.vp) levels.push(ADMIN.vpNoise); // post-solve vertiport layer
+    const total = energyAdd(base, ...levels);
+    return Math.max(0, +(total - base).toFixed(1));
+  });
+}
+function pathLen(path){ let d=0; for(let i=1;i<path.length;i++){ d += Math.hypot(path[i][0]-path[i-1][0], path[i][1]-path[i-1][1]); } return d; }
+
+// ---------------------------------------------------------------------------
+// 2026-07-30 session: solver bridge — build the request, call /solve, translate
+// the answer back into the per-community dB changes the map already renders.
+// ---------------------------------------------------------------------------
+
+// Every fairness choice becomes a field the solver already understands.
+//
+//   Equal            -> hard cap on U (the spread BETWEEN communities)
+//   Sufficientarian  -> hard cap on D (nobody's own increase passes the limit)
+//   Utilitarian      -> minimize total noise (utilNoiseMode)
+//   Prioritarian     -> minimize noise over the protected stations
+//   Who counts=People-> turn the transit objective on at weight 0.3 and weight
+//                       stations by population
+//
+// D and U are BOTH always sent (the endpoint requires D>0, U>=0); the one a
+// principle does not use is set wide rather than omitted.
+function buildSolveRequest(conf, demandFactor){
+  const {starts, ends, mult} = buildStreams(demandFactor);
+  const usesLimit = conf.principle==='equal' || conf.principle==='sufficientarian';
+  const lim = usesLimit ? conf.limit : SOLVER.wideCap;
+  // The Equal tightening below is only valid while some station is guaranteed
+  // empty at every timestep. That holds by pigeonhole with fewer aircraft than
+  // the 25 stations — 12 packed, 16 individual at the default demand — and the
+  // test below is on the actual fleet size, so raising demand far enough (or
+  // switching to individual flights with big counts) correctly turns it off
+  // rather than silently imposing a rule the group did not ask for.
+  const someStationAlwaysEmpty = starts.length < 25;
+
+  const baseline = COMMUNITIES.map(c => c.base ?? 55);
+  const people = conf.who === 'people';
+  const util = conf.principle==='utilitarian' || people;
+
+  const req = {
+    N: starts.length, M: 25,
+    // Equal constrains the gap between communities; Sufficientarian constrains
+    // each community's own increase.
+    //
+    // Equal sends the SAME number as D as well, which is not an extra rule: with
+    // fewer aircraft than the 25 stations (12 packed, 16 individual at the default
+    // demand), pigeonhole leaves a station empty at every timestep, so
+    // min(increase) is always 0 and "gap <= n" already implies
+    // "every increase <= n". Stating D explicitly adds no constraint that was not
+    // already forced -- but it shrinks the solver's per-station count domain from
+    // the whole fleet down to a handful, which was the difference between a 23s
+    // solve and running out the budget: Equal 5 dB + People measurably timed out
+    // with D left wide. (Measured under the old 4-minute budget and the old
+    // pairwise U encoding; the reasoning holds, the margin is now wider.)
+    // (This is also why Equal and Sufficientarian return the same routing here --
+    // a known property of this map, left as-is by decision.)
+    D: (conf.principle==='equal' && !someStationAlwaysEmpty) ? SOLVER.wideCap : lim,
+    U: conf.principle==='equal' ? lim : SOLVER.wideCap,
+    adjacency: buildAdjacency(),
+    startPositions: starts, endPositions: ends,
+    aircraftMultipliers: mult,
+    baseline, aircraftDB: ADMIN.aircraft,
+    hardT: false,
+    optimizeUtilitarian: util,
+    optimizePrioritarian: conf.principle==='prioritarian' && conf.protected.length>0,
+    optimizeProximity: conf.principle==='proportional',
+    weightUtilitarian: conf.principle==='utilitarian' ? 1.0 : SOLVER.peopleWeight,
+    weightPrioritarian: 1.0,
+    weightProximity: 1.0,
+    weightTime: 1.0,
+    // The Utilitarian PRINCIPLE means least total noise. The People toggle means
+    // least travel. utilNoiseMode is one flag and cannot serve both, so the
+    // principle owns it and People is expressed through the 0.3 transit weight.
+    utilNoiseMode: conf.principle==='utilitarian',
+  };
+  if(req.optimizePrioritarian) req.protectedStations = conf.protected.map(stationOf);
+  // Path B: send the vector outright rather than vertiportStations + a base, so the
+  // Manhattan metric above is what gets priced instead of the solver's own BFS.
+  if(req.optimizeProximity){
+    // Path B: send the vector outright rather than vertiportStations + a base, so the
+    // ranked Manhattan model above is what gets priced instead of the solver's own BFS.
+    const model = proportionalModel(conf.propOrder, conf.propPopulation!==false);
+    req.proximityWeights = model.weights;
+  }
+  if(util && people) req.stationTransitWeights =
+    COMMUNITIES.map(c => POPW[(c.attrs?.Population)||'Medium']);
+
+  req.T_max = chebyshevTLower(starts, ends) + slackFor(conf);
+  return req;
+}
+
+// The extra time step is dropped whenever the utilitarian objective is switched
+// on — by the Utilitarian principle, or by the People toggle on any principle.
+// Measured, not assumed; and note this is NOT about a wide D, which was the first
+// theory and was wrong.
+//
+// The runs below predate both the 10-minute budget and the max/min U encoding, so
+// the timings are stale and some of the timeouts may no longer reproduce. What is
+// not stale is the shape: the objective and a longer horizon are expensive
+// together. Re-measure before spending the extra step again.
+//
+//   objective off  Equal 10 / Communities        T+1: 12.1s ok
+//                  Prioritarian / Communities    T+0:  9.8s ok    T+1: 31.0s ok
+//   objective on   Equal 5 / People (D=5)        T+0: 30.8s ok    T+1: TIMED OUT
+//                  Utilitarian (D=30)            T+0: 186s  ok    T+1: TIMED OUT
+//
+// Equal 5 + People still timed out after D was tightened from 30 to 5, so the
+// count domain was not the cause — pairing the transit/noise objective with a
+// longer horizon is. On timeout the solver returns phase 1's UNWEIGHTED route,
+// so the extra step does not merely cost time, it costs the answer: Utilitarian
+// came back +6.99 dB and 34% longer instead of +4.77 dB and 0%.
+//
+// Nothing is lost by dropping it: +4.77 dB is the same peak the extra step earns
+// for the other principles. An active objective already suppresses simultaneity,
+// so it does not additionally need horizon slack to stagger arrivals.
+function slackFor(conf){
+  const utilOn = conf.principle === 'utilitarian' || conf.who === 'people';
+  return utilOn ? 0 : SOLVER.slack;
+}
+
+// Hybrid cache: participants toggle back and forth constantly, and a repeat of a
+// set-up already solved must come back instantly rather than costing another
+// 20-80s of Z3. Survives reload via localStorage.
+const CACHE_KEY = 'uam5x5.solve.v1';
+const memCache = new Map();
+let diskCache = {};
+try { diskCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e){ diskCache = {}; }
+function cacheGet(k){
+  if(memCache.has(k)) return memCache.get(k);
+  if(diskCache[k]){ memCache.set(k, diskCache[k]); return diskCache[k]; }
+  return null;
+}
+function cacheSet(k, v){
+  memCache.set(k, v); diskCache[k] = v;
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(diskCache)); }
+  catch(e){ diskCache = {[k]:v}; try{ localStorage.setItem(CACHE_KEY, JSON.stringify(diskCache)); }catch(e2){} }
+}
+
+function setStatus(msg, busy){
+  const el = document.getElementById('solveStatus');
+  if(!el) return;
+  el.textContent = msg || '';
+  el.style.display = msg ? '' : 'none';
+  el.classList.toggle('busy', !!busy);
+}
+
+// /progress is served while /solve blocks (the server runs threaded), so the
+// room sees which phase is running instead of a frozen screen.
+// 2026-07-30: the ticker is generation-tagged. A superseded solve still runs to
+// completion inside its own `finally`, and an untagged stopProgress() there would
+// clear the ticker belonging to the solve that replaced it — the status line would
+// freeze at whatever the dead solve last wrote. Each start claims a generation and
+// only that generation may stop it; stopProgress() with no argument is the
+// unconditional form, used when the user stops everything.
+let progressTimer = null, progressGen = 0;
+function startProgress(label){
+  const gen = ++progressGen;
+  if(progressTimer){ clearInterval(progressTimer); progressTimer = null; }
+  progressTimer = setInterval(async ()=>{
+    try{
+      const r = await fetch(SOLVER.url + '/progress');
+      const p = await r.json();
+      if(p && p.phase){
+        const el = p.elapsed_s != null ? ` ${p.elapsed_s}s` : '';
+        const tt = p.phase==='phase1' && p.T ? ` (testing T=${p.T})` : '';
+        setStatus(`${label} — ${p.phase}${tt}${el}`, true);
+      }
+    }catch(e){ /* progress is best-effort; never let it break a solve */ }
+  }, 700);
+  return gen;
+}
+function stopProgress(gen){
+  if(gen != null && gen !== progressGen) return;   // a stale solve tidying up
+  if(progressTimer){ clearInterval(progressTimer); progressTimer=null; }
+}
+
+// 2026-07-30: solves are abortable. The controller is created by renderSide and
+// threaded down, so one interaction owns exactly one cancellable chain — the
+// demand-degradation retries included. Two aborts are possible and they mean
+// different things, so the controller carries the reason:
+//   .stopped  the participant pressed Stop, or a newer choice superseded this one
+//             -> paint nothing, leave what is on screen alone
+//   (neither) the request exceeded SOLVER.timeoutMs -> fall back to the offline
+//             estimate, same as any other network failure
+function abortReason(e, ctrl){ return (e && e.name === 'AbortError' && ctrl.stopped); }
+
+async function postSolve(req, ctrl){
+  ctrl = ctrl || new AbortController();
+  // The id names this attempt so /cancel can only stop the solve we meant. It is
+  // added here, NOT in buildSolveRequest, because that request object doubles as
+  // the cache key — a per-attempt id in it would make every result a cache miss.
+  ctrl.reqId = ctrl.reqId || `r${Date.now().toString(36)}${Math.random().toString(36).slice(2,8)}`;
+  let timedOut = false;
+  // The budget is PER PHASE on the server, and a solve runs two of them, so the
+  // client has to allow 2x or it would abort a solve that was still legitimately
+  // running and report the offline estimate as though the solver had died.
+  const budget = SOLVER.timeoutMs * 2 + 15000;
+  const timer = setTimeout(()=>{ timedOut = true; ctrl.abort(); }, budget);
+  try{
+    const r = await fetch(SOLVER.url + '/solve', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({...req, clientRequestId: ctrl.reqId, timeoutMs: SOLVER.timeoutMs}),
+      signal: ctrl.signal,
+    });
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error || `solver returned HTTP ${r.status}`);
+    // The server can report a cancel on a request we are still listening to (a
+    // Stop that landed while this attempt was queued). That is a stop, not a
+    // failed solve — without this it would read as "no routing satisfies the rule".
+    if(j.status === 'cancelled'){ const s = new Error('stopped'); s.stopped = true; throw s; }
+    return j;
+  } catch(e){
+    if(abortReason(e, ctrl)){ const s = new Error('stopped'); s.stopped = true; throw s; }
+    // Name the failure accurately. "Unreachable" for a 255s wait sent people
+    // looking for a dead server when the solver was simply still working.
+    if(timedOut){ const t = new Error(`no answer after ${Math.round(budget/1000)}s`); t.timedOut = true; throw t; }
+    throw e;
+  } finally { clearTimeout(timer); }
+}
+
+// Demand degradation stays client-side, as agreed: when a limit cannot be met at
+// full demand we fly fewer aircraft rather than relaxing the fairness rule.
+// Factors are coarse on purpose — each retry is a whole solve.
+const DEMAND_FACTORS = [1, 0.75, 0.5, 0.25];
+
+async function solveRemote(conf, ctrl){
+  const attempts = [];
+  for(const f of DEMAND_FACTORS){
+    // Stop has to be checked between retries too: a rule that fails at full
+    // demand queues up to four solves, and without this the participant would
+    // press Stop and watch the next factor start anyway.
+    if(ctrl && ctrl.stopped){ const s = new Error('stopped'); s.stopped = true; throw s; }
+    const req = buildSolveRequest(conf, f);
+    const key = JSON.stringify(req);
+    let res = cacheGet(key);
+    const cached = !!res;
+    if(!res){
+      const g = startProgress(f<1 ? `Solving at ${Math.round(f*100)}% demand` : 'Solving');
+      try{ res = await postSolve(req, ctrl); }
+      finally{ stopProgress(g); }
+      // A too-small T_max is our Chebyshev bound being optimistic: a tight D can
+      // force detours the straight-line distance never saw. Retry once using the
+      // true minimum the solver just reported.
+      if(res.status!=='sat' && res.reason==='T_max_too_small'){
+        const m = /minimum feasible T=(\d+)/.exec(res.detail||'');
+        if(m){
+          req.T_max = (+m[1]) + slackFor(conf);
+          const g2 = startProgress('Solving (longer horizon)');
+          try{ res = await postSolve(req, ctrl); } finally{ stopProgress(g2); }
+        }
+      }
+      cacheSet(key, res);
+    }
+    attempts.push({f, res, cached});
+    if(res.status === 'sat') return {res, f, cached, degraded: f<1};
+  }
+  return {res: attempts[attempts.length-1].res, f: DEMAND_FACTORS[DEMAND_FACTORS.length-1],
+          cached:false, degraded:true, failed:true};
+}
+
+// noiseMatrix is M x T of dB INCREASES per station per timestep. Collapse the time
+// axis for the two metrics that ask a per-timestep question:
+//   'peak'  = the loudest single timestep
+//   'count' = how many timesteps sat at least 5 dB above baseline
+// 'average' no longer arrives here — cumulative exposure is rebuilt from the paths
+// in energy instead (see cumulativeChanges), so the trailing energy-mean branch is
+// unreachable from computeResult and survives only as a defensive default.
+function collapseNoise(noiseMatrix, pattern){
+  return noiseMatrix.map((row,i)=>{
+    if(!row || !row.length) return 0;
+    if(pattern==='count'){
+      const c = COMMUNITIES[i], base = c.base ?? 55;
+      return row.reduce((n,v)=>{
+        const increase = c.vp ? energyAdd(base + v, ADMIN.vpNoise) - base : v;
+        return n + (increase >= 5 ? 1 : 0);
+      }, 0);
+    }
+    if(pattern==='peak') return Math.max(...row);
+    const e = row.reduce((s,v)=> s + Math.pow(10, v/10), 0) / row.length;
+    return 10*Math.log10(e);
+  });
+}
+
+// The vertiport takeoff/landing layer is added AFTER solving, by design — the
+// solver never sees it, so it can never distort the routing it chose.
+//
+// This is the FLAT form: vpNoise as though a takeoff were permanently in progress.
+// That is exactly right for the loudest-event metric, which is the only caller
+// left; cumulative exposure duty-cycles the same layer itself.
+function withVertiportLayer(changes){
+  return COMMUNITIES.map((c,i)=>{
+    const base = c.base ?? 55;
+    let lvl = base + (changes[i]||0);
+    if(c.vp) lvl = energyAdd(lvl, ADMIN.vpNoise);
+    return Math.max(0, +(lvl - base).toFixed(1));
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Cumulative exposure — the energy a community actually receives over the hour.
+//
+// The other two metrics collapse the solver's dB matrix down the time axis. This
+// one deliberately does not; it rebuilds the hour in ENERGY from the paths,
+// because averaging that matrix over T is wrong twice over:
+//
+//   1. T is the solver's horizon, not a duration. An aircraft goes inactive once
+//      it arrives, so a longer horizon appends silent timesteps that dilute the
+//      mean — the identical routing scores quieter purely because slackFor()
+//      handed it an extra step. Dividing each aircraft's tile-time by ITS OWN
+//      trip length instead makes the number invariant to T, which is the whole
+//      point of a cumulative measure.
+//
+//   2. "Demand" is aircraft ALOFT — steady state. As one lands another departs,
+//      so the real hour has no quiet tail at all. A solve models one wave; the
+//      hour is that wave on repeat. Occupancy is a ratio, so it carries over
+//      unchanged and needs no timestep duration whatsoever.
+//
+// The vertiport layer DOES need the clock, because a takeoff is a fixed-length
+// event rather than a fraction of a trip. Each slot flies
+// PERIOD_SECONDS/(span*TIMESTEP_SECONDS) trips an hour, each with one takeoff at
+// its origin and one landing at its destination. A duty cycle above 1 is
+// meaningful rather than an error: it means operations overlap, and the layer
+// correctly lands above the single-event level.
+//
+// This is also why withVertiportLayer is NOT applied on top — it adds a flat
+// vpNoise as though a takeoff were in progress continuously, which is right for
+// the loudest-event metric and badly wrong for this one.
+// ---------------------------------------------------------------------------
+function cumulativeChanges(paths, starts, ends, mult){
+  const M = COMMUNITIES.length;
+  const occ = new Array(M).fill(0);         // mean aircraft over each tile
+  const opsPerHour = new Array(M).fill(0);  // takeoffs + landings at each tile
+
+  (paths||[]).forEach((p,i)=>{
+    const s0 = starts[i], e0 = ends[i], m = mult[i] || 1;
+    if(!p || !p.length || s0 === e0) return;
+    // Mirror the solver's active window exactly (_active_output_matrices in
+    // solver_server_dB.py): active from the first move through the arrival
+    // timestep inclusive. Using the same window keeps this consistent with the
+    // counts the D and U constraints were actually enforced against.
+    const tFirst = p.findIndex(s => s !== s0);
+    if(tFirst < 0) return;                       // never departed
+    let tArr = p.indexOf(e0);
+    if(tArr < 0) tArr = p.length - 1;
+    if(tArr < tFirst) return;
+    const span = tArr - tFirst + 1;
+    // Self-loop holds are included on purpose: the solver counts a holding
+    // aircraft as active, so excluding it here would show a level lower than the
+    // one the fairness limits were checked against.
+    for(let t=tFirst; t<=tArr; t++) occ[indexOfStation(p[t])] += m / span;
+    const tripsPerHour = PERIOD_SECONDS / (span * TIMESTEP_SECONDS);
+    opsPerHour[indexOfStation(s0)] += m * tripsPerHour;
+    opsPerHour[indexOfStation(e0)] += m * tripsPerHour;
+  });
+
+  return COMMUNITIES.map((c,i)=>{
+    const base = c.base ?? 55;
+    let energy = Math.pow(10, base/10) + occ[i] * Math.pow(10, ADMIN.aircraft/10);
+    if(c.vp){
+      const duty = opsPerHour[i] * VP_EVENT_SECONDS / PERIOD_SECONDS;
+      energy += duty * Math.pow(10, ADMIN.vpNoise/10);
+    }
+    return Math.max(0, +(10*Math.log10(energy) - base).toFixed(1));
+  });
+}
+
+// Solver paths are station numbers per timestep; collapse consecutive repeats
+// (an aircraft holding on a self-loop) into a drawable polyline of [col,row].
+// `cells` is the drawn route with repeats removed. `timeline` keeps one entry per
+// timestep, and `holds` records where the solver parked an aircraft on the same
+// tile for extra timesteps. That last one is not cosmetic: trip length deliberately
+// ignores self-loop holds as waiting rather than travel, but a holding aircraft is
+// still overhead making noise, so without this the map showed the noise without
+// ever showing the loitering that produced it.
+// Only the active window counts — from the first move through arrival — matching
+// the window the solver itself uses for noise.
+function pathVisual(path, start, end){
+  if(!path || !path.length) return {cells:[], timeline:[], holds:[]};
+  const firstMove = path.findIndex(s=>s!==start);
+  if(firstMove < 0) return {cells:[], timeline:[], holds:[]};
+  let arrival = path.indexOf(end, firstMove);
+  if(arrival < 0) arrival = path.length - 1;
+  const active = [start, ...path.slice(firstMove, arrival+1)];
+  const timeline = active.map(s=>{
+    const i = indexOfStation(s);
+    return [i%5, (i-i%5)/5];
+  });
+  const cells = [], holdMap = new Map();
+  timeline.forEach((cell,t)=>{
+    const last = cells[cells.length-1];
+    if(!last || last[0]!==cell[0] || last[1]!==cell[1]) cells.push(cell);
+    // The arrival timestep is not a hold — the aircraft has landed, not lingered.
+    else if(t>0 && t<timeline.length-1){
+      const key = cell.join(',');
+      holdMap.set(key, (holdMap.get(key)||0)+1);
+    }
+  });
+  return {cells, timeline, holds:[...holdMap].map(([key,extra])=>({cell:key.split(',').map(Number),extra}))};
+}
+
+// ---------------------------------------------------------------------------
+// The offline fallback solver: enumerate the 27 corridor combos, apply the active
+// principle + measurement, reduce demand only if no combo satisfies a dB limit.
+// It was the placeholder before the Z3 bridge existed; it now runs only when the
+// solver is switched off or unreachable, and its results are always labelled.
+// ---------------------------------------------------------------------------
+// Admin-set slots count in the solver even before a group claims them.
+function statTiles(){ return COMMUNITIES.map((c,i)=>({c,i})).filter(x=>!x.c.cyo || x.c.claimed || x.c.adminSet); }
+function scoreConfig(changes, conf){
+  const tiles = statTiles();
+  const weights = tiles.map(t => conf.who==='people' ? POPW[(t.c.attrs?.Population)||'Medium'] : 1);
+  const vals = tiles.map(t => conf.pattern==='count' ? (changes[t.i] >= 5 ? 1 : 0) : changes[t.i]);
+  if(conf.pattern==='peak') return Math.max(...vals);
+  const wsum = weights.reduce((a,b)=>a+b,0);
+  return vals.reduce((s,v,k)=> s + v*weights[k], 0) / wsum;
+}
+function solve(conf){
+  const combos = [];
+  for(let a=0;a<3;a++) for(let b=0;b<3;b++) for(let c=0;c<3;c++) combos.push([a,b,c]);
+  const limit = (conf.principle==='equal'||conf.principle==='sufficientarian') ? conf.limit : null;
+  const prot = conf.principle==='prioritarian' ? conf.protected : [];
+  function evalCombo(vc, f){
+    const changes = computeChanges(vc, f);
+    const tiles = statTiles();
+    const maxChg = Math.max(...tiles.map(t=>changes[t.i]));
+    const minChg = Math.min(...tiles.map(t=>changes[t.i]));
+    const protExp = prot.reduce((s,i)=> s + changes[i], 0);
+    const avg = scoreConfig(changes, {...conf, pattern:'average'});
+    const obj = scoreConfig(changes, conf);
+    const len = ROUTES.reduce((s,r,ri)=> s + pathLen(r.variants[vc[ri]]), 0);
+    return {vc, f, changes, maxChg, minChg, protExp, avg, obj, len};
+  }
+  let best = null;
+  const factors = limit ? [1,.9,.8,.7,.6,.5,.4,.3,.2,.1] : [1];
+  for(const f of factors){
+    const ok = [];
+    for(const vc of combos){
+      const r = evalCombo(vc, f);
+      // 2026-07-29 session (Whit + Jeff): the limit is each community's own
+      // increase over its pre-UAM level (45 can't pass 55 at 10 dB) — for both
+      // Equal and Sufficientarian, matching Jeff's solver. Equal then prefers
+      // the smallest gap between communities among the routings that fit.
+      if(limit !== null && r.maxChg > limit + 0.05) continue;
+      ok.push(r);
+    }
+    if(ok.length){
+      ok.sort((x,y)=> (prot.length ? (x.protExp - y.protExp) : 0)
+        || (conf.principle==='equal' ? ((x.maxChg-x.minChg) - (y.maxChg-y.minChg)) : 0)
+        || (x.obj - y.obj) || (x.len - y.len));
+      best = ok[0]; break;
+    }
+  }
+  if(!best){ // even at 10% demand no combo fits: take least-bad at 10%
+    const all = combos.map(vc => evalCombo(vc, .1));
+    all.sort((x,y)=> x.maxChg - y.maxChg); best = all[0]; best.infeasible = true;
+  }
+  if(conf.principle==='utilitarian'){ // direct routes, full demand
+    const direct = [0,0,0];
+    best = evalCombo(direct, 1);
+  }
+  if(conf.principle==='prioritarian' && !prot.length){ best = evalCombo([0,0,0], 1); }
+  const directLen = ROUTES.reduce((s,r)=> s + pathLen(r.variants[0]), 0);
+  best.tripPct = Math.round((best.len/directLen - 1) * 100);
+  // 2026-07-29 session (Whit + Jeff): what the map and stats show includes the
+  // vertiport takeoff and landing layer, added after solving.
+  best.changes = computeChanges(best.vc, best.f, true);
+  // noise before / after (per measurement)
+  const tiles = statTiles();
+  if(conf.pattern==='count'){
+    best.changes = best.changes.map(v=>v >= 5 ? 1 : 0);
+    const w = tiles.map(t => conf.who==='people' ? POPW[(t.c.attrs?.Population)||'Medium'] : 1);
+    const wsum = w.reduce((a,b)=>a+b,0);
+    best.before = 0;
+    best.after = tiles.reduce((s,t,k)=>s + best.changes[t.i]*w[k], 0)/wsum;
+  } else if(conf.pattern==='peak'){
+    // Peak = the loudest place, before UAM and with UAM
+    best.before = Math.max(...tiles.map(t => t.c.base??55));
+    best.after  = Math.max(...tiles.map(t => (t.c.base??55)+best.changes[t.i]));
+  } else {
+    const w = tiles.map(t => conf.who==='people' ? POPW[(t.c.attrs?.Population)||'Medium'] : 1);
+    const wsum = w.reduce((a,b)=>a+b,0);
+    best.before = tiles.reduce((s,t,k)=> s + (t.c.base??55)*w[k], 0)/wsum;
+    best.after  = tiles.reduce((s,t,k)=> s + ((t.c.base??55)+best.changes[t.i])*w[k], 0)/wsum;
+  }
+  best.served = Math.round(best.f*100);
+  return best;
+}
+
+// ---------------------------------------------------------------------------
+// UI state
+// ---------------------------------------------------------------------------
+// 2026-07-28 round 3: brief hover explainers on principles, dB limits, and tiles
+const PRINCIPLES = [
+  {key:'equal', label:'Equal', rule:'limit', hint:'Everyone gets about the same new noise.'},
+  {key:'utilitarian', label:'Utilitarian', rule:'none', hint:'The least total noise for the whole city.'},
+  {key:'sufficientarian', label:'Sufficientarian', rule:'limit', hint:'No community can go past the noise limit.'},
+  {key:'prioritarian', label:'Prioritarian', rule:'protect', hint:'Protect the communities you choose.'},
+  {key:'proportional', label:'Proportional', rule:'rank', hint:'More benefit means more of the burden.'},
+];
+// randomize order each session so groups don't anchor on the first option
+const ORDER = PRINCIPLES.map((p,i)=>i).sort(()=>Math.random()-.5);
+
+const NOISE_METRICS = {
+  average:{label:'Cumulative Noise'},
+  peak:{label:'Loudest Noise Event'},
+  count:{label:'Noise Event Count'},
+};
+function metricLabel(pattern){ return (NOISE_METRICS[pattern] || NOISE_METRICS.average).label; }
+
+const state = {
+  compare:false,
+  watched:new Set(),
+  protected:[],          // shared across sides, cap 3
+  saved:[],              // reusable navigation shortcuts; compare can load any two
+  sides:[
+    {principle:'equal', limit:10, who:'communities', pattern:'average', propOrder:[...DEFAULT_PROP_ORDER], propPopulation:true},
+    {principle:'utilitarian', limit:10, who:'communities', pattern:'average', propOrder:[...DEFAULT_PROP_ORDER], propPopulation:true},
+  ],
+  drawer:null, // index of open community, or {cyo:index}
+  editingCyo:null,
+};
+const MAX_SAVED = 6;
+
+// Rail text under the principle buttons. Empty for Equal and Sufficientarian:
+// both show a dB-limit selector immediately below, which says it better than a
+// sentence would.
+//
+// 2026-07-30 session: the wording that remains matches what the solver is actually
+// asked to do. Utilitarian used to say "most direct routes", which described the
+// offline fallback taking the straight variants; the solver is asked for the least
+// total noise, and that is not the same routing.
+const RULE_TEXT = {
+  equal:'',
+  sufficientarian:'',
+  utilitarian:'Least total noise.',
+  prioritarian:'Choose up to 3 communities to protect.',
+  proportional:'Rank what decides who is protected. Communities nearest a vertiport benefit most, so they carry more of the noise.',
+};
+
+function renderRail(){
+  const pl = document.getElementById('plist');
+  pl.innerHTML = ORDER.map(i=>{
+    const p = PRINCIPLES[i];
+    return `<button class="pbtn ${state.sides[0].principle===p.key?'active':''}" data-p="${p.key}" data-hint="${p.hint}">${p.label}</button>`;
+  }).join('');
+  pl.querySelectorAll('.pbtn').forEach(b=> b.onclick = ()=>{ state.sides[0].principle = b.dataset.p; renderAll(); });
+  const s = state.sides[0];
+  const p = PRINCIPLES.find(x=>x.key===s.principle);
+  const rb = document.getElementById('rulebox');
+  let html = RULE_TEXT[s.principle] ? `<div class="note">${RULE_TEXT[s.principle]}</div>` : '';
+  if(p.rule==='limit'){
+    html += `<div class="seg" id="limSeg">${[5,10,15].map(v=>`<button data-v="${v}" class="${s.limit===v?'on':''}">${v} dB</button>`).join('')}</div>`;
+  }
+  if(p.rule==='protect'){
+    const chips = state.protected.map(i=>`<span class="chip" data-un="${i}">★ ${COMMUNITIES[i].name} ✕</span>`).join('');
+    html += `${chips?`<div class="protchips">${chips}</div>`:''}<button class="btn" id="chooseProtectBtn">Choose communities (${state.protected.length}/3)</button>`;
+  }
+  if(p.rule==='rank'){
+    const order = activePropOrder(s);
+    const popOff = s.propPopulation===false;
+    const row = (key,index,total,excluded) => {
+      const f = PROP_FACTORS[key];
+      const toggle = key==='population'
+        ? `<label class="propswitch" title="Turn Population on or off"><input type="checkbox" data-prop-pop ${excluded?'':'checked'} aria-label="Include Population in the ranking"></label>` : '';
+      const arrows = excluded ? '' :
+        `<button data-prop-key="${key}" data-prop-dir="up" aria-label="Move ${f.label} up" ${index===0?'disabled':''}>&uarr;</button>`+
+        `<button data-prop-key="${key}" data-prop-dir="down" aria-label="Move ${f.label} down" ${index===total-1?'disabled':''}>&darr;</button>`;
+      return `<div class="proprow${excluded?' prop-excluded':''}"><span class="propnum">${excluded?'&ndash;':index+1}</span>`+
+             `<span class="propname" data-hint="${f.hint}">${f.label}</span>`+
+             `<span class="propactions">${arrows}${toggle}</span></div>`;
+    };
+    html += `<div class="proprank" aria-label="Rank the factors">`
+          + order.map((k,i)=>row(k,i,order.length,false)).join('')
+          + (popOff ? `<div class="propexcludedlabel">Not included</div>${row('population',0,1,true)}` : '')
+          + `</div><div class="proporder">${popOff
+              ? 'Population will not affect this calculation. Ranks translate to 45%, 35% and 20%.'
+              : 'Ranks translate to 40%, 30%, 20% and 10%.'} Higher rank means that factor decides more of who is protected.</div>`;
+  }
+  rb.innerHTML = html;
+  const seg = document.getElementById('limSeg');
+  if(seg) seg.querySelectorAll('button').forEach(b=> b.onclick = ()=>{ state.sides[0].limit = +b.dataset.v; renderAll(); });
+  rb.querySelectorAll('[data-un]').forEach(ch => ch.onclick = ()=>{ state.protected = state.protected.filter(i=> i !== +ch.dataset.un); renderAll(); });
+  const chooseProtectBtn = document.getElementById('chooseProtectBtn');
+  if(chooseProtectBtn) chooseProtectBtn.onclick = openProtectPicker;
+  rb.querySelectorAll('[data-prop-dir]').forEach(btn => btn.onclick = ()=>{
+    const order = activePropOrder(s);
+    const i = order.indexOf(btn.dataset.propKey);
+    const j = btn.dataset.propDir==='up' ? i-1 : i+1;
+    if(i<0 || j<0 || j>=order.length) return;
+    [order[i],order[j]] = [order[j],order[i]];
+    // Population keeps its place in the stored order even while excluded, so
+    // switching it back on restores the ranking the group last saw.
+    s.propOrder = s.propPopulation===false ? [...order,'population'] : order;
+    renderAll();
+  });
+  rb.querySelectorAll('[data-prop-pop]').forEach(t => t.onchange = ()=>{
+    s.propPopulation = t.checked;
+    if(s.propPopulation) s.propOrder = [...cleanPropOrder(s.propOrder).filter(k=>k!=='population'),'population'];
+    renderAll();
+  });
+  // measurement segs (side 0)
+  [['whoSeg','who']].forEach(([id,key])=>{
+    const el = document.getElementById(id);
+    el.querySelectorAll('button').forEach(b=>{
+      b.classList.toggle('on', state.sides[0][key]===b.dataset.v);
+      b.onclick = ()=>{ state.sides[0][key] = b.dataset.v; renderAll(); };
+    });
+  });
+  // Saved set-ups double as one-click navigation in the single-map view.
+  const sc = document.getElementById('savedchips');
+  // Same text as the compare bar; kept in one place so a ranking shown on a saved
+  // card cannot drift from the ranking shown on the card that loads it.
+  const describe = setupDescription;
+  sc.innerHTML = state.saved.length
+    ? state.saved.map((st,k)=>`<div class="savedrow"><button class="savedsetup" data-load="${k}" title="Load this set-up">${k+1}. ${describe(st)}</button><button class="unsave" data-unsave="${k}" title="Remove saved set-up" aria-label="Remove saved set-up ${k+1}">✕</button></div>`).join('')
+    : '<div class="emptysaved">Save up to six ideas. Click any saved idea to return to it quickly.</div>';
+  sc.querySelectorAll('[data-load]').forEach(x => x.onclick = ()=> loadSaved(+x.dataset.load, 0));
+  sc.querySelectorAll('[data-unsave]').forEach(x => x.onclick = ()=>{ state.saved.splice(+x.dataset.unsave,1); renderAll(); });
+  const saveBtn = document.getElementById('saveBtn');
+  const duplicate = state.saved.some(st=> sameSetup(st, state.sides[0]));
+  saveBtn.disabled = state.saved.length >= MAX_SAVED || duplicate;
+  saveBtn.textContent = state.saved.length >= MAX_SAVED ? 'Six set-ups saved' : duplicate ? 'This set-up is saved' : `Save this set-up (${state.saved.length}/${MAX_SAVED})`;
+}
+
+function samePropSetup(a,b){
+  if(a.principle!=='proportional') return true;
+  return cleanPropOrder(a.propOrder).join(',')===cleanPropOrder(b.propOrder).join(',')
+      && (a.propPopulation!==false)===(b.propPopulation!==false);
+}
+function sameSetup(a,b){
+  return a.principle===b.principle && a.limit===b.limit && a.who===b.who && a.pattern===b.pattern
+      && samePropSetup(a,b);
+}
+// Deep-copies the ranking too: a shared propOrder array would let editing one side
+// silently reorder the saved set-up it came from.
+function copySetup(st){
+  return {...st, propOrder:[...cleanPropOrder(st.propOrder)], propPopulation:st.propPopulation!==false};
+}
+function loadSaved(k, si){
+  const st = state.saved[k];
+  if(!st) return;
+  state.sides[si] = copySetup(st);
+  state.drawer = null;
+  renderAll();
+}
+function propSummary(st){
+  if(st.principle!=='proportional') return '';
+  const first = PROP_FACTORS[activePropOrder(st)[0]];
+  return ` · ${first.label} first${st.propPopulation===false?' · no population':''}`;
+}
+function setupDescription(st){
+  const p = PRINCIPLES.find(x=>x.key===st.principle);
+  const lim = (st.principle==='equal'||st.principle==='sufficientarian') ? ` ${st.limit} dB` : '';
+  return `${p.label}${lim}${propSummary(st)} · ${st.who==='people'?'People':'Communities'} · ${metricLabel(st.pattern)}`;
+}
+function renderCompareBar(){
+  const bar = document.getElementById('comparebar');
+  if(!state.saved.length){
+    bar.innerHTML = '<span class="barlabel">Saved set-ups</span><span class="emptysaved">None yet — use the manual choices below.</span>';
+    return;
+  }
+  bar.innerHTML = `<span class="barlabel">Load saved first</span>${state.saved.map((st,k)=>`<span class="savedcard"><span>${k+1}. ${setupDescription(st)}</span><button class="loadside" data-load-a="${k}" title="Load on comparison side A">Use A</button><button class="loadside" data-load-b="${k}" title="Load on comparison side B">Use B</button></span>`).join('')}`;
+  bar.querySelectorAll('[data-load-a]').forEach(b=> b.onclick=()=>loadSaved(+b.dataset.loadA,0));
+  bar.querySelectorAll('[data-load-b]').forEach(b=> b.onclick=()=>loadSaved(+b.dataset.loadB,1));
+}
+
+// Hints interpolate TIMESTEP_SECONDS at render time, which is why the old
+// syncTimestepLabels patch-up of static markup is gone.
+//
+// The "loudest event" wording is doing more work than the model strictly supports:
+// it is the highest MODELLED TIMESTEP level, and whether a timestep is fine-grained
+// enough to stand for a single overflight is still an open question for the
+// acoustics side. Kept participant-facing wording plain rather than hedging in a
+// tooltip, but do not treat this number as a certified single-event peak.
+function renderMetricBar(si){
+  const el = document.querySelector(`[data-metricbar="${si}"]`);
+  if(!el) return;
+  const s = state.sides[si];
+  el.innerHTML = `<strong>Which noise matters?</strong><div class="seg">
+    <button data-v="average" data-hint="Total noise energy received over one hour of steady traffic. Each tile shows no UAM → with UAM, then the change.">Cumulative</button>
+    <button data-v="peak" data-hint="The highest modeled timestep level on that tile.">Loudest event</button>
+    <button data-v="count" data-hint="Counts ${TIMESTEP_SECONDS/60}-minute periods at least 5 dB above baseline.">Event count</button>
+  </div><span class="assumption" data-hint="A flight counts as hovering when the solver keeps it over the same community tile for an extra timestep. One timestep is ${TIMESTEP_SECONDS/60} minutes.">⏸ Hovering = remains over tile</span>`;
+  el.querySelectorAll('button').forEach(b=>{
+    b.classList.toggle('on', s.pattern===b.dataset.v);
+    b.onclick = ()=>{ s.pattern = b.dataset.v; renderAll(); };
+  });
+}
+function renderSideHead(si){
+  const el = document.querySelector(`[data-side="${si}"]`);
+  const s = state.sides[si];
+  el.innerHTML = `<strong>${si===0?'A':'B'}:</strong>
+    <select data-k="principle">${ORDER.map(i=>{const p=PRINCIPLES[i];return `<option value="${p.key}" ${s.principle===p.key?'selected':''}>${p.label}</option>`;}).join('')}</select>
+    ${(s.principle==='equal'||s.principle==='sufficientarian')?`<select data-k="limit">${[5,10,15].map(v=>`<option ${s.limit===v?'selected':''}>${v}</option>`).join('')}</select><span>dB</span>`:''}
+    <select data-k="who"><option value="communities" ${s.who==='communities'?'selected':''}>Communities</option><option value="people" ${s.who==='people'?'selected':''}>People</option></select>`;
+  el.querySelectorAll('select').forEach(sel => sel.onchange = ()=>{
+    const k = sel.dataset.k; s[k] = k==='limit' ? +sel.value : sel.value; renderAll();
+  });
+}
+
+// 2026-07-30 session: full-scale dropped from 15 dB to 6 dB. With a 45 dBA
+// aircraft the largest increase physically reachable on this map is about 6 dB
+// (three aircraft-units over a 45 dB tile is 10*log10(4) = 6.02), so a 15 dB
+// ramp left every real result washed out in the palest third of the scale.
+// It stays a FIXED scale, not per-result, so the two maps in compare mode remain
+// directly comparable.
+// Vertiport tiles get their own ceiling in cumulative mode. Takeoff and landing
+// energy puts a quiet vertiport near +18 dB, which on the 6 dB ramp would peg all
+// three at solid orange and erase every difference between them — Downtown
+// handles more than twice Commuter Town's operations, and that should be visible.
+// Two scales in one map is a real cost; it is paid down by the fact that
+// vertiports already carry a blue border and an "✈ Vertiport" badge, and by the
+// legend naming the second scale explicitly.
+const HEAT_FULL_SCALE = 6, HEAT_FULL_SCALE_VP = 20, HEAT_FULL_SCALE_COUNT = 20;
+
+// What counts as "no change at all". Every metric hands the renderer a value that
+// is either an integer count or already rounded to 1 dp, so the smallest change
+// that exists is 0.1 — this threshold sits below that and therefore catches only
+// true zero.
+//
+// It used to be 0.2, which silently swallowed +0.1 and +0.2: those tiles printed
+// "±0" and painted white, so a community carrying a real if small share of the
+// burden looked untouched. Written as !(chg > eps) so a missing or NaN value reads
+// as no change rather than rendering "+NaN dB".
+const CHANGE_EPS = 0.05;
+const noChange = chg => !(chg > CHANGE_EPS);
+
+function heat(chg, pattern='average', isVp=false){
+  if(noChange(chg)) return '#ffffff';
+  const full = pattern==='count' ? HEAT_FULL_SCALE_COUNT
+             : (isVp && pattern==='average') ? HEAT_FULL_SCALE_VP
+             : HEAT_FULL_SCALE;
+  const t = Math.min(1, chg/full);
+  const mix=(a,b)=>Math.round(a+(b-a)*t);
+  return `rgb(${mix(255,226)},${mix(255,112)},${mix(255,29)})`;
+}
+
+function eventCountText(value){
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
+// ---------------------------------------------------------------------------
+// 2026-07-30 session: result adapter. A solver answer is reshaped into exactly
+// the object the renderer already consumed from the offline fallback, so the
+// map, stats, ranking strip and drawer did not have to be rebuilt around it.
+// ---------------------------------------------------------------------------
+function cyoGaps(){ return COMMUNITIES.filter(c => c.cyo && !c.claimed && !c.adminSet); }
+function chebOne(sa, sb){
+  const a=indexOfStation(sa), b=indexOfStation(sb);
+  return Math.max(Math.abs(a%5 - b%5), Math.abs(((a-a%5)/5) - ((b-b%5)/5)));
+}
+function scoreFromChanges(changes, conf){
+  const tiles = statTiles();
+  const w = tiles.map(t => conf.who==='people' ? POPW[(t.c.attrs?.Population)||'Medium'] : 1);
+  const wsum = w.reduce((a,b)=>a+b,0) || 1;
+  if(conf.pattern==='count') return {
+    before: 0,
+    after: tiles.reduce((s,t,k)=> s + changes[t.i]*w[k], 0)/wsum,
+  };
+  if(conf.pattern==='peak') return {
+    before: Math.max(...tiles.map(t => t.c.base??55)),
+    after:  Math.max(...tiles.map(t => (t.c.base??55) + changes[t.i])),
+  };
+  return {
+    before: tiles.reduce((s,t,k)=> s + (t.c.base??55)*w[k], 0)/wsum,
+    after:  tiles.reduce((s,t,k)=> s + ((t.c.base??55)+changes[t.i])*w[k], 0)/wsum,
+  };
+}
+// The original 27-combo enumerator is kept as an offline fallback so the room is
+// never staring at a dead screen if the solver is down — but it is always
+// labelled, because its numbers are NOT the solver's.
+// The offline heuristic scores 27 fixed route-variant combos on noise alone; it has
+// no notion of the proximity weights, so for Proportional its pick is generic rather
+// than principled. Say so wherever it surfaces instead of letting a least-noise
+// routing wear the Proportional label silently.
+const OFFLINE_BLIND = {
+  proportional: 'The offline estimate cannot model Proportional — it scores noise only, '
+              + 'not proximity to the vertiports — so this routing is indicative, not the '
+              + 'answer the principle would give.',
+};
+// Every offline path goes through localResult, but the callers below overwrite
+// r.error with their own reason for falling back. The caveat must survive that,
+// because "solver unreachable" and "this estimate cannot model your principle"
+// are two different facts and the second is the one that changes how the routing
+// should be read.
+function withOfflineCaveat(conf, msg){
+  const c = OFFLINE_BLIND[conf.principle];
+  return c ? `${msg} ${c}` : msg;
+}
+function localResult(conf){
+  const r = solve(conf);
+  r.fromSolver = false;
+  if(OFFLINE_BLIND[conf.principle]) r.error = OFFLINE_BLIND[conf.principle];
+  // The offline estimator has no per-timestep matrix, so it cannot separate
+  // cumulative from loudest — both read the same array, and the event count is a
+  // crude "5 dB or more" test. Kept so the tile display never goes blank offline;
+  // the result is already labelled as an estimate wherever it is shown.
+  const offlineChanges = computeChanges(r.vc, r.f, true);
+  r.metrics = {
+    average: offlineChanges.slice(),
+    peak:    offlineChanges.slice(),
+    count:   offlineChanges.map(v=>v>=5?1:0),
+  };
+  r.changes = r.metrics[conf.pattern] || r.metrics.average;
+  Object.assign(r, scoreFromChanges(r.changes, conf));
+  r.lines = ROUTES.map((rt,ri)=>({cells: rt.variants[r.vc[ri]], timeline: rt.variants[r.vc[ri]], holds:[], mult: ADMIN.demand[ri]||1}));
+  r.hoverTiles = {};
+  return r;
+}
+async function computeResult(conf, ctrl){
+  if(!SOLVER.enabled) return localResult(conf);
+  let out;
+  try { out = await solveRemote(conf, ctrl); }
+  catch(e){
+    // A deliberate stop is not a solver failure — it must NOT paint the offline
+    // estimate over a perfectly good previous result. Let it through to renderSide.
+    if(e && e.stopped) throw e;
+    const r = localResult(conf);
+    r.error = withOfflineCaveat(conf, e && e.timedOut
+      ? `The solver did not answer (${e.message}) — it may still be working on an earlier request. `
+        + `Showing the offline estimate instead.`
+      : `Solver unreachable (${e.message}). If you have just edited solver_server_dB.py it is `
+        + `restarting — try again in a moment. Showing the offline estimate instead.`);
+    return r;
+  }
+  const {res, f, cached, degraded} = out;
+  if(res.status !== 'sat'){
+    const r = localResult(conf);
+    r.error = withOfflineCaveat(conf, `Solver found no routing that satisfies this rule (${res.reason||'unsat'}). `
+            + `${res.detail||''} Showing the offline estimate instead.`);
+    return r;
+  }
+  const {starts, ends, mult} = buildStreams(f);
+  // Cumulative exposure is rebuilt from the paths in energy rather than collapsed
+  // from the dB matrix — see cumulativeChanges for why, and note it carries its
+  // own vertiport treatment. The other two metrics ask per-timestep questions, so
+  // they keep the matrix path and the flat vertiport layer.
+  // All three are computed every solve, not just the selected one: each tile now
+  // shows the full set so a group can see what their metric choice is hiding.
+  const metrics = {
+    average: cumulativeChanges(res.paths, starts, ends, mult),
+    peak:    withVertiportLayer(collapseNoise(res.noiseMatrix, 'peak')),
+    count:   collapseNoise(res.noiseMatrix, 'count'),
+  };
+  const displayedChanges = metrics[conf.pattern] || metrics.average;
+  const {before, after} = scoreFromChanges(displayedChanges, conf);
+
+  const visuals = (res.paths||[]).map((p,i)=>({
+    ...pathVisual(p, starts[i], ends[i]), mult: mult[i]||1,
+  }));
+  // Roll the per-route holds up per tile: how many modelled flights loiter there,
+  // and the longest single hold, which is what the badge reports in minutes.
+  const hoverTiles = {};
+  visuals.forEach(v=>v.holds.forEach(h=>{
+    const i = idxAt(h.cell[0],h.cell[1]);
+    if(i<0) return;
+    const flights = v.mult || 1;
+    const tile = hoverTiles[i] || {flights:0,maxSteps:0,totalFlightSteps:0};
+    tile.flights += flights;
+    tile.maxSteps = Math.max(tile.maxSteps,h.extra);
+    tile.totalFlightSteps += flights*h.extra;
+    hoverTiles[i] = tile;
+  }));
+
+  // Trip length is measured from the returned paths, not from totalTransit: the
+  // solver only reports totalTransit when the utilitarian objective is switched
+  // on, so relying on it would make Equal, Sufficientarian and Prioritarian all
+  // claim "most direct" no matter how far the solver actually routed them.
+  // Counting position changes also correctly ignores self-loop holds, which are
+  // waiting, not travel.
+  const floor = starts.reduce((s,_,i)=> s + mult[i]*chebOne(starts[i], ends[i]), 0);
+  let flown = 0;
+  (res.paths||[]).forEach((p,i)=>{
+    let hops = 0;
+    for(let t=1;t<p.length;t++) if(p[t] !== p[t-1]) hops++;
+    flown += (mult[i]||1) * hops;
+  });
+  return {
+    changes: displayedChanges, metrics, hoverTiles, before, after, f, served: Math.round(f*100),
+    tripPct: (flown && floor) ? Math.round((flown/floor - 1)*100) : 0,
+    infeasible: false, fromSolver: true, cached, degraded,
+    lines: visuals,
+    T: res.T_used ?? res.T, T_min: res.T_min, warning: res.warning,
+  };
+}
+
+// Long solver messages collapse to their first clause. The headline still has to
+// carry the actual news on its own — someone who never clicks "more" must still
+// learn that the routing shown ignores their choices — so the split is at the
+// first sentence break, not at a fixed character count that could cut mid-word.
+function notice(cls, text){
+  if(!text) return '';
+  const s = String(text).trim();
+  const m = /^[\s\S]{20,150}?(?:[.!?](?:\s|$)|\s—\s)/.exec(s);
+  const head = m ? m[0].trim() : (s.length > 150 ? s.slice(0,150).replace(/\s\S*$/,'') + '…' : s);
+  if(head.length >= s.length) return `<div class="${cls}">${s}</div>`;
+  return `<details class="${cls}"><summary>${head}</summary><div class="more">${s}</div></details>`;
+}
+
+// Rapid toggling can leave several solves in flight; only the newest may paint.
+// 2026-07-30: the token is now per side. It used to be one shared counter, which
+// meant renderAll's `await renderSide(0); renderSide(1)` sequence could invalidate
+// a side-0 solve that a *newer* interaction had just started — in compare mode the
+// left map would then never repaint. Sides are solved one after the other, so this
+// also gives each one its own cancellable request.
+const renderToken = [0, 0];
+const inFlight = [null, null];   // the AbortController of each side's open /solve
+
+// Tell the server to drop the solve as well as dropping the connection. Fire and
+// forget on purpose: /cancel answers immediately (it never takes the solve lock),
+// and if it is unreachable the caller's abort has still freed the UI.
+function cancelServerSolve(reqId){
+  if(!SOLVER.enabled) return;
+  try{
+    fetch(SOLVER.url + '/cancel', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({clientRequestId: reqId || null}),
+    }).then(r=>{
+      // 404 means the solver predates /cancel. Stop still frees the dashboard,
+      // but Z3 keeps running and holds the lock, so the next solve queues behind
+      // it — worth saying, because that wait looks like a hang.
+      if(r.status === 404) SOLVER.canCancel = false;
+    }).catch(()=>{});
+  }catch(e){}
+}
+// Switching principle mid-solve, or pressing Stop, both land here. Marking the
+// controller `.stopped` before aborting is what tells postSolve this was a choice
+// rather than a timeout.
+function cancelSide(si){
+  const c = inFlight[si];
+  if(c){ c.stopped = true; c.abort(); inFlight[si] = null; cancelServerSolve(c.reqId); }
+}
+function showStop(on){
+  const b = document.getElementById('stopSolveBtn');
+  if(b) b.style.display = on ? '' : 'none';
+}
+function stopSolving(){
+  // Bump both tokens first so anything already past its await is orphaned too.
+  renderToken[0]++; renderToken[1]++;
+  cancelSide(0); cancelSide(1);
+  stopProgress();
+  showStop(false);
+  setStatus(SOLVER.canCancel === false
+    ? 'Stopped here — this solver build has no /cancel, so it is still finishing that request'
+    : 'Stopped', false);
+}
+
+async function renderSide(si){
+  const s = state.sides[si];
+  const conf = {...s, protected: state.protected};
+  const st = document.querySelector(`[data-stats="${si}"]`);
+
+  // All four create-your-own slots must be filled before anything is solved —
+  // an empty slot has no baseline, so the solver would be handed a made-up 55 dB
+  // community and the group would be shown a result about a place nobody chose.
+  const gaps = cyoGaps();
+  if(gaps.length){
+    st.innerHTML = `<div class="gate"><div class="card"><h3>Fill the create-your-own slots first</h3>
+      Solving is paused until all four slots have a community. Click each dashed tile on the
+      map to add one, or prefill them in <strong>Facilitator set-up</strong>.
+      <ul>${gaps.map(c=>`<li>${c.name}${c.slotNote?` — ${c.slotNote}`:''}</li>`).join('')}</ul></div></div>`;
+    renderGrid(si, COMMUNITIES.map(()=>0), s.pattern);
+    const svg0 = document.querySelector(`[data-svg="${si}"]`); if(svg0) svg0.innerHTML = '';
+    const rk0 = document.querySelector(`[data-rank="${si}"]`); if(rk0) rk0.innerHTML = '';
+    setStatus('Waiting on create-your-own slots', false);
+    return;
+  }
+
+  // A new choice for this side supersedes the one still solving: drop the old
+  // request rather than letting it hold the server's lock while its answer is
+  // already destined for the bin.
+  cancelSide(si);
+  const token = ++renderToken[si];
+  if(!s.lastResult) st.innerHTML = `<div class="stat"><div class="k">Solving</div><div class="v">…</div></div>`;
+  // Debounce before firing. The solver serializes every request behind one lock,
+  // so a participant clicking through four principles would otherwise queue four
+  // full solves and wait for all of them. Settling first means only the choice
+  // they landed on is actually sent.
+  await new Promise(r => setTimeout(r, 250));
+  if(token !== renderToken[si]) return;
+
+  const ctrl = new AbortController();
+  inFlight[si] = ctrl;
+  let res;
+  try{
+    showStop(true);
+    res = await computeResult(conf, ctrl);
+  }catch(e){
+    // Stopped or superseded. Whatever is on screen is still the last thing the
+    // group actually chose, so leave it standing.
+    if(e && e.stopped) return;
+    throw e;
+  }finally{
+    if(inFlight[si] === ctrl) inFlight[si] = null;
+    showStop(false);
+  }
+  if(token !== renderToken[si]) return;   // superseded by a newer interaction
+  s.lastResult = res;
+  setStatus(res.error ? 'Offline estimate'
+    : res.cached ? `Loaded from saved results (T=${res.T})`
+    : res.fromSolver ? `Solved · T=${res.T}${res.T_min?` (min ${res.T_min})`:''}` : 'Offline estimate', false);
+
+  const servedDelta = res.served<100 ? `<span class="delta down">▼ rules cut ${100-res.served}% of flights</span>` : `<span class="delta good">all demand flown</span>`;
+  const tripDelta = res.tripPct>0 ? `<span class="delta up">▲ ${res.tripPct}% longer</span>` : `<span class="delta good">most direct</span>`;
+  const metricStat = s.pattern==='count'
+    ? `<div class="stat"><div class="k" data-hint="Each event is one ${TIMESTEP_SECONDS/60}-minute period at least 5 dB above baseline.">Noise Event Count</div><div class="v">${eventCountText(res.after)} events</div>${res.infeasible?'<div class="note">⚠ no routing met this limit</div>':''}</div>`
+    : `<div class="stat"><div class="k"${s.pattern==='average'?` data-hint="Energy received over one hour of steady traffic — not one pass of the solver's clock."`:''}>${metricLabel(s.pattern)}: before and with UAM</div><div class="v">${res.before.toFixed(1)} → ${res.after.toFixed(1)} dB <span class="delta ${res.after-res.before>3?'up':'good'}">+${(res.after-res.before).toFixed(1)} dB</span></div>${res.infeasible?'<div class="note">⚠ no routing met this limit</div>':''}</div>`;
+  st.innerHTML = `
+    ${notice('solveerr', res.error)}
+    ${notice('solvewarn', res.warning)}
+    <div class="stat"><div class="k">Demand served: riders who want a flight this hour</div><div class="v">${res.served}% ${servedDelta}</div></div>
+    <div class="stat"><div class="k">Trip length: how much longer than the most direct route</div><div class="v">${res.tripPct>0?'+'+res.tripPct+'%':'±0%'} ${tripDelta}</div></div>
+    ${metricStat}`;
+  renderGrid(si, res.changes, s.pattern, res.metrics, res.hoverTiles);
+  // 2026-07-28 session: the map colors show ADDED noise, so the strip above
+  // gives the other half of the picture — the loudest places by total noise.
+  const rk = document.querySelector(`[data-rank="${si}"]`);
+  if(rk){
+    const ranked = COMMUNITIES.map((c,i)=>({c,i,total:s.pattern==='count' ? res.changes[i] : (c.base??55)+res.changes[i]}))
+      .filter(x=>!x.c.cyo || x.c.claimed || x.c.adminSet)
+      .sort((a,b)=> b.total - a.total).slice(0,3);
+    const hoverCount = Object.keys(res.hoverTiles||{}).length;
+    const hoverSummary = `<span class="hoversummary">⏸ ${hoverCount ? `Hovering on ${hoverCount} tile${hoverCount===1?'':'s'}` : 'No in-flight hovering on this route'}</span><span>·</span>`;
+    rk.innerHTML = hoverSummary + (s.pattern==='count'
+      ? `<span>Most noise events:</span> ` + ranked.map((x,n)=>`<span><strong>${n+1}. ${x.c.name}</strong> ${eventCountText(x.total)}</span>`).join(' · ')
+      : `<span>${s.pattern==='peak'?'Loudest noise events':'Highest cumulative noise'}:</span> ` + ranked.map((x,n)=>`<span><strong>${n+1}. ${x.c.name}</strong> ${x.total%1?x.total.toFixed(1):x.total} dB</span>`).join(' · '));
+  }
+  const legend = document.querySelector(`[data-legend="${si}"]`);
+  // In cumulative mode the vertiports are on a second, wider ramp — say so, or
+  // the same colour would mean two different things on one map.
+  if(legend) legend.innerHTML = s.pattern==='count'
+    ? '<span>Noise events:</span><span>few</span><span class="ramp"></span><span>most</span>'
+    : s.pattern==='average'
+      ? `<span>Cumulative noise:</span><span>lower</span><span class="ramp"></span><span>higher</span>`
+        + `<span style="margin-left:2px">· 0–${HEAT_FULL_SCALE} dB, vertiports 0–${HEAT_FULL_SCALE_VP} dB</span>`
+      : `<span>Loudest noise event:</span><span>lower</span><span class="ramp"></span><span>higher</span>`;
+  renderPaths(si, res);
+}
+
+// Grid tiles. Extracted from renderSide so the create-your-own gate can blank the
+// map without duplicating the tile markup.
+// All three outcomes on one tile. The one currently driving the map colour and the
+// fairness comparison is marked active, so the choice is visible rather than implied.
+function tileMetrics(c, i, metrics, pattern){
+  if(!metrics) return '';
+  const cumulative = metrics.average?.[i] || 0;
+  const peak = metrics.peak?.[i] || 0;
+  const count = metrics.count?.[i] || 0;
+  const baseline = c.base ?? 55;
+  const total = v => `${(baseline+v).toFixed(1)} dB`;
+  return `<div class="tilemetrics" aria-label="All noise outcomes">
+    <div class="tilemetric ${pattern==='average'?'active':''}" aria-label="Cumulative noise: ${baseline.toFixed(1)} dB without UAM, ${(baseline+cumulative).toFixed(1)} dB with UAM, an increase of ${cumulative.toFixed(1)} dB"><span class="mk">Cumulative</span><span class="mv">${baseline.toFixed(1)} → ${(baseline+cumulative).toFixed(1)} <span class="metricdelta">(+${cumulative.toFixed(1)})</span></span></div>
+    <div class="tilemetric ${pattern==='peak'?'active':''}"><span class="mk">Loudest</span><span class="mv">${total(peak)}</span></div>
+    <div class="tilemetric ${pattern==='count'?'active':''}"><span class="mk">Events</span><span class="mv">${eventCountText(count)}</span></div>
+  </div>`;
+}
+function hoverBadge(hover){
+  if(!hover) return '';
+  const minutes = hover.maxSteps * TIMESTEP_SECONDS / 60;
+  return `<div class="hovermark" data-hint="${hover.flights} modeled flight${hover.flights===1?'':'s'} remain${hover.flights===1?'s':''} over this tile for up to ${minutes} minute${minutes===1?'':'s'}.">⏸ Hovering: ${hover.flights} flight${hover.flights===1?'':'s'} · ${minutes} min</div>`;
+}
+function renderGrid(si, changes, pattern='average', metrics=null, hoverTiles={}){
+  const g = document.querySelector(`[data-grid="${si}"]`);
+  g.innerHTML = COMMUNITIES.map((c,i)=>{
+    const chg = changes[i] || 0;
+    // The star outline has to appear on every branch, not just the last one, or a
+    // protected create-your-own community would look unprotected on the map.
+    const protd = state.protected.includes(i) ? ' protected' : '';
+    if(c.cyo && !c.claimed && !c.adminSet){
+      return `<div class="tile cyo" data-i="${i}" data-hint="Facilitators may prefill this slot; participants can add or revise it."><div class="nm">＋ ${c.name}</div><div class="band">click to create · editable later</div></div>`;
+    }
+    if(c.cyo && !c.claimed && c.adminSet){
+      // solver attributes set by the admin; a group can still claim the slot
+      return `<div class="tile cyo${protd}" data-i="${i}" style="background:${heat(chg, pattern, !!c.vp)}">
+        <div><div class="nm">＋ ${c.name}</div><div class="band">prefilled by facilitator · click to complete</div>${tileMetrics(c,i,metrics,pattern)}</div>
+        <div class="chg ${noChange(chg)?'zero':''}">${pattern==='count' ? `${eventCountText(chg)} event${chg===1?'':'s'}` : `${noChange(chg)?'±0':'+'+chg.toFixed(1)} dB`}</div>
+        ${hoverBadge(hoverTiles[i])}</div>`;
+    }
+    // 2026-07-28 session: "Quiet/Moderate/Loud place" label replaced with the
+    // before → after dB under the name; tile fill stays the added-noise ramp.
+    return `<div class="tile${c.cyo?' cyo':''}${c.vp?' vp':''}${protd}" data-i="${i}" data-hint="Click for details${prioritarianActive()?' and the option to protect this community':''}." style="background:${heat(chg, pattern, !!c.vp)}">
+      <div><div class="nm">${c.name}</div>${tileMetrics(c,i,metrics,pattern)}</div>
+      <div class="chg ${noChange(chg)?'zero':''}">${pattern==='count' ? `${eventCountText(chg)} event${chg===1?'':'s'}` : `${noChange(chg)?'±0':'+'+chg.toFixed(1)} dB`}</div>
+      ${hoverBadge(hoverTiles[i])}</div>`;
+  }).join('');
+  g.querySelectorAll('.tile').forEach(t =>{
+    const open = ()=> openDrawer(+t.dataset.i, si);
+    t.tabIndex = 0;
+    t.setAttribute('role','button');
+    t.onclick = open;
+    t.onkeydown = e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); } };
+  });
+}
+
+// 2026-07-30 session: the corridors drawn are now the SOLVER's chosen paths — one
+// polyline per aircraft stream rather than a pick from three fixed variants. This
+// is the visible payoff of free routing: streams on the same OD pair can diverge,
+// and the map shows it.
+function renderPaths(si, res){
+  const svg = document.querySelector(`[data-svg="${si}"]`);
+  const W = svg.clientWidth || 600, H = svg.clientHeight || 500;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const cx = c => (c + .5) * (W/5), cy = r => (r + .5) * (H/5);
+
+  // Merge duplicates: a stream and its return leg trace the same corridor, so
+  // draw one two-way line (thicker) instead of two identical overlapping ones.
+  const uniq = new Map();
+  (res.lines||[]).forEach(({cells, mult})=>{
+    if(!cells || cells.length < 2) return;
+    const key = cells.map(p=>p.join()).join('>');
+    const rev = cells.slice().reverse().map(p=>p.join()).join('>');
+    const hit = uniq.get(key) || uniq.get(rev);
+    if(hit) hit.mult += (mult||1); else uniq.set(key, {cells, mult: mult||1});
+  });
+
+  let lines = '';
+  const vpSpots = {};
+  [...uniq.values()].forEach((L, k)=>{
+    const d = 'M' + L.cells.map(([c,w])=>`${cx(c).toFixed(1)},${cy(w).toFixed(1)}`).join(' L');
+    lines += `<path class="corr" id="corr-${si}-${k}" d="${d}" style="stroke-width:${Math.min(6, 1.5 + L.mult*0.7).toFixed(1)}"/>`;
+    vpSpots[L.cells[0].join()] = [cx(L.cells[0][0]), cy(L.cells[0][1])];
+    const last = L.cells[L.cells.length-1];
+    vpSpots[last.join()] = [cx(last[0]), cy(last[1])];
+    // 2026-07-29 session (Whit + Jeff): flights run both ways — opposing
+    // arrowheads mid-route, a dot on each vertiport, and moving dots for flights.
+    const m = Math.max(1, Math.floor(L.cells.length/2));
+    const x1=cx(L.cells[m-1][0]), y1=cy(L.cells[m-1][1]), x2=cx(L.cells[m][0]), y2=cy(L.cells[m][1]);
+    const mx=(x1+x2)/2, my=(y1+y2)/2, len=Math.hypot(x2-x1,y2-y1)||1;
+    const ux=(x2-x1)/len, uy=(y2-y1)/len, vx=-uy, vy=ux;
+    const tri = (px,py,dx,dy)=>`<polygon points="${px+dx*7},${py+dy*7} ${px-dx*2+vx*4.5},${py-dy*2+vy*4.5} ${px-dx*2-vx*4.5},${py-dy*2-vy*4.5}" fill="#334155" fill-opacity=".55"/>`;
+    lines += tri(mx+ux*9, my+uy*9, ux, uy) + tri(mx-ux*9, my-uy*9, -ux, -uy);
+    const dots = Math.max(1, Math.min(6, Math.round(L.mult)));
+    const dur = 6 + k*1.1;
+    for(let j=0;j<dots;j++){
+      lines += `<circle r="3.5" fill="var(--accent)" opacity="0.9"><animateMotion dur="${dur}s" repeatCount="indefinite" begin="${-(j*dur/dots).toFixed(2)}s"><mpath href="#corr-${si}-${k}"/></animateMotion></circle>`;
+      lines += `<circle r="3.5" fill="var(--accent)" opacity="0.5"><animateMotion dur="${dur}s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" begin="${-(j*dur/dots + dur/2).toFixed(2)}s"><mpath href="#corr-${si}-${k}"/></animateMotion></circle>`;
+    }
+  });
+  Object.values(vpSpots).forEach(([x,y])=>{
+    lines += `<circle cx="${x}" cy="${y}" r="5.5" fill="var(--accent)" stroke="#fff" stroke-width="1.5"/>`;
+  });
+  svg.innerHTML = lines;
+}
+
+// ---------------------------------------------------------------------------
+// Drawer: full attributes, watch, protect / CYO form
+// ---------------------------------------------------------------------------
+function openDrawer(i, si){
+  state.drawer = {i, si};
+  renderDrawer();
+}
+
+// 2026-07-30: create-your-own communities can be protected too.
+//
+// They were excluded by a `!c.cyo` test, which made the four slots the only
+// places on the map a group could not choose to shelter — exactly the communities
+// the group invented for themselves, and the ones a prioritarian discussion is
+// most likely to be about. A filled slot is a real station to the solver already
+// (statTiles counts it, stationOf numbers it), so nothing downstream needed to
+// change; the button was simply never offered.
+//
+// "Filled" means claimed by a group OR set up by the admin. An admin-set slot is
+// already coloured on the map and already in the solve, so refusing to protect it
+// would be the same inconsistency in a smaller form. A blank slot stays out: it
+// has no baseline and no attributes, and the solve gate blocks on it anyway.
+function isRealCommunity(c){ return Boolean(!c.cyo || c.claimed || c.adminSet); }
+function renderProtectPicker(){
+  const list = document.getElementById('protectList');
+  const atMax = state.protected.length >= 3;
+  list.innerHTML = COMMUNITIES.map((c,i)=>{
+    if(!isRealCommunity(c)) return '';
+    const selected = state.protected.includes(i);
+    return `<label class="protectoption"><input type="checkbox" data-protect="${i}" ${selected?'checked':''} ${atMax&&!selected?'disabled':''}><span>${c.name}</span></label>`;
+  }).join('');
+  list.querySelectorAll('[data-protect]').forEach(box=>{
+    box.onchange = ()=>{
+      const i = +box.dataset.protect;
+      if(box.checked && state.protected.length < 3 && !state.protected.includes(i)) state.protected.push(i);
+      if(!box.checked) state.protected = state.protected.filter(x=>x!==i);
+      renderProtectPicker();
+    };
+  });
+}
+function openProtectPicker(){
+  renderProtectPicker();
+  document.getElementById('protectwrap').classList.add('open');
+}
+function closeProtectPicker(){
+  document.getElementById('protectwrap').classList.remove('open');
+  renderAll();
+}
+function prioritarianActive(){
+  return state.sides[0].principle==='prioritarian'
+      || (state.compare && state.sides[1] && state.sides[1].principle==='prioritarian');
+}
+function protectButton(i){
+  if(!isRealCommunity(COMMUNITIES[i])) return '';
+  const isProt = state.protected.includes(i);
+  const canProt = isProt || state.protected.length < 3;
+  return `<button class="btn ${isProt?'primary':''}" id="protBtn" ${canProt?'':'disabled'}>`
+       + `${isProt?'★ Protected — click to remove':'Protect this community ('+state.protected.length+'/3)'}</button>`;
+}
+function wireProtectButton(d, i){
+  const pb = d.querySelector('#protBtn');
+  if(!pb) return;
+  pb.onclick = ()=>{
+    if(state.protected.includes(i)) state.protected = state.protected.filter(x=>x!==i);
+    else if(state.protected.length < 3) state.protected.push(i);
+    renderAll();
+  };
+}
+function renderDrawer(){
+  const d = document.getElementById('drawer');
+  if(state.drawer===null){ d.classList.remove('open'); return; }
+  const {i, si} = state.drawer;
+  const c = COMMUNITIES[i];
+  d.classList.add('open');
+  if(c.cyo && (!c.claimed || state.editingCyo===i)){
+    const isEditing = c.claimed && state.editingCyo===i;
+    d.innerHTML = `<button class="close">✕</button><h3>${isEditing?'Edit '+c.name:c.name}</h3><div class="sub">Facilitators may prefill a slot; participants can complete or revise it here.</div>
+      <div class="cform">
+        <label><span>Community name</span><input id="f_name" placeholder="e.g. Montopolis"></label>
+        <label><span>Population</span><select id="f_Population"><option>Low</option><option selected>Medium</option><option>High</option></select></label>
+        <label><span>Income</span><select id="f_Income"><option>Low</option><option selected>Medium</option><option>High</option></select></label>
+        <label><span>Race / ethnicity</span><select id="f_Race"><option>Mostly white</option><option>Mostly Hispanic</option><option>Mostly Black</option><option>Mostly Asian</option><option selected>Mixed</option></select></label>
+        <label><span>Life stage</span><select id="f_Life"><option>Families</option><option>Younger adults</option><option>Mostly older adults</option><option selected>Mixed ages</option></select></label>
+        <label><span>Housing</span><select id="f_Housing"><option>Owners</option><option>Renters</option><option selected>Mixed</option></select></label>
+        <label><span>Transport</span><select id="f_Transport"><option>Desert</option><option selected>Some</option><option>Oasis</option></select></label>
+        <label><span>Employment</span><select id="f_Employment"><option>Hub</option><option selected>Balance</option><option>Few local jobs</option></select></label>
+        <label><span>Land use</span><select id="f_Land"><option selected>Residential</option><option>Mixed</option><option>Commercial</option><option>Industrial</option></select></label>
+        <label><span>Current noise</span><select id="f_Noise"><option value="45">Quiet (45 dB)</option><option value="55" selected>Moderate (55 dB)</option><option value="65">Loud (65 dB)</option></select></label>
+        <div class="warn" id="f_warn">Industrial or commercial areas can’t be Quiet — pick Moderate or Loud.</div>
+        <button class="btn primary" id="f_save">${isEditing?'Save changes':'Add to the map'}</button>
+        ${isEditing?'<button class="btn" id="f_cancel">Cancel editing</button>':''}
+      </div>
+      ${c.adminSet && prioritarianActive()
+        ? `<div class="actions">${protectButton(i)}</div>` : ''}`;
+    d.querySelector('.close').onclick = ()=>{ state.drawer=null; state.editingCyo=null; renderDrawer(); };
+    // An admin-set slot is already in the solve, so it can be protected before a
+    // group claims it. Claiming later keeps the same index, so the choice sticks.
+    wireProtectButton(d, i);
+    const landSel = d.querySelector('#f_Land'), noiseSel = d.querySelector('#f_Noise'), warn = d.querySelector('#f_warn');
+    // Prefill every existing participant field during edit. For an untouched
+    // facilitator slot, only the solver attributes are known.
+    if(isEditing){
+      d.querySelector('#f_name').value = c.name;
+      const fieldMap = {Population:'Population',Income:'Income',Race:'Race',Life:'Life stage',Housing:'Housing',Transport:'Transport',Employment:'Employment',Land:'Land use'};
+      Object.entries(fieldMap).forEach(([id,key])=>{ if(c.attrs && c.attrs[key]) d.querySelector('#f_'+id).value = c.attrs[key]; });
+      noiseSel.value = String(c.base);
+    } else if(c.adminSet){
+      d.querySelector('#f_Population').value = c.attrs.Population;
+      noiseSel.value = String(c.base);
+    }
+    function checkConstraint(){
+      const bad = ['Commercial','Industrial'].includes(landSel.value) && noiseSel.value==='45';
+      warn.style.display = bad ? 'block' : 'none';
+      return !bad;
+    }
+    landSel.onchange = noiseSel.onchange = checkConstraint;
+    d.querySelector('#f_save').onclick = ()=>{
+      if(!checkConstraint()) return;
+      const nm = d.querySelector('#f_name').value.trim() || c.name;
+      c.claimed = true; c.name = nm; c.base = +noiseSel.value;
+      c.attrs = {Population:val('f_Population'),Income:val('f_Income'),Race:val('f_Race'),'Life stage':val('f_Life'),Housing:val('f_Housing'),Transport:val('f_Transport'),Employment:val('f_Employment'),'Land use':val('f_Land'),Landmarks:'—'};
+      state.drawer = null; state.editingCyo = null; renderAll();
+    };
+    const cancel = d.querySelector('#f_cancel');
+    if(cancel) cancel.onclick = ()=>{ state.editingCyo=null; renderDrawer(); };
+    function val(id){ return d.querySelector('#'+id).value; }
+    return;
+  }
+  const s = state.sides[si];
+  const res = s.lastResult;
+  const attrs = Object.entries(c.attrs || {}).map(([k,v])=>`<div class="a"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  const isProtectable = prioritarianActive();
+  // The drawer used to repeat only the selected metric, which made it the one place
+  // a group could not check what the other two said about the tile they had opened.
+  const metricSummary = res?.metrics
+    ? tileMetrics(c, i, res.metrics, s.pattern)
+    : '<span>No solved result yet.</span>';
+  const hover = res?.hoverTiles?.[i];
+  const hoverSummary = hover
+    ? `<div class="hovermark">⏸ ${hover.flights} modeled flight${hover.flights===1?'':'s'} hover${hover.flights===1?'s':''} over this tile for up to ${hover.maxSteps*TIMESTEP_SECONDS/60} minutes (${hover.maxSteps} extra timestep${hover.maxSteps===1?'':'s'}).</div>`
+    : '';
+  d.innerHTML = `<button class="close">✕</button>
+    <h3>${c.name}${c.vp?' · '+c.vp+' Vertiport':''}</h3>
+    <div class="sub">${BANDS[c.base]} place · baseline ${c.base} dB${c.claimed?' · added by your group':''}</div>
+    <div class="noisebar">${metricSummary}${hoverSummary}</div>
+    <div class="attrs">${attrs}</div>
+    <div class="actions">
+      ${isProtectable ? protectButton(i) : ''}
+      ${c.cyo ? '<button class="btn" id="editCyoBtn">Edit this community</button><button class="btn" id="resetCyoBtn">Reset this slot</button>' : ''}
+    </div>`;
+  d.querySelector('.close').onclick = ()=>{ state.drawer=null; renderDrawer(); };
+  wireProtectButton(d, i);
+  const editCyo = d.querySelector('#editCyoBtn');
+  if(editCyo) editCyo.onclick = ()=>{ state.editingCyo=i; renderDrawer(); };
+  const resetCyo = d.querySelector('#resetCyoBtn');
+  if(resetCyo) resetCyo.onclick = ()=>{
+    if(!confirm('Reset this create-your-own slot? You can fill it in again afterward.')) return;
+    c.claimed = false;
+    c.name = c.slotName;
+    const slot = COMMUNITIES.filter(x=>x.cyo).indexOf(c);
+    const prefill = ADMIN.cyo[slot];
+    c.adminSet = Boolean(prefill);
+    c.base = prefill ? prefill.base : null;
+    c.attrs = prefill ? {Population:prefill.pop} : null;
+    state.protected = state.protected.filter(x=>x!==i);
+    state.editingCyo = null;
+    state.drawer = null;
+    renderAll();
+  };
+}
+
+// ---------------------------------------------------------------------------
+async function renderAll(){
+  document.getElementById('maparea').classList.toggle('compare', state.compare);
+  // 2026-07-28 session: in compare, the left rail hides so the two maps get
+  // the full width — settings stay changeable in each map's header row.
+  document.getElementById('main').classList.toggle('hiderail', state.compare);
+  document.getElementById('side1').style.display = state.compare ? 'flex' : 'none';
+  document.getElementById('exitCompareBtn').style.display = state.compare ? '' : 'none';
+  renderRail();
+  renderMetricBar(0);
+  renderMetricBar(1);
+  renderCompareBar();
+  renderSideHead(0);
+  // 2026-07-30 session: solving is now a network round trip, so the drawer is
+  // painted both before and after — the panel stays usable during the wait and
+  // then picks up the new numbers.
+  renderDrawer();
+  await renderSide(0);
+  if(state.compare){ renderSideHead(1); await renderSide(1); }
+  renderDrawer();
+}
+const toggleCompare = ()=>{
+  state.compare = !state.compare;
+  // Entering compare loads the saved set-ups (A and B) if the group made them.
+  if(state.compare && state.saved.length){
+    state.sides[0] = {...state.saved[0]};
+    if(state.saved[1]) state.sides[1] = {...state.saved[1]};
+  }
+  renderAll();
+};
+document.getElementById('stopSolveBtn').onclick = stopSolving;
+document.getElementById('compareBtn').onclick = toggleCompare;
+document.getElementById('exitCompareBtn').onclick = toggleCompare;
+const protectwrap = document.getElementById('protectwrap');
+document.getElementById('protectClose').onclick = closeProtectPicker;
+document.getElementById('protectDone').onclick = closeProtectPicker;
+protectwrap.onclick = e => { if(e.target === protectwrap) closeProtectPicker(); };
+document.getElementById('saveBtn').onclick = ()=>{
+  if(state.saved.length < MAX_SAVED && !state.saved.some(st=>sameSetup(st,state.sides[0]))){
+    const {principle, limit, who, pattern, propOrder, propPopulation} = state.sides[0];
+    state.saved.push({principle, limit, who, pattern,
+                      propOrder:[...cleanPropOrder(propOrder)], propPopulation:propPopulation!==false});
+  }
+  renderAll();
+};
+// 2026-07-29 session (Whit + Jeff): admin set-up page
+const adminwrap = document.getElementById('adminwrap');
+// The note quotes the resulting aircraft count, because N is what actually
+// decides whether a solve takes 30s or runs out its budget — otherwise this
+// toggle reads as an abstract modelling preference with a hidden cost.
+function streamNote(){
+  const sel = document.getElementById('ad_streams');
+  const note = document.getElementById('ad_streamnote');
+  if(!sel || !note) return;
+  const counts = [0,1,2].map(k => Math.max(1, +document.getElementById('ad_d'+k).value || 0));
+  const split = sel.value === 'split';
+  const n = split ? 12 : counts.reduce((a,b)=> a + b*2, 0);
+  note.innerHTML = split
+    ? `<strong>${n} aircraft</strong> in the solver, whatever the demand — each direction is
+       packed into a 1/3 and a 2/3 stream and the count rides in the stream weight. Much
+       faster to solve, but coarser: the 2/3 stream puts its whole weight on one tile at
+       once, which can make a tight dB limit unsatisfiable that the same flights could have
+       met by spreading out.`
+    : `<strong>${n} aircraft</strong> in the solver — one per flight, every weight 1. Flights
+       on the same corridor route independently and can diverge, and no tile ever takes a
+       whole group's noise at one moment. The truer picture, and the slower one: the search
+       space grows with every extra aircraft.`;
+}
+document.getElementById('ad_streams').onchange = streamNote;
+[0,1,2].forEach(k => document.getElementById('ad_d'+k).oninput = streamNote);
+document.getElementById('adminBtn').onclick = ()=>{
+  document.getElementById('ad_streams').value = ADMIN.streamMode;
+  streamNote();
+  adminwrap.classList.add('open');
+};
+document.getElementById('adminClose').onclick = ()=> adminwrap.classList.remove('open');
+adminwrap.onclick = e => { if(e.target === adminwrap) adminwrap.classList.remove('open'); };
+function applyAdmin(){
+  ADMIN.demand = [0,1,2].map(k => Math.max(0, +document.getElementById('ad_d'+k).value || 0));
+  ADMIN.aircraft = +document.getElementById('ad_ac').value || 45;
+  ADMIN.vpNoise = +document.getElementById('ad_vp').value || 0;
+  ADMIN.streamMode = document.getElementById('ad_streams').value === 'split' ? 'split' : 'individual';
+  // create-your-own slots: population + current noise are what the solver uses
+  const slots = COMMUNITIES.filter(c => c.cyo);
+  slots.forEach((c,k)=>{
+    const pop = document.getElementById('ad_cp'+k).value;
+    const noise = document.getElementById('ad_cn'+k).value;
+    ADMIN.cyo[k] = noise ? {pop: pop || 'Medium', base: +noise} : null;
+    if(c.claimed) return; // a group's own entry wins
+    if(ADMIN.cyo[k]){
+      c.adminSet = true; c.base = ADMIN.cyo[k].base;
+      c.attrs = {Population: ADMIN.cyo[k].pop};
+    } else {
+      c.adminSet = false; c.base = null; c.attrs = null;
+      // Emptying a slot must drop any protection on it. Left behind, the index
+      // would still be sent as a protected station and would silently transfer to
+      // whichever community fills the slot next — protecting somebody the group
+      // never chose, under a principle whose whole point is that they choose.
+      const idx = COMMUNITIES.indexOf(c);
+      state.protected = state.protected.filter(x => x !== idx);
+    }
+  });
+  // 2026-07-30 session: solver settings
+  SOLVER.enabled = document.getElementById('ad_use').value === '1';
+  SOLVER.url = (document.getElementById('ad_url').value || 'http://127.0.0.1:5051').replace(/\/+$/,'');
+  SOLVER.slack = Math.max(0, Math.min(4, +document.getElementById('ad_slack').value || 0));
+  // Entered in minutes, sent in ms. Clamped to 1–30 min, inside the 5s–30 min
+  // window the server itself enforces, so a typo cannot tie up the single solve
+  // lock for hours.
+  SOLVER.timeoutMs = Math.max(1, Math.min(30, +document.getElementById('ad_timeout').value || 10)) * 60000;
+  const total = ADMIN.demand.reduce((a,b)=>a+b,0);
+  document.getElementById('demandChip').textContent = `Scenario demand: ${total} aircraft aloft per direction · facilitator setting`;
+  adminwrap.classList.remove('open');
+  renderAll();
+}
+document.getElementById('adminApply').onclick = applyAdmin;
+// 2026-07-30 session: resize must NOT re-solve. It only changes pixel geometry,
+// so redraw the corridors from the result already in hand — otherwise every drag
+// of the window edge would queue another Z3 run.
+let resizeTimer = null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{
+    [0,1].forEach(si=>{
+      if(si===1 && !state.compare) return;
+      const r = state.sides[si].lastResult;
+      if(r) renderPaths(si, r);
+    });
+  }, 120);
+});
+renderAll();
+</script>
+</body>
+</html>
