@@ -837,11 +837,17 @@ function setStatus(msg, busy){
 // freeze at whatever the dead solve last wrote. Each start claims a generation and
 // only that generation may stop it; stopProgress() with no argument is the
 // unconditional form, used when the user stops everything.
+// How many consecutive failed polls before the status line says so. At 700ms a
+// blip or a GC pause can lose one or two; three (~2.1s) means the solver is
+// really not answering. It self-heals — a later successful poll resets the count
+// and repaints the phase.
+const PROGRESS_MAX_MISSES = 3;
 let progressTimer = null, progressGen = 0, progressLive = false;
 function startProgress(label){
   const gen = ++progressGen;
   if(progressTimer){ clearInterval(progressTimer); progressTimer = null; }
   progressLive = true;
+  let misses = 0;
   progressTimer = setInterval(async ()=>{
     try{
       const r = await fetch(SOLVER.url + '/progress');
@@ -854,12 +860,23 @@ function startProgress(label){
       // reach. progressLive covers Stop (which does not bump the generation) and
       // the generation covers a solve superseded by a newer one.
       if(!progressLive || gen !== progressGen) return;
+      misses = 0;
       if(p && p.phase){
         const el = p.elapsed_s != null ? ` ${p.elapsed_s}s` : '';
         const tt = p.phase==='phase1' && p.T ? ` (testing T=${p.T})` : '';
         setStatus(`${label} — ${p.phase}${tt}${el}`, true);
       }
-    }catch(e){ /* progress is best-effort; never let it break a solve */ }
+    }catch(e){
+      // A failed poll must never break the solve — but silence is its own
+      // failure. Nothing else writes to this line while a solve is in flight, so
+      // a solver that dies mid-solve used to leave the last phase frozen there
+      // with the busy animation still running, for as long as the outer request
+      // budget (timeoutMs * 2 + 15s) took to give up. Say it plainly instead.
+      if(!progressLive || gen !== progressGen) return;
+      if(++misses >= PROGRESS_MAX_MISSES){
+        setStatus('Solver unreachable — it may have stopped. Press Stop solving to give up on this one.', false);
+      }
+    }
   }, 700);
   return gen;
 }
@@ -1371,7 +1388,7 @@ function renderMetricBar(si){
   const el = document.querySelector(`[data-metricbar="${si}"]`);
   if(!el) return;
   const s = state.sides[si];
-  el.innerHTML = `<strong>Which noise matters?</strong><div class="seg">
+  el.innerHTML = `<strong>Use for fairness + map color</strong><div class="seg">
     <button data-v="average" data-hint="Total noise energy received over one hour of steady traffic. Each tile shows no UAM → with UAM, then the change.">Cumulative</button>
     <button data-v="peak" data-hint="The highest modeled timestep level on that tile.">Loudest event</button>
     <button data-v="count" data-hint="Counts ${TIMESTEP_SECONDS/60}-minute periods at least 5 dB above baseline.">Event count</button>
