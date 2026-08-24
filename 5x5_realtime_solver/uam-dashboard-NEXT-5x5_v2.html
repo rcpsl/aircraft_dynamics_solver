@@ -848,6 +848,17 @@ function startProgress(label){
   if(progressTimer){ clearInterval(progressTimer); progressTimer = null; }
   progressLive = true;
   let misses = 0;
+  // When our request went out. /progress describes THE SERVER, not our request:
+  // only one solve runs at a time, so while another holds _solve_lock ours has not
+  // started and the phase being reported belongs to somebody else. That is how a
+  // fresh principle switch could show "phase2 120s" — a clock already running when
+  // we asked. If the reported phase has been going longer than we have been
+  // waiting, it began before our request existed, so it cannot be ours.
+  //
+  // 1.5s of slack absorbs clock jitter. A foreign solve that entered its current
+  // phase after we asked still reads as ours; that is a much smaller lie, and not
+  // one the client can catch without the server naming the running request.
+  const t0 = Date.now();
   progressTimer = setInterval(async ()=>{
     try{
       const r = await fetch(SOLVER.url + '/progress');
@@ -864,6 +875,10 @@ function startProgress(label){
       if(p && p.phase){
         const el = p.elapsed_s != null ? ` ${p.elapsed_s}s` : '';
         const tt = p.phase==='phase1' && p.T ? ` (testing T=${p.T})` : '';
+        if(p.elapsed_s != null && p.elapsed_s > (Date.now() - t0)/1000 + 1.5){
+          setStatus(`Waiting for an earlier solve to finish (${p.phase}${el}) — yours starts when it does`, true);
+          return;
+        }
         setStatus(`${label} — ${p.phase}${tt}${el}`, true);
       }
     }catch(e){
@@ -1622,39 +1637,82 @@ const inFlight = [null, null];   // the AbortController of each side's open /sol
 // Tell the server to drop the solve as well as dropping the connection. Fire and
 // forget on purpose: /cancel answers immediately (it never takes the solve lock),
 // and if it is unreachable the caller's abort has still freed the UI.
-function cancelServerSolve(reqId){
-  if(!SOLVER.enabled) return;
+// Reports what the server actually did, so Stop stops claiming a success it did
+// not get. Every /cancel outcome is HTTP 200 — the two refusals included — and the
+// only thing this used to inspect was a 404, so a refused cancel was indis-
+// tinguishable from a granted one.
+//
+// The refusals are NOT equivalent and must be told apart:
+//   "no solve in flight"          benign — the solve had already finished
+//   "the solve now running is a   damaging — a solve from another page (or another
+//    different request"           session sharing this port) holds _solve_lock, so
+//                                 the next solve queues behind it with no sign why
+// `detail` is prose and matching on it would break the moment the server reworded
+// it, so they are separated structurally instead: if nothing is running /progress
+// reports no phase, and if a foreign solve holds the lock it reports a live one.
+// That probe costs one extra request and only happens on a refusal.
+async function cancelServerSolve(reqId){
+  if(!SOLVER.enabled) return {verdict:'off'};
+  let j;
   try{
-    fetch(SOLVER.url + '/cancel', {
+    const r = await fetch(SOLVER.url + '/cancel', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({clientRequestId: reqId || null}),
-    }).then(r=>{
-      // 404 means the solver predates /cancel. Stop still frees the dashboard,
-      // but Z3 keeps running and holds the lock, so the next solve queues behind
-      // it — worth saying, because that wait looks like a hang.
-      if(r.status === 404) SOLVER.canCancel = false;
-    }).catch(()=>{});
+    });
+    // 404 means the solver predates /cancel. Stop still frees the dashboard, but
+    // Z3 keeps running and holds the lock, so the next solve queues behind it.
+    if(r.status === 404){ SOLVER.canCancel = false; return {verdict:'no_endpoint'}; }
+    SOLVER.canCancel = true;   // clears a stale false left by an older solver build
+    j = await r.json();
+  }catch(e){ return {verdict:'unreachable'}; }
+  if(j && j.cancelled) return {verdict:'cancelled'};
+  try{
+    const p = await (await fetch(SOLVER.url + '/progress')).json();
+    if(p && p.phase) return {verdict:'foreign', phase:p.phase, elapsed:p.elapsed_s};
   }catch(e){}
+  return {verdict:'nothing_running'};
 }
 // Switching principle mid-solve, or pressing Stop, both land here. Marking the
 // controller `.stopped` before aborting is what tells postSolve this was a choice
 // rather than a timeout.
 function cancelSide(si){
   const c = inFlight[si];
-  if(c){ c.stopped = true; c.abort(); inFlight[si] = null; cancelServerSolve(c.reqId); }
+  if(!c) return null;
+  // The abort frees the UI synchronously and must stay that way — Stop has to feel
+  // instant. Only the server's verdict is returned, for callers that want to say
+  // what really happened once it arrives.
+  c.stopped = true; c.abort(); inFlight[si] = null;
+  return cancelServerSolve(c.reqId);
 }
 function showStop(on){
   const b = document.getElementById('stopSolveBtn');
   if(b) b.style.display = on ? '' : 'none';
 }
-function stopSolving(){
+let stopGen = 0;
+async function stopSolving(){
+  const mine = ++stopGen;
   // Bump both tokens first so anything already past its await is orphaned too.
   renderToken[0]++; renderToken[1]++;
-  cancelSide(0); cancelSide(1);
+  const pending = [cancelSide(0), cancelSide(1)].filter(Boolean);
   stopProgress();
   showStop(false);
-  setStatus(SOLVER.canCancel === false
-    ? 'Stopped here — this solver build has no /cancel, so it is still finishing that request'
+  // The aborts above already freed the dashboard; only the WORDING waits on the
+  // server. It used to read SOLVER.canCancel on the line right after firing the
+  // request, which cannot have answered yet — so the "no /cancel" case was always
+  // reported one Stop late, and the first Stop after a page load always said
+  // "Stopped" whether or not anything had been.
+  setStatus(pending.length ? 'Stopping…' : 'Stopped', false);
+  if(!pending.length) return;
+  const verdicts = await Promise.all(pending);
+  // A newer Stop, or a solve started while we were waiting, owns the status line
+  // now. Same guard as the progress ticker, and for the same reason: an awaited
+  // write that lands late must never paint over what replaced it.
+  if(mine !== stopGen || progressLive) return;
+  const foreign = verdicts.find(v => v && v.verdict === 'foreign');
+  const noRoute = verdicts.some(v => v && v.verdict === 'no_endpoint');
+  setStatus(
+    noRoute ? 'Stopped here — this solver build has no /cancel, so it is still finishing that request'
+    : foreign ? `Stopped here — the solver is still busy with an earlier request (${foreign.phase}${foreign.elapsed != null ? ` ${foreign.elapsed}s`:''}). Your next solve will queue behind it.`
     : 'Stopped', false);
 }
 
