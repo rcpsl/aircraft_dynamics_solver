@@ -837,14 +837,23 @@ function setStatus(msg, busy){
 // freeze at whatever the dead solve last wrote. Each start claims a generation and
 // only that generation may stop it; stopProgress() with no argument is the
 // unconditional form, used when the user stops everything.
-let progressTimer = null, progressGen = 0;
+let progressTimer = null, progressGen = 0, progressLive = false;
 function startProgress(label){
   const gen = ++progressGen;
   if(progressTimer){ clearInterval(progressTimer); progressTimer = null; }
+  progressLive = true;
   progressTimer = setInterval(async ()=>{
     try{
       const r = await fetch(SOLVER.url + '/progress');
       const p = await r.json();
+      // Re-check AFTER both awaits. clearInterval cannot cancel a tick that is
+      // already suspended at one, so a tick in flight when the participant presses
+      // Stop would resolve a moment later and repaint "Solving — phase2", painting
+      // over "Stopped" with no ticker left alive to correct it — the status line
+      // then stays frozen on that text for good, looking like a solve nobody can
+      // reach. progressLive covers Stop (which does not bump the generation) and
+      // the generation covers a solve superseded by a newer one.
+      if(!progressLive || gen !== progressGen) return;
       if(p && p.phase){
         const el = p.elapsed_s != null ? ` ${p.elapsed_s}s` : '';
         const tt = p.phase==='phase1' && p.T ? ` (testing T=${p.T})` : '';
@@ -856,6 +865,7 @@ function startProgress(label){
 }
 function stopProgress(gen){
   if(gen != null && gen !== progressGen) return;   // a stale solve tidying up
+  progressLive = false;
   if(progressTimer){ clearInterval(progressTimer); progressTimer=null; }
 }
 
