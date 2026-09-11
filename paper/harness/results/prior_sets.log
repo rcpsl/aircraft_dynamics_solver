@@ -1,0 +1,10 @@
+8 jobs, 0 already done, 8 to run, par=8
+[1/8] sat                             14.2s  prot|burden|0.5
+[2/8] sat                             14.1s  prot|corridor|0.5
+[3/8] sat                             66.3s  prot|burden|1.0
+[4/8] sat                            116.2s  prot|corridor|1.0
+[5/8] sat                            400.7s  prot|burden|1.5
+[6/8] sat                            619.9s  prot|corridor|1.5
+[7/8] sat                            623.0s  prot|burden|2.0
+[8/8] sat                            622.9s  prot|corridor|2.0
+DONE in 623s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/prior_sets.jsonl

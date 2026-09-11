@@ -1,0 +1,474 @@
+{
+ "out": "results/fleet.jsonl",
+ "par": 8,
+ "wall_kill": 1000000000,
+ "checkpoint_s": 600,
+ "setup": {
+  "name": "default",
+  "slack": null,
+  "limit": 10,
+  "hard_cap": null,
+  "aircraft_db": 45.0,
+  "demand": [
+   4,
+   2,
+   2
+  ],
+  "protected": [
+   15,
+   19,
+   24
+  ],
+  "ambient_kind": "default"
+ },
+ "jobs": [
+  {
+   "key": "fleet|default|utilitarian|0.25",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|proportional|0.25",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|utilitarian|0.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|proportional|0.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|utilitarian|0.75",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|proportional|0.75",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|utilitarian|1.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|proportional|1.0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|utilitarian|1.25",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|proportional|1.25",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|utilitarian|1.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|proportional|1.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|utilitarian|1.75",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|proportional|1.75",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|utilitarian|2.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "fleet|default|proportional|2.0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "default",
+    "slack": null,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  }
+ ]
+}

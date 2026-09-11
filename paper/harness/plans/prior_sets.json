@@ -1,0 +1,119 @@
+{
+ "out": "results/prior_sets.jsonl",
+ "par": 8,
+ "wall_kill": 1500,
+ "jobs": [
+  {
+   "key": "prot|burden|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "prot|burden|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "prot|burden|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "prot|burden|2.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "prot|corridor|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     16,
+     13,
+     18
+    ]
+   }
+  },
+  {
+   "key": "prot|corridor|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     16,
+     13,
+     18
+    ]
+   }
+  },
+  {
+   "key": "prot|corridor|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     16,
+     13,
+     18
+    ]
+   }
+  },
+  {
+   "key": "prot|corridor|2.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0,
+    "protected": [
+     16,
+     13,
+     18
+    ]
+   }
+  }
+ ]
+}

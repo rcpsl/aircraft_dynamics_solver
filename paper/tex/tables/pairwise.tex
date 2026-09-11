@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\caption{The two disparity encodings, built on an otherwise identical phase-2 model and timed. Both state the same constraint and agree on the objective at every size. The pairwise form needs two orders of magnitude more assertions and takes correspondingly longer to \emph{build}, but it \emph{solves} $6$--$9\times$ faster --- so the max/min encoding's advantage is in construction, and it decays from $3.2\times$ on total time at $N{=}6$ to parity at $N{=}16$. Single runs on an idle machine; the solve times at $N{=}6$ are under a second and should be read as indicative.}
+\label{tab:pairwise}
+\begin{tabular}{r rr rr rr}
+\toprule
+\multirow{2}{*}{$N$} & \multicolumn{2}{c}{max/min} & \multicolumn{2}{c}{pairwise} & \multicolumn{2}{c}{ratio} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+ & constr. & solve (s) & constr. & solve (s) & solve & total \\
+\midrule
+6 & 306 & 0.64 & 25,200 & 0.12 & $0.19\times$ & $3.22\times$ \\
+8 & 306 & 1.28 & 32,400 & 0.20 & $0.16\times$ & $2.31\times$ \\
+14 & 306 & 4.47 & 48,240 & 0.47 & $0.11\times$ & $1.17\times$ \\
+16 & 306 & 6.11 & 53,136 & 0.72 & $0.12\times$ & $1.00\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}

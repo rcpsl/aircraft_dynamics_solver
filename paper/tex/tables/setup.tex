@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{The instance the fleet-size study runs on, against the dashboard's own defaults. Only the rows in bold differ. The horizon slack is the knob that matters most: the dashboard sends $T_{\max}$ one step above the Chebyshev lower bound (zero when the Utilitarian term is live), which leaves a principle almost nowhere to detour into, so it can express itself only by reordering aircraft.}
+\label{tab:setup}
+\begin{tabular}{l l l}
+\toprule
+Knob & Default & Study \\
+\midrule
+Horizon slack above the Chebyshev floor & per principle (0 or 1) & per principle (0 or 1) \\
+Cap value $D$/$U$ sent by Equal and Sufficientarian & 10 & 10 \\
+Hard cap $D$ applied to every principle & none & none \\
+Aircraft source level (dBA) & 45 & 45 \\
+Demand per origin--destination pair & (4, 2, 2) & (4, 2, 2) \\
+Prioritarian protected set & (15, 19, 24) & (15, 19, 24) \\
+Ambient map & default & default \\
+\bottomrule
+\end{tabular}
+\end{table}

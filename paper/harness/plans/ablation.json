@@ -1,0 +1,358 @@
+{
+ "out": "results/ablation.jsonl",
+ "par": 9,
+ "wall_kill": 1500,
+ "jobs": [
+  {
+   "key": "abl|prioritarian|on|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "abl|prioritarian|off|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   },
+   "req": {
+    "optimizePrioritarian": false
+   }
+  },
+  {
+   "key": "abl|utilitarian|on|0.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "abl|utilitarian|off|0.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   },
+   "req": {
+    "optimizeUtilitarian": false
+   }
+  },
+  {
+   "key": "abl|proportional|on|0.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "abl|proportional|off|0.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   },
+   "req": {
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "abl|equal|on|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "abl|equal|off|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0
+   }
+  },
+  {
+   "key": "abl|sufficientarian|on|0.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "abl|sufficientarian|off|0.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0
+   }
+  },
+  {
+   "key": "abl|prioritarian|on|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "abl|prioritarian|off|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   },
+   "req": {
+    "optimizePrioritarian": false
+   }
+  },
+  {
+   "key": "abl|utilitarian|on|1.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "abl|utilitarian|off|1.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "req": {
+    "optimizeUtilitarian": false
+   }
+  },
+  {
+   "key": "abl|proportional|on|1.0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "abl|proportional|off|1.0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "req": {
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "abl|equal|on|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "abl|equal|off|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0
+   }
+  },
+  {
+   "key": "abl|sufficientarian|on|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "abl|sufficientarian|off|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0
+   }
+  },
+  {
+   "key": "abl|prioritarian|on|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "abl|prioritarian|off|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   },
+   "req": {
+    "optimizePrioritarian": false
+   }
+  },
+  {
+   "key": "abl|utilitarian|on|1.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "abl|utilitarian|off|1.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   },
+   "req": {
+    "optimizeUtilitarian": false
+   }
+  },
+  {
+   "key": "abl|proportional|on|1.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "abl|proportional|off|1.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   },
+   "req": {
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "abl|equal|on|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "abl|equal|off|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0
+   }
+  },
+  {
+   "key": "abl|sufficientarian|on|1.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "abl|sufficientarian|off|1.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0
+   }
+  }
+ ]
+}

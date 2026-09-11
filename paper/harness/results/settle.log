@@ -1,0 +1,4 @@
+2 jobs, 0 already done, 2 to run, par=2
+[1/2] sat                            291.1s  settle|sufficientarian|1.75
+[2/2] sat                            296.1s  settle|equal|1.75
+DONE in 296s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/settle.jsonl

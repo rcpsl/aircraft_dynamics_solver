@@ -1,0 +1,11 @@
+9 jobs, 0 already done, 9 to run, par=1
+[1/9] sat                             37.1s  rep|sufficientarian|0
+[2/9] sat                             38.1s  rep|sufficientarian|1
+[3/9] sat                             36.1s  rep|sufficientarian|2
+[4/9] sat                            608.8s  rep|utilitarian|0
+[5/9] sat                            604.4s  rep|utilitarian|1
+[6/9] sat                            604.4s  rep|utilitarian|2
+[7/9] sat                            604.4s  rep|proportional|0
+[8/9] sat                            604.3s  rep|proportional|1
+[9/9] sat                            604.3s  rep|proportional|2
+DONE in 3742s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/reps.jsonl

@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{Tightening the Sufficientarian cap $D$ at $N{=}16$. Tier shares are the percentage of aircraft-timesteps aloft spent over communities of each ambient level. The cap does \emph{not} redistribute traffic between tiers --- the shares do not trend with $D$ --- but it does lengthen the schedule: at $D{=}4$ the minimum horizon rises from 5 to 7 and flight time from 44 to 48 aircraft-timesteps. At $D{=}3$ a \SI{45}{\dBA} vertiport can hold no aircraft at all and no routing exists.}
+\label{tab:caps}
+\begin{tabular}{rlrrrr}
+\toprule
+$D$ (dB) & Outcome & \SI{45}{\dBA} & \SI{55}{\dBA} & \SI{65}{\dBA} & Hops \\
+\midrule
+3 & infeasible & \multicolumn{4}{c}{\emph{no feasible routing}} \\
+4 & optimal & 25.0 & 50.0 & 25.0 & 48 \\
+5 & optimal & 25.0 & 47.7 & 27.3 & 44 \\
+7 & optimal & 20.5 & 52.3 & 27.3 & 44 \\
+10 & optimal & 29.5 & 43.2 & 27.3 & 44 \\
+15 & optimal & 25.0 & 47.7 & 27.3 & 44 \\
+20 & optimal & 25.0 & 47.7 & 27.3 & 44 \\
+\bottomrule
+\end{tabular}
+\end{table}

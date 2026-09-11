@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\caption{Wall-clock solve time in seconds against fleet size $N$, with the outcome of each solve. \emph{opt} = proven optimal; \emph{par} = objective applied but optimality unproven when the \SI{600}{\second} budget expired; \emph{fb} = phase~2 produced nothing and the route shown ignores the principle.}
+\label{tab:scaling}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Principle & $N{=}6$ & $N{=}8$ & $N{=}14$ & $N{=}16$ & $N{=}22$ & $N{=}24$ & $N{=}30$ & $N{=}32$ \\
+\midrule
+Equal & 8\,{\scriptsize opt} & 12\,{\scriptsize opt} & 41\,{\scriptsize opt} & 59\,{\scriptsize opt} & 122\,{\scriptsize opt} & 193\,{\scriptsize opt} & 632\,{\scriptsize par} & 630\,{\scriptsize fb} \\
+Sufficientarian & 8\,{\scriptsize opt} & 13\,{\scriptsize opt} & 47\,{\scriptsize opt} & 55\,{\scriptsize opt} & 133\,{\scriptsize opt} & 178\,{\scriptsize opt} & 623\,{\scriptsize par} & 467\,{\scriptsize opt} \\
+Prioritarian & 8\,{\scriptsize opt} & 16\,{\scriptsize opt} & 56\,{\scriptsize opt} & 75\,{\scriptsize opt} & 183\,{\scriptsize opt} & 453\,{\scriptsize opt} & 622\,{\scriptsize par} & 622\,{\scriptsize par} \\
+Utilitarian & 260\,{\scriptsize opt} & 605\,{\scriptsize par} & 608\,{\scriptsize par} & 609\,{\scriptsize par} & 615\,{\scriptsize par} & 619\,{\scriptsize par} & 621\,{\scriptsize par} & 620\,{\scriptsize par} \\
+Proportional & 604\,{\scriptsize par} & 606\,{\scriptsize par} & 610\,{\scriptsize par} & 611\,{\scriptsize par} & 616\,{\scriptsize par} & 620\,{\scriptsize par} & 623\,{\scriptsize par} & 622\,{\scriptsize par} \\
+\bottomrule
+\end{tabular}
+\end{table}

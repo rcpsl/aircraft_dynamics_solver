@@ -1,0 +1,26 @@
+24 jobs, 48 already done, 24 to run, par=8
+[1/24] sat                              7.1s  perm|0|equal|0.5
+[2/24] sat                              7.1s  perm|0|sufficientarian|0.5
+[3/24] sat                              7.1s  perm|0|prioritarian|0.5
+[4/24] sat                              7.1s  perm|0|baseline|0.5
+[5/24] sat                              7.1s  perm|1|equal|0.5
+[6/24] sat                              7.1s  perm|1|sufficientarian|0.5
+[7/24] sat                              7.1s  perm|1|prioritarian|0.5
+[8/24] sat                              7.1s  perm|1|baseline|0.5
+[9/24] sat                              6.1s  perm|2|equal|0.5
+[10/24] sat                              6.1s  perm|2|baseline|0.5
+[11/24] sat                              7.1s  perm|2|sufficientarian|0.5
+[12/24] sat                              7.1s  perm|2|prioritarian|0.5
+[13/24] sat                              7.1s  perm|3|equal|0.5
+[14/24] sat                              7.1s  perm|3|sufficientarian|0.5
+[15/24] sat                              7.1s  perm|3|baseline|0.5
+[16/24] sat                              8.2s  perm|3|prioritarian|0.5
+[17/24] sat                              6.2s  perm|4|equal|0.5
+[18/24] sat                              6.2s  perm|4|sufficientarian|0.5
+[19/24] sat                              6.1s  perm|4|baseline|0.5
+[20/24] sat                              6.1s  perm|5|equal|0.5
+[21/24] sat                              6.1s  perm|5|sufficientarian|0.5
+[22/24] sat                              7.2s  perm|4|prioritarian|0.5
+[23/24] sat                              7.1s  perm|5|prioritarian|0.5
+[24/24] sat                              6.1s  perm|5|baseline|0.5
+DONE in 22s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/perm.jsonl

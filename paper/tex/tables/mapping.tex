@@ -1,0 +1,43 @@
+%% Hand-written (unlike the rest of tables/, which analyze.py generates).
+%% This is the paper's central claim about the encoding, not a measurement.
+\begin{table*}[t]
+\centering
+\caption{The five principles as constraints. ``Form'' is whether the principle's own
+statement is a satisfaction condition or an optimisation; ``Encoded as'' is what our
+solver receives. The one row where these disagree is Equal, and
+Section~\ref{sec:mismatch} measures what that disagreement costs. $\ell$ is the
+user-selected decibel limit, $P$ the protected set, $\pi_m$ the benefit-derived price
+of \eqref{eq:price}, and $\infty$ a cap set wide enough to be unreachable.}
+\label{tab:mapping}
+\begin{tabular}{llllc}
+\toprule
+Principle & Statement in this domain & Form & Encoded as & Objective? \\
+\midrule
+Equal &
+  added noise as equal as possible across communities &
+  optimisation &
+  hard cap $U \le \ell$ (and $D \le \ell$) &
+  no \\
+Sufficientarian &
+  no community's noise exceeds a stated threshold &
+  satisfaction &
+  hard cap $D \le \ell$, $U \le \infty$ &
+  no \\
+Prioritarian &
+  the already most-burdened receive the least additional noise &
+  optimisation &
+  $\min J_{\mathrm{prior}} = \sum_{t}\sum_{p \in P} \tilde\dbinc_p(c_{p,t})$ &
+  yes \\
+Utilitarian &
+  the summed added noise over all communities is lowest &
+  optimisation &
+  $\min J_{\mathrm{util}} = \sum_{t}\sum_{m} w_m \tilde\dbinc_m(c_{m,t})$ &
+  yes \\
+Proportional &
+  those who benefit most from the network carry more of its noise &
+  optimisation &
+  $\min J_{\mathrm{prop}} = \sum_{t}\sum_{m} \pi_m\,\tilde\dbinc_m(c_{m,t})$ &
+  yes \\
+\bottomrule
+\end{tabular}
+\end{table*}

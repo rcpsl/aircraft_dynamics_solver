@@ -1,0 +1,197 @@
+{
+ "out": "results/rescue.jsonl",
+ "par": 6,
+ "wall_kill": 15600.0,
+ "jobs": [
+  {
+   "key": "rescue|bind|equal|5|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 5,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|bind|equal|8|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 8,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|bind|equal|6|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|bind|sufficientarian|5|2.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 5,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|bind|sufficientarian|4|2.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 4,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|bind|sufficientarian|6|2.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|bind|equal|4|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 4,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|bind|equal|3|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 3,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|sat|equal|8|3.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 8,
+    "demand_factor": 3.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|sat|sufficientarian|5|3.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 5,
+    "demand_factor": 3.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|sat|sufficientarian|8|3.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 8,
+    "demand_factor": 3.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|sat|equal|5|4.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 5,
+    "demand_factor": 4.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|sat|equal|5|3.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 5,
+    "demand_factor": 3.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|sat|equal|8|4.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 8,
+    "demand_factor": 4.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|sat|sufficientarian|8|4.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 8,
+    "demand_factor": 4.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|sat|sufficientarian|5|4.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 5,
+    "demand_factor": 4.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|scale|equal|communities|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|scale|equal|people|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "rescue|scale|sufficientarian|people|2.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  }
+ ]
+}

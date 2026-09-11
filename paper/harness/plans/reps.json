@@ -1,0 +1,88 @@
+{
+ "out": "results/reps.jsonl",
+ "par": 1,
+ "wall_kill": 1500,
+ "jobs": [
+  {
+   "key": "rep|sufficientarian|0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "rep|sufficientarian|1",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "rep|sufficientarian|2",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "rep|utilitarian|0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "rep|utilitarian|1",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "rep|utilitarian|2",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "rep|proportional|0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "rep|proportional|1",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "rep|proportional|2",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  }
+ ]
+}

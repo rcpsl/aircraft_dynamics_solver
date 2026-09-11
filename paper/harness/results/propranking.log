@@ -1,0 +1,5 @@
+3 jobs, 0 already done, 3 to run, par=3
+[1/3] NO_OUTPUT                     3856.5s  rank|income
+[2/3] NO_OUTPUT                     3856.5s  rank|distance
+[3/3] NO_OUTPUT                     3856.5s  rank|ambient
+DONE in 3857s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/propranking.jsonl

@@ -1,0 +1,13 @@
+{
+ "key": "fleet|default|proportional|1.25",
+ "pid": 10816,
+ "elapsed_s": 59679.7,
+ "wrote_at": "2026-09-09T19:09:42",
+ "progress": {
+  "phase": "phase2",
+  "T": 6,
+  "T_min": null,
+  "T_max": null,
+  "started_at": 1401947.109
+ }
+}

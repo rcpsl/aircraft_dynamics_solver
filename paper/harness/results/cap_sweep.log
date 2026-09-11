@@ -1,0 +1,22 @@
+20 jobs, 0 already done, 20 to run, par=8
+[1/20] phase1_noise_cap                 1.1s  cap|3|equal|1.0
+[2/20] phase1_noise_cap                 1.1s  cap|3|sufficientarian|1.0
+[3/20] sat                             22.1s  cap|5|sufficientarian|1.0
+[4/20] sat                             22.1s  cap|6|sufficientarian|1.0
+[5/20] sat                             23.1s  cap|6|equal|1.0
+[6/20] sat                             22.1s  cap|8|sufficientarian|1.0
+[7/20] phase1_noise_cap                 1.0s  cap|3|sufficientarian|2.0
+[8/20] sat                             24.2s  cap|5|equal|1.0
+[9/20] sat                             23.2s  cap|8|equal|1.0
+[10/20] sat                             85.3s  cap|4|equal|1.0
+[11/20] sat                             86.3s  cap|4|sufficientarian|1.0
+[12/20] sat                            974.4s  cap|8|equal|2.0
+[13/20] sat                            311.1s  cap|8|sufficientarian|2.0
+[14/20] sat                           3261.5s  cap|6|sufficientarian|2.0
+[15/20] sat                           3344.6s  cap|5|sufficientarian|2.0
+[16/20] phase2_failed_timeout         8205.7s  cap|6|equal|2.0
+[17/20] phase2_failed_timeout         8208.7s  cap|4|sufficientarian|2.0
+[18/20] phase2_failed_timeout         8208.7s  cap|5|equal|2.0
+[19/20] phase1_stopped                8216.8s  cap|3|equal|2.0
+[20/20] phase1_stopped                8229.8s  cap|4|equal|2.0
+DONE in 8253s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/captight.jsonl

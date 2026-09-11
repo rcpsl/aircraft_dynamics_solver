@@ -1,0 +1,7 @@
+5 jobs, 0 already done, 5 to run, par=5
+[1/5] sat                          15615.5s  rank|income
+[2/5] sat                          15615.5s  rank|distance
+[3/5] sat                          15615.5s  rank|ambient
+[4/5] sat                          15619.5s  long|utilitarian|1.5
+[5/5] sat                          15619.5s  long|proportional|1.5
+DONE in 15620s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/gapfill.jsonl

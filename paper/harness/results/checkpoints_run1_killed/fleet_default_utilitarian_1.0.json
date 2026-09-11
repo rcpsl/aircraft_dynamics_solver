@@ -1,0 +1,13 @@
+{
+ "key": "fleet|default|utilitarian|1.0",
+ "pid": 13944,
+ "elapsed_s": 60010.7,
+ "wrote_at": "2026-09-09T19:09:43",
+ "progress": {
+  "phase": "phase2",
+  "T": 5,
+  "T_min": null,
+  "T_max": null,
+  "started_at": 1401615.921
+ }
+}

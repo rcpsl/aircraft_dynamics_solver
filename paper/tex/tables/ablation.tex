@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{Objective ablation at three demands: each principle against the identical payload with its own term removed. \emph{Arrival} is the lexicographic tie-break, the only quantity every run optimises. \emph{Metric} is that principle's \emph{own} objective, recomputed from the returned paths --- spread for Equal, peak for Sufficientarian, protected-set noise for Prioritarian, summed noise for Utilitarian, priced noise for Proportional --- so the columns are not commensurable across rows and are given as the on/off ratio. Equal, Sufficientarian and Prioritarian leave arrival unchanged at every demand: nine paired comparisons, all proven, in which the principle bought nothing the solver was optimising. Utilitarian and Proportional bind at every demand, and pay for it in arrival time. All treatment cells were given a four-hour budget and all controls are proven optima, so the columns are comparable: Utilitarian's effect weakens mildly with demand while Proportional's strengthens. Treatment rows are unproven incumbents, so each ratio is an upper bound on the true effect.}
+\label{tab:ablation}
+\begin{tabular}{l rr rr rr}
+\toprule
+\multirow{2}{*}{Principle} & \multicolumn{2}{c}{$N{=}8$} & \multicolumn{2}{c}{$N{=}16$} & \multicolumn{2}{c}{$N{=}24$} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+ & arr. & metric & arr. & metric & arr. & metric \\
+\midrule
+Equal & 22/22 & $1.00\times$ & 44/44 & $1.46\times$ & 66/66 & $1.29\times$ \\
+Sufficientarian & 22/22 & $1.00\times$ & 44/44 & $1.26\times$ & 66/66 & $0.77\times$ \\
+Prioritarian & 22/22 & 0/0 & 44/44 & 0/0 & 66/66 & 0/0 \\
+Utilitarian & \textbf{23}/22 & $0.37\times$ & \textbf{46}/44 & $0.49\times$ & \textbf{96}/66 & $0.58\times$ \\
+Proportional & \textbf{25}/22 & $0.27\times$ & \textbf{62}/44 & $0.19\times$ & \textbf{102}/66 & $0.18\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}

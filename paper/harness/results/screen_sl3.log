@@ -1,0 +1,8 @@
+6 jobs, 2 already done, 6 to run, par=6
+[1/6] sat                             79.1s  scr|sl3|sufficientarian|1.0
+[2/6] sat                             86.1s  scr|sl3|equal|1.0
+[3/6] sat                             96.1s  scr|sl3|baseline|1.0
+[4/6] sat                            119.1s  scr|sl3|prioritarian|1.0
+[5/6] sat                            903.5s  scr|sl3|utilitarian|1.0
+[6/6] sat                            903.5s  scr|sl3|proportional|1.0
+DONE in 904s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/screen.jsonl

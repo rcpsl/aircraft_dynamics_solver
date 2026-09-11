@@ -1,0 +1,188 @@
+{
+ "out": "results/longbudget.jsonl",
+ "par": 8,
+ "wall_kill": 15000,
+ "jobs": [
+  {
+   "key": "long|utilitarian|0.25",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "long|utilitarian|0.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "long|utilitarian|0.75",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "long|utilitarian|1.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "long|proportional|0.25",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "long|proportional|0.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "long|proportional|0.75",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "long|proportional|1.0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "longabl|utilitarian|off|1.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "req": {
+    "optimizeUtilitarian": false
+   },
+   "timeout_ms": 7200000
+  },
+  {
+   "key": "longabl|proportional|off|1.0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "req": {
+    "optimizeProximity": false
+   },
+   "timeout_ms": 7200000
+  },
+  {
+   "key": "long|prioritarian|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "long|prioritarian|1.75",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.75,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "long|prioritarian|2.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "longfb|equal|communities|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "longfb|equal|people|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "longfb|sufficientarian|people|2.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 2.0
+   },
+   "timeout_ms": 14400000
+  }
+ ]
+}

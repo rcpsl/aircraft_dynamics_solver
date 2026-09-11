@@ -1,0 +1,133 @@
+{
+ "out": "results/caps.jsonl",
+ "par": 9,
+ "wall_kill": 1500,
+ "jobs": [
+  {
+   "key": "cap|sufficientarian|3",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 3,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|equal|3",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 3,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|sufficientarian|4",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 4,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|equal|4",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 4,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|sufficientarian|5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 5,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|equal|5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 5,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|sufficientarian|7",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 7,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|equal|7",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 7,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|sufficientarian|10",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|equal|10",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|sufficientarian|15",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 15,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|equal|15",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 15,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|sufficientarian|20",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 20,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "cap|equal|20",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 20,
+    "demand_factor": 1.0
+   }
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+=== N=8 ===
+  N=  8 maxmin    U-constraints=     306 build=   0.41s solve=    1.28s sat arrival=22
+  N=  8 pairwise  U-constraints=   32400 build=   3.70s solve=    0.20s sat arrival=22
+=== N=14 ===
+  N= 14 maxmin    U-constraints=     306 build=   0.70s solve=    4.47s sat arrival=40
+  N= 14 pairwise  U-constraints=   48240 build=   5.56s solve=    0.47s sat arrival=40
+=== N=16 ===
+  N= 16 maxmin    U-constraints=     306 build=   0.78s solve=    6.11s sat arrival=44
+  N= 16 pairwise  U-constraints=   53136 build=   6.17s solve=    0.72s sat arrival=44
+
+N=8: objectives agree=True  solve speedup=0.16x  total speedup=2.31x
+N=14: objectives agree=True  solve speedup=0.11x  total speedup=1.17x
+N=16: objectives agree=True  solve speedup=0.12x  total speedup=1.0x

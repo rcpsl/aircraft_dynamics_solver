@@ -1,0 +1,25 @@
+23 jobs, 0 already done, 23 to run, par=9
+[1/23] sat                             13.1s  g4|equal|0.5
+[2/23] sat                             16.1s  g4|sufficientarian|0.5
+[3/23] sat                             18.1s  g4|prioritarian|0.5
+[4/23] sat                             88.2s  g4|equal|1.0
+[5/23] sat                             88.2s  g4|sufficientarian|1.0
+[6/23] sat                            130.2s  g4|prioritarian|1.0
+[7/23] sat                            291.4s  g4|sufficientarian|1.5
+[8/23] sat                            347.5s  g4|equal|1.5
+[9/23] sat                             85.1s  g4abl|prioritarian|off|1.0
+[10/23] sat                             36.1s  g4abl|utilitarian|off|1.0
+[11/23] sat                             85.1s  g4abl|proportional|off|1.0
+[12/23] sat                             85.1s  g4abl|equal|off|1.0
+[13/23] sat                             20.0s  g4prot|corridor|0.5
+[14/23] sat                             82.1s  g4abl|sufficientarian|off|1.0
+[15/23] sat                            609.7s  g4|prioritarian|1.5
+[16/23] sat                            603.7s  g4|utilitarian|0.5
+[17/23] sat                            607.7s  g4|utilitarian|1.0
+[18/23] sat                            609.7s  g4|utilitarian|1.5
+[19/23] sat                            604.6s  g4|proportional|0.5
+[20/23] sat                            607.6s  g4|proportional|1.0
+[21/23] sat                            609.6s  g4|proportional|1.5
+[22/23] sat                            408.3s  g4prot|corridor|1.0
+[23/23] sat                            608.4s  g4prot|corridor|1.5
+DONE in 1152s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/grid4.jsonl

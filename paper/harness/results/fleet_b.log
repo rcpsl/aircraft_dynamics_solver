@@ -1,0 +1,18 @@
+16 jobs, 32 already done, 16 to run, par=8
+[1/16] sat                             78.1s  fleet|default|utilitarian|0.25
+[2/16] sat                            330.2s  fleet|default|utilitarian|0.5
+[3/16] sat                           4584.0s  fleet|default|proportional|0.25
+[4/16] sat                          29396.3s  fleet|default|proportional|0.5
+[5/16] NO_OUTPUT                    87016.0s  fleet|default|utilitarian|0.75
+[6/16] NO_OUTPUT                    87016.1s  fleet|default|proportional|0.75
+[7/16] NO_OUTPUT                    87016.1s  fleet|default|utilitarian|1.0
+[8/16] NO_OUTPUT                    87016.0s  fleet|default|proportional|1.0
+[9/16] NO_OUTPUT                    86938.0s  fleet|default|utilitarian|1.25
+[10/16] NO_OUTPUT                    86685.8s  fleet|default|proportional|1.25
+[11/16] NO_OUTPUT                    82432.1s  fleet|default|utilitarian|1.5
+[12/16] NO_OUTPUT                    57619.8s  fleet|default|proportional|1.5
+[13/16] NO_OUTPUT                        1.1s  fleet|default|utilitarian|1.75
+[14/16] NO_OUTPUT                        1.0s  fleet|default|proportional|1.75
+[15/16] NO_OUTPUT                        1.0s  fleet|default|utilitarian|2.0
+[16/16] NO_OUTPUT                        1.0s  fleet|default|proportional|2.0
+DONE in 87017s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/fleet.jsonl

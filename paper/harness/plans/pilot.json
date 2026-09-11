@@ -1,0 +1,78 @@
+{
+ "out": "results/pilot.jsonl",
+ "par": 4,
+ "wall_kill": 1000000000,
+ "checkpoint_s": 600,
+ "setup": {
+  "name": "default",
+  "slack": null,
+  "limit": 10,
+  "hard_cap": null,
+  "aircraft_db": 45.0,
+  "demand": [
+   4,
+   2,
+   2
+  ],
+  "protected": [
+   15,
+   19,
+   24
+  ],
+  "ambient_kind": "default"
+ },
+ "jobs": [
+  {
+   "key": "pilot|default|equal|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000
+  },
+  {
+   "key": "pilot|default|sufficientarian|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000
+  },
+  {
+   "key": "pilot|default|prioritarian|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   },
+   "timeout_ms": 1000000000
+  },
+  {
+   "key": "pilot|default|baseline|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  }
+ ]
+}

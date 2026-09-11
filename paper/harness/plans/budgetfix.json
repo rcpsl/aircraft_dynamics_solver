@@ -1,0 +1,27 @@
+{
+ "out": "results/budgetfix.jsonl",
+ "par": 5,
+ "wall_kill": 16000,
+ "jobs": [
+  {
+   "key": "long|utilitarian|1.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "long|proportional|1.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 14400000
+  }
+ ]
+}

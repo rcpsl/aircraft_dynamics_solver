@@ -1,0 +1,16 @@
+14 jobs, 0 already done, 14 to run, par=9
+[1/14] phase1_noise_cap                 2.2s  cap|sufficientarian|3
+[2/14] phase1_noise_cap                 2.2s  cap|equal|3
+[3/14] sat                             51.2s  cap|equal|7
+[4/14] sat                             53.3s  cap|sufficientarian|7
+[5/14] sat                             55.4s  cap|sufficientarian|10
+[6/14] sat                             56.5s  cap|sufficientarian|5
+[7/14] sat                             57.5s  cap|equal|5
+[8/14] sat                             59.5s  cap|equal|10
+[9/14] sat                             63.5s  cap|sufficientarian|15
+[10/14] sat                             54.4s  cap|equal|15
+[11/14] sat                             57.3s  cap|sufficientarian|20
+[12/14] sat                             56.3s  cap|equal|20
+[13/14] sat                            163.9s  cap|equal|4
+[14/14] sat                            167.9s  cap|sufficientarian|4
+DONE in 168s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/caps.jsonl

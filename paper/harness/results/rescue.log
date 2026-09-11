@@ -1,0 +1,21 @@
+19 jobs, 0 already done, 19 to run, par=6
+[1/19] sat                            764.4s  rescue|bind|equal|8|2.0
+[2/19] sat                           2810.3s  rescue|bind|sufficientarian|6|2.0
+[3/19] sat                           2868.3s  rescue|bind|sufficientarian|5|2.0
+[4/19] NO_OUTPUT                    15600.4s  rescue|bind|equal|5|2.0
+[5/19] NO_OUTPUT                    15600.5s  rescue|bind|equal|6|2.0
+[6/19] NO_OUTPUT                    15600.5s  rescue|bind|sufficientarian|4|2.0
+[7/19] NO_OUTPUT                    15601.3s  rescue|bind|equal|4|2.0
+[8/19] sat                           1383.4s  rescue|sat|sufficientarian|8|3.0
+[9/19] NO_OUTPUT                    15601.0s  rescue|bind|equal|3|2.0
+[10/19] NO_OUTPUT                    15601.1s  rescue|sat|equal|8|3.0
+[11/19] phase1_timeout               14428.2s  rescue|sat|equal|5|4.0
+[12/19] phase2_failed_timeout        14480.3s  rescue|sat|sufficientarian|5|3.0
+[13/19] phase2_failed_timeout        14712.6s  rescue|sat|equal|5|3.0
+[14/19] sat                           1119.6s  rescue|scale|equal|communities|2.0
+[15/19] phase2_failed_timeout        14468.5s  rescue|sat|equal|8|4.0
+[16/19] phase2_failed_timeout        14466.9s  rescue|sat|sufficientarian|8|4.0
+[17/19] NO_OUTPUT                    15600.3s  rescue|sat|sufficientarian|5|4.0
+[18/19] sat                          14408.3s  rescue|scale|equal|people|2.0
+[19/19] sat                          14407.2s  rescue|scale|sufficientarian|people|2.0
+DONE in 45486s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/rescue.jsonl

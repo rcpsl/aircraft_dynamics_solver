@@ -1,0 +1,18 @@
+16 jobs, 48 already done, 16 to run, par=8
+[1/16] sat                            902.4s  slp|1|utilitarian|0.5
+[2/16] sat                            902.4s  slp|1|proportional|0.5
+[3/16] sat                            902.4s  slp|2|utilitarian|0.5
+[4/16] sat                            902.4s  slp|2|proportional|0.5
+[5/16] sat                            902.4s  slp|3|utilitarian|0.5
+[6/16] sat                            902.4s  slp|3|proportional|0.5
+[7/16] sat                            903.5s  slp|4|utilitarian|0.5
+[8/16] sat                            903.5s  slp|4|proportional|0.5
+[9/16] sat                            903.5s  slp|1|utilitarian|1.0
+[10/16] sat                            903.5s  slp|1|proportional|1.0
+[11/16] sat                            904.5s  slp|2|utilitarian|1.0
+[12/16] sat                            904.5s  slp|2|proportional|1.0
+[13/16] sat                            904.5s  slp|3|utilitarian|1.0
+[14/16] sat                            904.5s  slp|3|proportional|1.0
+[15/16] sat                            904.5s  slp|4|utilitarian|1.0
+[16/16] sat                            904.5s  slp|4|proportional|1.0
+DONE in 1808s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/slack.jsonl

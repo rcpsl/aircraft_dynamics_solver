@@ -1,0 +1,22 @@
+longbudget done 05:35:49
+19 job(s) to rescue at 4.0 h each -> D:\Documents\EECS_199_Shoukry\paper\harness\plans\rescue.json
+   phase1_timeout           bind|equal|3|2.0
+   phase1_timeout           bind|equal|4|2.0
+   phase2_failed_timeout    bind|equal|5|2.0
+   phase2_failed_timeout    bind|equal|6|2.0
+   phase2_failed_timeout    bind|equal|8|2.0
+   phase2_failed_timeout    bind|sufficientarian|4|2.0
+   phase2_failed_timeout    bind|sufficientarian|5|2.0
+   phase2_failed_timeout    bind|sufficientarian|6|2.0
+   phase2_failed_timeout    sat|equal|5|3.0
+   phase1_timeout           sat|equal|5|4.0
+   phase2_failed_timeout    sat|equal|8|3.0
+   phase2_failed_timeout    sat|equal|8|4.0
+   phase2_failed_timeout    sat|sufficientarian|5|3.0
+   phase1_timeout           sat|sufficientarian|5|4.0
+   phase2_failed_timeout    sat|sufficientarian|8|3.0
+   phase2_failed_timeout    sat|sufficientarian|8|4.0
+   phase2_failed_timeout    scale|equal|communities|2.0
+   phase2_failed_timeout    scale|equal|people|2.0
+   phase2_failed_timeout    scale|sufficientarian|people|2.0
+rescue rc 0 18:13:54

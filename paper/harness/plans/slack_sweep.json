@@ -1,0 +1,1544 @@
+{
+ "out": "results/slack.jsonl",
+ "par": 8,
+ "wall_kill": 1000000000,
+ "checkpoint_s": 600,
+ "jobs": [
+  {
+   "key": "sl|1|equal|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|1|sufficientarian|0.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|1|prioritarian|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|1|baseline|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|2|equal|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|2|sufficientarian|0.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|2|prioritarian|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|2|baseline|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|3|equal|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|3|sufficientarian|0.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|3|prioritarian|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|3|baseline|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|4|equal|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|4|sufficientarian|0.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|4|prioritarian|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|4|baseline|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|1|equal|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|1|sufficientarian|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|1|prioritarian|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|1|baseline|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|2|equal|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|2|sufficientarian|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|2|prioritarian|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|2|baseline|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|3|equal|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|3|sufficientarian|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|3|prioritarian|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|3|baseline|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|4|equal|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|4|sufficientarian|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|4|prioritarian|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|4|baseline|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|1|equal|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|1|sufficientarian|1.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|1|prioritarian|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|1|baseline|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 1
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl1",
+    "slack": 1,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|2|equal|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|2|sufficientarian|1.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|2|prioritarian|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|2|baseline|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 2
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl2",
+    "slack": 2,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|3|equal|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|3|sufficientarian|1.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|3|prioritarian|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|3|baseline|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 3
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl3",
+    "slack": 3,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "sl|4|equal|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|4|sufficientarian|1.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|4|prioritarian|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   }
+  },
+  {
+   "key": "sl|4|baseline|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "slack": 4
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "sl4",
+    "slack": 4,
+    "limit": 10,
+    "hard_cap": null,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     15,
+     19,
+     24
+    ],
+    "ambient_kind": "default"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0,
+    "optimizeUtilitarian": false,
+    "optimizePrioritarian": false,
+    "optimizeProximity": false
+   }
+  }
+ ]
+}

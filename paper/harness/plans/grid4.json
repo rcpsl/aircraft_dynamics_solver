@@ -1,0 +1,289 @@
+{
+ "out": "results/grid4.jsonl",
+ "par": 9,
+ "wall_kill": 1500,
+ "jobs": [
+  {
+   "key": "g4|equal|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|equal|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|equal|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|sufficientarian|0.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|sufficientarian|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|sufficientarian|1.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|prioritarian|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "adjacency_kind": "grid4",
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "g4|prioritarian|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "adjacency_kind": "grid4",
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "g4|prioritarian|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "adjacency_kind": "grid4",
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "g4|utilitarian|0.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|utilitarian|1.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|utilitarian|1.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|proportional|0.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|proportional|1.0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4|proportional|1.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4abl|prioritarian|off|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "adjacency_kind": "grid4",
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   },
+   "req": {
+    "optimizePrioritarian": false
+   }
+  },
+  {
+   "key": "g4abl|utilitarian|off|1.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "adjacency_kind": "grid4"
+   },
+   "req": {
+    "optimizeUtilitarian": false
+   }
+  },
+  {
+   "key": "g4abl|proportional|off|1.0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "adjacency_kind": "grid4"
+   },
+   "req": {
+    "optimizeProximity": false
+   }
+  },
+  {
+   "key": "g4abl|equal|off|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "adjacency_kind": "grid4"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0
+   }
+  },
+  {
+   "key": "g4abl|sufficientarian|off|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "adjacency_kind": "grid4"
+   },
+   "req": {
+    "D": 30.0,
+    "U": 30.0
+   }
+  },
+  {
+   "key": "g4prot|corridor|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     16,
+     13,
+     18
+    ],
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4prot|corridor|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     16,
+     13,
+     18
+    ],
+    "adjacency_kind": "grid4"
+   }
+  },
+  {
+   "key": "g4prot|corridor|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     16,
+     13,
+     18
+    ],
+    "adjacency_kind": "grid4"
+   }
+  }
+ ]
+}

@@ -1,0 +1,571 @@
+{
+ "out": "results/scaling.jsonl",
+ "par": 9,
+ "wall_kill": 1500,
+ "jobs": [
+  {
+   "key": "scale|equal|communities|0.25",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.25
+   }
+  },
+  {
+   "key": "scale|equal|communities|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "scale|equal|communities|0.75",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.75
+   }
+  },
+  {
+   "key": "scale|equal|communities|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "scale|equal|communities|1.25",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.25
+   }
+  },
+  {
+   "key": "scale|equal|communities|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "scale|equal|communities|1.75",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.75
+   }
+  },
+  {
+   "key": "scale|equal|communities|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0
+   }
+  },
+  {
+   "key": "scale|sufficientarian|communities|0.25",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.25
+   }
+  },
+  {
+   "key": "scale|sufficientarian|communities|0.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "scale|sufficientarian|communities|0.75",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.75
+   }
+  },
+  {
+   "key": "scale|sufficientarian|communities|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "scale|sufficientarian|communities|1.25",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.25
+   }
+  },
+  {
+   "key": "scale|sufficientarian|communities|1.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "scale|sufficientarian|communities|1.75",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.75
+   }
+  },
+  {
+   "key": "scale|sufficientarian|communities|2.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0
+   }
+  },
+  {
+   "key": "scale|prioritarian|communities|0.25",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.25,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|prioritarian|communities|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|prioritarian|communities|0.75",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.75,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|prioritarian|communities|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|prioritarian|communities|1.25",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.25,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|prioritarian|communities|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|prioritarian|communities|1.75",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.75,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|prioritarian|communities|2.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|utilitarian|communities|0.25",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.25
+   }
+  },
+  {
+   "key": "scale|utilitarian|communities|0.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "scale|utilitarian|communities|0.75",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.75
+   }
+  },
+  {
+   "key": "scale|utilitarian|communities|1.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "scale|utilitarian|communities|1.25",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.25
+   }
+  },
+  {
+   "key": "scale|utilitarian|communities|1.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "scale|utilitarian|communities|1.75",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.75
+   }
+  },
+  {
+   "key": "scale|utilitarian|communities|2.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0
+   }
+  },
+  {
+   "key": "scale|proportional|communities|0.25",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.25
+   }
+  },
+  {
+   "key": "scale|proportional|communities|0.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "scale|proportional|communities|0.75",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 0.75
+   }
+  },
+  {
+   "key": "scale|proportional|communities|1.0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "scale|proportional|communities|1.25",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.25
+   }
+  },
+  {
+   "key": "scale|proportional|communities|1.5",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "scale|proportional|communities|1.75",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.75
+   }
+  },
+  {
+   "key": "scale|proportional|communities|2.0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 2.0
+   }
+  },
+  {
+   "key": "scale|equal|people|0.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "scale|equal|people|1.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "scale|equal|people|1.5",
+   "cfg": {
+    "principle": "equal",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "scale|equal|people|2.0",
+   "cfg": {
+    "principle": "equal",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 2.0
+   }
+  },
+  {
+   "key": "scale|sufficientarian|people|0.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "scale|sufficientarian|people|1.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "scale|sufficientarian|people|1.5",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "scale|sufficientarian|people|2.0",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 2.0
+   }
+  },
+  {
+   "key": "scale|prioritarian|people|0.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 0.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|prioritarian|people|1.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 1.0,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|prioritarian|people|1.5",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 1.5,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|prioritarian|people|2.0",
+   "cfg": {
+    "principle": "prioritarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 2.0,
+    "protected": [
+     15,
+     19,
+     24
+    ]
+   }
+  },
+  {
+   "key": "scale|utilitarian|people|0.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 0.5
+   }
+  },
+  {
+   "key": "scale|utilitarian|people|1.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 1.0
+   }
+  },
+  {
+   "key": "scale|utilitarian|people|1.5",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 1.5
+   }
+  },
+  {
+   "key": "scale|utilitarian|people|2.0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "people",
+    "limit": 10,
+    "demand_factor": 2.0
+   }
+  }
+ ]
+}

@@ -1,0 +1,6 @@
+4 jobs, 0 already done, 4 to run, par=4
+[1/4] sat                             14.0s  pilot|default|sufficientarian|1.0
+[2/4] sat                             15.1s  pilot|default|equal|1.0
+[3/4] sat                             16.0s  pilot|default|baseline|1.0
+[4/4] sat                             17.1s  pilot|default|prioritarian|1.0
+DONE in 17s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/pilot.jsonl

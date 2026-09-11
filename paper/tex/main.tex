@@ -1,0 +1,102 @@
+%% Fair UAM routing --- ICRA 2027 submission
+%% Compile on Overleaf (IEEEtran.cls ships with every TeX Live install).
+%% Section files live alongside this one; results tables in tables/ are generated
+%% by ../harness/analyze.py and should never be hand-edited.
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+% amsthm supplies the `proof' environment used in Sec. IV. IEEEtran does not define
+% one (it has \IEEEproof), so this is required, not optional.
+\usepackage{amsthm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+% Units. Deliberately NOT siunitx: \SI is deprecated in siunitx v3 (which current
+% TeX Live ships), and a package-version failure on the submission deadline is a
+% worse trade than three macros. Output is identical for our usage. To switch back,
+% delete this block and use \usepackage{siunitx} with \qty in place of \SI.
+\newcommand{\SI}[2]{#1\,#2}
+\newcommand{\dB}{dB}
+\newcommand{\dBA}{dBA}
+\newcommand{\second}{s}
+\newcommand{\hour}{h}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% Shorthand for the model. NB: no \cap shorthand -- that name is taken by the
+% set-intersection operator and \newcommand would abort the build.
+\newcommand{\stations}{\mathcal{M}}
+\newcommand{\aircraft}{\mathcal{N}}
+\newcommand{\steps}{\mathcal{T}}
+\newcommand{\capm}{\kappa}
+\newcommand{\dbinc}{\delta}
+
+\begin{document}
+
+\title{Fairness Principles as Constraints:\\
+An SMT Encoding of Distributive Justice for\\
+Urban Air Mobility Noise Routing}
+
+% ICRA review is DOUBLE-ANONYMOUS: no names, affiliations, emails, or funding
+% acknowledgements in the submitted PDF. Restore the block below only for the
+% camera-ready version.
+%
+% \author{\IEEEauthorblockN{Zhixiang Yang}
+% \IEEEauthorblockA{\textit{Department of Electrical Engineering and Computer Science} \\
+% \textit{University of California, Irvine}\\
+% Irvine, CA, USA \\
+% zhixiangyang22@gmail.com}}
+\author{\IEEEauthorblockN{Anonymous Submission}}
+
+\maketitle
+
+\begin{abstract}
+Urban air mobility will distribute aircraft noise over communities whose existing noise
+burdens are already unequal, and the routing objective decides who bears it. We take five
+principles of distributive justice --- Equal, Utilitarian, Sufficientarian, Prioritarian
+and Proportional --- as stated in the philosophical literature, encode each as an explicit
+constraint system over a multi-aircraft routing problem, and solve them with an optimising
+SMT solver on a $5\times5$ map of Austin, TX used in a participatory workshop. The
+translation from words to constraints turns out not to be neutral. Bounding
+inter-community disparity --- the natural encoding of Equal --- is subsumed by
+Sufficientarian's bound on absolute level, since the spread of a non-negative quantity is
+bounded by its maximum; under the further condition that neither principle contributes an
+objective, the two return interchangeable answers at every fleet size we settled, and the
+difference a user sees between them, up to \SI{3.98}{\dB} of peak noise, is produced
+entirely by solver tie-breaking. Because sound adds in energy, expressing fairness in
+\emph{added} decibels makes already-loud communities some $70\times$ cheaper to overfly.
+An ablation shows three of the five principles bind on nothing at the deployed setting;
+the caps begin to bite only within one or two decibels of infeasibility. The five differ
+by more than an order of magnitude in tractability, in the opposite direction to
+intuition, and one constraint proves redundant yet load-bearing for solvability. We argue
+a fairness-aware planner must report whether a principle was optimised, whether that
+optimum was proven, and whether it was binding at all --- and we show that comparing an
+unproven answer against a proven one produced four conclusions we had to retract.
+\end{abstract}
+
+\begin{IEEEkeywords}
+urban air mobility, fairness, distributive justice, satisfiability modulo theories,
+multi-agent routing, environmental noise
+\end{IEEEkeywords}
+
+\input{sec1_intro}
+\input{sec2_principles}
+\input{sec3_encoding}
+\input{sec4_results}
+\input{sec5_conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

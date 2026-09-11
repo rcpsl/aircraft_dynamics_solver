@@ -1,0 +1,18 @@
+16 jobs, 0 already done, 16 to run, par=8
+[1/16] sat                             76.1s  long|utilitarian|0.25
+[2/16] sat                              7.0s  longabl|utilitarian|off|1.0
+[3/16] sat                             20.0s  longabl|proportional|off|1.0
+[4/16] sat                            151.1s  long|prioritarian|1.5
+[5/16] sat                            338.3s  long|utilitarian|0.5
+[6/16] sat                            269.2s  long|prioritarian|1.75
+[7/16] sat                            405.2s  long|prioritarian|2.0
+[8/16] sat                            803.4s  longfb|equal|communities|2.0
+[9/16] sat                           4651.2s  long|proportional|0.25
+[10/16] sat                          14403.5s  long|proportional|0.5
+[11/16] sat                          14404.6s  long|utilitarian|0.75
+[12/16] sat                          14404.6s  long|utilitarian|1.0
+[13/16] sat                          14404.6s  long|proportional|0.75
+[14/16] sat                          14405.6s  long|proportional|1.0
+[15/16] sat                          14410.4s  longfb|equal|people|2.0
+[16/16] sat                          14409.4s  longfb|sufficientarian|people|2.0
+DONE in 15736s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/longbudget.jsonl

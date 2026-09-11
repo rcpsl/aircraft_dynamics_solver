@@ -1,0 +1,4 @@
+2 jobs, 0 already done, 2 to run, par=2
+[1/2] sat                            902.4s  probe|default|utilitarian|1.0
+[2/2] sat                            902.4s  probe|default|proportional|1.0
+DONE in 902s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/screen.jsonl

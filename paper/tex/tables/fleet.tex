@@ -1,0 +1,37 @@
+\begin{table}[t]
+\centering
+\caption{Routing under each principle as the fleet grows, on setup \texttt{default} at an unlimited solver budget. \emph{+vs base} is total fleet hops above the no-fairness baseline at the same $N$; \emph{max/tile} the largest number of aircraft over one community at one timestep; \emph{shared} the tile-timesteps carrying two or more. Total added noise is the arithmetic dB sum the Utilitarian term minimises. A dagger marks a verified feasible routing whose optimality is unproven; every such number bounds the optimum rather than stating it.}
+\label{tab:fleet}
+\begin{tabular}{r l rr rr rr}
+\toprule
+$N$ & Condition & avg hops & +vs base & max/tile & shared & total dB & peak dB \\
+\midrule
+8 & Equal & 2.75 & 0 & 4 & 3 & 19.7 & 3.01 \\
+8 & Sufficientarian & 2.75 & 0 & 4 & 3 & 19.7 & 3.01 \\
+8 & Prioritarian & 2.75 & 0 & 3 & 4 & 24.6 & 6.02 \\
+8 & Utilitarian & 2.75 & 0 & 5 & 7 & 10.2 & 4.77 \\
+8 & Proportional & 2.75 & 0 & 5 & 6 & 10.3 & 4.77 \\
+8 & Baseline & 2.75 & 0 & 4 & 3 & 19.7 & 3.01 \\
+\midrule
+16 & Equal & 2.75 & 0 & 5 & 12 & 39.6 & 6.99 \\
+16 & Sufficientarian & 2.75 & 0 & 8 & 11 & 39.9 & 6.02 \\
+16 & Prioritarian & 2.75 & 0 & 7 & 14 & 30.9 & 4.77 \\
+16 & Utilitarian & 2.75$^\dagger$ & 0$^\dagger$ & 10$^\dagger$ & 9$^\dagger$ & 16.8$^\dagger$ & 6.99$^\dagger$ \\
+16 & Proportional & 2.75$^\dagger$ & 0$^\dagger$ & 10$^\dagger$ & 11$^\dagger$ & 17.0$^\dagger$ & 6.99$^\dagger$ \\
+16 & Baseline & 2.75 & 0 & 9 & 13 & 36.1 & 4.77 \\
+\midrule
+24 & Equal & 2.75 & 0 & 9 & 19 & 57.3 & 10.00 \\
+24 & Sufficientarian & 2.75 & 0 & 12 & 17 & 55.3 & 6.02 \\
+24 & Prioritarian & 2.75 & 0 & 13 & 14 & 38.7 & 6.02 \\
+24 & Utilitarian & 3.17$^\dagger$ & 10$^\dagger$ & 22$^\dagger$ & 8$^\dagger$ & 24.1$^\dagger$ & 8.45$^\dagger$ \\
+24 & Proportional & 3.50$^\dagger$ & 18$^\dagger$ & 18$^\dagger$ & 9$^\dagger$ & 26.3$^\dagger$ & 8.45$^\dagger$ \\
+24 & Baseline & 2.75 & 0 & 13 & 14 & 48.7 & 7.78 \\
+\midrule
+32 & Equal & 2.75 & 0 & 11 & 19 & 67.0 & 9.54 \\
+32 & Sufficientarian & 2.75 & 0 & 18 & 17 & 68.8 & 9.03 \\
+32 & Prioritarian & 2.75 & 0 & 11 & 17 & 64.3 & 8.45 \\
+32 & Utilitarian & 3.59$^\dagger$ & 27$^\dagger$ & 32$^\dagger$ & 11$^\dagger$ & 43.4$^\dagger$ & 9.54$^\dagger$ \\
+32 & Baseline & 2.75 & 0 & 18 & 16 & 59.8 & 6.99 \\
+\bottomrule
+\end{tabular}
+\end{table}

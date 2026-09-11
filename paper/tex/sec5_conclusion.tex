@@ -1,0 +1,100 @@
+\section{Discussion and Conclusion}
+\label{sec:conclusion}
+
+We encoded five principles of distributive justice as an explicit constraint system over
+a multi-aircraft noise-routing problem, solved it with an optimising SMT solver, and
+measured what each principle does. Five lessons generalise beyond our instance.
+
+\paragraph{The encoding is part of the ethics} Equal admits both an optimisation reading
+(``as equal as possible'') and a satisfaction reading (``no two communities differ by
+more than $X$''); ordinary usage does not distinguish them, and taking the second --- the
+cheaper, more composable choice --- left Equal returning answers interchangeable with
+Sufficientarian's at every fleet size we settled, so participants were interpreting
+differences produced by solver tie-breaking. Two conditions carry that result: no
+objective term on either principle, and an optimum lying inside the tighter feasible set.
+The first fails under the optimisation reading, which is why the collapse indicts the
+reading rather than the principle. The second is empirical, but the underlying inclusion
+is not specific to noise --- a bound on the \emph{spread} of any non-negative quantity is
+implied by a bound on its \emph{level} --- so any system offering both a comparative and
+an absolute fairness cap has one that can only ever be the weaker. A tool offering a menu
+of fairness principles owes its users a demonstration that the menu items are
+distinguishable, and that is a claim about the instance, not a property of the code.
+
+\paragraph{Ask whether a principle binds, not whether it is implemented} Three of our
+five principles changed nothing the solver optimises at the deployed setting, and the
+caps meant to protect communities bite only within one or two decibels of infeasibility.
+At every fleet size where budgets are matched ($N \le 16$; above that only the hard-cap
+principles were re-run at four hours) all five principles fly every aircraft on a
+shortest path, so what a principle selects there is \emph{which} shortest paths, not how
+far anyone flies. None of this is visible in a map, and all of it is cheap to measure:
+run the same payload with the principle's own term removed and compare the quantity it
+was supposed to move.
+
+\paragraph{An unproven answer is not a weak answer, it is a different kind of thing}
+Four of our conclusions were wrong, all for the same reason: each compared a timed-out
+incumbent against a proven optimum. At the deployed budget Equal and Sufficientarian
+appeared to diverge at $N=30$ (arrival 149 against 147); a cap appeared to bind hard at
+$N=32$ (158 against 88); Utilitarian appeared to fly more than the others over loud
+communities; and the decibel-valued principles appeared to detour substantially from the
+shortest path while the others did not. Given four hours, the first pair proves out
+identical at 84 --- the earlier answers were $77\%$ from optimal --- the second at 88 with
+no binding, the third vanishes, and the fourth reverses: wherever budgets are matched
+($N \le 16$) \emph{all five} principles fly every aircraft on a shortest path, and the
+apparent detour gap was an artefact of comparing four-hour rows for three principles
+against \SI{600}{\second} rows for the other two. Every error pointed in the direction
+that made the system look more interesting than it is, none was visible without
+re-running, and none would have been caught by inspecting the routings.
+
+We built a standing audit that grades each claim by the status of the rows beneath it,
+and it caught the first two. It missed the last two, because it graded by \emph{status}
+and the flaw was in \emph{budget}: a table can compare rows that are all `partial' and
+still be confounded if some were given six hundred seconds and others four hours. The
+audit now checks budget homogeneity within a comparison as well. We report this because
+the failure is instructive --- an audit is only as good as the confound it was designed
+against, and ours had to be taught a second one.
+
+\paragraph{The metric carries a distributional judgement the principle does not}
+Because sound adds in energy, expressing any fairness criterion in \emph{added}
+decibels makes already-loud communities roughly $70\times$ cheaper to overfly than quiet
+ones at our source level. Every principle we implemented inherits that gradient, and the
+one optimising summed decibels most directly --- Utilitarian --- exploits it most, flying
+least of all five over the quiet \SI{45}{\dBA} communities ($9.1\%$ of its flight time
+against Equal's $34.1\%$) and displacing that traffic onto the mid-level ones. It does
+\emph{not} fly more over the loudest tier: that share is pinned at $27.3\%$ for every
+principle by where the vertiports sit. The gradient shows up as an exodus from the quiet,
+not an influx to the loud. Nothing in the philosophical statement of utilitarianism says
+``prefer communities that are already suffering''; the choice of measure says it. Since existing
+noise burdens in the United States fall disproportionately on lower-income and minority
+neighbourhoods~\cite{casey2017noise,simon2022sociodemographic}, a change-based metric
+quietly ratifies the existing distribution. We do not claim an absolute-level metric is
+correct; we claim the choice is normative and should be made explicitly.
+
+\paragraph{Tractability is not neutral either} The principles expressible as hard caps
+solved to proven optimality in under \SI{200}{\second} at fleet sizes where the two
+decibel-valued optimisation principles could not prove optimality at all. If a
+deployment picks its fairness rule partly on what it can compute in the time available
+--- and a participatory tool with a room full of people waiting certainly does --- then
+computational cost is silently doing normative work. Our system's response is to make
+the three relevant facts machine-readable and visible: whether a principle was
+optimised, whether its optimum was proven, and whether the answer on screen is the
+principle's answer or a fallback that ignores it.
+
+\subsection{Limitations and future work}
+
+The acoustic model is deliberately coarse: a tile is treated as uniformly exposed over an
+area several kilometres across, and aircraft are point sources with a single level, no
+directivity, no altitude and no psychoacoustic weighting~\cite{nasaUAMnoise2020}. Absolute
+decibel values should be read as ordinal. Our results concern how fairness rules order
+routings under a given noise model, not how loud a real corridor would be.
+
+Proposition~\ref{prop:collapse} holds for any instance, but the empirical findings are
+measurements on two instances of one city. Our five principles are also five readings of
+five traditions, fixed in advance by the workshop's definition sheet; a maximin
+Prioritarian, a threshold-then-Utilitarian Sufficientarian, or an Equal minimising
+variance rather than range are all defensible, and comparing such variants is exactly
+what this framework exists for. The most direct next step is to close the gap documented
+here --- implement Equal as the minimisation its statement calls for, and measure what it
+costs and whether it then separates from Sufficientarian. More broadly, the degeneracy we
+observe suggests reporting a principle's whole optimal set rather than one arbitrary
+member: the honest output of a fairness query may be a family of routings plus a
+statement of what the principle does not determine.

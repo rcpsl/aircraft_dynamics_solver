@@ -1,0 +1,27 @@
+{
+ "out": "results/settle.jsonl",
+ "par": 2,
+ "wall_kill": 15000,
+ "jobs": [
+  {
+   "key": "settle|equal|1.75",
+   "cfg": {
+    "principle": "equal",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.75
+   },
+   "timeout_ms": 14400000
+  },
+  {
+   "key": "settle|sufficientarian|1.75",
+   "cfg": {
+    "principle": "sufficientarian",
+    "who": "communities",
+    "limit": 10,
+    "demand_factor": 1.75
+   },
+   "timeout_ms": 14400000
+  }
+ ]
+}
