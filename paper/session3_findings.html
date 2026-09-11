@@ -100,7 +100,7 @@ footer li{margin-bottom:.22rem}
 
 <div class="wrap">
 <header>
-  <p class="eyebrow">UAM noise routing &middot; Austin, TX &middot; session 3 interim</p>
+  <p class="eyebrow">UAM noise routing &middot; Austin, TX &middot; session 3 &middot; complete</p>
   <h1>When a Principle Binds</h1>
   <p class="lede col">Sessions&nbsp;1&ndash;2 found that the five fairness principles
   barely differed, and that what difference there was fell inside the solver&rsquo;s own
@@ -112,15 +112,16 @@ footer li{margin-bottom:.22rem}
     <span><b>budget</b> unlimited, harvest at H = 3600 s</span>
     <span><b>per cell</b> K = 4 aircraft orderings</span>
     <span><b>setup</b> D = 6, protected = {14, 4, 8}</span>
-    <span><b>snapshot</b> 2026-09-12 00:30</span>
+    <span><b>snapshot</b> 2026-09-12 03:15, sweep complete</span>
   </div>
 </header>
 
-<div class="banner"><b>The ladder is still running.</b> Lane A is at 116 of 128 cells
-&mdash; N = 6 through 24 complete and proven, N = 30 and 32 in progress. Lane B (the two
-objective principles) has not started. Everything below is drawn from what is on disk;
-nothing here depends on the cells still outstanding, and the two places where an
-incomplete cell would matter are marked.</div>
+<div class="banner"><b>Sweep complete: 192 cells, 184 answered.</b> All six conditions
+are proven in all four orderings at every fleet size from N&nbsp;=&nbsp;6 to 24. Above
+that the ladder thins: cells that had not proved after one hour were stopped and their
+routings salvaged, and eight cells &mdash; Equal at N&nbsp;=&nbsp;30 and 32 &mdash;
+produced no routing their own search could verify. Findings below rest on the proven
+range unless they say otherwise.</div>
 
 <section class="col">
 <p class="eyebrow">The question</p>
@@ -314,11 +315,16 @@ to be the second.</p>
   any one community&rsquo;s level. At N&nbsp;=&nbsp;30 that difference becomes decisive:
   Sufficientarian&rsquo;s absolute cap still yields a verified routing within the one-hour
   harvest horizon, while all four Equal cells return no verifiable answer at all.</p>
-  <p class="note"><b>Not yet settled.</b> N&nbsp;=&nbsp;30 and 32 are still running and
-  their cells are harvested rather than proven, so the numbers there are upper bounds on
-  what the principle achieves, not the principle&rsquo;s answer. Lane B has not started,
-  so nothing is yet known about how the two objective principles behave on this setup
-  above N&nbsp;=&nbsp;16.</p>
+  <p>The two objective principles fared better at the top than the caps did.
+  Utilitarian is <b>proven to N&nbsp;=&nbsp;30</b> &mdash; further up the ladder than any
+  cap-based principle reaches &mdash; and is the cheapest condition in the whole study to
+  solve, faster at every size through N&nbsp;=&nbsp;16 than the baseline that carries no
+  fairness term at all. Its objective prunes the search rather than enlarging it.</p>
+  <p class="note"><b>What is not settled.</b> Cells above N&nbsp;=&nbsp;24 were harvested
+  at the one-hour horizon rather than proven, so their values bound what the principle
+  achieves rather than stating it, and they are drawn as isolated points rather than
+  joined to any curve. The attributable differences in Finding&nbsp;05 rest on
+  N&nbsp;=&nbsp;22 and 24 only &mdash; two fleet sizes.</p>
   </div>
 </div>
 
