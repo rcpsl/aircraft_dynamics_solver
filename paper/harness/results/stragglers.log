@@ -1,0 +1,6 @@
+knob sweeps clear Fri Sep 11 19:29:07     2026 - starting stragglers
+harvesting Fri Sep 11 20:09:07     2026
+stragglers done Fri Sep 11 20:09:10     2026
+16 jobs, 47 already done, 1 to run, par=8
+[1/1] sat                           2403.0s  fleet|default|proportional|2.0
+DONE in 2403s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/fleet.jsonl

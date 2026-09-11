@@ -287,6 +287,7 @@ def run(job):
            # The screen queues many setups into one file, and `cfg` only carries the
            # knobs that moved; the setup dict makes each row self-describing.
            "setup": job.get("setup"),
+           "perm": job.get("perm"),
            "probe": job.get("probe", False)}
 
     ck = Checkpointer(S, job["key"], period=float(job.get("checkpoint_s", 600)))

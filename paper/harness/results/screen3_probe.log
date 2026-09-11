@@ -1,0 +1,8 @@
+6 jobs, 100 already done, 6 to run, par=8
+[1/6] sat                            726.4s  s3p|D6_protA|utilitarian|1.0
+[2/6] sat                            726.4s  s3p|D6_protA|proportional|1.0
+[3/6] sat                            726.4s  s3p|D5_protA|utilitarian|1.0
+[4/6] sat                            726.4s  s3p|D5_protA|proportional|1.0
+[5/6] sat                            726.4s  s3p|default|utilitarian|1.0
+[6/6] sat                            726.4s  s3p|default|proportional|1.0
+DONE in 726s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/screen3.jsonl

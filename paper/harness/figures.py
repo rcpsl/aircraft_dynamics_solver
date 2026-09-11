@@ -338,11 +338,23 @@ CMARK = dict(MARK, baseline="x")
 LADDER = (8, 16, 24, 32)          # the fleet sizes routes_grid shows
 
 
+# The banded cell table the session-3 figures read. Set to None to fall back to the
+# session-2 single-run table.
+MAIN_STEM = "fleet_main_metrics"
+MAIN_FILES = ["results/fleet_main.jsonl"]
+
+
 def _fleet(setup=None):
     """(cells, metrics, setup_name) for the study, or (None, None, None)."""
     import metrics_run as MR
-    cells = MR.cells()
-    mets = MR.metrics_index()
+    import os as _os
+    main = _os.path.join(RES, MAIN_STEM + ".json")
+    if _os.path.exists(main):
+        cells = MR.cells(MAIN_FILES)
+        mets = MR.metrics_index(main)
+    else:
+        cells = MR.cells()
+        mets = MR.metrics_index()
     if not cells:
         return None, None, None
     if setup is None:
@@ -365,13 +377,39 @@ def _series(mets, setup, cond, field):
 
 
 def _plot_series(ax, mets, setup, field, conds=None, baseline_dashed=True):
+    """A line through the mean, with the permutation range shaded behind it.
+
+    The band IS the indifference floor at that cell, so a reader can see
+    attributability directly: two lines whose bands overlap are not separated by
+    anything the principle did.
+    """
     for c in (conds or CONDITIONS):
         xs, ys, pv = _series(mets, setup, c, field)
         if not xs:
             continue
+        lo = [(mets.get((setup, c, x)) or {}).get(field + "_min") for x in xs]
+        hi = [(mets.get((setup, c, x)) or {}).get(field + "_max") for x in xs]
+        if all(v is not None for v in lo + hi) and any(h > l for l, h in zip(lo, hi)):
+            ax.fill_between(xs, lo, hi, color=CCOLOR[c], alpha=0.16, lw=0, zorder=1)
         dashed = (c == "baseline") and baseline_dashed
-        ax.plot(xs, ys, "--" if dashed else "-", color=CCOLOR[c],
-                lw=1.1, alpha=0.9, zorder=2)
+        # The line joins PROVEN cells only. A harvested cell sits wherever its search
+        # was stopped, so joining it to the curve draws a trend out of how far the
+        # solver got -- at N=30 that turns a stopped search into an apparent jump from
+        # 0 to 115 extra hops. Unproven cells are drawn as isolated hollow markers,
+        # which is what they are: a real routing, at an unknown distance from the
+        # optimum.
+        run_x, run_y = [], []
+        for x, y, ok in zip(xs, ys, pv):
+            if ok:
+                run_x.append(x); run_y.append(y)
+            else:
+                if len(run_x) > 1:
+                    ax.plot(run_x, run_y, "--" if dashed else "-", color=CCOLOR[c],
+                            lw=1.1, alpha=0.9, zorder=2)
+                run_x, run_y = [], []
+        if len(run_x) > 1:
+            ax.plot(run_x, run_y, "--" if dashed else "-", color=CCOLOR[c],
+                    lw=1.1, alpha=0.9, zorder=2)
         for x, y, ok in zip(xs, ys, pv):
             ax.plot(x, y, CMARK[c], ms=3.8, color=CCOLOR[c],
                     mfc=CCOLOR[c] if ok else "white", mew=0.9, zorder=3)
@@ -388,6 +426,28 @@ def _legend_handles(mets, setup):
 
 
 # ------------------------------------------------------------ F1 routes_grid
+_ABSENT = None
+
+
+def _absent_label(cond, n):
+    """Why a cell has no panel: it failed, or it was never run."""
+    global _ABSENT
+    if _ABSENT is None:
+        import glob
+        import divergence as _DV
+        _ABSENT = {}
+        for p in glob.glob(os.path.join(RES, "fleet_main.jsonl")):
+            for line in io.open(p, encoding="utf-8"):
+                try:
+                    r = json.loads(line)
+                except Exception:
+                    continue
+                st = str(r.get("status", ""))
+                if st.startswith("phase2_failed") or r.get("fellBackToPhase1"):
+                    _ABSENT[(_DV.principle_of(r), r.get("N"))] = "no verified routing"
+    return _ABSENT.get((cond, n), "not run")
+
+
 def fig_routes_grid(sizes=LADDER, split=True):
     """Rows = fleet size, columns = condition. The centrepiece.
 
@@ -428,8 +488,13 @@ def fig_routes_grid(sizes=LADDER, split=True):
                 ax = axes[ri][ci]
                 row = cells.get((setup, c, n))
                 if row is None:
+                    # Distinguish "has not returned" from "returned nothing usable".
+                    # A phase-2 failure IS finished -- it just produced no routing its
+                    # own search could verify, so the solver fell back to the
+                    # unweighted route. Labelling that "still solving" would promise a
+                    # result that is not coming.
                     ax.axis("off")
-                    ax.text(0.5, 0.5, "still solving", ha="center", va="center",
+                    ax.text(0.5, 0.5, _absent_label(c, n), ha="center", va="center",
                             fontsize=6.5, color="0.45", transform=ax.transAxes)
                     if ci == 0:
                         ax.text(-0.08, 0.5, f"$N={n}$", rotation=90, fontsize=8,
@@ -467,6 +532,7 @@ def fig_metric_vs_N():
         print("no fleet metrics for metric_vs_N"); return
     PANELS = [
         ("avg_trip_hops",          "avg trip length (hops)",      True),
+        ("departure_delay_total",  "departure delay (ac-timesteps)", True),
         ("extra_vs_baseline",      "extra hops vs baseline",      False),
         ("max_count",              "max aircraft per tile",       True),
         ("shared_tile_timesteps",  "shared tile-timesteps",       True),
@@ -474,6 +540,7 @@ def fig_metric_vs_N():
         ("peak_added",             "peak added noise (dB)",       True),
     ]
     fig, axes = plt.subplots(2, 3, figsize=(7.0, 3.7))
+    PANELS = PANELS[:6]
     for ax, (field, ylab, with_base) in zip(axes.ravel(), PANELS):
         conds = CONDITIONS if with_base else ORDER
         _plot_series(ax, mets, setup, field, conds=conds)

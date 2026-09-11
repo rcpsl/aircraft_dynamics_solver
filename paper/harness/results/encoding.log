@@ -1,0 +1,26 @@
+24 jobs, 0 already done, 24 to run, par=8
+[1/24] sat                              5.1s  enc|D6_protA|utilitarian_count|0.25|p0
+[2/24] sat                              5.1s  enc|D6_protA|utilitarian_count|0.25|p1
+[3/24] sat                              5.1s  enc|D6_protA|utilitarian_count|0.25|p2
+[4/24] sat                              5.1s  enc|D6_protA|utilitarian_count|0.25|p3
+[5/24] sat                              7.1s  enc|D6_protA|utilitarian_count|0.5|p1
+[6/24] sat                              7.1s  enc|D6_protA|utilitarian_count|0.5|p2
+[7/24] sat                             13.3s  enc|D6_protA|proportional_count|0.25|p0
+[8/24] sat                             13.3s  enc|D6_protA|proportional_count|0.25|p3
+[9/24] sat                              8.2s  enc|D6_protA|utilitarian_count|0.5|p0
+[10/24] sat                              8.2s  enc|D6_protA|utilitarian_count|0.5|p3
+[11/24] sat                             14.4s  enc|D6_protA|proportional_count|0.25|p1
+[12/24] sat                             14.4s  enc|D6_protA|proportional_count|0.25|p2
+[13/24] sat                             25.3s  enc|D6_protA|proportional_count|0.5|p1
+[14/24] sat                             27.4s  enc|D6_protA|proportional_count|0.5|p0
+[15/24] sat                             26.3s  enc|D6_protA|proportional_count|0.5|p2
+[16/24] sat                             27.3s  enc|D6_protA|utilitarian_count|1.0|p0
+[17/24] sat                             27.3s  enc|D6_protA|utilitarian_count|1.0|p1
+[18/24] sat                             26.3s  enc|D6_protA|utilitarian_count|1.0|p2
+[19/24] sat                             28.3s  enc|D6_protA|utilitarian_count|1.0|p3
+[20/24] sat                             31.4s  enc|D6_protA|proportional_count|0.5|p3
+[21/24] sat                            119.3s  enc|D6_protA|proportional_count|1.0|p0
+[22/24] sat                            119.3s  enc|D6_protA|proportional_count|1.0|p1
+[23/24] sat                            118.2s  enc|D6_protA|proportional_count|1.0|p3
+[24/24] sat                            122.3s  enc|D6_protA|proportional_count|1.0|p2
+DONE in 162s -> D:\Documents\EECS_199_Shoukry\paper\harness\results/encoding.jsonl

@@ -81,14 +81,25 @@ def _best(rows):
     return list(out.values())
 
 
-def build(files=None):
+def build(files=None, agg=False):
     # A row that carries no answer carries no metrics either: `derive` would return a
     # shell of Nones that then reads as a cell with data in every table downstream.
     # These are reported as unfinished, from the runner log and the checkpoints, not
     # as rows with empty columns.
     import runner as _R
-    rows = [r for r in _best(load(files or DEFAULT_FILES))
-            if str(r.get("status", "")) not in _R.UNANSWERED]
+    rows = []
+    for r in _best(load(files or DEFAULT_FILES)):
+        st = str(r.get("status", ""))
+        if st in _R.UNANSWERED:
+            continue
+        # A phase-2 failure carries phase 1's UNWEIGHTED route -- the solver's fallback,
+        # with no principle applied at all. `derive` would happily compute a full set of
+        # metrics from it and the cell would then read as the principle's answer. It is
+        # not one. These are reported as fallbacks by table_frontier and by the runner
+        # log; they do not become cells.
+        if st.startswith("phase2_failed") or r.get("fellBackToPhase1"):
+            continue
+        rows.append(r)
     recs = []
     for r in rows:
         try:
@@ -105,6 +116,7 @@ def build(files=None):
         m["demand_factor"] = r.get("cfg", {}).get("demand_factor")
         m["slack"] = r.get("slack")
         m["probe"] = r.get("probe", False)
+        m["perm"] = r.get("perm")
         recs.append(m)
 
     # Join each condition to the baseline at the same setup and fleet size.
@@ -133,22 +145,30 @@ def build(files=None):
                                      if a is not None and b is not None else None)
 
     recs.sort(key=lambda m: (m.get("setup_name") or "", m.get("N") or 0,
-                             m.get("condition") or ""))
-    return recs
+                             m.get("condition") or "", m.get("perm") or 0))
+    return aggregate(recs) if agg else recs
 
 
-def write(recs):
+def write(recs, stem="fleet_metrics", cells_recs=None):
+    """Write the flat per-run table, and -- when given -- the banded cell table.
+
+    Both, deliberately. The CSV is every individual solve, so any number in the paper
+    can be traced to the run that produced it; the `<stem>.json` is the K runs collapsed
+    into one cell with its permutation band, which is what every table and figure reads.
+    Keeping only the second would hide which run any value came from; keeping only the
+    first would let a figure quietly plot one draw as if it were the answer.
+    """
     os.makedirs(RES, exist_ok=True)
-    jp = os.path.join(RES, "fleet_metrics.json")
+    jp = os.path.join(RES, stem + ".json")
     with io.open(jp, "w", encoding="utf-8") as f:
-        json.dump(recs, f, indent=1)
+        json.dump(cells_recs if cells_recs is not None else recs, f, indent=1)
 
     keys = list(LEAD)
     for m in recs:
         for k in m:
             if k not in keys:
                 keys.append(k)
-    cp = os.path.join(RES, "fleet_metrics.csv")
+    cp = os.path.join(RES, stem + ".csv")
     with io.open(cp, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore")
         w.writeheader()
@@ -161,6 +181,87 @@ def write(recs):
     print(f"{len(recs)} rows -> {cp}")
     print(f"{len(recs)} rows -> {jp}")
     return cp, jp
+
+
+# Metrics that are averaged and banded across a cell's permutation runs. Everything
+# else on a cell record (D, U, T, the setup, the status counts) is either identical
+# across the runs or is reported per run.
+BANDED = ("avg_trip_hops", "total_trip_hops", "extra_vs_floor", "extra_vs_baseline",
+          "arrivalPenalty", "departure_delay_total", "hover_steps_total",
+          "max_count", "mean_count_occupied", "shared_tile_timesteps",
+          "occupied_tile_timesteps", "stations_touched",
+          "capacity_utilisation_max", "capacity_utilisation_mean",
+          "total_added", "total_added_energy", "peak_added", "peak_spread",
+          "protected_peak", "occ_dist_vs_baseline", "wall", "t_phase1", "t_phase2")
+
+
+def aggregate(recs):
+    """Collapse a cell's K permutation runs into one record with a band.
+
+    For each banded metric the record carries `<m>` (the mean), `<m>_min`, `<m>_max`
+    and `floor_<m>` = max - min. That floor is the tie-break measured with no confound:
+    the permuted problems are the same problem, so the only thing separating the runs
+    is which member of the optimal set came back.
+
+    ONLY PROVEN RUNS contribute to a band. An unproven run is at whatever point the
+    search reached, which is not a sample from the optimal set, and averaging it in
+    would inflate the floor and make every comparison look unattributable. A cell with
+    no proven run is kept -- its routing is still real -- but carries no band, and
+    `attributable()` refuses to rule on it.
+    """
+    by = {}
+    for m in recs:
+        by.setdefault((m.get("setup_name"), m.get("condition"), m.get("N")),
+                      []).append(m)
+    out = []
+    for (setup, cond, n), runs in by.items():
+        proven = [r for r in runs if r.get("optimality") == "optimal"]
+        base = dict(sorted(proven or runs, key=lambda r: (r.get("perm") or 0))[0])
+        base["runs"] = len(runs)
+        base["runs_proven"] = len(proven)
+        base["perm_keys"] = sorted(str(r.get("key")) for r in runs)
+        base["optimality"] = "optimal" if len(proven) == len(runs) else (
+            "partial" if proven else (runs[0].get("optimality") or "none"))
+        base["all_proven"] = len(proven) == len(runs) and len(runs) > 0
+        for f in BANDED:
+            vals = [r.get(f) for r in proven if r.get(f) is not None]
+            if not vals:
+                base.pop(f"floor_{f}", None)
+                continue
+            base[f] = sum(vals) / len(vals)
+            base[f + "_min"] = min(vals)
+            base[f + "_max"] = max(vals)
+            base["floor_" + f] = max(vals) - min(vals)
+        out.append(base)
+    out.sort(key=lambda m: (m.get("setup_name") or "", m.get("N") or 0,
+                            m.get("condition") or ""))
+    return out
+
+
+def attributable(a, b, field):
+    """Is the difference between two cells on `field` evidence about the condition?
+
+    Two conditions must clear BOTH tests:
+      * their means differ by more than the larger of the two floors, and
+      * their permutation ranges do not overlap.
+
+    The second is the stricter one and is what stops a claim resting on two bands that
+    happen to have different centres. Returns None when either cell has no band, which
+    is not the same as False and must not be reported as one.
+    """
+    if a is None or b is None:
+        return None
+    fa, fb = a.get("floor_" + field), b.get("floor_" + field)
+    if fa is None or fb is None or a.get(field) is None or b.get(field) is None:
+        return None
+    if not (a.get("all_proven") and b.get("all_proven")):
+        return None
+    gap = abs(a[field] - b[field])
+    if gap <= max(fa, fb):
+        return False
+    lo_a, hi_a = a[field + "_min"], a[field + "_max"]
+    lo_b, hi_b = b[field + "_min"], b[field + "_max"]
+    return hi_a < lo_b or hi_b < lo_a
 
 
 def cells(files=None, include_probes=False):
@@ -199,11 +300,16 @@ def metrics_index(path=None):
 
 
 if __name__ == "__main__":
-    files = sys.argv[1:] or None
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    stem = "fleet_metrics"
+    if "--stem" in sys.argv:
+        stem = sys.argv[sys.argv.index("--stem") + 1]
+        args = [a for a in args if a != stem]
+    files = args or None
     recs = build(files)
     if not recs:
         print("no rows yet"); sys.exit(0)
-    write(recs)
+    write(recs, stem=stem, cells_recs=aggregate(recs))
     by = {}
     for m in recs:
         by.setdefault((m["setup_name"], m["N"]), []).append(m)

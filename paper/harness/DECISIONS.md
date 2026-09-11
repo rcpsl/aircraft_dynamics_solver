@@ -366,3 +366,120 @@ The general lesson, already in the project's README for `.tex` and now true of t
 harness too: **edit source through the editor, not by index arithmetic on a string.**
 The only reason this cost minutes rather than the session is that the file was copied
 first and `ast.parse` was run after.
+
+---
+
+# Session 3
+
+## D23. K = 4 aircraft-order permutations are now the default for every paper cell
+
+Sessions 1-2 established that a single solve is one draw from a set of equally-optimal
+routings, and that the spread over that set is wider than most differences between
+principles. A cell is therefore no longer one run: `plans._sweep` emits K=4 jobs per
+cell under OD-preserving permutations, keyed `<plan>|<setup>|<cond>|<factor>|p<k>`.
+
+The permutation seed depends on `(factor, k)` and **not** on the condition, so at
+permutation k every condition faces the identical aircraft ordering. The comparison is
+paired: a difference between two conditions at the same k cannot be an ordering
+difference, because they had the same ordering.
+
+`metrics_run.aggregate` collapses the K runs into one cell carrying the mean, the range,
+and `floor_<metric>` = max - min. `metrics_run.attributable(a, b, field)` requires BOTH
+that the means differ by more than the larger floor AND that the ranges do not overlap;
+it returns `None`, not `False`, when either cell lacks a band, because "cannot tell" and
+"no difference" are different answers. Only PROVEN runs contribute to a band — an
+unproven run sits wherever the search stopped, which is not a sample from the optimal
+set, and averaging it in would inflate the floor and make every comparison look
+unattributable.
+
+## D24. The protected set is chosen from the data: stations 14, 4, 8
+
+`PROT_BURDEN` carries **zero** aircraft-timesteps in the baseline routing at every fleet
+size — the loudest tiles sit off every corridor. That, not anything about the principle,
+is why Prioritarian's objective evaluates to 0.0 whether it is switched on or not. The
+screen confirms it holds even at D=5.
+
+`PROT_ACTIVE = (13, 3, 7)` → stations 14 (Lower-Income Urban), 4 (University), 8
+(Working-Class Homeowner): the three busiest non-vertiport tiles that are also **Low
+income**, carrying 11, 9 and 9 aircraft-timesteps. Active *and* normatively the right
+shape for Prioritarian — it protects burden-bearing communities rather than whichever
+tile happens to be loud. With it, the ablation control puts 3.45 dB on the protected set
+at N=16 and the objective removes it entirely.
+
+## D25. `principle_of` scans for the condition instead of counting from the end
+
+The `|p<k>` suffix broke a `parts[-2]` lookup, and the symptom was not an error: every
+cell in the setup screen read "no cell" and every setup scored 0/5 active. Now it scans
+the key for a known condition name, and `prioritarian_off` is a recognised name so the
+ablation control can be addressed. Checked against old and new key shapes; the 54
+existing checks still pass.
+
+## D26. Two runners must never share an output file
+
+Queuing the confirmation behind the probes used a `pgrep` guard that does not match on
+this platform, so both ran at once, both appending to `results/screen3.jsonl`. No
+corruption occurred (116 lines, all valid) but probe rows carry paths and two 25xT
+matrices, and a split write would have damaged the file.
+
+Only the RUNNER writes the jsonl — workers write their own temp files — so killing the
+confirmation runner stopped its writes instantly and left nothing half-written. It had 2
+of 80 jobs done and `runner.py` skips completed keys, so it resumes for free. Restarted
+after the probes finish.
+
+The rule from D3 applies to every sweep, not just Phase 2: **sequential runners per
+output file**, and a guard that is verified to work before it is relied on.
+
+## D27. SETUP_MAIN = `D6_protA` — cap D=6 on every principle, protected set on the corridor
+
+The screen (100 cells, K=4, unlimited, `results/setup_choice.md`) says neither knob alone
+activates the menu:
+
+| setup | Equal | Suff | Prior | active at N=16 |
+|---|---|---|---|---|
+| `D6` / `D5` | yes | yes | **no** | 2/5 |
+| `protA` | no | no | yes | 1/5 |
+| `D6_protA` / `D5_protA` | yes | yes | yes | **5/5** |
+
+Caps activate by binding exactly (capacity utilisation 1.00 against 0.31 and 0.25 at the
+tool's D=10). Prioritarian activates because the protected set is now somewhere aircraft
+want to fly: its ablation control puts **3.45 dB** on the set at N=16 and the objective
+removes it. Both decibel objectives beat the baseline's score on their own metric by more
+than the permutation floor (17.9 vs 16.1; 504.5 vs 16.1).
+
+**D6 over D5**, on the brief's ordering: tied on active principles (5/5) and on knobs
+moved (2), broken by attributable differences at N=24 — **2/6 against 1/6** — and the
+looser cap is the one more likely to survive the top of the ladder, where session 2 could
+not solve Equal at N=32 under either.
+
+Confirmed at N=8 and N=24 before committing. At **N=8 the caps are not yet binding**
+(utilisation 0.62 / 0.50, no attributable difference) and Prioritarian's effect is inside
+the band. That is not a defect of the setup: it is the fleet-size response the paper is
+about, and it is what the "N at which the principle becomes active" column of
+`response.tex` reports.
+
+## D28. Utilitarian and Proportional run the COUNT-weighted encoding on the ladder
+
+Both objectives stall because they are decibel-valued lookups. The solver already exposes
+a count-weighted form of each and the request parameters that select them cost no code
+change: `utilNoiseMode: false` and `proximityMode: "count"`. Screened on SETUP_MAIN at
+N=6, 8, 16, unlimited, K=4 (`results/encoding.jsonl`) — **every cell proved, 4/4
+permutations**:
+
+| N=8, mean wall | dB form | count form | |
+|---|---|---|---|
+| Utilitarian | 328.9 s | **6.4 s** | 51x |
+| Proportional | 29 395 s | **26.5 s** | **1110x** |
+
+At N=16 the count form proves in 26 s and 119 s where the dB form did not prove in
+15.4 h. That is the difference between a ladder carrying two conditions and one carrying
+five, so the ladder runs count mode and §IV-A states it.
+
+`SETUP_MAIN["objective_encoding"] = "count"` drives it through `condition()`, so plans,
+figures and tables cannot disagree about which encoding was measured. The dB form is not
+discarded: the two are compared head-to-head at the fleet sizes where both prove, which
+is the next step.
+
+## D29. The main ladder writes `fleet_main.jsonl`, not `fleet.jsonl`
+
+The default-setup ladder stays on disk untouched as the reference the paper cites in one
+paragraph. `fleet_main` is added to `MERGE_EXEMPT` alongside it.

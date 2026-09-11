@@ -9,26 +9,31 @@ measured what each principle does. Five lessons generalise beyond our instance.
 (``as equal as possible'') and a satisfaction reading (``no two communities differ by
 more than $X$''); ordinary usage does not distinguish them, and taking the second --- the
 cheaper, more composable choice --- left Equal returning answers interchangeable with
-Sufficientarian's at every fleet size we settled, so participants were interpreting
-differences produced by solver tie-breaking. Two conditions carry that result: no
+Sufficientarian's wherever the cap does not bind, so what looked like a choice between
+principles was a choice between tie-breaks. Two conditions carry that result: no
 objective term on either principle, and an optimum lying inside the tighter feasible set.
 The first fails under the optimisation reading, which is why the collapse indicts the
 reading rather than the principle. The second is empirical, but the underlying inclusion
 is not specific to noise --- a bound on the \emph{spread} of any non-negative quantity is
 implied by a bound on its \emph{level} --- so any system offering both a comparative and
-an absolute fairness cap has one that can only ever be the weaker. A tool offering a menu
-of fairness principles owes its users a demonstration that the menu items are
-distinguishable, and that is a claim about the instance, not a property of the code.
+an absolute fairness cap has one that can only ever be the weaker. A system offering a
+menu of fairness principles owes a demonstration that the menu items are distinguishable,
+and that is a claim about the instance, not a property of the code.
 
-\paragraph{Ask whether a principle binds, not whether it is implemented} Three of our
-five principles changed nothing the solver optimises at the deployed setting, and the
-caps meant to protect communities bite only within one or two decibels of infeasibility.
-At every fleet size where budgets are matched ($N \le 16$; above that only the hard-cap
-principles were re-run at four hours) all five principles fly every aircraft on a
-shortest path, so what a principle selects there is \emph{which} shortest paths, not how
-far anyone flies. None of this is visible in a map, and all of it is cheap to measure:
-run the same payload with the principle's own term removed and compare the quantity it
-was supposed to move.
+\paragraph{Ask whether a principle binds, not whether it is implemented} Whether a
+principle does anything is a question about the operating point, not about the principle.
+At the settings our system ships with, the caps sit at a third of the capacity they
+allow and the protected set carries no traffic at all, and three of the five principles
+then return the no-fairness routing or something indistinguishable from it. Move the cap
+to where it binds and put the protected set where aircraft fly, and the same three
+principles separate from that routing by margins a reader can act on.
+
+Measuring which of those regimes one is in is cheap, and it is not the ablation we
+started with. Re-solve the same configuration under permutations of the aircraft list:
+the problem is unchanged, so the spread over those runs is the solver's indifference, and
+a principle whose effect is smaller than that spread is not doing the work being
+attributed to it. Running that test is how we found that our own deployed setting was the
+wrong one to draw conclusions from.
 
 \paragraph{An unproven answer is not a weak answer, it is a different kind of thing}
 Four of our conclusions were wrong, all for the same reason: each compared a timed-out
@@ -89,7 +94,8 @@ routings under a given noise model, not how loud a real corridor would be.
 
 Proposition~\ref{prop:collapse} holds for any instance, but the empirical findings are
 measurements on two instances of one city. Our five principles are also five readings of
-five traditions, fixed in advance by the workshop's definition sheet; a maximin
+five traditions, fixed in advance by the definitions of
+Section~\ref{sec:principles}; a maximin
 Prioritarian, a threshold-then-Utilitarian Sufficientarian, or an Equal minimising
 variance rather than range are all defensible, and comparing such variants is exactly
 what this framework exists for. The most direct next step is to close the gap documented

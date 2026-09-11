@@ -38,7 +38,8 @@ ORDER = ["equal", "sufficientarian", "prioritarian", "utilitarian", "proportiona
 # quietly seat a 600 s incumbent in an unlimited-budget table, which is the error the
 # whole redirection exists to avoid. The exemption blocks it in both directions: these
 # files are neither upgraded from, nor used to upgrade.
-MERGE_EXEMPT = {"reps", "pilot", "fleet", "fleet_default", "screen", "slack",
+MERGE_EXEMPT = {"reps", "pilot", "fleet", "fleet_default", "screen", "screen3",
+                "fleet_main", "slack",
                 "captight", "perm"}
 
 
@@ -1194,7 +1195,7 @@ def _cell(m, field, nd=2, scale=1.0):
 
 def table_fleet():
     """Six metrics per principle across the fleet ladder. The paper's main table."""
-    idx, setup = _fleet_metrics()
+    idx, setup = _main_cells()
     if not idx:
         return
     sizes = [n for n in FLEET_LADDER if any(k[0] == setup and k[2] == n for k in idx)]
@@ -1233,7 +1234,7 @@ def table_fleet():
               r"unproven; every such number bounds the optimum rather than "
               r"stating it." if unproven else
               r"Every cell is a proven optimum.") + r"}",
-           r"\label{tab:fleet}",
+           r"\label{tab:fleet-main}",
            r"\begin{tabular}{r l rr rr rr}", r"\toprule",
            r"$N$ & Condition & avg hops & +vs base & max/tile & shared & "
            r"total dB & peak dB \\", r"\midrule"]
@@ -1249,7 +1250,7 @@ def table_fleet():
                        f"{_cell(m,'shared_tile_timesteps',0)} & "
                        f"{_cell(m,'total_added',1)} & {_cell(m,'peak_added')} " + r"\\")
     tex += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    io.open(os.path.join(TEXDIR, "fleet.tex"), "w", encoding="utf-8",
+    io.open(os.path.join(TEXDIR, "fleet_main.tex"), "w", encoding="utf-8",
             newline="\n").write("\n".join(tex) + "\n")
 
 
@@ -1260,7 +1261,7 @@ def table_capacity():
     ambient level. It is the number that says a uniform cap is not a uniform rule: the
     same D buys a 65 dBA tile many times the capacity it buys a 45 dBA one.
     """
-    idx, setup = _fleet_metrics()
+    idx, setup = _main_cells()
     if not idx:
         return
     sizes = [n for n in (16, 32) if any(k[0] == setup and k[2] == n for k in idx)]
@@ -1383,7 +1384,7 @@ def table_setup():
 
 def table_frontier():
     """How far each principle proved out, and what is still running."""
-    idx, setup = _fleet_metrics()
+    idx, setup = _main_cells()
     if not idx:
         return
     ns = sorted({k[2] for k in idx if k[0] == setup})
@@ -1404,11 +1405,139 @@ def table_frontier():
            f"{got[0][1].get('runner_par')} |")
 
 
+# ---------------------------------------------------------------- session 3
+MAIN_STEM = "fleet_main_metrics"
+FAMILIES3 = [("congestion", "max_count", 0),
+             ("travel time", "extra_vs_baseline", 0),
+             ("departure delay", "departure_delay_total", 0),
+             ("added noise", "peak_added", 2)]
+
+
+def _main_cells(stem=MAIN_STEM):
+    p = os.path.join(RES, stem + ".json")
+    if not os.path.exists(p):
+        return {}, None
+    recs = json.load(io.open(p, encoding="utf-8"))
+    idx = {(m.get("setup_name"), m.get("condition"), m.get("N")): m for m in recs}
+    names = [k[0] for k in idx]
+    return idx, (max(set(names), key=names.count) if names else None)
+
+
+def table_response():
+    """One row per principle, one column per metric family: what it does as N grows.
+
+    Two things per cell, and they answer different questions. **Active from** is the
+    smallest fleet size at which this principle's value differs attributably from the
+    no-fairness baseline -- the principle does nothing below it. The arrow is what
+    happens to that difference above it: growing with N, shrinking, or present but not
+    moving. A principle that is never attributable gets a dash, which is a finding
+    about the principle at this setup, not a gap in the data.
+
+    Attributability is `metrics_run.attributable`: means apart by more than the larger
+    permutation floor AND ranges that do not overlap.
+    """
+    sys.path.insert(0, HERE)
+    import metrics_run as MR
+    idx, setup = _main_cells()
+    if not idx:
+        return
+    ns = sorted({k[2] for k in idx if k[0] == setup})
+    conds = [c for c in ORDER if any(k[0] == setup and k[1] == c for k in idx)]
+    if not conds:
+        return
+
+    md("\n## What each principle does as the fleet grows\n")
+    md(f"Setup `{setup}`. **Active from** is the smallest N at which the principle "
+       "differs attributably from the baseline on that metric; the arrow is what the "
+       "difference does above it. A dash means the principle never separates from the "
+       "baseline on that metric at this setup.\n")
+    md("| principle | " + " | ".join(f for f, _m, _d in FAMILIES3) + " |")
+    md("|---" * (len(FAMILIES3) + 1) + "|")
+
+    rows_tex = []
+    for c in conds:
+        cells, tex = [], []
+        for _fam, metric, nd in FAMILIES3:
+            att = [n for n in ns
+                   if MR.attributable(idx.get((setup, c, n)),
+                                      idx.get((setup, "baseline", n)), metric)]
+            if not att:
+                cells.append("--"); tex.append("--"); continue
+            lo, hi = att[0], att[-1]
+            d_lo = idx[(setup, c, lo)][metric] - idx[(setup, "baseline", lo)][metric]
+            d_hi = idx[(setup, c, hi)][metric] - idx[(setup, "baseline", hi)][metric]
+            if abs(d_hi) > abs(d_lo) * 1.15:
+                arrow, atex = "grows", r"$\uparrow$"
+            elif abs(d_hi) < abs(d_lo) * 0.85:
+                arrow, atex = "shrinks", r"$\downarrow$"
+            else:
+                arrow, atex = "flat", r"$-$"
+            cells.append(f"from N={lo}, {arrow} ({d_lo:+.{nd}f} to {d_hi:+.{nd}f})")
+            tex.append(f"{atex} from $N{{=}}{lo}$")
+        md(f"| {LABEL[c]} | " + " | ".join(cells) + " |")
+        rows_tex.append((LABEL[c], tex))
+
+    tex = [r"\begin{table}[t]", r"\centering",
+           r"\caption{How each principle responds to fleet size. \emph{From} is the "
+           r"smallest fleet at which the principle's routing differs from the "
+           r"no-fairness baseline by more than the permutation band at that cell; the "
+           r"arrow is whether that difference grows or shrinks above it. A dash means "
+           r"the principle never separates from the baseline on that metric, which is "
+           r"a property of the principle on this instance rather than a missing "
+           r"measurement.}",
+           r"\label{tab:response}",
+           r"\begin{tabular}{l" + "l" * len(FAMILIES3) + "}", r"\toprule",
+           "Principle & " + " & ".join(f.title() for f, _m, _d in FAMILIES3) + r" \\",
+           r"\midrule"]
+    for lab, cells in rows_tex:
+        tex.append(f"{lab} & " + " & ".join(cells) + r" \\")
+    tex += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    io.open(os.path.join(TEXDIR, "response.tex"), "w", encoding="utf-8",
+            newline="\n").write("\n".join(tex) + "\n")
+
+
+def table_reference():
+    """The tool's default setup in three lines: the paragraph §IV-A points at."""
+    idx, _ = _main_cells("fleet_metrics")
+    if not idx:
+        return
+    rows = [(c, n) for c in ORDER for n in (8, 16, 24) if ("default", c, n) in idx]
+    if not rows:
+        return
+    md("\n## Reference: the tool's own default setup\n")
+    md("$D=10$, protected set off the corridor. Three fleet sizes, for the one "
+       "paragraph in §IV-A that says what the default does.\n")
+    md("| N | condition | max/tile | peak dB | extra hops |")
+    md("|---|---|---|---|---|")
+    tex = [r"\begin{table}[t]", r"\centering",
+           r"\caption{The tool's own default setup, for reference: cap $D{=}10$ and a "
+           r"protected set that carries no traffic. At $N{=}8$ Equal and "
+           r"Sufficientarian return the baseline's routing exactly; above it their "
+           r"differences from the baseline and from each other are smaller than the "
+           r"range one condition covers under a relabelling of the aircraft. This is "
+           r"the regime the study moves away from.}",
+           r"\label{tab:reference}", r"\begin{tabular}{r l rrr}", r"\toprule",
+           r"$N$ & Condition & max/tile & peak dB & extra hops \\", r"\midrule"]
+    for n in (8, 16, 24):
+        for c in ORDER + ["baseline"]:
+            m = idx.get(("default", c, n))
+            if not m:
+                continue
+            md(f"| {n} | {LABEL.get(c, c)} | {fmt(m.get('max_count'),0)} | "
+               f"{fmt(m.get('peak_added'))} | {fmt(m.get('extra_vs_floor'),0)} |")
+            tex.append(f"{n} & {LABEL.get(c, c)} & {fmt(m.get('max_count'),0)} & "
+                       f"{fmt(m.get('peak_added'))} & {fmt(m.get('extra_vs_floor'),0)} "
+                       + r"\\")
+    tex += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    io.open(os.path.join(TEXDIR, "reference.tex"), "w", encoding="utf-8",
+            newline="\n").write("\n".join(tex) + "\n")
+
+
 def main():
     md("# Experiment summary")
     md("\nGenerated by `paper/harness/analyze.py` from the raw sweeps in "
        "`paper/harness/results/`. Every number traces to one jsonl row.")
-    for fn in (table_setup, table_fleet, table_capacity, table_frontier,
+    for fn in (table_response, table_reference, table_fleet, table_capacity, table_frontier,
                table_scaling, table_metrics, table_collapse, table_tiers,
                table_ablation, table_caps, table_prior, table_reps, table_grid4, table_detour, table_binding, table_distinct):
         try:

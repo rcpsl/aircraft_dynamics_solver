@@ -363,3 +363,128 @@ space (D13).
 * `compare.py` → `results/comparison.md` — the three metric families, plus the floor.
 * `slack_sweep` / `slack_probe` / `cap_sweep` plans, and `figs/levers.pdf`.
 * `report_html.py` → `paper/results_review.html`, published; now leads with the floor.
+
+---
+
+# Session 3 — 2026-09-11/12 — the study moved to a regime where the principles bind
+
+## The setup, and why
+
+`SETUP_MAIN = D6_protA`: cap **D = 6 dB** applied to all five principles (Equal and
+Sufficientarian through `limit`, the others through a `req` override, so all five face one
+hard constraint and differ only in their objective), and the Prioritarian protected set
+moved to **stations 14, 4, 8** — Lower-Income Urban, University, Working-Class Homeowner:
+the three busiest non-vertiport communities that are also low-income.
+
+Chosen by a 100-cell screen (`results/setup_choice.md`), K=4 permutations, unlimited:
+
+| setup | Equal | Suff | Prior | Util | Prop | active |
+|---|---|---|---|---|---|---|
+| `D6` / `D5` | yes | yes | no | — | — | 2/5 |
+| `protA` | no | no | yes | — | — | 1/5 |
+| **`D6_protA`** | yes | yes | yes | yes | yes | **5/5** |
+| `D5_protA` | yes | yes | yes | yes | yes | 5/5 |
+
+Neither knob alone works. Caps activate by binding exactly (utilisation 1.00, against
+0.31 and 0.25 at the shipped D=10). Prioritarian activates because the protected set is
+now where aircraft fly: its ablation control puts **3.45 dB** on the set at N=16 and the
+objective removes it. `PROT_BURDEN` carries **zero** aircraft-timesteps at every fleet
+size, which is why that objective was always 0.0 — a property of the set, not of the
+principle. **D6 over D5** on attributable differences at N=24 (2/6 against 1/6) and
+tractability headroom.
+
+**Justification paragraph for §IV-A** is in the section already: choosing an operating
+point at which a principle does something is a precondition for measuring what it does,
+not a result. The shipped default is reported in one paragraph and `tables/reference.tex`.
+
+## Encoding: both objectives run COUNT-weighted
+
+`utilNoiseMode: false` and `proximityMode: "count"` — forms the solver already exposes,
+no solver change. Screened at N=6/8/16, unlimited, K=4: **every cell proved, 4/4**.
+
+| N=8 mean wall | dB form | count form | |
+|---|---|---|---|
+| Utilitarian | 328.9 s | **6.4 s** | 51× |
+| Proportional | 29 395 s | **26.5 s** | **1110×** |
+
+At N=16 the count form proves in 26 s and 119 s where the dB form did not prove in 15.4 h.
+
+## Ladder status — 192 cells, `results/fleet_main.jsonl`
+
+**184 answered, 8 `phase2_failed_timeout`, 34 harvested at H = 3600 s.**
+All six conditions are proven 4/4 at every size **N = 6 … 24**. Above that:
+
+| condition | proven to | above it |
+|---|---|---|
+| Equal | N=24 | N=30, 32: **no verified routing** in any permutation (disparity cap) |
+| Sufficientarian | N=24 | harvested |
+| Prioritarian | N=24 | harvested |
+| **Utilitarian** | **N=30** | N=32 harvested |
+| Proportional | N=24 | harvested |
+| Baseline | N=32 | — |
+
+## Each principle's response to N, with the attributability verdict
+
+Attributable = means apart by more than the larger permutation band AND ranges disjoint.
+
+- **Equal** — nothing below N=14; pins peak at 4.77 dB with **zero band** from N=14; pays
+  2.75 fleet-hops from N=22 (attributable at N=22, 24); peak attributable at N=22.
+  `fleet|D6_protA|equal|{1.25,1.5}|p{0..3}`
+- **Sufficientarian** — identical behaviour to Equal throughout, as Prop. 1 predicts;
+  3.00 and 2.75 hops at N=22, 24. `fleet|D6_protA|sufficientarian|{1.25,1.5}|p{0..3}`
+- **Prioritarian** — same peak pinning, 2.50 hops, and additionally cuts **total** added
+  noise attributably at N=14 and 16 (28.0 dB against the baseline's 37.7).
+  `fleet|D6_protA|prioritarian|{0.75,1.0}|p{0..3}`
+- **Utilitarian** — zero extra distance at every size; pays **3 aircraft-timesteps of
+  departure delay** at N=22, 24 (attributable, zero band both sides); cheapest condition
+  in the study to solve. `fleet|D6_protA|utilitarian|{1.25,1.5}|p{0..3}`
+- **Proportional** — the only principle whose routing is **fully determined at every
+  fleet size** (zero band on total added noise and on max aircraft per tile); largest
+  total-noise reduction, attributable at five of six proven sizes; also pays in departure
+  delay. `fleet|D6_protA|proportional|{0.25..1.25}|p{0..3}`
+
+## The result worth taking to the paper
+
+**A binding cap does not merely lower the peak — it removes the arbitrariness in it.**
+From N=14 up, all five principles return a peak of exactly 4.77 dB in all four
+permutations (band 0.00); the baseline returns 5.64 / 5.88 / 6.70 / 7.70 dB with bands of
+2.22 / 2.22 / 1.76 / 3.98. The mechanism is integer capacity: `eq:capclosed` gives a
+45 dBA tile exactly two aircraft at D=6, and the routing saturates it. Two aircraft over a
+quiet tile add 4.77 dB.
+
+Session 2's problem was that differences *between* principles were smaller than variation
+*within* one. A binding constraint inverts that — it makes the outcome determinate.
+
+## Generated
+
+Figures: `routes_grid` (rows N=8/16/24/32 × six conditions), `metric_vs_N` (six panels,
+mean line + permutation band, lines joining proven cells only). Tables: `response.tex`,
+`fleet_main.tex`, `capacity.tex`, `reference.tex`. Generated but not `\input`:
+`reference`, `capacity`, `solve_time`, `route_sharing`, `noise_over_time`, `floor`.
+
+`verify_sec4.py` rewritten for this section: **10 checks, all passing**. `check_tex`,
+its selftest, `metrics.selftest` and `validate_payload` all clean.
+
+## Page count and the cut list
+
+§IV is **1,971 words with 4 floats**, down from 3,441 and 7. Estimate for the whole paper
+after the §I/§III/§V vocabulary pass: still **~10 pages against a hard 8**. The cheapest
+remaining cuts, per `README.md`, are unchanged: §II to a half-column table (~500 words),
+and §III's per-principle subsections merged (~400). Those two plus the §IV reduction
+already banked bring it to roughly 8.5; reaching 8 still needs one further cut, and §IV-E
+(solver performance) is now the cheapest candidate since the encoding result can be
+stated in two sentences of §IV-A.
+
+## Resume
+
+```bash
+cd paper/harness
+python plans.py fleet_a && python runner.py plans/fleet_a.json   # resumable
+python plans.py fleet_b && python runner.py plans/fleet_b.json
+python metrics_run.py results/fleet_main.jsonl --stem fleet_main_metrics
+python figures.py --fleet && python analyze.py && python findings.py && python compare.py
+python verify_sec4.py && python check_tex.py
+```
+
+Stretch not run: N = 38, 40. `fleet.jsonl` (the shipped-default ladder) is untouched and
+is the reference the paper cites in one paragraph.

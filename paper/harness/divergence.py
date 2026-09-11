@@ -64,16 +64,29 @@ def load_rows(paths):
     return rows
 
 
+CONDITION_NAMES = tuple(ORDER) + (
+    "baseline",
+    "prioritarian_off",                             # Prioritarian's ablation control
+    "utilitarian_count", "proportional_count",      # the count-weighted encodings
+)
+
+
 def principle_of(row):
     """The CONDITION a row measures -- which is not always its cfg principle.
 
     `baseline` is built from the Equal payload with the caps opened and the objectives
-    off, so its cfg says "equal". The key is the only thing that distinguishes them.
+    off, and `prioritarian_off` from the Prioritarian payload with its objective
+    cleared, so both report a cfg principle that is not the condition. The key is the
+    only thing that distinguishes them.
+
+    Scanned rather than taken from a fixed position: keys gained a `|p<k>` permutation
+    suffix in session 3, which silently broke a `parts[-2]` lookup and made every cell
+    in the setup screen read as "no cell".
     """
-    k = str(row.get("key", ""))
-    parts = k.split("|")
-    if len(parts) >= 3 and parts[-2] in (tuple(ORDER) + ("baseline",)):
-        return parts[-2]
+    parts = str(row.get("key", "")).split("|")
+    for p in reversed(parts):
+        if p in CONDITION_NAMES:
+            return p
     return row.get("cfg", {}).get("principle")
 
 

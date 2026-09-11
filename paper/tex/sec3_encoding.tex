@@ -175,8 +175,8 @@ $3.2\times$ on total time at $N=6$ to exactly $1.0\times$ at $N=16$. Extrapolati
 trend, the pairwise form would win outright at the fleet sizes we most care about.
 
 We report this because the honest conclusion contradicts the one we started with. The
-max/min encoding is worth keeping at workshop scale, where a solve is dominated by
-construction and the tool must feel responsive; it is not what makes these problems
+max/min encoding is worth keeping at the fleet sizes where a solve is dominated by
+construction rather than by search; it is not what makes these problems
 tractable, and the constraint-count ratio was never evidence that it was. Constraint
 counts are a proxy for encoding cost, not for search cost, and the two came apart here in
 the direction opposite to the intuition.
@@ -290,7 +290,7 @@ indifference has consequences we quantify in Section~\ref{sec:concavity}.
 \label{sec:enc-prop}
 Proportional is relational: it ties burden to benefit, and benefit is not in the noise
 model at all. Section~\ref{sec:proportional-encoding} constructs a per-tile price $\pi_m$
-from participants' own ranking of what confers benefit; given it, the objective is
+from a supplied ranking of what confers benefit; given it, the objective is
 \begin{equation}
 J_{\mathrm{prop}} \;=\; \sum_{t}\sum_{m} \pi_m\,\beta_{m,t} ,
 \label{eq:jprop}
@@ -334,8 +334,7 @@ to one, and
 with base $\gamma$. The product form is deliberate: each factor contributes its own
 multiplicative factor, so a price reads back as the separate contribution of each ranked
 choice rather than one opaque number. Since $\sum_f \rho_f = 1$ and
-$\sigma_f \in [0,\Sigma]$, the price stays in $[1,\gamma^\Sigma]$ however participants
-rank. The distance factor's \emph{sign} is the principle: proximity to a vertiport scores
+$\sigma_f \in [0,\Sigma]$, the price stays in $[1,\gamma^\Sigma]$ under any ranking. The distance factor's \emph{sign} is the principle: proximity to a vertiport scores
 as cheap, because the tiles nearest a vertiport enjoy the access and so under
 benefit-carries-burden are the ones that should pay. A prototype that scored proximity as
 deserving protection was implementing the opposite principle.
@@ -347,8 +346,8 @@ $\beta_{m,t} = \tilde\dbinc_m(c_{m,t})$, charges the noise the community actuall
 experiences --- the more defensible reading, and our default. The decibel form inherits
 both awkward properties of \eqref{eq:db}: concavity makes the objective \emph{prefer} to
 concentrate traffic, and baseline-dependence applies the $\approx\!70\times$ gradient
-toward loud tiles on top of whatever ambient preference participants expressed,
-double-counting a factor they were asked to rank. We flag the trade rather than resolving
+toward loud tiles on top of whatever ambient preference the ranking expressed,
+double-counting a factor the price already carries. We flag the trade rather than resolving
 it: which reading is correct is a normative question our measurements can inform but not
 settle.
 
@@ -364,7 +363,7 @@ across terms:
 J_{\mathrm{tier1}} = \sum_k \omega_k \hat{J}_k .
 \end{equation}
 These bounds must be \emph{tight}, not merely valid: a loose divisor produces no error,
-it silently shrinks a term's reachable range, so a weight the user set to $1.0$ behaves
+it silently shrinks a term's reachable range, so a weight supplied as $1.0$ behaves
 like a much smaller number and the routing stops responding to it. The obvious bound for
 $J_{\mathrm{prop}}$ --- every tile simultaneously carrying the whole fleet --- needs
 $M\sum_i \mu_i$ aircraft when only $\sum_i \mu_i$ exist, and overstates the attainable

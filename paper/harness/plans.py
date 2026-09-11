@@ -31,6 +31,21 @@ PROT_BURDEN = (15, 19, 24)      # Underdeveloped Nbhd, New High-Density Dev, Ind
 # satisfied for free" from "this map has nothing to protect".
 PROT_CORRIDOR = (16, 13, 18)    # Retirement Community, Lower-Income Urban, Historic Black
 
+# Chosen from the data, session 3. PROT_BURDEN turns out to carry ZERO aircraft-timesteps
+# in the baseline routing at every fleet size -- the loudest tiles sit off every corridor,
+# which is why the Prioritarian objective evaluates to 0.0 whether or not it is switched
+# on. A protected set has to be somewhere aircraft want to fly or the principle has
+# nothing to do.
+#
+# These are the three busiest NON-vertiport tiles that are also Low income, so the set is
+# both active and normatively the right shape for Prioritarian -- it protects
+# burden-bearing communities rather than whichever tile happens to be loud. Traffic
+# summed over the baseline at N=8,16,24,32: 11, 9, 9 aircraft-timesteps.
+#   13 -> station 14  Lower-Income Urban Neighborhood   45 dBA, Low income, High pop
+#    3 -> station  4  University                        55 dBA, Low income, High pop
+#    7 -> station  8  Working-Class Homeowner Nbhd      45 dBA, Low income, Medium pop
+PROT_ACTIVE = (13, 3, 7)
+
 
 def _k(*parts):
     return "|".join(str(p) for p in parts)
@@ -354,10 +369,45 @@ SETUP_DEFAULT = {
     "ambient_kind": "default",
 }
 
-# Chosen by the Phase-1b screen; see NIGHT_REPORT.md for the log and the verdict.
-SETUP_MAIN = dict(SETUP_DEFAULT)
+# Chosen by the session-3 setup screen; log and justification in results/setup_choice.md.
+#
+# D = 6 applied to every principle (Equal and Sufficientarian through `limit`, the three
+# objective principles through a `req` override) so that all five face one hard cap and
+# differ only in their objective; the protected set moved onto the corridor.
+#
+# Why this and not the tool's default: at D = 10 with PROT_BURDEN, three of the five
+# principles constrain nothing. The caps sit at capacity utilisation 0.31 and 0.25 and
+# produce no attributable difference from the wide-cap baseline, and the protected set
+# carries zero aircraft-timesteps so its objective is satisfied for free. At D = 6 with
+# PROT_ACTIVE all five are active at N = 16: both caps bind exactly (utilisation 1.00),
+# the Prioritarian control puts 3.45 dB on the protected set and the objective removes
+# it, and both decibel objectives beat the baseline's score on their own metric by more
+# than the permutation floor (17.9 vs 16.1, and 504.5 vs 16.1).
+#
+# D = 6 over D = 5: identical on activity (5/5) and on knobs moved (2), but more
+# attributable differences at N = 24 (2/6 against 1/6), and the looser cap is the one
+# more likely to stay tractable at the top of the ladder.
+# `objective_encoding` selects which of the two forms the solver already exposes the
+# two decibel-valued objectives run under. "count" sets utilNoiseMode=False and
+# proximityMode="count"; "dB" leaves the tool's defaults. Sec. III describes both, so
+# this states which encoding of the principle the ladder measures, not a new principle.
+#
+# Measured on SETUP_MAIN before choosing (results/encoding.jsonl): count mode proves
+# every cell 4/4 permutations at N=6, 8 and 16 -- Utilitarian in 26 s and Proportional
+# in 119 s at N=16, where the dB form did not prove in 15.4 h. At N=8 the speedups are
+# 51x and 1110x. That is the difference between a ladder with two conditions on it and a
+# ladder with five.
+SETUP_MAIN = dict(SETUP_DEFAULT, hard_cap=6, limit=6, protected=PROT_ACTIVE,
+                  objective_encoding="count", name="D6_protA")
+
+# Request overrides that select the count-weighted form of each objective.
+COUNT_ENCODING = {"utilitarian": {"utilNoiseMode": False},
+                  "proportional": {"proximityMode": "count"}}
 
 CONDITIONS = PRINCIPLES + ("baseline",)
+# `prioritarian_off` is a control, not a condition of the study; it appears only
+# in the setup screen, where Prioritarian's activity test needs it.
+CONTROLS = ("prioritarian_off",)
 
 # The flag each principle's objective rides on, for building its control.
 OBJ_FLAG = {"prioritarian": "optimizePrioritarian",
@@ -403,7 +453,35 @@ def _cfg(setup, principle, factor):
     return cfg
 
 
-def condition(setup, name, factor, key):
+def perm_req(setup, factor, seed, stream_mode='individual'):
+    """A `req` override that relabels which aircraft is listed first.
+
+    The permuted problem is the SAME problem: same origin-destination pairs, same
+    fleet, same feasible set, same optimum under a different name. What changes is the
+    order Z3 creates its variables in, and therefore which member of the optimal set it
+    returns. Running every cell under several permutations turns the tie-break from an
+    unmeasured confound into a measured band.
+
+    The seed depends only on (factor, seed), NOT on the condition, so at permutation k
+    every condition faces the identical aircraft ordering. That makes the comparison
+    paired: a difference between two conditions at the same k cannot be an ordering
+    difference, because they had the same ordering.
+
+    T_max is unaffected -- chebyshev_t_lower takes a max over the OD pairs, and the
+    multiset of pairs is preserved -- so the horizon does not move either.
+    """
+    import random
+    import payload as P
+    starts, ends, mult = P.build_streams(factor, stream_mode, tuple(setup["demand"]))
+    idx = list(range(len(starts)))
+    if seed:
+        random.Random(1000 * seed + int(factor * 100)).shuffle(idx)
+    return {"startPositions": [starts[i] for i in idx],
+            "endPositions": [ends[i] for i in idx],
+            "aircraftMultipliers": [mult[i] for i in idx]}
+
+
+def condition(setup, name, factor, key, perm=None):
     """One of the six conditions as a runnable job.
 
     `baseline` is built from the Equal payload with the caps opened and every
@@ -417,6 +495,15 @@ def condition(setup, name, factor, key):
         cfg = _cfg(setup, "equal", factor)
         req = {"D": WIDE, "U": WIDE, "optimizeUtilitarian": False,
                "optimizePrioritarian": False, "optimizeProximity": False}
+    elif name == "prioritarian_off":
+        # Prioritarian's own ablation control: the identical payload with only its
+        # objective cleared. It answers the question the principle's activity turns on
+        # -- would the protected set be overflown if nobody were protecting it? -- which
+        # the wide-cap baseline cannot, because the baseline also drops the cap.
+        cfg = _cfg(setup, "prioritarian", factor)
+        req = {"optimizePrioritarian": False}
+        if setup["hard_cap"] is not None:
+            req["D"] = float(setup["hard_cap"])
     else:
         cfg = _cfg(setup, name, factor)
         req = {}
@@ -425,30 +512,47 @@ def condition(setup, name, factor, key):
         # `limit` (and Equal's pigeonhole guard, which must keep applying).
         if setup["hard_cap"] is not None and name not in ("equal", "sufficientarian"):
             req["D"] = float(setup["hard_cap"])
+        if setup.get("objective_encoding") == "count" and name in COUNT_ENCODING:
+            req.update(COUNT_ENCODING[name])
+    if perm is not None:
+        req.update(perm_req(setup, factor, perm))
     job = {"key": key, "cfg": cfg, "timeout_ms": UNLIMITED_MS,
            "setup": {k: (list(v) if isinstance(v, tuple) else v)
                      for k, v in setup.items()}}
+    if perm is not None:
+        job["perm"] = perm
     if req:
         job["req"] = req
     return job
 
 
-def _sweep(setup, factors, out, prefix, conditions=CONDITIONS, par=8,
-           timeout_ms=UNLIMITED_MS, wall_kill=NO_WALL_KILL):
-    """Jobs ordered SMALL N FIRST, all conditions at one N before the next.
+K_PERM = 4          # permutations per cell; the spread over them IS the floor
 
-    The runner pops from the front, so this ordering is what makes the ladder
-    complete from the bottom: whenever the sweep is stopped, every N below the
-    frontier is finished for all six conditions and is publishable as it stands.
+
+def _sweep(setup, factors, out, prefix, conditions=CONDITIONS, par=8,
+           timeout_ms=UNLIMITED_MS, wall_kill=NO_WALL_KILL, K=K_PERM):
+    """Jobs ordered SMALL N FIRST, all conditions and permutations at one N.
+
+    The runner pops from the front, so this ordering is what makes the ladder complete
+    from the bottom: whenever the sweep is stopped, every N below the frontier is
+    finished for all six conditions and is publishable as it stands.
+
+    K > 1 runs each cell under K aircraft orderings. Without that a cell is one draw
+    from the set of equally-optimal routings and its distance from another condition
+    cannot be told from the distance between two draws of the same condition -- which
+    is what sessions 1-2 established the hard way. K=1 keeps the old single-draw
+    behaviour for screens, where the decision does not rest on a margin.
     """
     jobs = []
     for f in factors:
         for c in conditions:
-            j = condition(setup, c, f, _k(prefix, setup["name"], c, f))
-            j["timeout_ms"] = timeout_ms
-            jobs.append(j)
+            for k in (range(K) if K > 1 else [None]):
+                key = _k(prefix, setup["name"], c, f) + (f"|p{k}" if K > 1 else "")
+                j = condition(setup, c, f, key, perm=k)
+                j["timeout_ms"] = timeout_ms
+                jobs.append(j)
     return {"out": out, "par": par, "wall_kill": wall_kill,
-            "checkpoint_s": 600, "setup": setup, "jobs": jobs}
+            "checkpoint_s": 600, "setup": setup, "K": K, "jobs": jobs}
 
 
 # ---------------------------------------------------------------- Phase 1b screen
@@ -475,6 +579,65 @@ SCREEN_KNOBS = [
 # budget this session has, so without a cap the screen could not return at all.
 SCREEN_MS = 900_000
 SCREEN_KILL = 1200
+
+
+# Session 3: the candidate setups, chosen from what sessions 1-2 measured rather than
+# from the generic knob list. The cap is the lever that activates Equal and
+# Sufficientarian (the cap sweep puts the binding point at D=5-6); the protected set is
+# the lever that activates Prioritarian, and nothing else can, because its objective is
+# zero wherever the set is off-corridor. Utilitarian and Proportional are already active
+# at the default, so no knob is aimed at them.
+SETUP3_CANDIDATES = [
+    dict(hard_cap=6, limit=6, name="D6"),
+    dict(hard_cap=5, limit=5, name="D5"),
+    dict(protected=PROT_ACTIVE, name="protA"),
+    dict(hard_cap=6, limit=6, protected=PROT_ACTIVE, name="D6_protA"),
+    dict(hard_cap=5, limit=5, protected=PROT_ACTIVE, name="D5_protA"),
+]
+# The four that prove out fast, plus the baseline reference and Prioritarian's own
+# ablation control. Utilitarian and Proportional are screened separately as probes.
+SCREEN3_CONDS = ("equal", "sufficientarian", "prioritarian", "prioritarian_off",
+                 "baseline")
+
+
+def screen3(factors=(1.0,), setups=None, conds=SCREEN3_CONDS, K=K_PERM):
+    """Session 3 setup search: which setups make every principle ACTIVE?
+
+    Unlimited budget and K permutations per cell, because the verdict is a margin and a
+    margin needs its floor measured alongside it. That is the whole change from the
+    session-1 screen, which accepted "the routings differ" as evidence -- and distinct
+    routings are exactly what the tie-break produces for free.
+    """
+    jobs = []
+    for over in (setups if setups is not None else SETUP3_CANDIDATES):
+        s = setup_of(**over)
+        for f in factors:
+            for c in conds:
+                for k in range(K):
+                    key = _k("s3", s["name"], c, f) + f"|p{k}"
+                    jobs.append(condition(s, c, f, key, perm=k))
+    return {"out": "results/screen3.jsonl", "par": 8, "wall_kill": NO_WALL_KILL,
+            "checkpoint_s": 600, "K": K, "jobs": jobs}
+
+
+def screen3_probe(setups, factors=(1.0,), ms=1800_000):
+    """Utilitarian and Proportional at a candidate setup, capped.
+
+    D4 convention: probes decide, they never enter a table. Their activity test is
+    whether the objective's own value beats what the baseline routing scores on that
+    same objective, by more than the cap-based floor at the same setup.
+    """
+    jobs = []
+    for over in setups:
+        s = setup_of(**over)
+        for f in factors:
+            for c in ("utilitarian", "proportional"):
+                j = condition(s, c, f, _k("s3p", s["name"], c, f), perm=0)
+                j["timeout_ms"] = ms
+                j["probe"] = True
+                jobs.append(j)
+    return {"out": "results/screen3.jsonl", "par": 8, "wall_kill": ms // 1000 + 300,
+            "checkpoint_s": 600, "jobs": jobs}
 
 
 def screen_setups(knob=None):
@@ -676,6 +839,37 @@ def perm_sweep(k=6, factors=(1.0, 1.5)):
             "checkpoint_s": 600, "jobs": jobs}
 
 
+def encoding_screen(factors=(0.25, 0.5, 1.0), K=K_PERM):
+    """Step 3: can either objective be made to finish, without touching the solver?
+
+    Utilitarian and Proportional stall because both objectives are decibel-valued
+    lookups -- Z3 has to drive a table of dB expressions to its optimum and then prove
+    it there. The solver already exposes a count-weighted form of each, and the request
+    parameters that select them cost no code change:
+
+        utilNoiseMode: false        Utilitarian over aircraft counts, not added dB
+        proximityMode: "count"      Proportional prices plain occupancy, not dB
+
+    Sec. III already describes both modes, so using one is a statement about which
+    encoding of the principle the ladder runs, not a new principle. Run unlimited at the
+    bottom of the ladder: if a count-mode cell proves where the dB cell does not, that is
+    the tractable encoding, and N=6/N=8 -- where both prove -- is where the two can be
+    compared on the routing they return.
+    """
+    jobs = []
+    for f in factors:
+        for c, over in (("utilitarian", {"utilNoiseMode": False}),
+                        ("proportional", {"proximityMode": "count"})):
+            for k in range(K):
+                j = condition(SETUP_MAIN, c, f,
+                              _k("enc", SETUP_MAIN["name"], c + "_count", f) + f"|p{k}",
+                              perm=k)
+                j["req"] = dict(j.get("req", {}), **over)
+                jobs.append(j)
+    return {"out": "results/encoding.jsonl", "par": 8, "wall_kill": NO_WALL_KILL,
+            "checkpoint_s": 600, "K": K, "jobs": jobs}
+
+
 def fleet_stretch():
     """The two sizes above the ladder, run only if Phase 2 clears early."""
     return _sweep(SETUP_MAIN, (2.25, 2.5), "results/fleet.jsonl", "fleet")
@@ -698,7 +892,8 @@ PLANS = {"scaling": scaling, "ablation": ablation, "caps": caps,
          "pilot": pilot, "fleet": fleet, "fleet_a": fleet_a, "fleet_b": fleet_b,
          "fleet_stretch": fleet_stretch, "fleet_default": fleet_default,
          "screen": screen, "slack_sweep": slack_sweep, "slack_probe": slack_probe,
-         "cap_sweep": cap_sweep, "perm_sweep": perm_sweep}
+         "cap_sweep": cap_sweep, "perm_sweep": perm_sweep,
+         "screen3": screen3, "encoding_screen": encoding_screen}
 
 if __name__ == "__main__":
     name = sys.argv[1]

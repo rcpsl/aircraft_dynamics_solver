@@ -162,6 +162,8 @@ BUILTIN = {
     # first appear here only because the fleet study's harvested incumbents are the
     # first unproven rows any generated table has had to mark.
     "dagger", "ddagger", "ast", "star", "circ", "bullet",
+    # Trend arrows in the response table. Plain-TeX math relations.
+    "uparrow", "downarrow", "leftarrow", "rightarrow",
 }
 
 main_src = read(main)

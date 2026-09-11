@@ -1,0 +1,353 @@
+<title>When a Principle Binds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+:root{
+  /* Neutrals biased a touch green, toward the accent, so the greys read as chosen. */
+  --ground:#fafbfa; --panel:#ffffff; --sunk:#f0f4f2;
+  --ink:#14181a; --ink-2:#4a5654; --ink-3:#7d8a87;
+  --rule:#e0e6e3; --rule-2:#c3cdc9;
+  /* Semantic, and the whole memo turns on the distinction: green = the principle did
+     it, amber = the solver's indifference did it. Neither is the "brand" colour. */
+  --yes:#1c6b52; --yes-bg:#e7f2ed;
+  --no:#8a6420;  --no-bg:#f8f0df;
+  --stop:#8f2f26;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0f1413; --panel:#161c1b; --sunk:#1c2422;
+    --ink:#e9efec; --ink-2:#a2b0ac; --ink-3:#71807c;
+    --rule:#28322f; --rule-2:#3b4643;
+    --yes:#5fc79e; --yes-bg:#13322a;
+    --no:#d9ab5c;  --no-bg:#332a15;
+    --stop:#e08276;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0f1413; --panel:#161c1b; --sunk:#1c2422;
+  --ink:#e9efec; --ink-2:#a2b0ac; --ink-3:#71807c;
+  --rule:#28322f; --rule-2:#3b4643;
+  --yes:#5fc79e; --yes-bg:#13322a;
+  --no:#d9ab5c;  --no-bg:#332a15;
+  --stop:#e08276;
+}
+*{box-sizing:border-box}
+body{background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Serif",Georgia,serif; font-size:16.5px; line-height:1.65;
+  margin:0; -webkit-font-smoothing:antialiased}
+.wrap{max-width:940px; margin:0 auto; padding:0 26px 90px}
+.col{max-width:66ch}
+h1,h2,h3,.ui{font-family:"IBM Plex Sans",system-ui,sans-serif}
+h1{font-size:2.5rem; line-height:1.08; font-weight:600; letter-spacing:-.024em;
+   margin:0 0 .45rem; text-wrap:balance}
+h2{font-size:1.32rem; font-weight:600; letter-spacing:-.012em; margin:0 0 .5rem;
+   text-wrap:balance; line-height:1.3}
+h3{font-size:.95rem; font-weight:600; margin:0 0 .3rem}
+p{margin:0 0 1rem}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace; font-size:.85em}
+code{background:var(--sunk); padding:.09em .36em; border-radius:3px;
+  border:1px solid var(--rule)}
+.eyebrow{font-family:"IBM Plex Sans",sans-serif; font-size:.69rem; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 .5rem}
+.lede{font-size:1.1rem; line-height:1.55; color:var(--ink-2); margin:0 0 1.4rem}
+
+header{padding:60px 0 26px; border-bottom:2px solid var(--ink); margin-bottom:24px}
+.meta{display:flex; flex-wrap:wrap; gap:5px 22px; font-family:"IBM Plex Mono",monospace;
+  font-size:.74rem; color:var(--ink-3); padding-top:12px}
+.meta b{color:var(--ink-2); font-weight:500}
+
+.banner{background:var(--no-bg); border-left:3px solid var(--no); padding:13px 17px;
+  border-radius:0 4px 4px 0; font-size:.92rem; color:var(--ink); margin:0 0 26px}
+.banner b{font-weight:600}
+
+/* findings are a numbered sequence: each rests on the one before it */
+.finding{border-top:1px solid var(--rule); padding:30px 0 4px; margin-top:20px}
+.fnum{font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--yes);
+  letter-spacing:.1em; display:block; margin-bottom:7px}
+.kicker{font-size:1.02rem; color:var(--ink); font-weight:500;
+  font-family:"IBM Plex Sans",sans-serif; margin:0 0 .8rem; line-height:1.45;
+  border-left:3px solid var(--yes); padding-left:15px}
+
+.scroll{overflow-x:auto; margin:16px 0 8px; border:1px solid var(--rule);
+  border-radius:5px; background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-size:.83rem;
+  font-family:"IBM Plex Sans",sans-serif}
+th,td{padding:7px 12px; text-align:right; white-space:nowrap;
+  border-bottom:1px solid var(--rule); font-variant-numeric:tabular-nums}
+th{font-size:.67rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3);
+  font-weight:600; background:var(--sunk)}
+th:first-child,td:first-child{text-align:left}
+tbody tr:last-child td{border-bottom:none}
+td.name{font-weight:500}
+.zero{color:var(--yes); font-weight:600}
+.wide{color:var(--no)}
+.pill{display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:.67rem;
+  padding:1px 7px; border-radius:99px}
+.pill.ok{background:var(--yes-bg); color:var(--yes)}
+.pill.no{background:var(--no-bg); color:var(--no)}
+caption{caption-side:bottom; text-align:left; font-size:.8rem; color:var(--ink-2);
+  padding:9px 12px; font-family:"IBM Plex Sans",sans-serif}
+
+.note{background:var(--sunk); border-left:3px solid var(--rule-2); padding:11px 16px;
+  font-size:.89rem; color:var(--ink-2); border-radius:0 4px 4px 0; margin:14px 0}
+footer{margin-top:48px; padding-top:20px; border-top:1px solid var(--rule);
+  font-size:.84rem; color:var(--ink-3)}
+footer ul{padding-left:1.1rem; margin:.3rem 0 1rem}
+footer li{margin-bottom:.22rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">UAM noise routing &middot; Austin, TX &middot; session 3 interim</p>
+  <h1>When a Principle Binds</h1>
+  <p class="lede col">Sessions&nbsp;1&ndash;2 found that the five fairness principles
+  barely differed, and that what difference there was fell inside the solver&rsquo;s own
+  indifference. This session moved the study to an operating point where the principles
+  actually constrain the routing &mdash; and the constraint does something the earlier
+  regime could not show.</p>
+  <div class="meta">
+    <span><b>solver</b> Z3 4.16.0, unmodified</span>
+    <span><b>budget</b> unlimited, harvest at H = 3600 s</span>
+    <span><b>per cell</b> K = 4 aircraft orderings</span>
+    <span><b>setup</b> D = 6, protected = {14, 4, 8}</span>
+    <span><b>snapshot</b> 2026-09-12 00:30</span>
+  </div>
+</header>
+
+<div class="banner"><b>The ladder is still running.</b> Lane A is at 116 of 128 cells
+&mdash; N = 6 through 24 complete and proven, N = 30 and 32 in progress. Lane B (the two
+objective principles) has not started. Everything below is drawn from what is on disk;
+nothing here depends on the cells still outstanding, and the two places where an
+incomplete cell would matter are marked.</div>
+
+<section class="col">
+<p class="eyebrow">The question</p>
+<h2>Was the problem the principles, or the operating point?</h2>
+<p>The earlier sessions measured five principles at the workshop tool&rsquo;s own default
+settings and found almost nothing separating them. That result had two possible readings:
+the principles genuinely do the same thing on this map, or the default settings give them
+nothing to do. Distinguishing those is what this session is for, and the answer turns out
+to be the second.</p>
+</section>
+
+<div class="finding">
+  <span class="fnum">FINDING 01</span>
+  <div class="col">
+  <p class="kicker">At the tool&rsquo;s default settings, two of the five principles
+  return the no-fairness routing exactly &mdash; not approximately.</p>
+  <p>Running each condition under six different aircraft orderings at the default setup,
+  Equal and Sufficientarian produce the same peak added noise, the same maximum aircraft
+  per tile, the same total added noise and the same trip lengths as the baseline, ordering
+  for ordering, at N&nbsp;=&nbsp;8. At N&nbsp;=&nbsp;16 and 24 they differ, but by less
+  than one condition varies on its own when only the aircraft ordering changes.</p>
+  <p>Prioritarian&rsquo;s objective evaluated to exactly zero everywhere, and the reason
+  was not the principle. Its protected set &mdash; the three loudest non-vertiport tiles
+  &mdash; carries <b>zero aircraft-timesteps</b> in the baseline routing at every fleet
+  size. Nobody was ever going to fly there, so protecting it cost nothing.</p>
+  </div>
+</div>
+
+<div class="finding">
+  <span class="fnum">FINDING 02</span>
+  <div class="col">
+  <p class="kicker">Making every principle active needs two changes, and neither works
+  alone.</p>
+  <p>A screen of 100 cells &mdash; five candidate setups, four conditions plus a control,
+  four orderings each, all proven &mdash; tested each principle against what that
+  principle <i>is</i>: a cap is active if it binds, an objective is active if switching it
+  off changes what it is supposed to protect.</p>
+  </div>
+  <div class="scroll"><table>
+    <caption>Active principles at N = 16, by candidate setup. <code>D6</code> caps every
+    principle at 6 dB of added noise; <code>protA</code> moves the protected set onto the
+    corridor, to the three busiest non-vertiport communities that are also low-income.</caption>
+    <thead><tr><th>setup</th><th>Equal</th><th>Sufficientarian</th><th>Prioritarian</th>
+    <th>Utilitarian</th><th>Proportional</th><th>active</th></tr></thead>
+    <tbody>
+      <tr><td class="name"><code>D6</code> / <code>D5</code></td>
+        <td><span class="pill ok">yes</span></td><td><span class="pill ok">yes</span></td>
+        <td><span class="pill no">no</span></td><td>&mdash;</td><td>&mdash;</td><td>2/5</td></tr>
+      <tr><td class="name"><code>protA</code></td>
+        <td><span class="pill no">no</span></td><td><span class="pill no">no</span></td>
+        <td><span class="pill ok">yes</span></td><td>&mdash;</td><td>&mdash;</td><td>1/5</td></tr>
+      <tr><td class="name"><code>D6_protA</code> / <code>D5_protA</code></td>
+        <td><span class="pill ok">yes</span></td><td><span class="pill ok">yes</span></td>
+        <td><span class="pill ok">yes</span></td><td><span class="pill ok">yes</span></td>
+        <td><span class="pill ok">yes</span></td><td><b>5/5</b></td></tr>
+    </tbody>
+  </table></div>
+  <div class="col">
+  <p>With the protected set on the corridor, the ablation control puts
+  <b>3.45&nbsp;dB</b> on the protected communities and the objective removes it entirely.
+  The two decibel objectives beat the baseline&rsquo;s score on their own metric by more
+  than the indifference floor (17.9 against 16.1, and 504.5 against 16.1).
+  <code>D6</code> was chosen over <code>D5</code> on attributable differences at
+  N&nbsp;=&nbsp;24 &mdash; 2 of 6 metrics against 1 &mdash; and because the looser cap is
+  likelier to stay solvable at the top of the ladder.</p>
+  </div>
+</div>
+
+<div class="finding">
+  <span class="fnum">FINDING 03</span>
+  <div class="col">
+  <p class="kicker">A binding cap does not merely lower the peak noise &mdash; it removes
+  the arbitrariness in it.</p>
+  <p>This is the result that did not exist in the earlier regime, and it is the one worth
+  taking to the paper.</p>
+  <p>Every cell here is solved four times under four aircraft orderings. The orderings
+  leave the problem mathematically identical &mdash; same fleet, same origin&ndash;destination
+  pairs, same feasible set &mdash; so the spread across them is pure tie-break: which of
+  many equally-optimal routings the solver happened to return. For the un-capped baseline
+  that spread reaches <b>3.98&nbsp;dB</b> of peak added noise. For every capped condition,
+  from N&nbsp;=&nbsp;14 upward, it is <b>exactly zero</b>.</p>
+  </div>
+  <div class="scroll"><table>
+    <caption>Spread in peak added noise across four aircraft orderings (dB). Zero means
+    all four orderings returned the same peak &mdash; the cap determines it. The baseline
+    has no cap, and its peak is whatever the tie-break happens to produce.</caption>
+    <thead><tr><th>condition</th><th>N=6</th><th>N=8</th><th>N=14</th><th>N=16</th>
+    <th>N=22</th><th>N=24</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Baseline <span class="pill no">no cap</span></td>
+        <td>0.00</td><td class="wide">1.76</td><td class="wide">2.22</td>
+        <td class="wide">2.22</td><td class="wide">1.76</td><td class="wide">3.98</td></tr>
+      <tr><td class="name">Equal</td><td>0.00</td><td class="wide">1.76</td>
+        <td class="zero">0.00</td><td class="zero">0.00</td><td class="zero">0.00</td>
+        <td class="zero">0.00</td></tr>
+      <tr><td class="name">Sufficientarian</td><td class="wide">1.76</td><td>0.00</td>
+        <td class="zero">0.00</td><td class="zero">0.00</td><td class="zero">0.00</td>
+        <td class="zero">0.00</td></tr>
+      <tr><td class="name">Prioritarian</td><td>0.00</td><td>0.00</td>
+        <td class="zero">0.00</td><td class="zero">0.00</td><td class="zero">0.00</td>
+        <td class="zero">0.00</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col">
+  <p>The capped conditions return a peak of 4.77&nbsp;dB every single time from
+  N&nbsp;=&nbsp;14 on, while the baseline wanders between 5.64 and 7.70&nbsp;dB depending
+  on nothing anyone chose. Capacity utilisation sits at exactly 1.00, also with zero
+  spread: the cap is binding on some community at some timestep, in all four orderings.</p>
+  <p class="note">Why this matters beyond the instance: session&nbsp;2 established that
+  most differences <i>between</i> principles were smaller than the variation <i>within</i>
+  one principle, and so could not be attributed to the principle. A binding constraint
+  inverts that. It does not just move the outcome &mdash; it makes the outcome
+  determinate, which is a property a community on the ground can actually rely on.</p>
+  </div>
+</div>
+
+<div class="finding">
+  <span class="fnum">FINDING 04</span>
+  <div class="col">
+  <p class="kicker">Switching the two objectives to their count-weighted form makes the
+  whole ladder solvable, at no cost in code.</p>
+  <p>Utilitarian and Proportional stall because both objectives are decibel-valued
+  lookups: Z3 has to drive a table of dB expressions to its optimum and then prove it
+  there. The solver already exposes a count-weighted form of each, described in the
+  paper&rsquo;s encoding section, selected by request parameters that cost no change to
+  the solver at all.</p>
+  </div>
+  <div class="scroll"><table>
+    <caption>Mean solve time to a proven optimum, four orderings each. The decibel figures
+    are from the earlier sessions at the default setup; the count figures are on the new
+    setup. Both forms encode the same principle.</caption>
+    <thead><tr><th>condition</th><th>N</th><th>decibel form</th><th>count form</th>
+    <th>speedup</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Utilitarian</td><td>8</td><td>328.9 s</td>
+        <td class="zero">6.4 s</td><td>51&times;</td></tr>
+      <tr><td class="name">Proportional</td><td>8</td><td>29 395 s</td>
+        <td class="zero">26.5 s</td><td><b>1110&times;</b></td></tr>
+      <tr><td class="name">Utilitarian</td><td>16</td><td>not proven in 15.4 h</td>
+        <td class="zero">25.9 s</td><td>&mdash;</td></tr>
+      <tr><td class="name">Proportional</td><td>16</td><td>not proven in 15.4 h</td>
+        <td class="zero">118.6 s</td><td>&mdash;</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col">
+  <p>All four orderings proved at every size screened. That is the difference between a
+  study carrying two principles up the fleet ladder and one carrying five, and it means
+  the tractability result the earlier sessions reported was a property of <i>an
+  encoding</i> of those principles rather than of the principles themselves.</p>
+  </div>
+</div>
+
+<div class="finding">
+  <span class="fnum">FINDING 05</span>
+  <div class="col">
+  <p class="kicker">In the new regime the caps cost travel time and buy quieter peaks
+  &mdash; attributably, from N = 22.</p>
+  <p>Across the whole of sessions 1&ndash;2, no principle ever flew further than the
+  shortest-path floor except in a one-decibel window at the very edge of feasibility. At
+  D&nbsp;=&nbsp;6 that changes: from N&nbsp;=&nbsp;22 all three cap-based conditions fly
+  further than the no-fairness baseline and land a quieter peak, and both differences
+  clear the indifference floor.</p>
+  </div>
+  <div class="scroll"><table>
+    <caption>Difference from the no-fairness baseline at the same fleet size, where the
+    difference exceeds the permutation band at that cell. Congestion never clears the
+    floor; the bands on maximum aircraft per tile stay wide (4 to 6 aircraft).</caption>
+    <thead><tr><th>condition</th><th>extra hops vs baseline</th>
+    <th>peak added noise</th><th>attributable from</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Equal</td><td>+3</td><td>&minus;1.93 dB</td><td>N = 22</td></tr>
+      <tr><td class="name">Sufficientarian</td><td>+3</td><td>&minus;1.93 dB</td><td>N = 22</td></tr>
+      <tr><td class="name">Prioritarian</td><td>+2</td><td>&minus;1.93 dB</td><td>N = 22</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col">
+  <p>So the trade a fairness cap makes on this map is now visible and measurable: two to
+  three fleet-hops of extra flying, for about two decibels off the worst-affected
+  community&rsquo;s peak, and for an outcome that no longer depends on which optimal
+  routing the solver picked.</p>
+  </div>
+</div>
+
+<div class="finding">
+  <span class="fnum">FINDING 06</span>
+  <div class="col">
+  <p class="kicker">Above N = 25 the two caps stop behaving alike, and one of them stops
+  being solvable.</p>
+  <p>Above 25 aircraft the tool stops sending an absolute cap to Equal and sends a
+  disparity cap instead &mdash; a bound on the spread between communities rather than on
+  any one community&rsquo;s level. At N&nbsp;=&nbsp;30 that difference becomes decisive:
+  Sufficientarian&rsquo;s absolute cap still yields a verified routing within the one-hour
+  harvest horizon, while all four Equal cells return no verifiable answer at all.</p>
+  <p class="note"><b>Not yet settled.</b> N&nbsp;=&nbsp;30 and 32 are still running and
+  their cells are harvested rather than proven, so the numbers there are upper bounds on
+  what the principle achieves, not the principle&rsquo;s answer. Lane B has not started,
+  so nothing is yet known about how the two objective principles behave on this setup
+  above N&nbsp;=&nbsp;16.</p>
+  </div>
+</div>
+
+<section class="col" style="border-top:1px solid var(--rule); padding-top:30px; margin-top:24px">
+<p class="eyebrow">Method</p>
+<h2>What counts as a difference</h2>
+<p>Every claim above uses one test. A difference between two conditions counts only if
+their means differ by more than the larger of their two permutation bands <b>and</b> the
+bands do not overlap. The band is measured by re-solving the identical problem under
+different aircraft orderings, which leaves the feasible set and the optimum untouched and
+moves only which optimal routing comes back.</p>
+<p>Only proven cells contribute to a band. A cell stopped at the harvest horizon sits
+wherever the search reached, which is not a sample from the optimal set, and averaging it
+in would widen the band and make every comparison look unattributable. Cells whose phase-2
+search produced nothing carry the solver&rsquo;s unweighted fallback route rather than the
+principle&rsquo;s, and are excluded from the tables entirely.</p>
+</section>
+
+<footer>
+<h3>Where this comes from</h3>
+<ul>
+  <li>Setup screen and the activity criterion &mdash; <code>results/setup_choice.md</code>, <code>harness/activity.py</code></li>
+  <li>Encoding comparison &mdash; <code>results/encoding.jsonl</code></li>
+  <li>Main ladder, one row per solve &mdash; <code>results/fleet_main_metrics.csv</code>; banded cells in the <code>.json</code></li>
+  <li>Every judgement call, numbered &mdash; <code>harness/DECISIONS.md</code></li>
+  <li>What ran and what broke &mdash; <code>harness/NIGHT_REPORT.md</code></li>
+</ul>
+<p>Interim snapshot taken 2026-09-12 00:30 while the ladder was still running. The
+earlier sessions&rsquo; full results, including the indifference-floor method this builds
+on, are in the companion review page.</p>
+</footer>
+</div>
