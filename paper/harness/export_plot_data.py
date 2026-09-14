@@ -115,7 +115,9 @@ def write_tex(name, body):
 
 
 def proven(m):
-    return m.get("optimality") == "optimal"
+    # All four orderings: a decibel cell with fewer runs has no band, and aggregate()
+    # would otherwise call a one-run cell "optimal" and plot it as a filled, band-free mean.
+    return m.get("optimality") == "optimal" and m.get("runs", 4) == 4
 
 
 def series(I, field, conds):

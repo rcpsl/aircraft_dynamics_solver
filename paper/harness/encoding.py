@@ -217,12 +217,16 @@ def form_compare(dbm):
             a, b = dbm.get((pd, n)), lad.get((p, n))
             if a is None or b is None:
                 continue
-            row = {"principle": p, "N": n, "db_all_proven": bool(a.get("all_proven"))}
+            # A band needs all four orderings: aggregate() calls a one-run cell
+            # all_proven with a zero-width band, which would let a single draw read as
+            # attributable. Fewer than four decibel runs -> not testable (None).
+            full = bool(a.get("all_proven")) and a.get("runs") == 4
+            row = {"principle": p, "N": n, "db_all_proven": full, "db_runs": a.get("runs")}
             for f, _lab in COMPARE:
                 row[f] = {"db": a.get(f), "db_lo": a.get(f + "_min"), "db_hi": a.get(f + "_max"),
                           "count": b.get(f), "count_lo": b.get(f + "_min"),
                           "count_hi": b.get(f + "_max"),
-                          "attributable": MR.attributable(a, b, f)}
+                          "attributable": MR.attributable(a, b, f) if full else None}
             out.append(row)
     return out
 
