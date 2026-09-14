@@ -129,7 +129,17 @@ KNOWN_PACKAGES = {
     "multirow": {"multirow"},
     "cite": {"cite"},
     "hyperref": {"url", "href", "hidelinks"},
-    "xcolor": {"color", "textcolor", "colorbox"},
+    "xcolor": {"color", "textcolor", "colorbox", "definecolor"},
+    # The figures are generated pgfplots/TikZ (export_plot_data.py). pgfplots loads
+    # TikZ and PGF, so their commands and environments come with it.
+    "pgfplots": {"tikzpicture", "axis", "groupplot", "scope", "addplot",
+                 "addlegendentry", "nextgroupplot", "pgfplotsset", "pgfplotsextra",
+                 "usepgfplotslibrary", "usetikzlibrary", "draw", "fill", "node", "path",
+                 "coordinate", "foreach", "tikz", "pgfmathsetmacro",
+                 "pgfmathtruncatemacro", "pgfmathprintnumber", "pgfplotslegendfromname",
+                 "thisrow", "pgfkeysvalueof"},
+    "pgfplotstable": {"pgfplotstableread", "pgfplotstablegetelem",
+                      "pgfplotstablegetrowsof", "pgfplotsretval", "of"},
 }
 # Commands provided by LaTeX itself or by IEEEtran; not exhaustive, but anything
 # outside it is surfaced for a human to confirm rather than silently accepted.
@@ -164,6 +174,10 @@ BUILTIN = {
     "dagger", "ddagger", "ast", "star", "circ", "bullet",
     # Trend arrows in the response table. Plain-TeX math relations.
     "uparrow", "downarrow", "leftarrow", "rightarrow",
+    # TeX primitives the generated figures use for their table loops, and \textup,
+    # which keeps the unit macros upright inside math.
+    "edef", "gdef", "xdef", "let", "ifnum", "else", "fi", "numexpr", "relax",
+    "textup", "setlength", "tabcolsep",
 }
 
 main_src = read(main)
@@ -172,15 +186,32 @@ loaded = set(re.findall(r"\\usepackage(?:\[[^\]]*\])?\{([^}]+)\}", main_src))
 loaded = {p.strip() for grp in loaded for p in grp.split(",")}
 newtheorems = set(re.findall(r"\\newtheorem\{(\w+)\}", main_src))
 
-allowed = set(BUILTIN) | defined | newtheorems
-for pkg, cmds in KNOWN_PACKAGES.items():
-    if pkg in loaded:
-        allowed |= cmds
-
 # Macros used anywhere in the document. Comments are stripped first: a commented-out
 # alternative (\qty, \IEEEproof) is not a use, and flagging it trains the reader to
 # ignore this check.
 doc_live = re.sub(r"(?<!\\)%.*", "", doc)
+
+# Macros a generated figure defines for itself: \def/\edef/\let, pgfmath results,
+# \foreach loop variables, and the table handles \pgfplotstableread creates. Collected
+# from the definitions themselves, so a use with no definition is still reported.
+local = set(re.findall(r"\\(?:[egx]?def|let)\s*\\([a-zA-Z]+)", doc_live))
+local |= set(re.findall(r"\\pgfmath(?:set|truncate)macro\s*\{?\\([a-zA-Z]+)", doc_live))
+local |= set(re.findall(r"\\foreach\s*\\([a-zA-Z]+)", doc_live))
+local |= set(re.findall(r"\\pgfplotstableread(?:\[[^\]]*\])?\{[^}]*\}\s*\\([a-zA-Z]+)",
+                        doc_live))
+
+allowed = set(BUILTIN) | defined | newtheorems | local
+for pkg, cmds in KNOWN_PACKAGES.items():
+    if pkg in loaded:
+        allowed |= cmds
+
+# ---- figure data --------------------------------------------------------------
+# Every CSV a pgfplots figure reads must exist: a missing one is a compile error on
+# Overleaf, and nothing else in this checker would see it.
+for m in re.finditer(r"\{(data/[^{}\s]+\.csv)\}", doc_live):
+    if not os.path.exists(os.path.join(TEX, m.group(1))):
+        note("MISSING DATA", m.group(1))
+
 used = set(re.findall(r"\\([a-zA-Z]+)", doc_live))
 unknown = sorted(u for u in used - allowed)
 if unknown:

@@ -1,0 +1,7 @@
+N,equal,equal_lo,equal_hi,equal_open,sufficientarian,sufficientarian_lo,sufficientarian_hi,sufficientarian_open,prioritarian,prioritarian_lo,prioritarian_hi,prioritarian_open,utilitarian,utilitarian_lo,utilitarian_hi,utilitarian_open,proportional,proportional_lo,proportional_hi,proportional_open,baseline,baseline_lo,baseline_hi,baseline_open
+6,5.8,5.09,6.27,nan,5.4425,4.77,6,nan,7.25,7,7.72,nan,1.5975,1.56,1.62,nan,4.2475,3.91,4.44,nan,5.87,5.62,6.05,nan
+8,9.765,9.03,10.33,nan,9.7275,9.28,10.58,nan,11.305,10.98,11.7,nan,2.375,2.28,2.45,nan,8.24,7.75,9.31,nan,10.27,9.89,10.72,nan
+14,35.775,34.12,37.48,nan,34.1075,31.81,34.98,nan,41.975,35.59,45.36,nan,6.0125,5.56,6.38,nan,36.7975,32.86,40.66,nan,38.8675,36.95,40.25,nan
+16,49.07,46.05,51.19,nan,48.715,47.39,49.7,nan,60.0525,55.52,63.69,nan,8.485,8.17,8.86,nan,59.175,57.89,60.86,nan,55.3125,50.42,59.36,nan
+22,110.795,107.22,113.72,nan,107.157,100.28,110.3,nan,110.825,96.42,124.61,nan,103.267,91.75,120.83,nan,226.577,206.64,240.5,nan,101.288,95.17,108.62,nan
+24,106.993,97.56,119.66,nan,108.505,99.88,120.09,nan,190.827,145.34,256.8,nan,151.38,144.66,165.14,nan,438.553,416.3,472.19,nan,200.41,152.22,268.64,nan

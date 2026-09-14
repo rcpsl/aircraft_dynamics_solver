@@ -1300,6 +1300,9 @@ def table_capacity():
            r"the capacity in aircraft at 45/55/65\,dBA under the row's $D$. Every "
            r"principle sends $D{=}6$; the baseline sends the wide cap $D{=}30$.}",
            r"\label{tab:capacity}",
+           # footnotesize: the baseline's 999/9990/99900 column overruns one IEEE
+           # column at normal size.
+           r"\footnotesize", r"\setlength{\tabcolsep}{2.5pt}",
            r"\begin{tabular}{r l r l rrr r}", r"\toprule",
            r"$N$ & Condition & $D$ & cap. & 45\,dBA & 55\,dBA & 65\,dBA & max \\",
            r"\midrule"]
