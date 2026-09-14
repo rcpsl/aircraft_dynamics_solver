@@ -222,6 +222,10 @@ def fig_tiers():
 
 # ------------------------------------------------- shared 5x5 map renderer
 SHADE = {45: "#dceefb", 55: "#f5f0d8", 65: "#f2d6c4"}
+# Prioritarian's protected set. Deliberately not the ambient palette and not the route
+# red: the outline marks WHICH communities are protected, not how loud they are or how
+# much traffic they take.
+PROT_EC = "#1c6b52"
 
 
 def _leg_usage(row, req):
@@ -246,7 +250,7 @@ def _leg_usage(row, req):
     return use
 
 
-def _draw_map(ax, row, req, title=None, title_size=7.5, ring=9.0):
+def _draw_map(ax, row, req, title=None, title_size=7.5, ring=9.0, protected=None):
     """One Fig.-2 panel: tiles shaded by ambient, vertiports ringed, every leg
     overlaid with width proportional to the aircraft on it.
 
@@ -259,6 +263,16 @@ def _draw_map(ax, row, req, title=None, title_size=7.5, ring=9.0):
         ax.add_patch(plt.Rectangle((c_ - .5, -r_ - .5), 1, 1,
                                    fc=SHADE.get(base[m], "#eeeeee"), ec="white",
                                    lw=1.0, zorder=0))
+    # The protected set, drawn on the tile rather than beside it. Prioritarian's whole
+    # objective is the noise summed over these three communities, and a reader cannot
+    # judge the routing against that objective without seeing WHERE they are -- the
+    # difference between a principle that reroutes around them and one that happens
+    # not to overfly them is visible only on the map.
+    for s in (protected or []):
+        r_, c_ = divmod(s - 1, 5)
+        ax.add_patch(plt.Rectangle((c_ - .5, -r_ - .5), 1, 1, fc="none",
+                                   ec=PROT_EC, lw=1.5, ls=(0, (2.2, 1.4)), zorder=2))
+
     for v in P.vertiport_indices():
         r_, c_ = divmod(v, 5)
         ax.plot(c_, -r_, "o", ms=ring, mfc="none", mec="#222", mew=1.4, zorder=4)
@@ -277,9 +291,15 @@ def _draw_map(ax, row, req, title=None, title_size=7.5, ring=9.0):
     return mx
 
 
-def _ambient_legend(fig, y=0.0, size=7):
+def _ambient_legend(fig, y=0.0, size=7, protected=None):
     handles = [plt.Rectangle((0, 0), 1, 1, fc=SHADE[b], ec="white") for b in (45, 55, 65)]
-    fig.legend(handles, ["45 dBA", "55 dBA", "65 dBA"], frameon=False, ncol=3,
+    labels = ["45 dBA", "55 dBA", "65 dBA"]
+    if protected:
+        handles.append(plt.Rectangle((0, 0), 1, 1, fc="none", ec=PROT_EC, lw=1.5,
+                                     ls=(0, (2.2, 1.4))))
+        labels.append("protected: stations "
+                      + ", ".join(str(s) for s in sorted(protected)))
+    fig.legend(handles, labels, frameon=False, ncol=len(labels),
                loc="lower center", bbox_to_anchor=(0.5, y), fontsize=size,
                handlelength=1.1, handleheight=0.9, columnspacing=1.4)
 
@@ -448,7 +468,73 @@ def _absent_label(cond, n):
     return _ABSENT.get((cond, n), "not run")
 
 
-def fig_routes_grid(sizes=LADDER, split=True):
+FULL_LADDER = (6, 8, 14, 16, 22, 24, 30, 32)
+
+
+def fig_routes_grid_full(stem="routes_grid_full"):
+    """Every cell of the ladder in one grid: 8 fleet sizes x 6 conditions.
+
+    The paper's version shows four sizes because eight rows of six panels does not fit
+    an IEEEtran float. A web page has no such limit, and the whole point of the figure is
+    the progression down a column, so the screen version shows all of it.
+    """
+    return fig_routes_grid(sizes=FULL_LADDER, split=False, stem=stem, width=10.5,
+                           panel_h=1.34)
+
+
+def fig_pair_grid(cond, sizes=FULL_LADDER, stem=None, width=10.5, panel_h=1.34,
+                  protected=None):
+    """One principle over the no-fairness baseline, the whole ladder left to right.
+
+    The six-column grid answers "how do the principles differ from each other"; it is
+    the wrong shape for "what did THIS principle do", because the reader has to jump
+    across four columns to reach the baseline. Here the comparison is vertical and
+    adjacent -- the same fleet size, the same problem, with and without the principle --
+    and the growth with N is the horizontal axis.
+    """
+    import metrics as MX
+    cells, mets, setup = _fleet()
+    if not cells:
+        print("no fleet rows for pair_grid"); return
+    stem = stem or f"pair_{cond}"
+    rows = [cond, "baseline"]
+    have = [n for n in sizes if any(k[0] == setup and k[2] == n for k in cells)]
+    nr, nc = len(rows), len(have)
+    fig, axes = plt.subplots(nr, nc, figsize=(width, panel_h * nr + 0.7),
+                             squeeze=False)
+    for ri, c in enumerate(rows):
+        for ci, n in enumerate(have):
+            ax = axes[ri][ci]
+            row = cells.get((setup, c, n))
+            if row is None:
+                ax.axis("off")
+                ax.text(0.5, 0.5, _absent_label(c, n), ha="center", va="center",
+                        fontsize=6.5, color="0.45", transform=ax.transAxes)
+            else:
+                req = MX._req_for(row)
+                m = mets.get((setup, c, n)) or MX.derive(row, req)
+                mark = "" if _proven(m) else r"$^\dagger$"
+                _draw_map(ax, row, req,
+                          title=f"{m['peak_added']:.2f} dB, +{m['extra_vs_floor']}"
+                                f" hops{mark}",
+                          title_size=6.2, ring=6.0, protected=protected)
+            if ri == 0:
+                ax.text(0.5, 1.30, f"$N={n}$", fontsize=8, ha="center", va="bottom",
+                        transform=ax.transAxes)
+            if ci == 0:
+                ax.text(-0.10, 0.5, CLABEL[c], rotation=90, fontsize=8, ha="center",
+                        va="center", transform=ax.transAxes,
+                        color=CCOLOR[c] if c != "baseline" else "0.35")
+    _ambient_legend(fig, y=0.0, size=6.5, protected=protected)
+    fig.subplots_adjust(left=0.045, right=0.995, top=0.86, bottom=0.10,
+                        wspace=0.03, hspace=0.30)
+    save(fig, stem)
+    plt.close(fig)
+    print(f"wrote {stem}.pdf  ({nr}x{nc}, {cond} vs baseline)")
+
+
+def fig_routes_grid(sizes=LADDER, split=True, stem="routes_grid", width=7.0,
+                    panel_h=1.30):
     """Rows = fleet size, columns = condition. The centrepiece.
 
     Aggregate metrics say a principle changed the routing; only this shows how, and
@@ -474,14 +560,14 @@ def fig_routes_grid(sizes=LADDER, split=True):
     # 7.0 in text width six columns still leaves ~1.17 in per 5x5 map, which is legible
     # for four rows -- the maps are five tiles across and carry no text. Seven or more
     # columns drops below ~1.1 in, which is not, and that is where the split happens.
-    wide = (7.0 / max(1, len(conds))) < 1.1 and len(have) > 2
+    wide = (width / max(1, len(conds))) < 1.1 and len(have) > 2
     groups = ([[n for n in have if n < 16], [n for n in have if n >= 16]]
               if split and wide else [have])
     groups = [g for g in groups if g]
     for gi, rows_n in enumerate(groups):
-        stem = "routes_grid" if len(groups) == 1 else f"routes_grid{gi + 1}"
+        this_stem = stem if len(groups) == 1 else f"{stem}{gi + 1}"
         nr, nc = len(rows_n), len(conds)
-        fig, axes = plt.subplots(nr, nc, figsize=(7.0, 1.30 * nr + 0.45),
+        fig, axes = plt.subplots(nr, nc, figsize=(width, panel_h * nr + 0.45),
                                  squeeze=False)
         for ri, n in enumerate(rows_n):
             for ci, c in enumerate(conds):
@@ -515,13 +601,37 @@ def fig_routes_grid(sizes=LADDER, split=True):
         _ambient_legend(fig, y=0.0, size=6.5)
         fig.subplots_adjust(left=0.03, right=0.995, top=0.90 - 0.01 * nr,
                             bottom=0.075, wspace=0.03, hspace=0.30)
-        save(fig, stem)
+        save(fig, this_stem)
         plt.close(fig)
-        print(f"wrote {stem}.pdf  ({nr}x{nc}, N={rows_n})")
+        print(f"wrote {this_stem}.pdf  ({nr}x{nc}, N={rows_n})")
 
 
 # ----------------------------------------------------------- F2 metric_vs_N
-def fig_metric_vs_N():
+METRIC_PANELS = [
+    ("peak_added",             "peak added noise (dB)",       True),
+    ("total_added",            "total added noise (dB, summed)", True),
+    ("max_count",              "max aircraft per tile",       True),
+    ("shared_tile_timesteps",  "shared tile-timesteps",       True),
+    ("avg_trip_hops",          "avg trip length (hops)",      True),
+    ("departure_delay_total",  "departure delay (ac-timesteps)", True),
+    ("extra_vs_baseline",      "extra hops vs baseline",      False),
+]
+
+
+def fig_metric_vs_N_full(stem="metric_vs_N_full"):
+    """All seven headline metrics, 4x2, peak added noise first.
+
+    The paper's F2 has room for six panels and drops peak added noise, which the
+    closed-form cap argument carries in the text instead. Nothing outside the paper
+    is short of space, so this variant plots the whole set with the headline metric
+    in the first cell.
+    """
+    return fig_metric_vs_N(panels=METRIC_PANELS, nrow=4, ncol=2, stem=stem,
+                           figsize=(7.2, 8.2))
+
+
+def fig_metric_vs_N(panels=None, nrow=2, ncol=3, stem="metric_vs_N",
+                    figsize=(7.0, 3.7)):
     """Six panels, one per headline metric, five principles and a dashed baseline.
 
     `extra travel vs baseline` has no baseline series by construction -- it is the
@@ -530,17 +640,17 @@ def fig_metric_vs_N():
     cells, mets, setup = _fleet()
     if not mets:
         print("no fleet metrics for metric_vs_N"); return
-    PANELS = [
+    PANELS = panels if panels is not None else [
         ("avg_trip_hops",          "avg trip length (hops)",      True),
         ("departure_delay_total",  "departure delay (ac-timesteps)", True),
         ("extra_vs_baseline",      "extra hops vs baseline",      False),
         ("max_count",              "max aircraft per tile",       True),
         ("shared_tile_timesteps",  "shared tile-timesteps",       True),
         ("total_added",            "total added noise (dB, summed)", True),
-        ("peak_added",             "peak added noise (dB)",       True),
     ]
-    fig, axes = plt.subplots(2, 3, figsize=(7.0, 3.7))
-    PANELS = PANELS[:6]
+    fig, axes = plt.subplots(nrow, ncol, figsize=figsize)
+    for ax in axes.ravel()[len(PANELS):]:
+        ax.axis("off")
     for ax, (field, ylab, with_base) in zip(axes.ravel(), PANELS):
         conds = CONDITIONS if with_base else ORDER
         _plot_series(ax, mets, setup, field, conds=conds)
@@ -553,9 +663,9 @@ def fig_metric_vs_N():
     fig.legend(hs, ls, frameon=False, ncol=len(ls), loc="lower center",
                bbox_to_anchor=(0.5, -0.02), fontsize=7)
     fig.tight_layout(rect=(0, 0.045, 1, 1))
-    save(fig, "metric_vs_N")
+    save(fig, stem)
     plt.close(fig)
-    print("wrote metric_vs_N.pdf")
+    print(f"wrote {stem}.pdf")
 
 
 # ---------------------------------------------------------- F3 route_sharing

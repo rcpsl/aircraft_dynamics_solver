@@ -102,3 +102,33 @@ not apply to them unaltered, and their effects are compared against the cap-base
 instead. The permutation sweep (`plans.py: perm_sweep`) removes that asymmetry — it
 leaves the feasible set identical for every condition — and is queued. Until it lands,
 the floor for the two objective principles is inferred rather than measured.
+
+---
+
+# Addendum, 2026-09-14 — the two objectives, scored on the baseline's routing
+
+The three objective-carrying principles report the objective they optimised, and the
+baseline reports none, so until now no comparison of a principle against the control *on
+the principle's own terms* existed. `harness/objectives.py` rebuilds all three from the
+stored routings (`noiseMatrix`, `paths`, `countMatrix`) and reproduces the solver's own
+reported value on 32/32 runs for each, which licenses evaluating them on the baseline.
+
+Two results, both invisible in every aggregate metric:
+
+| where | was | now |
+|---|---|---|
+| Prioritarian's objective | "evaluates to 0.0 at every fleet size" (2026-09-11 addendum, measured on `PROT_BURDEN`, where it was a degeneracy — nothing flew there) | **CONFIRMED at `D6_protA`, and it is no longer a degeneracy.** The protected set moved onto the corridor; the baseline now puts 2.23–11.03 dB on stations 4/8/14 and swings by up to 16.77 dB on ordering alone. Prioritarian still returns exactly 0.00, all four orderings, all six proven sizes. Attributable at N=16 and 22; the other four miss only because the baseline's band is wider than the gap. |
+| §IV / the findings page on Utilitarian, "its objective prunes the search rather than enlarging it" | FRAMING, and incomplete | **The objective is inert.** In count form Utilitarian minimises fleet transit time, and the baseline's routing already achieves the identical value — to the aircraft-timestep, at all eight sizes, zero band on both sides at the seven where both are proven. So Utilitarian's distinct routings are tie-breaks among equally optimal answers, not optimisation, and the cheap solve time is explained by an objective that never has to trade anything away. The departure delay it pays is real but is not bought by this objective: transit is measured first-move-to-arrival and does not count ground waiting. |
+
+This is the same shape as the pre-existing note that transit sits at the floor even with
+the objective off, now measured at the study's own operating point rather than inferred.
+
+**What it does not touch.** Utilitarian's peak added noise (4.77 dB from N=14, attributable
+at N=22 and N=30) is unaffected — that comes from the cap, which is active in every
+condition including this one. The claim that weakens is the one about the *objective*
+doing the work.
+
+**Open.** If the objective is inert at `D6_protA`, the Utilitarian column is a cap plus a
+tie-break, and the paper should either say so or move Utilitarian to the decibel form
+(`utilNoiseMode: True`), where the objective does have something to minimise. That is the
+same unrun sweep Step 3 of the session-3 brief asked for and is still outstanding.
