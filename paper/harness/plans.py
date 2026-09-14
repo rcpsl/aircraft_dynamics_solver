@@ -504,6 +504,17 @@ def condition(setup, name, factor, key, perm=None):
         req = {"optimizePrioritarian": False}
         if setup["hard_cap"] is not None:
             req["D"] = float(setup["hard_cap"])
+    elif name in DB_FORMS:
+        # The exact (decibel) encoding of an objective principle: the same payload as
+        # the ladder's condition, same cap, without the count override. The overrides
+        # are written out even where they equal the payload default, so a row says
+        # which encoding it ran without anyone having to know the default.
+        principle, over = DB_FORMS[name]
+        cfg = _cfg(setup, principle, factor)
+        req = {}
+        if setup["hard_cap"] is not None:
+            req["D"] = float(setup["hard_cap"])
+        req.update(over)
     else:
         cfg = _cfg(setup, name, factor)
         req = {}
@@ -885,7 +896,50 @@ def fleet_default():
                   "fdef", conditions=PRINCIPLES)
 
 
-PLANS = {"scaling": scaling, "ablation": ablation, "caps": caps,
+# Session 5, Experiment 5: the exact (decibel) encodings of the two objective principles,
+# run on SETUP_MAIN as their own conditions beside the ladder's count forms. The
+# overrides equal the payload defaults and are sent anyway, so every row names its form.
+DB_FORMS = {"utilitarian_db": ("utilitarian", {"utilNoiseMode": True}),
+            "proportional_db": ("proportional", {"proximityMode": "noise"})}
+
+
+def fleet_db(K=K_PERM):
+    """Experiment 5: Utilitarian and Proportional in decibel form, on the ladder.
+
+    Same setup, same keys scheme and same permutation seeds as the count-form ladder, so
+    ordering k here is paired with ordering k there: the form comparison is per ordering.
+
+    Lane 1 (N = 6, 8) must finish and runs first, small N first. Lane 2 (N = 14 ... 24)
+    fills slots as lane 1 frees them and runs until the single harvest (harvest.py). It is
+    ordering-major -- p0 at every N before p1 at any -- because with eight slots and cells
+    that may not prove before the harvest, an N-major queue would leave N >= 16 with no
+    incumbent at all (DECISIONS D30). Within each ordering it is still small N first.
+
+    Heartbeats every 60 s rather than 600, so harvest.py sees each cell's phase fresh.
+    """
+    conds = tuple(DB_FORMS)
+    jobs = []
+
+    def add(f, c, k):
+        j = condition(SETUP_MAIN, c, f, _k("fleet_db", SETUP_MAIN["name"], c, f) + f"|p{k}",
+                      perm=k)
+        j["timeout_ms"] = UNLIMITED_MS
+        jobs.append(j)
+
+    for f in (0.25, 0.5):
+        for c in conds:
+            for k in range(K):
+                add(f, c, k)
+    for k in range(K):
+        for f in (0.75, 1.0, 1.25, 1.5):
+            for c in conds:
+                add(f, c, k)
+    return {"out": "results/fleet_db.jsonl", "par": 8, "wall_kill": NO_WALL_KILL,
+            "checkpoint_s": 60, "setup": SETUP_MAIN, "K": K, "jobs": jobs}
+
+
+PLANS = {"fleet_db": fleet_db,
+         "scaling": scaling, "ablation": ablation, "caps": caps,
          "prior_sets": prior_sets, "reps": reps, "grid4": grid4,
          "binding": binding, "longbudget": longbudget,
          "budgetfix": budgetfix, "propranking": propranking,

@@ -27,6 +27,20 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # Statuses that mean "this job produced no answer", so a resumed plan re-runs them.
 UNANSWERED = {"NO_OUTPUT", "phase1_timeout", "phase1_stopped"}
 
+# D12, made mechanical: a job launched while a stop sentinel is on disk takes the
+# interrupt during phase 1 and returns no answer at all. So the runner launches nothing
+# while either file exists. HOLD stops launches only (harvest.py places it first, so the
+# running cells can be seen to be in phase 2 before STOP_ALL goes down); STOP_ALL also
+# interrupts every running worker. With a sentinel present and nothing left running,
+# the runner exits and the unlaunched jobs stay unanswered for a later resume.
+CHECKPOINTS = os.path.join(HERE, "results", "checkpoints")
+SENTINELS = ("HOLD", "STOP_ALL")
+
+
+def held():
+    return next((s for s in SENTINELS if os.path.exists(os.path.join(CHECKPOINTS, s))),
+                None)
+
 
 def main(plan_path):
     plan = json.load(open(plan_path))
@@ -84,7 +98,14 @@ def main(plan_path):
                 pass
 
     while queue or running:
-        while queue and len(running) < par:
+        stop = held()
+        if stop and queue and not running:
+            print(f"{stop} on disk and nothing running: {len(queue)} job(s) not launched",
+                  flush=True)
+            for j in queue:
+                print(f"  not launched: {j['key']}", flush=True)
+            break
+        while queue and len(running) < par and not stop:
             job = queue.pop(0)
             # Contention is a property of the sweep, not of the job definition, so it
             # is stamped on here and travels out on the result row (worker: runner_par).

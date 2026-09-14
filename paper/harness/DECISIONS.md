@@ -483,3 +483,45 @@ is the next step.
 
 The default-setup ladder stays on disk untouched as the reference the paper cites in one
 paragraph. `fleet_main` is added to `MERGE_EXEMPT` alongside it.
+
+---
+
+# Session 5 — Experiment 5, the decibel forms (2026-09-14)
+
+## D30. Lane 2 is queued ordering-major, not N-major
+
+`fleet_db` runs 48 cells (Utilitarian and Proportional in decibel form, six sizes, four
+orderings) on eight slots. Lane 1 (N = 6, 8) is small N first as asked. Lane 2
+(N = 14 … 24) is queued p0 at every N, then p1 at every N, and so on, still small N
+first within each ordering. The reason is arithmetic: the decibel forms did not prove
+above N = 8 on the shipped setting in 16.7 h, so a lane-2 cell is likely to hold its slot
+until the harvest. An N-major queue would fill the slots with N = 14 and leave N = 16, 22
+and 24 with no incumbent at all; ordering-major gives every (principle, N) its p0
+incumbent first. `encoding.jsonl` holds count-form rows only, so there was nothing to reuse.
+
+## D31. The salvage bound is read by wrapping `_best_so_far`, not by editing the solver
+
+The brief asks for Z3's lower bound at harvest. The solver does not report one, and it
+stays unmodified. `worker.capture_bound` replaces the module-level name `_best_so_far`
+in the worker's own copy of the solver with a wrapper that, in the solving thread and
+before the original runs, reads `OptimizeObjective(opt, 0, False).lower()` (tier 1 is
+objective 0) and the incumbent's tier-1 value from `opt.model()`. Read-only, same thread,
+so D2's cross-thread hazard does not apply. Smoke-tested on
+`smoke_db|…|proportional_db|1.5|p0` stopped at 40 s: salvage verified, incumbent 0.3056
+in normalised units, bound reported as `-1*oo`. If the bound is still −∞ at harvest,
+the gap is recorded as unavailable, never as 0 or 100 %.
+
+## D32. The runner holds launches while a sentinel is on disk; H is a fixed clock time
+
+`runner.py` now launches nothing while `results/checkpoints/HOLD` or `STOP_ALL` exists,
+and exits when a sentinel is present and nothing is running, leaving unlaunched jobs
+unanswered for a resume. `harvest.py` places `HOLD`, waits until every running cell's
+fresh heartbeat reports phase 2 (phase 1 is ≤ 12 s at N ≤ 24, measured on the ladder),
+then places `STOP_ALL`, and removes both once the runner exits. That is D12 enforced by
+the code rather than by care.
+
+The harvest is at 2026-09-15 00:00 UTC. The deadline is 2026-09-15 18:59 UTC (11:59 PDT).
+The reserve is about 19 h, for derivation, writing, a build and a human read, with room
+to recover from one failed step. That makes H = 19.6 h from the sweep's launch at
+04:25 UTC. Each harvested cell's own elapsed time is recorded, since later-launched
+cells run for less than H.
