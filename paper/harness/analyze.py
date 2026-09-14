@@ -1264,7 +1264,9 @@ def table_capacity():
     idx, setup = _main_cells()
     if not idx:
         return
-    sizes = [n for n in (16, 32) if any(k[0] == setup and k[2] == n for k in idx)]
+    # One size below the cap's activation and one above it, both proven in every
+    # ordering for every condition (N = 32 has harvested cells and no Equal row).
+    sizes = [n for n in (8, 24) if any(k[0] == setup and k[2] == n for k in idx)]
     if not sizes:
         return
     conds = [c for c in CORDER if any(k[0] == setup and k[1] == c for k in idx)]
@@ -1291,16 +1293,12 @@ def table_capacity():
 
     tex = [r"\begin{table}[t]", r"\centering",
            r"\caption{Capacity utilisation by ambient tier: peak aircraft over a "
-           r"community as a fraction of what the cap $D$ grants a tile at that "
-           r"ambient level (Fig.~\ref{fig:capacity}). Mean over the tiles of the tier "
-           r"that carried traffic. A uniform $D$ is not a uniform rule --- the same "
-           r"cap buys a 65\,dBA tile many times the capacity it buys a 45\,dBA one --- "
-           r"so a principle that routes over quiet communities runs at a far higher "
-           r"utilisation for the same number of aircraft. \emph{cap.} is that capacity "
-           r"in aircraft at 45/55/65\,dBA under the row's own $D$. Equal and "
-           r"Sufficientarian send $D{=}10$ and so face a real ceiling; the other "
-           r"conditions send the wide cap, under which no tile on this map can be "
-           r"filled and utilisation is near zero by construction.}",
+           r"community as a fraction of the capacity \eqref{eq:capclosed} grants a "
+           r"tile at that ambient level, averaged over the tier's tiles that carried "
+           r"traffic, for the first aircraft ordering. \emph{max} is the largest "
+           r"utilisation on any tile, averaged over the four orderings. \emph{cap.} is "
+           r"the capacity in aircraft at 45/55/65\,dBA under the row's $D$. Every "
+           r"principle sends $D{=}6$; the baseline sends the wide cap $D{=}30$.}",
            r"\label{tab:capacity}",
            r"\begin{tabular}{r l r l rrr r}", r"\toprule",
            r"$N$ & Condition & $D$ & cap. & 45\,dBA & 55\,dBA & 65\,dBA & max \\",

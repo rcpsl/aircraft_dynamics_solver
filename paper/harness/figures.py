@@ -555,6 +555,10 @@ def fig_routes_grid(sizes=LADDER, split=True, stem="routes_grid", width=7.0,
         print("no fleet rows at the ladder sizes"); return
     conds = [c for c in CONDITIONS
              if any(k[0] == setup and k[1] == c and k[2] in have for k in cells)]
+    # Prioritarian's protected set, outlined in every column: the other principles and
+    # the baseline are read against the same three tiles.
+    prot = next((m.get("protected_stations") for k, m in mets.items()
+                 if k[0] == setup and m.get("protected_stations")), None)
 
     # Split only when the panels would actually be too small to read. At IEEEtran's
     # 7.0 in text width six columns still leaves ~1.17 in per 5x5 map, which is legible
@@ -591,14 +595,15 @@ def fig_routes_grid(sizes=LADDER, split=True, stem="routes_grid", width=7.0,
                 mark = "" if _proven(m) else r"$^\dagger$"
                 t = (f"{m['peak_added']:.2f} dB, +{m['extra_vs_floor']} hops{mark}"
                      if ri or True else "")
-                _draw_map(ax, row, req, title=t, title_size=6.2, ring=6.0)
+                _draw_map(ax, row, req, title=t, title_size=6.2, ring=6.0,
+                          protected=prot)
                 if ri == 0:
                     ax.text(0.5, 1.30, CLABEL[c], fontsize=7.5, ha="center",
                             va="bottom", transform=ax.transAxes)
                 if ci == 0:
                     ax.text(-0.08, 0.5, f"$N={n}$", rotation=90, fontsize=8,
                             ha="center", va="center", transform=ax.transAxes)
-        _ambient_legend(fig, y=0.0, size=6.5)
+        _ambient_legend(fig, y=0.0, size=6.5, protected=prot)
         fig.subplots_adjust(left=0.03, right=0.995, top=0.90 - 0.01 * nr,
                             bottom=0.075, wspace=0.03, hspace=0.30)
         save(fig, this_stem)
@@ -640,12 +645,16 @@ def fig_metric_vs_N(panels=None, nrow=2, ncol=3, stem="metric_vs_N",
     cells, mets, setup = _fleet()
     if not mets:
         print("no fleet metrics for metric_vs_N"); return
+    # Columns are the three metric families Sec. IV reports -- congestion, travel time,
+    # added noise -- two metrics each, read top to bottom. Peak added noise takes the
+    # slot avg trip length held: extra hops already carries distance, and the peak is
+    # the metric the capacity argument is about.
     PANELS = panels if panels is not None else [
-        ("avg_trip_hops",          "avg trip length (hops)",      True),
-        ("departure_delay_total",  "departure delay (ac-timesteps)", True),
-        ("extra_vs_baseline",      "extra hops vs baseline",      False),
         ("max_count",              "max aircraft per tile",       True),
+        ("extra_vs_baseline",      "extra hops vs baseline",      False),
+        ("peak_added",             "peak added noise (dB)",       True),
         ("shared_tile_timesteps",  "shared tile-timesteps",       True),
+        ("departure_delay_total",  "departure delay (ac-timesteps)", True),
         ("total_added",            "total added noise (dB, summed)", True),
     ]
     fig, axes = plt.subplots(nrow, ncol, figsize=figsize)
