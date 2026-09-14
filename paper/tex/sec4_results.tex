@@ -157,6 +157,20 @@ parallel; the band is the range over the orderings.}
 
 What does the count abstraction cost in the principle's own objective and in the noise
 metrics, and what does it buy in solve time and reach across the ladder?
+Table~\ref{tab:encoding} scores both forms' routings on the decibel objective
+$J_{\mathrm{dB}}$, paired by aircraft ordering. The count-form routing has the same caps
+and horizon as the decibel problem, so it is feasible for it and can only score at or
+above the optimum $J^*$.
+
+\emph{Utilitarian.} At $N=6$ and 8 the decibel form proves in 49 and 296\,s against the
+count form's 1.6 and 2.4\,s, 30 and 124 times slower. The count-form routings score 20.79
+and 20.37\,dB on the decibel objective against optima of 9.52 and 10.24\,dB: a loss of
+11.27 and 10.13\,dB, or 118 and 99\,\%, attributable at both sizes. The count objective,
+airborne time, is minimised by every shortest-path routing, so the count form leaves the
+decibel objective to the arrival tie-break. The decibel form concentrates the fleet: it
+occupies 10 tile-timesteps against 15.25 and 16.25, and holds one aircraft-timestep more
+on the ground (7 against 6 and 9 against 8), both attributable. Its peak and footprint lie
+within the solver's indifference of the count form's.
 
 \begin{figure*}[t]
 \centering

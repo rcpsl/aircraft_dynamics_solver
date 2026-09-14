@@ -567,7 +567,8 @@ def main():
     capacity_tex()
     routes_grid_tex(rp, prot)
     n_csv = len([f for f in os.listdir(DATA) if f.endswith(".csv")])
-    print(f"wrote {n_csv} CSVs to {os.path.relpath(DATA, HERE)} and 5 .tex files to "
+    n_tex = len([f for f in os.listdir(FIGS) if f.endswith(".tex")])
+    print(f"wrote {n_csv} CSVs to {os.path.relpath(DATA, HERE)} and {n_tex} .tex files to "
           f"{os.path.relpath(FIGS, HERE)} (N <= {max(LADDER)})")
 
 

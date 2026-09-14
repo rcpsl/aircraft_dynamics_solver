@@ -163,23 +163,20 @@ def _(I):
     return ok and not bad, f"D=6 {t}, D=10 {t10}, recorded mismatches {bad}"
 
 
-@check("shipped settings: dB forms proven only to N=8 (Proportional in 8.2 h), caps fill "
-       "at most 0.44 at N=16, and the baseline never enters stations 16, 20, 25")
+@check("shipped settings: caps fill at most 0.44 of a tile at N=16, and the baseline "
+       "never enters the shipped protected set (stations 16, 20, 25)")
 def _(I):
+    """The shipped settings' decibel-form timings left the text in session 5: Experiment 5
+    measures both encodings on the study's own setup, so they are no longer quoted."""
     import plans as PL
     R = load(REF)
-    got = {c: sorted(n for (cc, n), m in R.items() if cc == c
-                     and m.get("optimality") == "optimal") for c in ("utilitarian",
-                                                                    "proportional")}
-    hours = R[("proportional", 8)]["wall"] / 3600
     util16 = max(m.get("capacity_utilisation_max") or 0
                  for (c, n), m in R.items() if n == 16)
     prot = [s + 1 for s in PL.PROT_BURDEN]
     on = {n: [R[("baseline", n)]["per_station_peak"][s - 1] for s in prot] for n in LADDER}
-    ok = (got == {"utilitarian": [6, 8], "proportional": [6, 8]}
-          and round(hours, 1) == 8.2 and round(util16, 2) == 0.44
-          and prot == [16, 20, 25] and all(v == 0 for vs in on.values() for v in vs))
-    return ok, f"proven {got}, {hours:.2f} h, N=16 max util {util16:.3f}, set {prot}"
+    ok = (round(util16, 2) == 0.44 and prot == [16, 20, 25]
+          and all(v == 0 for vs in on.values() for v in vs))
+    return ok, f"N=16 max util {util16:.3f}, set {prot}"
 
 
 @check("horizon: T=6 at every cell except Utilitarian, which runs at the bound (T=5) "
@@ -504,6 +501,104 @@ def _(I):
     got = (round(I[("baseline", 16)]["total_added"], 1),
            round(I[("proportional", 16)]["total_added"], 1))
     return got == (37.7, 19.7), f"{got}"
+
+
+# ---------------------------------------------- Exp. 5, the two encodings
+# encoding.py writes results/encoding.json from fleet_main.jsonl and fleet_db.jsonl; the
+# decibel-form cells go through the ladder's own metrics pipeline into
+# fleet_db_metrics.json. These checks are the invariants the comparison rests on; the
+# numbers the text quotes are asserted below them.
+ENC = os.path.join(RES, "encoding.json")
+DBJ = os.path.join(RES, "fleet_db.jsonl")
+
+
+def enc():
+    return json.load(io.open(ENC, encoding="utf-8"))
+
+
+def db_rows():
+    out = []
+    for l in io.open(DBJ, encoding="utf-8"):
+        try:
+            out.append(json.loads(l))
+        except ValueError:
+            pass
+    return out
+
+
+@check("Exp. 5: the decibel objective is re-derived exactly -- every decibel-form row "
+       "reproduces the solver's reported value")
+def _(I):
+    st = enc()["selftest"]
+    return st["checked"] > 0 and not st["mismatches"], (
+        f"{st['checked']} rows reproduced" if not st["mismatches"]
+        else f"mismatches {st['mismatches'][:2]}")
+
+
+@check("Exp. 5: proven decibel orderings agree on one J* per cell; every count routing "
+       "has the decibel run's horizon (so it is feasible for the decibel problem) and none "
+       "beats J*")
+def _(I):
+    bad = []
+    for c in enc()["cells"]:
+        if "J_star" in c and (not c["J_star_consistent"] or c["count_beats_star"]):
+            bad.append((c["principle"], c["N"], "J*"))
+        if not c["T_match"]:
+            bad.append((c["principle"], c["N"], "horizon"))
+    n = sum(1 for c in enc()["cells"] if "J_star" in c)
+    return not bad, f"{bad}" if bad else f"{n} cells with a proven J*, all consistent"
+
+
+@check("Exp. 5: every decibel run is an answer (proven or verified feasible, no fallback, "
+       "no phase-1 stop), ran with no Z3 budget, and lies on the N <= 24 ladder")
+def _(I):
+    rows = db_rows()
+    bad = [(r["key"], r.get("status"), r.get("optimality")) for r in rows
+           if r.get("status") != "sat" or r.get("optimality") not in ("optimal", "partial")
+           or (r.get("budget_s") or 0) < 100000 or r.get("N", 99) > 24]
+    return bool(rows) and not bad, f"{len(rows)} rows" + (f", bad {bad[:3]}" if bad else "")
+
+
+def _cell(p, n):
+    return next(c for c in enc()["cells"] if c["principle"] == p and c["N"] == n)
+
+
+def _fc(p, n):
+    return next(r for r in enc()["form_compare"] if r["principle"] == p and r["N"] == n)
+
+
+@check("Exp. 5 Utilitarian N=6, 8: decibel form proves in 49 and 296 s vs 1.6 and 2.4 s "
+       "(30x, 124x); count routings score 20.79 and 20.37 dB vs J* 9.52 and 10.24 dB, loss "
+       "11.27 and 10.13 dB (118 %, 99 %), attributable")
+def _(I):
+    got = []
+    for n in (6, 8):
+        c = _cell("utilitarian", n)
+        if len(c["db_proven"]) != 4:
+            return None, f"N={n} decibel cell not proven 4/4 yet"
+        got.append((round(c["wall_db"]["mean"]), round(c["wall_count"]["mean"], 1),
+                    round(c["speedup"]), round(c["J_count"]["mean"], 2), round(c["J_star"], 2),
+                    round(c["loss_abs"]["mean"], 2), round(100 * c["loss"]["mean"]),
+                    c["loss_attributable"]))
+    want = [(49, 1.6, 30, 20.79, 9.52, 11.27, 118, True),
+            (296, 2.4, 124, 20.37, 10.24, 10.13, 99, True)]
+    return got == want, f"{got}"
+
+
+@check("Exp. 5 Utilitarian N=6, 8: decibel form occupies 10 tile-timesteps vs 15.25 and "
+       "16.25 and departs 7 vs 6 and 9 vs 8 aircraft-timesteps, both attributable; peak and "
+       "footprint within the band")
+def _(I):
+    got = []
+    for n in (6, 8):
+        r = _fc("utilitarian", n)
+        o, d = r["occupied_tile_timesteps"], r["departure_delay_total"]
+        got.append((o["db"], o["count"], o["attributable"], d["db"], d["count"],
+                    d["attributable"], r["peak_added"]["attributable"],
+                    r["stations_touched"]["attributable"]))
+    want = [(10.0, 15.25, True, 7.0, 6.0, True, False, False),
+            (10.0, 16.25, True, 9.0, 8.0, True, False, False)]
+    return got == want, f"{got}"
 
 
 def main():
