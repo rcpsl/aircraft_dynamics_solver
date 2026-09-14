@@ -601,24 +601,30 @@ def _(I):
     return got == want, f"{got}"
 
 
-@check("Exp. 5 Proportional N=6: decibel form 2655 s vs 4.2 s (625x); count routings "
-       "128.00 in every ordering vs J* 109.43, loss 18.58 (17 %), attributable; summed 9.60 "
-       "vs 10.92 dB, occupied 11 vs 13, peak 4.77 vs 3.01 dB, departure 9 vs 6, attributable")
+@check("Exp. 5 Proportional N=6, 8: decibel form 2655 and 17793 s vs 4.2 and 8.2 s "
+       "(625x, 2159x); count routings 128.00 and 134.43 in every ordering vs J* 109.43 and "
+       "115.85, loss 18.58 (17 %, 16 %), attributable; summed 9.60/10.31 vs 10.92/11.63 dB, "
+       "occupied 11 vs 13, peak 4.77 vs 3.01 dB, departure 9 vs 6 and 11 vs 8, attributable")
 def _(I):
-    c, r = _cell("proportional", 6), _fc("proportional", 6)
-    if len(c["db_proven"]) != 4:
-        return None, "N=6 decibel cell not proven 4/4 yet"
-    got = (round(c["wall_db"]["mean"]), round(c["wall_count"]["mean"], 1), round(c["speedup"]),
-           round(c["J_count"]["min"], 2), round(c["J_count"]["max"], 2), round(c["J_star"], 2),
-           round(c["loss_abs"]["mean"], 2), round(100 * c["loss"]["mean"]),
-           c["loss_attributable"])
-    m = tuple((round(r[f]["db"], 2), round(r[f]["count"], 2), r[f]["attributable"])
-              for f in ("total_added", "occupied_tile_timesteps", "peak_added",
-                        "departure_delay_total"))
-    ok = (got == (2655, 4.2, 625, 128.0, 128.0, 109.43, 18.58, 17, True)
-          and m == ((9.6, 10.92, True), (11.0, 13.0, True), (4.77, 3.01, True),
-                    (9.0, 6.0, True)))
-    return ok, f"{got} {m}"
+    want = {6: ((2655, 4.2, 625, 128.0, 128.0, 109.43, 18.58, 17, True),
+                ((9.6, 10.92, True), (11.0, 13.0, True), (4.77, 3.01, True), (9.0, 6.0, True))),
+            8: ((17793, 8.2, 2159, 134.43, 134.43, 115.85, 18.58, 16, True),
+                ((10.31, 11.63, True), (11.0, 13.0, True), (4.77, 3.01, True),
+                 (11.0, 8.0, True)))}
+    got = {}
+    for n in (6, 8):
+        c, r = _cell("proportional", n), _fc("proportional", n)
+        if len(c["db_proven"]) != 4:
+            return None, f"N={n} decibel cell not proven 4/4 yet"
+        g = (round(c["wall_db"]["mean"]), round(c["wall_count"]["mean"], 1),
+             round(c["speedup"]), round(c["J_count"]["min"], 2), round(c["J_count"]["max"], 2),
+             round(c["J_star"], 2), round(c["loss_abs"]["mean"], 2),
+             round(100 * c["loss"]["mean"]), c["loss_attributable"])
+        m = tuple((round(r[f]["db"], 2), round(r[f]["count"], 2), r[f]["attributable"])
+                  for f in ("total_added", "occupied_tile_timesteps", "peak_added",
+                            "departure_delay_total"))
+        got[n] = (g, m)
+    return got == want, f"{got}"
 
 
 def main():
