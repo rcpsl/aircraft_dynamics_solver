@@ -1,123 +1,61 @@
-\section{Five Principles of Distributive Justice}
+\section{Five Principles}
 \label{sec:principles}
 
-This section states the five principles in words before any mathematics, because the gap
-between the two is the subject of the paper; the wording is taken from the definitions
-the system itself presents.
-Each is given as (i) its general claim about what a fair distribution is, (ii) the
-assumption that claim needs to be well posed, and (iii) its reading in this domain. Two
-features of the domain matter throughout: the thing distributed is a burden rather than a
-benefit, so every principle must be read in its harm-allocating form; and the burden is
-not freely divisible, since aircraft must fly \emph{somewhere} and the map fixes which
-communities lie between the vertiports. A principle here selects among routings, not
-among arbitrary allocations.
+The burden is the noise aircraft add to a community's ambient level, and a principle
+chooses among routings rather than among arbitrary allocations. We state each principle's
+general claim and its reading for routing; Table~\ref{tab:principles} gives what the
+solver receives, in the notation of Section~\ref{sec:encoding}.
 
-\subsection{Equal}
-\label{sec:p-equal}
-\emph{Everyone receives the same share, regardless of differences.} Fairness is
-identical treatment: no one gets more or less than anyone else. This assumes all
-parties have equivalent standing, and that circumstances are comparable enough for
-equal shares to make sense~\cite{dworkin1981}.
+\emph{Equal}: everyone receives the same share~\cite{dworkin1981}; added noise should be
+as equal as possible across communities. \emph{Sufficientarian}: everyone should reach a
+threshold, above which differences carry no weight~\cite{frankfurt1987}; no community's
+added noise may exceed a limit. \emph{Prioritarian}: a gain counts for more when it goes
+to the worst-off~\cite{parfit1997,rawls1971}; the communities already bearing the most
+burden should receive the least added noise. \emph{Utilitarian}: total harm should be
+minimal~\cite{mill1863}; the fleet's aggregate burden should be as low as possible.
+\emph{Proportional}: burden should follow benefit~\cite{aristotleNE,young1994}; the
+communities that gain most from the network should carry more of its noise.
 
-\emph{In this domain:} the extra noise added for every region should be as equal as
-possible.
+Equal and Sufficientarian are encoded as caps and contribute no objective. Prioritarian
+needs a protected set $P$ and Proportional a benefit price $\pi_m$, both inputs from
+outside the noise model (Section~\ref{sec:instance}). Equal is comparative and
+Sufficientarian absolute, yet under one limit $\ell$ they coincide on this instance.
 
-Note the form: a \emph{comparative} requirement, constraining differences between
-communities rather than any community's absolute level, and phrased as an optimisation
-(``as equal as possible'') rather than a threshold. Section~\ref{sec:mismatch} shows
-this distinction is what separates Equal from Sufficientarian in principle, and what
-makes them collapse into one another in our implementation.
+\begin{proposition}
+\label{prop:equiv}
+Let $\delta_{m,t}\ge0$ be the added noise on tile $m$ at time $t$, zero on an unoccupied
+tile. At each $t$, $\max_m\delta_{m,t}\le\ell$ implies
+$\max_m\delta_{m,t}-\min_m\delta_{m,t}\le\ell$. The converse holds whenever some tile is
+unoccupied, which is guaranteed when the fleet is smaller than the map, $N<M$.
+\end{proposition}
+\begin{proof}
+Since $\min_m\delta_{m,t}\ge0$, the spread is at most the maximum. An unoccupied tile
+makes the minimum zero and the spread equal to the maximum.
+\end{proof}
 
-\subsection{Utilitarian}
-\label{sec:p-util}
-\emph{Maximise overall benefit, or minimise overall harm, across the whole
-population.} The best distribution produces the greatest total good even if some
-individuals bear more burden than others. This assumes benefits and harms are
-measurable and interpersonally comparable, and that aggregate welfare is what
-matters~\cite{mill1863,harsanyi1955}.
+For $N<M=25$ the two principles therefore have the same feasible set and the same empty
+objective. The request builder sends Equal both caps while $N<M$ and the spread cap alone
+from $N=M$.
 
-\emph{In this domain:} the sum of added noise over all regions should be as low as
-possible.
-
-Utilitarianism is indifferent to distribution by construction: a routing adding
-\SI{1}{\dB} to twenty communities and one adding \SI{20}{\dB} to a single community score
-identically.
-
-\subsection{Sufficientarian}
-\label{sec:p-suff}
-\emph{Ensure everyone meets a minimum threshold before addressing other concerns.} The
-priority is that no one falls below an acceptable baseline; above it, further
-differences carry no special weight. This assumes there is a meaningful ``enough'' that
-can be specified, and that being below the threshold differs in kind from being above
-it~\cite{frankfurt1987,crisp2003}.
-
-\emph{In this domain:} no single region's noise level may exceed a stated maximum.
-The threshold is a policy input rather than a derived quantity; municipal ordinance
-provides one natural anchor, with general residential levels in Austin, TX of around
-\SI{70}{\dB} by day and \SI{55}{\dB} at night~\cite{austinnoise}. Note that an ordinance
-of this kind bounds the \emph{absolute} level, whereas our implementation bounds the
-\emph{added} level --- a substitution whose consequences Section~\ref{sec:concavity}
-measures.
-
-Sufficientarianism is the only one of the five natively a \emph{satisfaction} condition
-rather than an optimisation: it says when a distribution is acceptable, and is silent
-among acceptable ones.
-
-\subsection{Prioritarian}
-\label{sec:p-prior}
-\emph{Give extra weight to improving the situation of the worst-off.} A benefit matters
-more when it goes to someone already disadvantaged, so protecting those who bear the
-greatest existing burdens takes priority. This assumes the worst-off can be identified,
-and that improving their position is of heightened value~\cite{parfit1997,rawls1971}.
-
-\emph{In this domain:} regions that presently and historically bear the greatest noise
-burden from existing transportation infrastructure must receive the least additional
-noise.
-
-Prioritarianism requires an input from outside the noise model --- a judgement about who
-is already worst-off --- which we make explicitly by naming a protected set of
-communities. It is also the principle most exposed to a coupling the source material
-flags directly: proximity to a vertiport confers both the worst takeoff and landing
-noise \emph{and} the best access to the new service, so removing a burden from a
-transit-dependent community may remove a genuine benefit with it.
-
-\subsection{Proportional}
-\label{sec:p-prop}
-\emph{Those who benefit more should also bear more of the burden.} Burdens and benefits
-should be linked rather than distributed independently. This assumes the two can be
-meaningfully compared, and that linking them is fairer than treating them
-separately~\cite{aristotleNE,young1994,sen1979}.
-
-\emph{In this domain:} areas that gain most from UAM --- in transit access, economic
-activity and jobs --- should accept a proportional share of the noise.
-
-Proportional is the only principle whose statement refers to a quantity the noise model
-does not contain. ``Benefit'' must be constructed before the principle can be applied,
-and every construction embeds contestable judgements about what counts as gaining from an
-air-taxi network; Section~\ref{sec:proportional-encoding} makes ours explicit and
-an explicit input rather than a hidden constant.
-
-Two independent distinctions among the five govern everything that follows, and it is
-worth separating them because they are easily conflated.
-
-The first is \emph{what quantity} a principle speaks about. Sufficientarian and
-Prioritarian are \emph{absolute}: they constrain or minimise a community's own noise,
-with no reference to anyone else's. Equal is \emph{comparative}: it speaks only about
-differences between communities, and is indifferent to the level at which those
-differences sit. Utilitarian is \emph{aggregate}, and Proportional is
-\emph{relational} --- it ties each community's burden to a separate quantity, its
-benefit.
-
-The second is \emph{what form} the principle takes. Utilitarian, Prioritarian and
-Proportional rank feasible distributions and prefer the best; they are optimisations.
-Sufficientarian partitions distributions into acceptable and unacceptable and is silent
-within each class; it is a satisfaction condition. Equal admits \emph{both} readings, and
-this is the crux of Section~\ref{sec:mismatch}: ``as equal as possible'' is an
-optimisation over the spread, while ``no two communities' increases differ by more than
-$X$'' is a satisfaction condition on it. The two are not equivalent, ordinary usage does
-not distinguish them, and our implementation --- like most --- takes the second.
-
-The distinction matters because an SMT solver treats the two forms by different
-machinery, at different cost and with different behaviour when the clock runs out; and
-because, as we show, a comparative satisfaction condition on a non-negative quantity is
-weaker than it looks.
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Conditions as the solver receives them: the caps sent and the tier-1 objective,
+minimised before the arrival penalty \eqref{eq:jtime}. Utilitarian and Proportional are
+shown in the count form the study runs; their decibel forms replace $c_{m,t}$ by
+$\dbinc_m(c_{m,t})$. $\ell=\SI{6}{\dB}$; a cap not sent is \SI{30}{\dB}, which no tile on
+this map can reach.}
+\label{tab:principles}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Condition & Caps sent & Tier-1 objective \\
+\midrule
+Equal & $U{=}\ell$; $D{=}\ell$ if $N{<}M$ & none \\
+Sufficientarian & $D{=}\ell$ & none \\
+Prioritarian & $D{=}\ell$ & $\sum_{t}\sum_{p\in P}\dbinc_p(c_{p,t})$ \\
+Utilitarian & $D{=}\ell$ & $\sum_{t}\sum_{m} c_{m,t}$ \\
+Proportional & $D{=}\ell$ & $\sum_{t}\sum_{m}\pi_m\,c_{m,t}$ \\
+Baseline & none & none \\
+\bottomrule
+\end{tabular}
+\end{table}
