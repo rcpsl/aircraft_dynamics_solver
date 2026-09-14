@@ -51,7 +51,7 @@ fills the quiet tiles first.
 
 \begin{figure}[t]
 \centering
-\includegraphics{figs/capacity.pdf}
+\input{figs/capacity.tex}
 \caption{Aircraft a tile can hold under a cap $D$ on added noise, by ambient level, from
 \eqref{eq:capclosed} with $\alpha=\SI{45}{\dBA}$. At the study's $D=\SI{6}{\dB}$: 2, 29
 and 298. Below $D=\SI{3.01}{\dB}$ a \SI{45}{\dBA} tile holds none.}
@@ -66,7 +66,7 @@ The instance is a $5\times5$ grid over Austin, TX, with 8 tiles at \SI{45}{\dBA}
 both \SI{65}{\dBA}, and at an exurban commuter town at \SI{45}{\dBA}. Aircraft fly both
 directions of the three vertiport pairs: at demand factor $f=1$, 4 per direction between
 airport and downtown and 2 on each pair involving the town, $N=16$. Scaling $f$ from 0.25
-to 2 gives the ladder $N\in\{6,8,14,16,22,24,30,32\}$. The source level is
+to 1.5 gives the ladder $N\in\{6,8,14,16,22,24\}$. The source level is
 $\alpha=\SI{45}{\dBA}$ and a timestep is \SI{180}{\second}.
 
 The protected set $P$ is stations 4, 8 and 14, three low-income communities on the
@@ -85,8 +85,8 @@ Every principle faces $D=\SI{6}{\dB}$, so the five share one hard constraint and
 in tier~1. The shipped settings, $D=\SI{10}{\dB}$ for Equal and Sufficientarian and a
 protected set of the three loudest non-vertiport tiles (stations 16, 20 and 25), leave
 the principles little to act on here: at $N=16$ no cap fills more than 0.44 of a tile's
-capacity, and the baseline routing never enters that protected set at any fleet size. A
-screen over the cap and the protected set, four orderings per cell, selected
+capacity, and the baseline routing never enters that protected set at any size of the
+ladder. A screen over the cap and the protected set, four orderings per cell, selected
 $D=\SI{6}{\dB}$ and the corridor set; at $N=16$ the cap then runs at full capacity under
 every principle (Section~\ref{sec:routing}).
 
@@ -116,7 +116,7 @@ $\sum_{t,m}c_{m,t}$ is the fleet's airborne time and $\sum_{t,m}\pi_m c_{m,t}$ i
 price-weighted counterpart, and neither charges an aircraft waiting on the ground. Their
 decibel forms price $\dbinc_m(c_{m,t})$ instead. On the shipped settings the decibel forms
 prove optimality only to $N=8$, Proportional after \SI{8.2}{\hour}; the count forms prove
-every cell of this study's ladder to $N=24$, and the study runs them.
+every cell of this study's ladder, and the study runs them.
 
 \subsection{Solving}
 \label{sec:solving}
@@ -124,7 +124,4 @@ every cell of this study's ladder to $N=24$, and the study runs them.
 The horizon starts one timestep above the Chebyshev lower bound on trip length (at the
 bound for Utilitarian). Phase~1 raises it where the caps need more; phase~2 fixes it and
 optimises both tiers with Z3's $\nu$Z optimiser~\cite{demoura2008z3,bjorner2015nuz}, with
-arrival made sticky so aircraft can stagger their landings within the horizon. If
-phase~2 is interrupted, the solver re-checks its incumbent against every hard constraint
-and returns it as \emph{verified feasible}: a routing that satisfies the principle's caps,
-at an unknown distance from the optimum.
+arrival made sticky so aircraft can stagger their landings within the horizon.

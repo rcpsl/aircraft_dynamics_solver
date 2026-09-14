@@ -33,9 +33,8 @@ Since $\min_m\delta_{m,t}\ge0$, the spread is at most the maximum. An unoccupied
 makes the minimum zero and the spread equal to the maximum.
 \end{proof}
 
-For $N<M=25$ the two principles therefore have the same feasible set and the same empty
-objective. The request builder sends Equal both caps while $N<M$ and the spread cap alone
-from $N=M$.
+Every fleet in this study has $N<M=25$, so the two principles have the same feasible set
+and the same empty objective.
 
 \begin{table}[t]
 \centering
@@ -50,7 +49,7 @@ this map can reach.}
 \toprule
 Condition & Caps sent & Tier-1 objective \\
 \midrule
-Equal & $U{=}\ell$; $D{=}\ell$ if $N{<}M$ & none \\
+Equal & $U{=}\ell$, $D{=}\ell$ & none \\
 Sufficientarian & $D{=}\ell$ & none \\
 Prioritarian & $D{=}\ell$ & $\sum_{t}\sum_{p\in P}\dbinc_p(c_{p,t})$ \\
 Utilitarian & $D{=}\ell$ & $\sum_{t}\sum_{m} c_{m,t}$ \\
