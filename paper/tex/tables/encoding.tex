@@ -1,0 +1,28 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Experiment 5. $J_{\mathrm{dB}}$ is the decibel objective: summed added noise in dB for Utilitarian, price-weighted dB for Proportional. $J^*$ is its optimum, proven by the decibel form; \emph{count} is its value on the count-form routings (mean over four orderings), \emph{loss} the difference. Times are mean wall seconds to a proven optimum. A dagger marks a decibel cell not proven by the harvest: $J^*$ is then the best value reached (an upper bound on the optimum), the loss a lower bound, and the time and speed-up lower bounds.}
+\label{tab:encoding}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}r rrr rrr@{}}
+\toprule
+$N$ & $J^*$ & count & loss & $t_{\mathrm{dB}}$ & $t_{\mathrm{count}}$ & speed-up \\
+\midrule
+\multicolumn{7}{@{}l}{\emph{Utilitarian}} \\
+6 & 9.52 & 20.79 & 11.27 (118\%) & 49 & 1.6 & 30$\times$ \\
+8 & 10.24 & 20.37 & 10.13 (99\%) & 296 & 2.4 & 124$\times$ \\
+14 & -- & 35.66 & -- & -- & 6.0 & -- \\
+16 & -- & 39.31 & -- & -- & 8.5 & -- \\
+22 & -- & 54.38 & -- & -- & 103.3 & -- \\
+24 & -- & 53.85 & -- & -- & 151.4 & -- \\
+\midrule
+\multicolumn{7}{@{}l}{\emph{Proportional}} \\
+6 & -- & 128.0 & -- & -- & 4.2 & -- \\
+8 & -- & 134.4 & -- & -- & 8.2 & -- \\
+14 & -- & 220.0 & -- & -- & 36.8 & -- \\
+16 & -- & 224.8 & -- & -- & 59.2 & -- \\
+22 & -- & 327.3 & -- & -- & 226.6 & -- \\
+24 & -- & 331.4 & -- & -- & 438.6 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}

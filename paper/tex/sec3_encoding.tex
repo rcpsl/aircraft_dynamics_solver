@@ -111,12 +111,18 @@ The conditions form two lanes. In the \emph{cap lane}, Equal and Sufficientarian
 tier-1 objective, so among cap-feasible routings arrival alone decides. In the
 \emph{objective lane}, Prioritarian, Utilitarian and Proportional face the same cap and
 minimise their own objective first. Prioritarian's sums added decibels over $P$ only.
-Utilitarian's and Proportional's price every audible aircraft-timestep: in count form
-$\sum_{t,m}c_{m,t}$ is the fleet's airborne time and $\sum_{t,m}\pi_m c_{m,t}$ its
-price-weighted counterpart, and neither charges an aircraft waiting on the ground. Their
-decibel forms price $\dbinc_m(c_{m,t})$ instead. On the shipped settings the decibel forms
-prove optimality only to $N=8$, Proportional after \SI{8.2}{\hour}; the count forms prove
-every cell of this study's ladder, and the study runs them.
+Utilitarian's and Proportional's price every audible aircraft-timestep, and neither
+charges an aircraft waiting on the ground.
+
+Utilitarian and Proportional each have two encodings. The \emph{decibel form} prices
+$\dbinc_m(c_{m,t})$, the quantity the principle is about, and is the exact encoding. The
+\emph{count form} prices $c_{m,t}$ instead: $\sum_{t,m}c_{m,t}$ is the fleet's airborne
+time and $\sum_{t,m}\pi_m c_{m,t}$ its price-weighted counterpart. The abstraction drops
+the shape of \eqref{eq:db}. It no longer separates a quiet tile from a loud one, where one
+aircraft adds \SI{3.01}{\dB} and \SI{0.04}{\dB} respectively, and it no longer rewards
+stacking aircraft on one tile, which concavity makes cheaper in decibels. Both forms face
+the same cap, so the capacity asymmetry of \eqref{eq:capclosed} constrains both.
+Section~\ref{sec:exp5} measures what the abstraction costs and what it buys.
 
 \subsection{Solving}
 \label{sec:solving}

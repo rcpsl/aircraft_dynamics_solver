@@ -1,7 +1,7 @@
-N,equal,equal_lo,equal_hi,equal_open,sufficientarian,sufficientarian_lo,sufficientarian_hi,sufficientarian_open,prioritarian,prioritarian_lo,prioritarian_hi,prioritarian_open,utilitarian,utilitarian_lo,utilitarian_hi,utilitarian_open,proportional,proportional_lo,proportional_hi,proportional_open
-6,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan
-8,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan
-14,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan
-16,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan
-22,2.75,2,3,nan,3,3,3,nan,2.5,2,3,nan,0,0,0,nan,0,0,0,nan
-24,2.75,2,3,nan,2.75,2,3,nan,2.5,2,3,nan,0,0,0,nan,0,0,0,nan
+N,equal,equal_lo,equal_hi,equal_open,sufficientarian,sufficientarian_lo,sufficientarian_hi,sufficientarian_open,prioritarian,prioritarian_lo,prioritarian_hi,prioritarian_open,utilitarian,utilitarian_lo,utilitarian_hi,utilitarian_open,utilitarian_db,utilitarian_db_lo,utilitarian_db_hi,utilitarian_db_open,proportional,proportional_lo,proportional_hi,proportional_open,proportional_db,proportional_db_lo,proportional_db_hi,proportional_db_open
+6,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,nan,nan,nan,nan
+8,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,nan,nan,nan,nan
+14,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,nan,nan,nan,nan,0,0,0,nan,nan,nan,nan,nan
+16,0,0,0,nan,0,0,0,nan,0,0,0,nan,0,0,0,nan,nan,nan,nan,nan,0,0,0,nan,nan,nan,nan,nan
+22,2.75,2,3,nan,3,3,3,nan,2.5,2,3,nan,0,0,0,nan,nan,nan,nan,nan,0,0,0,nan,nan,nan,nan,nan
+24,2.75,2,3,nan,2.75,2,3,nan,2.5,2,3,nan,0,0,0,nan,nan,nan,nan,nan,0,0,0,nan,nan,nan,nan,nan

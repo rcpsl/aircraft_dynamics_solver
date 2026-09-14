@@ -522,6 +522,6 @@ the code rather than by care.
 
 The harvest is at 2026-09-15 00:00 UTC. The deadline is 2026-09-15 18:59 UTC (11:59 PDT).
 The reserve is about 19 h, for derivation, writing, a build and a human read, with room
-to recover from one failed step. That makes H = 19.6 h from the sweep's launch at
-04:25 UTC. Each harvested cell's own elapsed time is recorded, since later-launched
+to recover from one failed step. That makes H = 20.0 h from the sweep's launch at
+04:00 UTC. Each harvested cell's own elapsed time is recorded, since later-launched
 cells run for less than H.

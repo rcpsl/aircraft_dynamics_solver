@@ -152,6 +152,26 @@ parallel; the band is the range over the orderings.}
 \label{fig:solve-time}
 \end{figure}
 
+\subsection{Experiment 5: exactness against scalability}
+\label{sec:exp5}
+
+What does the count abstraction cost in the principle's own objective and in the noise
+metrics, and what does it buy in solve time and reach across the ladder?
+
+\begin{figure*}[t]
+\centering
+\input{figs/exp5.tex}
+\caption{Experiment 5. Left: loss of the count-form routings on the decibel objective,
+$(J_{\mathrm{dB}}(\text{count})-J^*)/J^*$, mean over four orderings with its range; a
+hollow marker is a lower bound where no decibel ordering proved. Right: mean wall time to
+a proven optimum for both forms; a hollow marker is the mean elapsed time of decibel runs
+not all proven by the harvest, a lower bound on their time to proof; the dashed line is
+the harvest horizon $H$.}
+\label{fig:exp5}
+\end{figure*}
+
+\input{tables/encoding}
+
 \subsection{Summary}
 \label{sec:summary}
 
