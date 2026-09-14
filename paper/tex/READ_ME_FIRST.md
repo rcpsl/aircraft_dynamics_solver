@@ -1,5 +1,12 @@
 # For the reviewer — read this before the paper
 
+> **Status 2026-09-14 (session 4): superseded — read `../DRAFT_REPORT.md` first.** The
+> paper was rewritten around the fleet-size study on setup `D6_protA`, ladder N = 6 … 24.
+> It now builds (Tectonic) to **6 pages**, `check_tex.py` is clean and `verify_sec4.py`
+> passes 31 checks. Figures are pgfplots/TikZ in `figs/*.tex`, generated with their CSVs
+> in `data/` by `../harness/export_plot_data.py`. Everything below this box describes the
+> session-1/2 draft (600 s budget, 11–12 pages) and is kept as history.
+
 ## Status in one paragraph
 
 Draft is complete: five sections, abstract, seven floats, 24 references. Every number
