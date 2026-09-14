@@ -1,226 +1,188 @@
 \section{Results}
 \label{sec:results}
 
-\subsection{Setup}
-\label{sec:setup}
-
-The instance is a $5\times5$ grid of $M=25$ communities drawn from Austin, TX, each
-carrying an ambient level of \SI{45}{\dBA} (8 tiles), \SI{55}{\dBA} (12) or
-\SI{65}{\dBA} (5). Three tiles host vertiports --- an airport, a downtown core and an
-exurban commuter town --- and traffic runs in both directions on all three
-origin--destination pairs. The per-aircraft source level is \SI{45}{\dBA} and one
-timestep is \SI{180}{\second}. Fleet size is set by a demand factor, giving the ladder
-$N \in \{6,8,14,16,22,24,30,32\}$.
-
-We compare six conditions at every size: the five principles, and a \emph{baseline} ---
-the same fleet with the caps opened and every objective cleared, which is the
-shortest-time routing the solver returns when no principle has been selected. It is the
-zero against which everything here is measured.
-
-\paragraph{The operating point, and why it is not the default} The cap, the protected set
-and the objective encoding are set so that each principle constrains the routing on the
-fleet range studied. The cap is $D=\SI{6}{\dB}$ of added noise, applied to all five
-principles so they face one hard constraint and differ only in their objective; the
-Prioritarian protected set is the three busiest non-vertiport communities that are also
-low-income. Both choices are forced. At the settings the system ships with --- $D=10$,
-and a protected set chosen as the loudest tiles --- the caps sit at a third of the
-capacity they allow, and the protected set carries \emph{zero} aircraft-timesteps at every
-fleet size, so its objective is satisfied without the routing changing at all. In that
-regime Equal and Sufficientarian return the baseline's routing exactly at $N=8$ and
-differ from it by less than the solver's own indifference above.
-Choosing an operating point at which a principle does something is a precondition for
-measuring what it does, not a result.
-
-Utilitarian and Proportional run the count-weighted form of their objectives
-(Section~\ref{sec:encoding}), which the solver already exposes. The decibel form does not
-prove optimality above $N=8$ on any budget we gave it; the count form proves every cell
-we ran, faster by $51\times$ at $N=8$ for Utilitarian and $1110\times$ for Proportional.
-That difference belongs to the encoding, not to the principle, and
-Section~\ref{sec:tractability} returns to it.
-
-\paragraph{Every cell is four solves} A single solve is one draw from a set of
-equally-optimal routings, and which member comes back is decided by the order the
-aircraft happen to be listed in. Every cell here is therefore solved four times under
-four permutations of that list. A permutation leaves the fleet, the origin--destination
-pairs and the feasible set identical, so the spread across the four is the solver's
-indifference and nothing else. The permutation at index $k$ is the same for every
-condition, so comparisons at fixed $k$ are paired.
-
-That spread is drawn as a band on every curve, and it fixes what counts as a finding: a
-difference between two conditions is reported only when their means differ by more than
-the larger of their two bands \emph{and} the bands do not overlap. Differences inside the
-band are stated as within the tie-break and nothing is built on them.
-
-\paragraph{Budget} Every solve ran unlimited. A cell that had not proved after
-\SI{3600}{\second} was stopped and its incumbent salvaged --- a routing satisfying every
-hard constraint, verified before being served, but not proven optimal. The horizon is
-uniform, so the proof frontier is a property of the problem. Proven cells are filled
-markers and carry bands; harvested cells are hollow, carry no band, and are never joined
-to a curve.
-
-\subsection{Routing and congestion as the fleet grows}
-\label{sec:degeneracy}
-
-Fig.~\ref{fig:routes-grid} shows the map at four fleet sizes, one column per condition.
-Through $N=24$ every condition is proven optimal in all four permutations.
-
-The first thing the bands settle is that congestion does \emph{not} separate the
-principles. Peak aircraft over one community rises from 2 to roughly 13 for every
-condition, and the bands on it are 3 to 6 aircraft wide --- wider than any gap between
-conditions. The single exception is Proportional, which is attributable at $N=8$ and,
-more tellingly, carries a band of exactly zero at every fleet size: it places 3, 5, 8,
-10, 12 and 14 aircraft on its busiest tile, the same number in all four permutations.
-Everywhere else, an ordering of the traffic that no one chose moves the peak occupancy
-more than the choice of principle does.
-
-\subsection{Travel time: two families, two currencies}
-\label{sec:traveltime}
-
-Through $N=16$ no condition flies further than the shortest-path floor. Above it the
-principles begin to pay, and they pay in different coin.
-
-The three cap-based principles pay in distance. Averaged over the four permutations, at
-$N=22$ and $N=24$ Equal flies 2.75 fleet-hops above the baseline, Sufficientarian 3.00
-and 2.75, and Prioritarian 2.50 --- individual runs are 2 or 3 hops, and the difference
-from the baseline's zero is attributable at every one of those six cells. The two
-objective-based principles fly \emph{no} extra distance at any size, in any permutation,
-and instead depart later: 25 and 27 aircraft-timesteps of departure delay at $N=22$ and
-$N=24$ against the baseline's 22 and 24, with zero band on both sides. They de-conflict
-the fleet in time rather than routing it apart in space.
-
-This is why travel time has to be reported as two quantities. A study that counted only
-hops would record the objective principles as free, and one that counted only arrival
-time would miss that the caps are buying their result by rerouting. Both panels of
-Fig.~\ref{fig:metric-vs-N} are needed, and Table~\ref{tab:response} reports both.
-
-\subsection{Noise: a binding cap makes the outcome determinate}
-\label{sec:concavity}
-
-The central result of this section is not that the principles are quieter than the
-baseline. It is that they are \emph{reliably} quieter, and the baseline is not reliably
-anything.
-
-From $N=14$ upward, every one of the five principles returns a peak added level of
-exactly \SI{4.77}{\dB}, in all four permutations, at every fleet size. The band is zero.
-The baseline over the same range returns 5.64, 5.88, 6.70 and \SI{7.70}{\dB} with bands
-of 2.22, 2.22, 1.76 and \SI{3.98}{\dB} --- its peak is whatever the tie-break happens to
-produce. At $N=22$ the gap clears the band for all five principles.
-
-The mechanism is the interaction of the cap with an integer capacity. Inverting
-$\dbinc_m$ in \eqref{eq:cap} gives the capacity a cap grants a tile in closed form,
-\begin{equation}
-\capm_m \;=\; \Bigl\lfloor \bigl(10^{D/10} - 1\bigr)\,
-              10^{(b_m - \alpha)/10} \Bigr\rfloor ,
-\label{eq:capclosed}
-\end{equation}
-which is exactly two aircraft for a \SI{45}{\dBA} community at $D=\SI{6}{\dB}$ --- and
-the routing saturates it. Two aircraft over a quiet tile add \SI{4.77}{\dB}, which is the
-number every principle returns. A cap that binds does not merely lower the worst outcome,
-it \emph{determines} it, because the binding constraint and not the search decides where
-the peak sits. That is a property a community could rely on, and the un-capped routing
-does not have it.
-
-\label{sec:mismatch}
-It also explains why Equal and Sufficientarian are indistinguishable here. Equal bounds
-the \emph{spread} of added noise across communities and Sufficientarian bounds its
-\emph{level}, and those are different rules about different things --- but encoded as the
-caps $U \le \ell$ and $D \le \ell$ they are not.
-
-\begin{proposition}[Collapse]
-\label{prop:collapse}
-Let $F_D(\ell)$ denote the set of routings satisfying
-$\max_{m,t}\dbinc_m(c_{m,t}) \le \ell$ and $F_U(\ell)$ those satisfying
-$\max_m \dbinc_m(c_{m,t}) - \min_m \dbinc_m(c_{m,t}) \le \ell$ for every $t$. Then
-$F_D(\ell) \subseteq F_U(\ell)$.
-\end{proposition}
-\begin{proof}
-$\dbinc_m(n) \ge 0$ for all $m,n$, since $\dbinc_m(0)=0$ and $\dbinc_m$ is increasing.
-Hence $\min_m \dbinc_m(c_{m,t}) \ge 0$ and
-$\max_m \dbinc_m - \min_m \dbinc_m \le \max_m \dbinc_m \le \ell$.
-\end{proof}
-
-The inclusion is not specific to noise: a bound on the spread of any non-negative
-quantity is implied by a bound on its level, so wherever a system offers both, the
-comparative cap is the weaker of the two. Below $N=25$ the two principles are sent
-$(D,U)=(\ell,\ell)$ and $(\ell,\infty)$, which this reduces to the same feasible set, and
-no measurement here separates them.
-
-Summed added noise separates differently, and here Proportional is the outlier in the
-study. Its total added noise is attributable against the baseline at five of the six
-proven sizes --- \SI{10.9}{\dB} against \SI{17.6}{\dB} at $N=6$, \SI{29.0}{\dB} against
-\SI{47.9}{\dB} at $N=24$ --- and its band is zero at every size. Pricing the burden per
-community, even over plain counts, produces both the largest reduction in total exposure
-and the only routing in the study that is fully determined at every fleet size.
-Prioritarian is attributable at $N=14$ and $16$ (\SI{28.0}{\dB} against \SI{37.7}{\dB}),
-buying its reduction by keeping traffic off three named communities.
-
-\subsection{Solver performance}
-\label{sec:tractability}
-
-The tractability ordering reported in earlier work inverts once the encoding is stated.
-In count form, Utilitarian is the \emph{cheapest} of the six conditions to solve at every
-size through $N=16$ --- \SI{1.6}{\second} at $N=6$ and \SI{8.5}{\second} at $N=16$,
-against \SI{5.9}{\second} and \SI{55.3}{\second} for the baseline, which carries no
-fairness term at all. Its objective prunes the search rather than extending it. The three
-cap-based conditions and the baseline run together, 35 to \SI{200}{\second} through
-$N=24$. Proportional is the most expensive, reaching \SI{438.6}{\second} at $N=24$,
-because its price vector gives every community a distinct weight and so removes the
-symmetry the other objectives leave intact.
-
-Above $N=24$ the ladder thins, and the two caps part company. Above $N=25$ the system
-stops sending an absolute cap to Equal and sends a bound on the \emph{spread} between
-communities instead; under that bound no Equal cell at $N=30$ or $32$ produced a routing
-its own phase-2 search could verify, within the harvest horizon, in any permutation. The
-absolute cap does not have this problem: Sufficientarian returns verified routings at both
-sizes. A comparative cap and an absolute one are interchangeable when neither binds
-(Proposition~\ref{prop:collapse}); at the top of this ladder only one of them is solvable.
-
-\subsection{Summary}
-
-\emph{Equal} and \emph{Sufficientarian} do nothing below $N=14$, then pin the worst-hit
-community at \SI{4.77}{\dB} and pay 3 fleet-hops for it from $N=22$; they are
-indistinguishable from each other throughout, which Proposition~\ref{prop:collapse}
-predicts. \emph{Prioritarian} does the same on peak while also cutting total exposure at
-$N=14$ and $16$, for 2 hops. \emph{Utilitarian} is free in distance, pays 3
-aircraft-timesteps of departure delay, and is the cheapest condition in the study to
-solve. \emph{Proportional} is the only principle whose routing is fully determined at
-every fleet size, and it removes the most total exposure, at the highest computational
-price.
-
-Across all five, what the choice of principle buys on this instance is not a quieter map
-so much as a \emph{predictable} one: five constrained routings that return the same peak
-every time, against an unconstrained routing that varies by up to \SI{3.98}{\dB}
-depending on nothing anyone selected.
-
 \begin{figure*}[t]
 \centering
-\includegraphics{figs/routes_grid.pdf}
-\caption{The instance at four fleet sizes, one column per condition. Tiles are shaded by
-ambient level, vertiports ringed, and each panel overlays every aircraft's path with line
-width proportional to the aircraft on that leg, for one representative permutation.
-Because the widths sum over the horizon, two panels can look alike while the routings
-differ in \emph{when} each leg is flown. A dagger marks a cell that was harvested at the
-budget horizon rather than proven.}
+\input{figs/routes_grid.tex}
+\caption{Routings at $N=8$, 16 and 24 (rows) under each condition (columns). Tiles are
+shaded by ambient level, vertiports ringed and Prioritarian's protected set outlined. Each
+map draws one of the four aircraft orderings. Line width is proportional to the aircraft
+on each leg summed over the horizon, so two maps can look alike while their routings
+differ in timing. Titles give peak added noise and extra fleet-hops over the
+shortest-path floor, averaged over the four orderings.}
 \label{fig:routes-grid}
 \end{figure*}
 
 \begin{figure*}[t]
 \centering
-\includegraphics{figs/metric_vs_N.pdf}
-\caption{Six metrics against fleet size. Each line runs through the mean of four
-permutations of the aircraft list and the shaded band is their full range --- the
-solver's indifference at that cell. Two conditions whose bands overlap are not separated
-by anything the principle did. Lines join proven cells only; harvested cells appear as
-isolated hollow markers, since a stopped search sits at an unknown distance from the
-optimum and joining it to the curve would draw a trend out of how far the solver got.}
+\input{figs/metric_vs_N.tex}
+\caption{Congestion (left), travel time (middle) and added noise (right) against fleet
+size. Lines join the mean over four aircraft orderings; the band is the range over the
+orderings, the solver's indifference at that cell. Departure delay counts
+aircraft-timesteps before each aircraft's first move, the origin step included, so a fleet
+departing at once scores $N$. Summed added noise adds $\dbinc_m(c_{m,t})$ over tiles and
+timesteps. The vertical line marks the nominal demand, $N=16$.}
 \label{fig:metric-vs-N}
 \end{figure*}
 
-\input{tables/response}
+\subsection{Setup}
+\label{sec:setup}
 
-\input{tables/fleet_main}
+The six conditions of Table~\ref{tab:principles} run at every size of the ladder, from
+$N=6$ to 24, on the operating point of Section~\ref{sec:instance}; the nominal demand,
+$N=16$, is marked in every plot. No solver timeout was set, and every cell is proven
+optimal.
 
-% Generated and current, deliberately not \input: tables/reference.tex (the shipped
-% default in three lines -- the one paragraph in IV-A covers it), tables/capacity.tex,
-% figs/solve_time.pdf, figs/route_sharing.pdf, figs/noise_over_time.pdf, figs/floor.pdf.
-% The same convention tables/caps.tex already follows. Re-add any if a reviewer asks.
+A solve returns one member of a set of equally optimal routings, and which member depends
+on the order in which the aircraft are listed. Every cell is therefore solved under four
+orderings of the same fleet. The feasible set and the optimum do not change, so the range
+over the four is the solver's indifference at that cell, drawn as a band. Ordering $k$ is
+the same for every condition. A difference between two conditions is
+\emph{attributable} when their means differ by more than the larger band and their ranges
+do not overlap; a smaller difference is stated as within the solver's indifference.
+
+\subsection{Experiment 1: routing and congestion}
+\label{sec:routing}
+
+How do each principle's routing and tile occupancy change as the fleet grows?
+Fig.~\ref{fig:routes-grid} draws the routings at $N=8$, 16 and 24, and the left column of
+Fig.~\ref{fig:metric-vs-N} the peak occupancy and the shared tile-timesteps.
+
+Congestion grows with $N$ under every condition: peak aircraft over one tile from 1--3 at
+$N=6$ to 11--14 at $N=24$, and tile-timesteps carrying two or more aircraft from 0--3 to
+15--18. On both metrics every principle stays within the solver's indifference of the
+baseline at every size, with the two exceptions below. The fleet sets how much congestion
+there is; the principle sets where it sits.
+
+\emph{Equal and Sufficientarian} pose the same problem at every size of the ladder
+(Proposition~\ref{prop:equiv}), so every difference between them is a difference between
+members of one optimal set; their arrival penalties agree at every size. At $N=6$ and 8
+the cap is not full, at capacity utilisation 0.50--0.75. From $N=14$ it binds on the
+\SI{45}{\dBA} tiles, utilisation 1.00 in every ordering, and from $N=22$ the corridors
+widen (Fig.~\ref{fig:routes-grid}, $N=24$) because a third aircraft may not cross a quiet
+tile. Sufficientarian carries fewer shared tile-timesteps than the baseline at $N=16$
+(11.75 against 14.25).
+
+\emph{Prioritarian} holds the protected set at 0.00\,dB of added noise at every size in
+every ordering. Staying off three corridor tiles narrows its footprint to 8--9 tiles
+against the baseline's 10--12, attributably at $N=6$, 14 and 16. Its cap binds from $N=14$
+as in the cap lane, and from $N=22$ it detours around the protected tiles.
+
+\emph{Utilitarian}'s count objective, airborne time, is minimised by flying every aircraft
+on a shortest path without hovering, which the baseline does at every size. Under the cap
+Utilitarian attains the same floor at every size, so its tier~1 keeps exactly the
+cap-feasible routings on shortest paths and arrival chooses among them. Its congestion
+stays within the baseline's band at every size.
+
+\emph{Proportional} confines the fleet to the same 6 tiles at every size, the three
+vertiports and the three \SI{55}{\dBA} tiles between them (stations 9, 12 and 13),
+against the baseline's 10--12, attributably from $N=6$ to 22. It loads them: peak
+occupancy is 3, 5, 8, 10, 12 and 14 aircraft from $N=6$ to 24, identical in all four
+orderings, and attributably above the baseline at $N=8$ (5 against 3.5).
+
+\subsection{Experiment 2: travel time}
+\label{sec:travel}
+
+What does each principle cost against the baseline, in distance and in departure delay?
+The middle column of Fig.~\ref{fig:metric-vs-N} gives both; the arrival penalty
+\eqref{eq:jtime} counts both.
+
+Through $N=16$ every principle is free in travel time. At $N=6$, 8, 14 and 16 each attains
+the baseline's arrival penalty of 18, 22, 40 and 44 aircraft-timesteps in every ordering,
+with every aircraft on a shortest path. At $N=22$ and 24 every principle pays exactly 3
+aircraft-timesteps more than the baseline (65 against 62, 69 against 66), with zero band.
+All five face the same cap and pay the same price for it; they differ in currency.
+
+Equal, Sufficientarian and Prioritarian pay mainly in distance: 2.75, 3.00 and 2.50 extra
+fleet-hops at $N=22$ and 2.75, 2.75 and 2.50 at $N=24$, each attributable. Utilitarian and
+Proportional fly no extra hop at any size and pay in departure delay: 25 and 27
+aircraft-timesteps before first moves at $N=22$ and 24, against the baseline's 22 and 24,
+with zero band. The objectives account for the split. Arrival cannot tell a detour from a
+hold on the ground, and Prioritarian's objective prices only the three protected tiles;
+Utilitarian's and Proportional's price every airborne aircraft-timestep and none on the
+ground, so for them a detour costs tier~1 and a hold does not.
+
+\subsection{Experiment 3: added noise and capacity}
+\label{sec:noise}
+
+Where does each principle put the noise as the fleet grows? The right column of
+Fig.~\ref{fig:metric-vs-N} gives the peak and the summed added noise, and
+Table~\ref{tab:capacity} the capacity used per ambient tier.
+
+The capacity asymmetry of \eqref{eq:capclosed} decides where the cap acts. At
+$D=\SI{6}{\dB}$ a \SI{45}{\dBA} tile holds 2 aircraft and a \SI{65}{\dBA} tile 298, so
+the cap binds on the quiet tier alone: at $N=24$ the \SI{45}{\dBA} tiles run at
+0.88--1.00 of capacity under every principle and the \SI{65}{\dBA} tiles at 0.02.
+
+\input{tables/capacity}
+
+\emph{Peak.} At $N=6$ and 8 the principles' peaks lie between 3.01 and 3.89\,dB, within
+the baseline's band; one aircraft over a quiet tile adds 3.01\,dB. From $N=14$ every
+principle returns exactly 4.77\,dB in every ordering at every size: two aircraft over a
+\SI{45}{\dBA} tile, the most \eqref{eq:capclosed} admits there. Over $N=14$, 16, 22 and 24
+the baseline's peak averages 5.64, 5.88, 6.70 and 7.70\,dB with bands of 2.22, 2.22, 1.76
+and 3.98\,dB. The binding cap fixes the principles' peak and the aircraft ordering sets
+the baseline's. The separation clears the band at $N=22$ for all five principles.
+
+\emph{Summed noise.} Proportional's summed added noise has zero band at every size: 10.9,
+11.6, 19.2, 19.7, 28.5 and 29.0\,dB from $N=6$ to 24, against the baseline's 17.6, 19.4,
+35.7, 37.7, 48.8 and 47.9\,dB. The difference is attributable at every size but $N=24$,
+where the baseline's band is 24.9\,dB wide. Proportional occupies 13 tile-timesteps at
+$N\le16$ against the baseline's 16--19 with the same airborne time, and since $\dbinc_m$ is
+concave, fewer occupied tile-timesteps add less in sum. Prioritarian's summed noise is
+attributably lower at $N=14$ and 16 (29.7 and 28.0 against 35.7 and 37.7\,dB). Equal,
+Sufficientarian and Utilitarian stay within the baseline's band at every size.
+
+\subsection{Experiment 4: solver performance}
+\label{sec:tractability}
+
+How does solve time grow with the fleet? Fig.~\ref{fig:solve-time} gives the mean wall
+time to a proven optimum over the four orderings, with eight solves running in parallel
+on one 14-core workstation. Every condition proves every cell. Equal, Sufficientarian and
+Prioritarian solve within a factor of two of the baseline at every size, and the baseline
+takes 5.9\,s at $N=6$ and 200\,s at $N=24$. Utilitarian is the fastest condition through
+$N=16$, at 1.6\,s for $N=6$ and 8.5\,s for $N=16$ against the baseline's 5.9 and 55.3\,s.
+Proportional is the slowest at $N=22$ and 24, at 227 and 439\,s.
+
+\begin{figure}[t]
+\centering
+\input{figs/solve_time.tex}
+\caption{Mean wall time to a proven optimum over four orderings, eight solves in
+parallel; the band is the range over the orderings.}
+\label{fig:solve-time}
+\end{figure}
+
+\subsection{Summary}
+\label{sec:summary}
+
+Table~\ref{tab:response} collects each principle's response to fleet size.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Response of each principle to fleet size: the change against the baseline and
+the sizes $N$ at which it holds. ``As baseline'' is within the solver's indifference at
+every size, except Sufficientarian's fewer shared tile-timesteps at $N=16$. Travel time
+is free to $N=16$ for all five and costs 3 aircraft-timesteps at $N=22$ and 24; the
+column gives the currency. The peak is fixed at \SI{4.77}{\dB} with zero band from
+$N=14$. Prioritarian's narrower footprint is attributable at $N=6$, 14 and 16.
+\emph{s} is the mean wall time to a proven optimum at $N=24$.}
+\label{tab:response}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lllll@{}}
+\toprule
+ & Congestion & Travel time & Added noise & s \\
+\midrule
+Equal & as baseline & distance, 22+ & peak fixed, 14+ & 107 \\
+Sufficientarian & as baseline & distance, 22+ & peak fixed, 14+ & 109 \\
+Prioritarian & 8--9 tiles & distance, 22+ & $P$ at 0\,dB; peak 14+ & 191 \\
+Utilitarian & as baseline & delay, 22+ & peak fixed, 14+ & 151 \\
+Proportional & 6 tiles, 6--22 & delay, 22+ & sum 6--22; peak 14+ & 439 \\
+Baseline & -- & -- & set by ordering & 200 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% Generated and current, deliberately not \input: tables/fleet_main.tex,
+% tables/reference.tex, tables/response.tex (superseded by tab:response above, which is
+% asserted cell by cell in verify_sec4.py), tables/setup.tex.
