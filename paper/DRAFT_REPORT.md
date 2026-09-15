@@ -43,6 +43,18 @@ report below; everything else there still applies.
 * **The response table (now Table IV)** has indented *dB form* rows. Their last column
   is the proof frontier.
 * **Abstract, contribution 4 and one conclusion paragraph** state the trade-off.
+* **Fig. 2 was redrawn by instruction** as a full-page `figure*[p]`, and the paper stays at
+  8 pages.
+  * Columns are N = 6, 8, 14, 16, 22, 24.
+  * Rows are Equal, Sufficientarian, Prioritarian, Utilitarian (dB), Utilitarian (count),
+    Proportional (dB), Proportional (count) and Baseline.
+  * A decibel map draws the lowest proven ordering, or else the lowest harvested one.
+  * The six decibel cells with no proven ordering are titled *timeout* and drawn at 0.3
+    opacity. They are Utilitarian at N = 22 and 24 and Proportional at N = 14 to 24.
+  * Prioritarian's protected set (stations 4, 8, 14) is outlined in the Prioritarian row
+    only, and the caption and legend say so.
+  * Every change is in `routes_grid_tex` and `export_routes` in `export_plot_data.py`;
+    there are no data changes.
 
 ### Claim table: new abstract claims
 
@@ -267,7 +279,7 @@ unproven cell. `_open` is empty on this ladder.
 | figure | source | CSVs |
 |---|---|---|
 | Fig. 1 capacity (§III) | `figs/capacity.tex` | `data/capacity.csv` (D, cap45, cap55, cap65; closed form, asserted against the capacity every principle cell recorded at D = 6) |
-| Fig. 2 routings (`figure*`, TikZ) | `figs/routes_grid.tex` | `data/routes_tiles.csv` (ambient, vertiport, protected per tile), `data/routes_panels.csv` (panel titles, per-panel leg maximum, drawn ordering), `data/routes_N{8,16,24}_{equal,sufficientarian,prioritarian,utilitarian,proportional,baseline}.csv` (legs r1, c1, r2, c2, aircraft): 18 files |
+| Fig. 2 routings (`figure*[p]`, TikZ; revised in session 5, see above) | `figs/routes_grid.tex` | `data/routes_tiles.csv` (ambient, vertiport, protected per tile), `data/routes_panels.csv` (panel titles, per-panel leg maximum, drawn ordering, timeout flag), `data/routes_N{6,8,14,16,22,24}_{equal,sufficientarian,prioritarian,utilitarian_db,utilitarian,proportional_db,proportional,baseline}.csv` (legs r1, c1, r2, c2, aircraft): 48 files |
 | Fig. 3 metric vs N (`figure*`, groupplot 3×2) | `figs/metric_vs_N.tex` | congestion: `data/mvn_max_count.csv`, `data/mvn_shared_tile_timesteps.csv`; travel: `data/mvn_extra_vs_baseline.csv` (no baseline series), `data/mvn_departure_delay_total.csv`; noise: `data/mvn_peak_added.csv`, `data/mvn_total_added.csv` |
 | Fig. 4 solve time (log y) | `figs/solve_time.tex` | `data/solve_time.csv` |
 
