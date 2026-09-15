@@ -1,0 +1,2774 @@
+{
+ "runs": [
+  {
+   "key": "fleet|D6_protA|utilitarian|0.25|p0",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 6,
+   "perm": 0,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 1.62,
+   "stoppedEarly": null,
+   "J_db": 24.07,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.25|p1",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 6,
+   "perm": 1,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 1.62,
+   "stoppedEarly": null,
+   "J_db": 17.53,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.25|p2",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 6,
+   "perm": 2,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 1.56,
+   "stoppedEarly": null,
+   "J_db": 20.22,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.25|p3",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 6,
+   "perm": 3,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 1.59,
+   "stoppedEarly": null,
+   "J_db": 21.35,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.25|p0",
+   "principle": "proportional",
+   "form": "count",
+   "N": 6,
+   "perm": 0,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 4.28,
+   "stoppedEarly": null,
+   "J_db": 128.0029,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.25|p1",
+   "principle": "proportional",
+   "form": "count",
+   "N": 6,
+   "perm": 1,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 4.44,
+   "stoppedEarly": null,
+   "J_db": 128.0029,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.25|p2",
+   "principle": "proportional",
+   "form": "count",
+   "N": 6,
+   "perm": 2,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 4.36,
+   "stoppedEarly": null,
+   "J_db": 128.0029,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.25|p3",
+   "principle": "proportional",
+   "form": "count",
+   "N": 6,
+   "perm": 3,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 3.91,
+   "stoppedEarly": null,
+   "J_db": 128.0029,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.5|p0",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 8,
+   "perm": 0,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 2.45,
+   "stoppedEarly": null,
+   "J_db": 19.7,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.5|p1",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 8,
+   "perm": 1,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 2.39,
+   "stoppedEarly": null,
+   "J_db": 19.7,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.5|p2",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 8,
+   "perm": 2,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 2.38,
+   "stoppedEarly": null,
+   "J_db": 23.71,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.5|p3",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 8,
+   "perm": 3,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 2.28,
+   "stoppedEarly": null,
+   "J_db": 18.36,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.75|p0",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 14,
+   "perm": 0,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 5.56,
+   "stoppedEarly": null,
+   "J_db": 35.25,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.75|p1",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 14,
+   "perm": 1,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 6.0,
+   "stoppedEarly": null,
+   "J_db": 31.77,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.75|p2",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 14,
+   "perm": 2,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 6.11,
+   "stoppedEarly": null,
+   "J_db": 38.58,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|0.75|p3",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 14,
+   "perm": 3,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 6.38,
+   "stoppedEarly": null,
+   "J_db": 37.03,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.5|p1",
+   "principle": "proportional",
+   "form": "count",
+   "N": 8,
+   "perm": 1,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 7.75,
+   "stoppedEarly": null,
+   "J_db": 134.4253,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.5|p0",
+   "principle": "proportional",
+   "form": "count",
+   "N": 8,
+   "perm": 0,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 8.01,
+   "stoppedEarly": null,
+   "J_db": 134.4253,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.5|p2",
+   "principle": "proportional",
+   "form": "count",
+   "N": 8,
+   "perm": 2,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 7.89,
+   "stoppedEarly": null,
+   "J_db": 134.4253,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.5|p3",
+   "principle": "proportional",
+   "form": "count",
+   "N": 8,
+   "perm": 3,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 9.31,
+   "stoppedEarly": null,
+   "J_db": 134.4253,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.0|p0",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 16,
+   "perm": 0,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 8.17,
+   "stoppedEarly": null,
+   "J_db": 36.01,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.0|p1",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 16,
+   "perm": 1,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 8.36,
+   "stoppedEarly": null,
+   "J_db": 36.25,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.0|p2",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 16,
+   "perm": 2,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 8.55,
+   "stoppedEarly": null,
+   "J_db": 36.29,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.0|p3",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 16,
+   "perm": 3,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 8.86,
+   "stoppedEarly": null,
+   "J_db": 48.71,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.75|p1",
+   "principle": "proportional",
+   "form": "count",
+   "N": 14,
+   "perm": 1,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 32.86,
+   "stoppedEarly": null,
+   "J_db": 219.9988,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.75|p2",
+   "principle": "proportional",
+   "form": "count",
+   "N": 14,
+   "perm": 2,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 34.44,
+   "stoppedEarly": null,
+   "J_db": 219.9988,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.75|p0",
+   "principle": "proportional",
+   "form": "count",
+   "N": 14,
+   "perm": 0,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 39.23,
+   "stoppedEarly": null,
+   "J_db": 219.9988,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|0.75|p3",
+   "principle": "proportional",
+   "form": "count",
+   "N": 14,
+   "perm": 3,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 40.66,
+   "stoppedEarly": null,
+   "J_db": 219.9988,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.0|p0",
+   "principle": "proportional",
+   "form": "count",
+   "N": 16,
+   "perm": 0,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 58.7,
+   "stoppedEarly": null,
+   "J_db": 224.794,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.0|p1",
+   "principle": "proportional",
+   "form": "count",
+   "N": 16,
+   "perm": 1,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 57.89,
+   "stoppedEarly": null,
+   "J_db": 224.794,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.0|p2",
+   "principle": "proportional",
+   "form": "count",
+   "N": 16,
+   "perm": 2,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 60.86,
+   "stoppedEarly": null,
+   "J_db": 224.794,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.0|p3",
+   "principle": "proportional",
+   "form": "count",
+   "N": 16,
+   "perm": 3,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 59.25,
+   "stoppedEarly": null,
+   "J_db": 224.794,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.25|p0",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 22,
+   "perm": 0,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 93.88,
+   "stoppedEarly": null,
+   "J_db": 46.79,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.25|p2",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 22,
+   "perm": 2,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 91.75,
+   "stoppedEarly": null,
+   "J_db": 56.43,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.25|p1",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 22,
+   "perm": 1,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 106.61,
+   "stoppedEarly": null,
+   "J_db": 54.35,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.25|p3",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 22,
+   "perm": 3,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 120.83,
+   "stoppedEarly": null,
+   "J_db": 59.95,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.5|p0",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 24,
+   "perm": 0,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 145.47,
+   "stoppedEarly": null,
+   "J_db": 53.19,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.25|p2",
+   "principle": "proportional",
+   "form": "count",
+   "N": 22,
+   "perm": 2,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 206.64,
+   "stoppedEarly": null,
+   "J_db": 327.3356,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.5|p1",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 24,
+   "perm": 1,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 150.25,
+   "stoppedEarly": null,
+   "J_db": 48.47,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.25|p0",
+   "principle": "proportional",
+   "form": "count",
+   "N": 22,
+   "perm": 0,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 225.31,
+   "stoppedEarly": null,
+   "J_db": 327.3356,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.25|p1",
+   "principle": "proportional",
+   "form": "count",
+   "N": 22,
+   "perm": 1,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 233.86,
+   "stoppedEarly": null,
+   "J_db": 327.3356,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.5|p2",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 24,
+   "perm": 2,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 165.14,
+   "stoppedEarly": null,
+   "J_db": 61.98,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|utilitarian|1.5|p3",
+   "principle": "utilitarian",
+   "form": "count",
+   "N": 24,
+   "perm": 3,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 144.66,
+   "stoppedEarly": null,
+   "J_db": 51.78,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.25|p3",
+   "principle": "proportional",
+   "form": "count",
+   "N": 22,
+   "perm": 3,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 240.5,
+   "stoppedEarly": null,
+   "J_db": 327.3356,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.5|p1",
+   "principle": "proportional",
+   "form": "count",
+   "N": 24,
+   "perm": 1,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 416.3,
+   "stoppedEarly": null,
+   "J_db": 331.3692,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.5|p0",
+   "principle": "proportional",
+   "form": "count",
+   "N": 24,
+   "perm": 0,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 439.3,
+   "stoppedEarly": null,
+   "J_db": 331.3692,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.5|p3",
+   "principle": "proportional",
+   "form": "count",
+   "N": 24,
+   "perm": 3,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 426.42,
+   "stoppedEarly": null,
+   "J_db": 331.3692,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet|D6_protA|proportional|1.5|p2",
+   "principle": "proportional",
+   "form": "count",
+   "N": 24,
+   "perm": 2,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 472.19,
+   "stoppedEarly": null,
+   "J_db": 331.3692,
+   "reported": null,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.25|p1",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 6,
+   "perm": 1,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 34.83,
+   "stoppedEarly": null,
+   "J_db": 9.52,
+   "reported": 9.52,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.25|p2",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 6,
+   "perm": 2,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 43.92,
+   "stoppedEarly": null,
+   "J_db": 9.52,
+   "reported": 9.52,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.25|p0",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 6,
+   "perm": 0,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 47.05,
+   "stoppedEarly": null,
+   "J_db": 9.52,
+   "reported": 9.52,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.25|p3",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 6,
+   "perm": 3,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 69.0,
+   "stoppedEarly": null,
+   "J_db": 9.52,
+   "reported": 9.52,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.5|p2",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 8,
+   "perm": 2,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 193.73,
+   "stoppedEarly": null,
+   "J_db": 10.24,
+   "reported": 10.24,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.5|p3",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 8,
+   "perm": 3,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 255.84,
+   "stoppedEarly": null,
+   "J_db": 10.24,
+   "reported": 10.24,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.5|p0",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 8,
+   "perm": 0,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 300.05,
+   "stoppedEarly": null,
+   "J_db": 10.24,
+   "reported": 10.24,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.5|p1",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 8,
+   "perm": 1,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 432.59,
+   "stoppedEarly": null,
+   "J_db": 10.24,
+   "reported": 10.24,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.25|p3",
+   "principle": "proportional",
+   "form": "db",
+   "N": 6,
+   "perm": 3,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 2154.05,
+   "stoppedEarly": null,
+   "J_db": 109.4276,
+   "reported": 109.4276,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.25|p1",
+   "principle": "proportional",
+   "form": "db",
+   "N": 6,
+   "perm": 1,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 2589.77,
+   "stoppedEarly": null,
+   "J_db": 109.4276,
+   "reported": 109.4276,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.25|p2",
+   "principle": "proportional",
+   "form": "db",
+   "N": 6,
+   "perm": 2,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 2644.84,
+   "stoppedEarly": null,
+   "J_db": 109.4276,
+   "reported": 109.4276,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.25|p0",
+   "principle": "proportional",
+   "form": "db",
+   "N": 6,
+   "perm": 0,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 3231.86,
+   "stoppedEarly": null,
+   "J_db": 109.4276,
+   "reported": 109.4276,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.5|p3",
+   "principle": "proportional",
+   "form": "db",
+   "N": 8,
+   "perm": 3,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 11386.8,
+   "stoppedEarly": null,
+   "J_db": 115.85,
+   "reported": 115.85,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.75|p0",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 14,
+   "perm": 0,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 10611.05,
+   "stoppedEarly": null,
+   "J_db": 19.18,
+   "reported": 19.18,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.5|p1",
+   "principle": "proportional",
+   "form": "db",
+   "N": 8,
+   "perm": 1,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 17445.78,
+   "stoppedEarly": null,
+   "J_db": 115.85,
+   "reported": 115.85,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.5|p2",
+   "principle": "proportional",
+   "form": "db",
+   "N": 8,
+   "perm": 2,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 18604.3,
+   "stoppedEarly": null,
+   "J_db": 115.85,
+   "reported": 115.85,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.5|p0",
+   "principle": "proportional",
+   "form": "db",
+   "N": 8,
+   "perm": 0,
+   "T": 6,
+   "optimality": "optimal",
+   "wall": 23733.78,
+   "stoppedEarly": null,
+   "J_db": 115.85,
+   "reported": 115.85,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.75|p1",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 14,
+   "perm": 1,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 14508.38,
+   "stoppedEarly": null,
+   "J_db": 19.18,
+   "reported": 19.18,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.0|p0",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 16,
+   "perm": 0,
+   "T": 5,
+   "optimality": "optimal",
+   "wall": 44438.97,
+   "stoppedEarly": null,
+   "J_db": 19.72,
+   "reported": 19.72,
+   "tier1_lower": null,
+   "tier1_lower_raw": null,
+   "tier1_incumbent": null
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.75|p0",
+   "principle": "proportional",
+   "form": "db",
+   "N": 14,
+   "perm": 0,
+   "T": 6,
+   "optimality": "partial",
+   "wall": 69504.12,
+   "stoppedEarly": "STOP_ALL",
+   "J_db": 217.1537,
+   "reported": 217.1537,
+   "tier1_lower": null,
+   "tier1_lower_raw": "-1*oo",
+   "tier1_incumbent": 0.027516622468488523
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.25|p0",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 22,
+   "perm": 0,
+   "T": 6,
+   "optimality": "partial",
+   "wall": 60228.62,
+   "stoppedEarly": "STOP_ALL",
+   "J_db": 35.03,
+   "reported": 35.03,
+   "tier1_lower": null,
+   "tier1_lower_raw": "-1*oo",
+   "tier1_incumbent": 0.01714635340186001
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.5|p0",
+   "principle": "proportional",
+   "form": "db",
+   "N": 24,
+   "perm": 0,
+   "T": 6,
+   "optimality": "partial",
+   "wall": 53152.03,
+   "stoppedEarly": "STOP_ALL",
+   "J_db": 334.2952,
+   "reported": 334.29519999999997,
+   "tier1_lower": null,
+   "tier1_lower_raw": "-1*oo",
+   "tier1_incumbent": 0.037819157032259285
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.0|p0",
+   "principle": "proportional",
+   "form": "db",
+   "N": 16,
+   "perm": 0,
+   "T": 6,
+   "optimality": "partial",
+   "wall": 68863.74,
+   "stoppedEarly": "STOP_ALL",
+   "J_db": 222.0367,
+   "reported": 222.0367,
+   "tier1_lower": null,
+   "tier1_lower_raw": "-1*oo",
+   "tier1_incumbent": 0.027240504695388624
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.25|p0",
+   "principle": "proportional",
+   "form": "db",
+   "N": 22,
+   "perm": 0,
+   "T": 6,
+   "optimality": "partial",
+   "wall": 59330.11,
+   "stoppedEarly": "STOP_ALL",
+   "J_db": 327.3194,
+   "reported": 327.3194,
+   "tier1_lower": null,
+   "tier1_lower_raw": "-1*oo",
+   "tier1_incumbent": 0.037653356436146306
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.75|p1",
+   "principle": "proportional",
+   "form": "db",
+   "N": 14,
+   "perm": 1,
+   "T": 6,
+   "optimality": "partial",
+   "wall": 33609.27,
+   "stoppedEarly": "STOP_ALL",
+   "J_db": 217.2415,
+   "reported": 217.2415,
+   "tier1_lower": null,
+   "tier1_lower_raw": "-1*oo",
+   "tier1_incumbent": 0.027527748042000432
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.0|p1",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 16,
+   "perm": 1,
+   "T": 5,
+   "optimality": "partial",
+   "wall": 25010.34,
+   "stoppedEarly": "STOP_ALL",
+   "J_db": 19.72,
+   "reported": 19.72,
+   "tier1_lower": 0.012826016260162602,
+   "tier1_lower_raw": "6413008130081300809/500000000000000000000",
+   "tier1_incumbent": 0.012826016260162602
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.5|p0",
+   "principle": "utilitarian",
+   "form": "db",
+   "N": 24,
+   "perm": 0,
+   "T": 6,
+   "optimality": "partial",
+   "wall": 54322.3,
+   "stoppedEarly": "STOP_ALL",
+   "J_db": 38.34,
+   "reported": 38.34,
+   "tier1_lower": null,
+   "tier1_lower_raw": "-1*oo",
+   "tier1_incumbent": 0.01828326180257511
+  }
+ ],
+ "cells": [
+  {
+   "principle": "utilitarian",
+   "N": 6,
+   "db_proven": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "db_harvested": [],
+   "db_absent": [],
+   "count_proven": true,
+   "J_count": {
+    "mean": 20.7925,
+    "min": 17.53,
+    "max": 24.07,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 24.07,
+    "1": 17.53,
+    "2": 20.22,
+    "3": 21.35
+   },
+   "wall_count": {
+    "mean": 1.5975000000000001,
+    "min": 1.56,
+    "max": 1.62,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 9.52,
+    "1": 9.52,
+    "2": 9.52,
+    "3": 9.52
+   },
+   "db_wall": {
+    "0": 47.05,
+    "1": 34.83,
+    "2": 43.92,
+    "3": 69.0
+   },
+   "wall_db": {
+    "mean": 48.7,
+    "min": 34.83,
+    "max": 69.0,
+    "n": 4
+   },
+   "elapsed_harvested": null,
+   "gap": {},
+   "lower_raw": {},
+   "speedup": 30.485133020344286,
+   "J_star": 9.52,
+   "J_star_consistent": true,
+   "count_beats_star": false,
+   "loss": {
+    "mean": 1.1840861344537816,
+    "min": 0.841386554621849,
+    "max": 1.5283613445378152,
+    "n": 4
+   },
+   "loss_abs": {
+    "mean": 11.2725,
+    "min": 8.010000000000002,
+    "max": 14.55,
+    "n": 4
+   },
+   "loss_attributable": true
+  },
+  {
+   "principle": "utilitarian",
+   "N": 8,
+   "db_proven": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "db_harvested": [],
+   "db_absent": [],
+   "count_proven": true,
+   "J_count": {
+    "mean": 20.3675,
+    "min": 18.36,
+    "max": 23.71,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 19.7,
+    "1": 19.7,
+    "2": 23.71,
+    "3": 18.36
+   },
+   "wall_count": {
+    "mean": 2.375,
+    "min": 2.28,
+    "max": 2.45,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 10.24,
+    "1": 10.24,
+    "2": 10.24,
+    "3": 10.24
+   },
+   "db_wall": {
+    "0": 300.05,
+    "1": 432.59,
+    "2": 193.73,
+    "3": 255.84
+   },
+   "wall_db": {
+    "mean": 295.5525,
+    "min": 193.73,
+    "max": 432.59,
+    "n": 4
+   },
+   "elapsed_harvested": null,
+   "gap": {},
+   "lower_raw": {},
+   "speedup": 124.44315789473684,
+   "J_star": 10.24,
+   "J_star_consistent": true,
+   "count_beats_star": false,
+   "loss": {
+    "mean": 0.989013671875,
+    "min": 0.7929687499999999,
+    "max": 1.3154296875,
+    "n": 4
+   },
+   "loss_abs": {
+    "mean": 10.1275,
+    "min": 8.12,
+    "max": 13.47,
+    "n": 4
+   },
+   "loss_attributable": true
+  },
+  {
+   "principle": "utilitarian",
+   "N": 14,
+   "db_proven": [
+    0,
+    1
+   ],
+   "db_harvested": [],
+   "db_absent": [
+    2,
+    3
+   ],
+   "count_proven": true,
+   "J_count": {
+    "mean": 35.6575,
+    "min": 31.77,
+    "max": 38.58,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 35.25,
+    "1": 31.77,
+    "2": 38.58,
+    "3": 37.03
+   },
+   "wall_count": {
+    "mean": 6.012499999999999,
+    "min": 5.56,
+    "max": 6.38,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 19.18,
+    "1": 19.18
+   },
+   "db_wall": {
+    "0": 10611.05,
+    "1": 14508.38
+   },
+   "wall_db": {
+    "mean": 12559.715,
+    "min": 10611.05,
+    "max": 14508.38,
+    "n": 2
+   },
+   "elapsed_harvested": null,
+   "gap": {},
+   "lower_raw": {},
+   "J_star": 19.18,
+   "J_star_consistent": true,
+   "count_beats_star": false,
+   "loss": {
+    "mean": 0.8590980187695516,
+    "min": 0.6564129301355579,
+    "max": 1.0114702815432741,
+    "n": 4
+   },
+   "loss_abs": {
+    "mean": 16.4775,
+    "min": 12.59,
+    "max": 19.4,
+    "n": 4
+   },
+   "loss_attributable": true
+  },
+  {
+   "principle": "utilitarian",
+   "N": 16,
+   "db_proven": [
+    0
+   ],
+   "db_harvested": [
+    1
+   ],
+   "db_absent": [
+    2,
+    3
+   ],
+   "count_proven": true,
+   "J_count": {
+    "mean": 39.315,
+    "min": 36.01,
+    "max": 48.71,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 36.01,
+    "1": 36.25,
+    "2": 36.29,
+    "3": 48.71
+   },
+   "wall_count": {
+    "mean": 8.485,
+    "min": 8.17,
+    "max": 8.86,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 19.72,
+    "1": 19.72
+   },
+   "db_wall": {
+    "0": 44438.97,
+    "1": 25010.34
+   },
+   "wall_db": {
+    "mean": 44438.97,
+    "min": 44438.97,
+    "max": 44438.97,
+    "n": 1
+   },
+   "elapsed_harvested": {
+    "mean": 25010.34,
+    "min": 25010.34,
+    "max": 25010.34,
+    "n": 1
+   },
+   "gap": {
+    "1": 0.0
+   },
+   "lower_raw": {
+    "1": "6413008130081300809/500000000000000000000"
+   },
+   "J_star": 19.72,
+   "J_star_consistent": true,
+   "count_beats_star": false,
+   "loss": {
+    "mean": 0.993661257606491,
+    "min": 0.8260649087221096,
+    "max": 1.4700811359026371,
+    "n": 4
+   },
+   "loss_abs": {
+    "mean": 19.595,
+    "min": 16.29,
+    "max": 28.990000000000002,
+    "n": 4
+   },
+   "loss_attributable": true
+  },
+  {
+   "principle": "utilitarian",
+   "N": 22,
+   "db_proven": [],
+   "db_harvested": [
+    0
+   ],
+   "db_absent": [
+    1,
+    2,
+    3
+   ],
+   "count_proven": true,
+   "J_count": {
+    "mean": 54.379999999999995,
+    "min": 46.79,
+    "max": 59.95,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 46.79,
+    "1": 54.35,
+    "2": 56.43,
+    "3": 59.95
+   },
+   "wall_count": {
+    "mean": 103.2675,
+    "min": 91.75,
+    "max": 120.83,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 35.03
+   },
+   "db_wall": {
+    "0": 60228.62
+   },
+   "wall_db": null,
+   "elapsed_harvested": {
+    "mean": 60228.62,
+    "min": 60228.62,
+    "max": 60228.62,
+    "n": 1
+   },
+   "gap": {
+    "0": null
+   },
+   "lower_raw": {
+    "0": "-1*oo"
+   },
+   "speedup_lower": 583.2291863364563,
+   "J_best_known": 35.03,
+   "loss_lower_bound": {
+    "mean": 0.5523836711390236,
+    "min": 0.3357122466457322,
+    "max": 0.7113902369397659,
+    "n": 4
+   },
+   "loss_abs_lower_bound": {
+    "mean": 19.35,
+    "min": 11.759999999999998,
+    "max": 24.92,
+    "n": 4
+   },
+   "count_beats_incumbent": {
+    "0": false
+   }
+  },
+  {
+   "principle": "utilitarian",
+   "N": 24,
+   "db_proven": [],
+   "db_harvested": [
+    0
+   ],
+   "db_absent": [
+    1,
+    2,
+    3
+   ],
+   "count_proven": true,
+   "J_count": {
+    "mean": 53.855,
+    "min": 48.47,
+    "max": 61.98,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 53.19,
+    "1": 48.47,
+    "2": 61.98,
+    "3": 51.78
+   },
+   "wall_count": {
+    "mean": 151.38,
+    "min": 144.66,
+    "max": 165.14,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 38.34
+   },
+   "db_wall": {
+    "0": 54322.3
+   },
+   "wall_db": null,
+   "elapsed_harvested": {
+    "mean": 54322.3,
+    "min": 54322.3,
+    "max": 54322.3,
+    "n": 1
+   },
+   "gap": {
+    "0": null
+   },
+   "lower_raw": {
+    "0": "-1*oo"
+   },
+   "speedup_lower": 358.84727176641564,
+   "J_best_known": 38.34,
+   "loss_lower_bound": {
+    "mean": 0.40466875326030244,
+    "min": 0.26421491914449646,
+    "max": 0.6165884194053206,
+    "n": 4
+   },
+   "loss_abs_lower_bound": {
+    "mean": 15.514999999999995,
+    "min": 10.129999999999995,
+    "max": 23.639999999999993,
+    "n": 4
+   },
+   "count_beats_incumbent": {
+    "0": false
+   }
+  },
+  {
+   "principle": "proportional",
+   "N": 6,
+   "db_proven": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "db_harvested": [],
+   "db_absent": [],
+   "count_proven": true,
+   "J_count": {
+    "mean": 128.0029,
+    "min": 128.0029,
+    "max": 128.0029,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 128.0029,
+    "1": 128.0029,
+    "2": 128.0029,
+    "3": 128.0029
+   },
+   "wall_count": {
+    "mean": 4.2475000000000005,
+    "min": 3.91,
+    "max": 4.44,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 109.4276,
+    "1": 109.4276,
+    "2": 109.4276,
+    "3": 109.4276
+   },
+   "db_wall": {
+    "0": 3231.86,
+    "1": 2589.77,
+    "2": 2644.84,
+    "3": 2154.05
+   },
+   "wall_db": {
+    "mean": 2655.13,
+    "min": 2154.05,
+    "max": 3231.86,
+    "n": 4
+   },
+   "elapsed_harvested": null,
+   "gap": {},
+   "lower_raw": {},
+   "speedup": 625.1041789287816,
+   "J_star": 109.4276,
+   "J_star_consistent": true,
+   "count_beats_star": false,
+   "loss": {
+    "mean": 0.16974967923997247,
+    "min": 0.16974967923997247,
+    "max": 0.16974967923997247,
+    "n": 4
+   },
+   "loss_abs": {
+    "mean": 18.575300000000013,
+    "min": 18.575300000000013,
+    "max": 18.575300000000013,
+    "n": 4
+   },
+   "loss_attributable": true
+  },
+  {
+   "principle": "proportional",
+   "N": 8,
+   "db_proven": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "db_harvested": [],
+   "db_absent": [],
+   "count_proven": true,
+   "J_count": {
+    "mean": 134.4253,
+    "min": 134.4253,
+    "max": 134.4253,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 134.4253,
+    "1": 134.4253,
+    "2": 134.4253,
+    "3": 134.4253
+   },
+   "wall_count": {
+    "mean": 8.24,
+    "min": 7.75,
+    "max": 9.31,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 115.85,
+    "1": 115.85,
+    "2": 115.85,
+    "3": 115.85
+   },
+   "db_wall": {
+    "0": 23733.78,
+    "1": 17445.78,
+    "2": 18604.3,
+    "3": 11386.8
+   },
+   "wall_db": {
+    "mean": 17792.665,
+    "min": 11386.8,
+    "max": 23733.78,
+    "n": 4
+   },
+   "elapsed_harvested": null,
+   "gap": {},
+   "lower_raw": {},
+   "speedup": 2159.304004854369,
+   "J_star": 115.85,
+   "J_star_consistent": true,
+   "count_beats_star": false,
+   "loss": {
+    "mean": 0.16033923176521364,
+    "min": 0.16033923176521364,
+    "max": 0.16033923176521364,
+    "n": 4
+   },
+   "loss_abs": {
+    "mean": 18.5753,
+    "min": 18.5753,
+    "max": 18.5753,
+    "n": 4
+   },
+   "loss_attributable": true
+  },
+  {
+   "principle": "proportional",
+   "N": 14,
+   "db_proven": [],
+   "db_harvested": [
+    0,
+    1
+   ],
+   "db_absent": [
+    2,
+    3
+   ],
+   "count_proven": true,
+   "J_count": {
+    "mean": 219.9988,
+    "min": 219.9988,
+    "max": 219.9988,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 219.9988,
+    "1": 219.9988,
+    "2": 219.9988,
+    "3": 219.9988
+   },
+   "wall_count": {
+    "mean": 36.7975,
+    "min": 32.86,
+    "max": 40.66,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 217.1537,
+    "1": 217.2415
+   },
+   "db_wall": {
+    "0": 69504.12,
+    "1": 33609.27
+   },
+   "wall_db": null,
+   "elapsed_harvested": {
+    "mean": 51556.69499999999,
+    "min": 33609.27,
+    "max": 69504.12,
+    "n": 2
+   },
+   "gap": {
+    "0": null,
+    "1": null
+   },
+   "lower_raw": {
+    "0": "-1*oo",
+    "1": "-1*oo"
+   },
+   "speedup_lower": 1401.0923296419592,
+   "J_best_known": 217.1537,
+   "loss_lower_bound": {
+    "mean": 0.013101779983486361,
+    "min": 0.013101779983486361,
+    "max": 0.013101779983486361,
+    "n": 4
+   },
+   "loss_abs_lower_bound": {
+    "mean": 2.845100000000002,
+    "min": 2.845100000000002,
+    "max": 2.845100000000002,
+    "n": 4
+   },
+   "count_beats_incumbent": {
+    "0": false,
+    "1": false
+   }
+  },
+  {
+   "principle": "proportional",
+   "N": 16,
+   "db_proven": [],
+   "db_harvested": [
+    0
+   ],
+   "db_absent": [
+    1,
+    2,
+    3
+   ],
+   "count_proven": true,
+   "J_count": {
+    "mean": 224.794,
+    "min": 224.794,
+    "max": 224.794,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 224.794,
+    "1": 224.794,
+    "2": 224.794,
+    "3": 224.794
+   },
+   "wall_count": {
+    "mean": 59.175,
+    "min": 57.89,
+    "max": 60.86,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 222.0367
+   },
+   "db_wall": {
+    "0": 68863.74
+   },
+   "wall_db": null,
+   "elapsed_harvested": {
+    "mean": 68863.74,
+    "min": 68863.74,
+    "max": 68863.74,
+    "n": 1
+   },
+   "gap": {
+    "0": null
+   },
+   "lower_raw": {
+    "0": "-1*oo"
+   },
+   "speedup_lower": 1163.7302915082385,
+   "J_best_known": 222.0367,
+   "loss_lower_bound": {
+    "mean": 0.012418217348753674,
+    "min": 0.012418217348753674,
+    "max": 0.012418217348753674,
+    "n": 4
+   },
+   "loss_abs_lower_bound": {
+    "mean": 2.757300000000015,
+    "min": 2.757300000000015,
+    "max": 2.757300000000015,
+    "n": 4
+   },
+   "count_beats_incumbent": {
+    "0": false
+   }
+  },
+  {
+   "principle": "proportional",
+   "N": 22,
+   "db_proven": [],
+   "db_harvested": [
+    0
+   ],
+   "db_absent": [
+    1,
+    2,
+    3
+   ],
+   "count_proven": true,
+   "J_count": {
+    "mean": 327.3356,
+    "min": 327.3356,
+    "max": 327.3356,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 327.3356,
+    "1": 327.3356,
+    "2": 327.3356,
+    "3": 327.3356
+   },
+   "wall_count": {
+    "mean": 226.5775,
+    "min": 206.64,
+    "max": 240.5,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 327.3194
+   },
+   "db_wall": {
+    "0": 59330.11
+   },
+   "wall_db": null,
+   "elapsed_harvested": {
+    "mean": 59330.11,
+    "min": 59330.11,
+    "max": 59330.11,
+    "n": 1
+   },
+   "gap": {
+    "0": null
+   },
+   "lower_raw": {
+    "0": "-1*oo"
+   },
+   "speedup_lower": 261.8534938376494,
+   "J_best_known": 327.3194,
+   "loss_lower_bound": {
+    "mean": 4.9492941756663965e-05,
+    "min": 4.9492941756663965e-05,
+    "max": 4.9492941756663965e-05,
+    "n": 4
+   },
+   "loss_abs_lower_bound": {
+    "mean": 0.016200000000026193,
+    "min": 0.016200000000026193,
+    "max": 0.016200000000026193,
+    "n": 4
+   },
+   "count_beats_incumbent": {
+    "0": false
+   }
+  },
+  {
+   "principle": "proportional",
+   "N": 24,
+   "db_proven": [],
+   "db_harvested": [
+    0
+   ],
+   "db_absent": [
+    1,
+    2,
+    3
+   ],
+   "count_proven": true,
+   "J_count": {
+    "mean": 331.3692,
+    "min": 331.3692,
+    "max": 331.3692,
+    "n": 4
+   },
+   "J_count_by_perm": {
+    "0": 331.3692,
+    "1": 331.3692,
+    "2": 331.3692,
+    "3": 331.3692
+   },
+   "wall_count": {
+    "mean": 438.5525,
+    "min": 416.3,
+    "max": 472.19,
+    "n": 4
+   },
+   "T_match": true,
+   "J_db_by_perm": {
+    "0": 334.2952
+   },
+   "db_wall": {
+    "0": 53152.03
+   },
+   "wall_db": null,
+   "elapsed_harvested": {
+    "mean": 53152.03,
+    "min": 53152.03,
+    "max": 53152.03,
+    "n": 1
+   },
+   "gap": {
+    "0": null
+   },
+   "lower_raw": {
+    "0": "-1*oo"
+   },
+   "speedup_lower": 121.1987846380992,
+   "J_best_known": 331.3692,
+   "loss_lower_bound": {
+    "mean": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "n": 4
+   },
+   "loss_abs_lower_bound": {
+    "mean": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "n": 4
+   },
+   "count_beats_incumbent": {
+    "0": true
+   }
+  }
+ ],
+ "form_compare": [
+  {
+   "principle": "utilitarian",
+   "N": 6,
+   "db_all_proven": true,
+   "db_runs": 4,
+   "total_added": {
+    "db": 9.5423,
+    "db_lo": 9.5423,
+    "db_hi": 9.5423,
+    "count": 20.825125,
+    "count_lo": 17.5619,
+    "count_hi": 24.1064,
+    "attributable": true
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": 4.7712,
+    "db_hi": 4.7712,
+    "count": 3.8907500000000006,
+    "count_lo": 3.0103,
+    "count_hi": 4.7712,
+    "attributable": false
+   },
+   "occupied_tile_timesteps": {
+    "db": 10.0,
+    "db_lo": 10,
+    "db_hi": 10,
+    "count": 15.25,
+    "count_lo": 14,
+    "count_hi": 17,
+    "attributable": true
+   },
+   "stations_touched": {
+    "db": 6.0,
+    "db_lo": 6,
+    "db_hi": 6,
+    "count": 10.0,
+    "count_lo": 9,
+    "count_hi": 13,
+    "attributable": false
+   },
+   "extra_vs_baseline": {
+    "db": 0.0,
+    "db_lo": 0,
+    "db_hi": 0,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": false
+   },
+   "departure_delay_total": {
+    "db": 7.0,
+    "db_lo": 7,
+    "db_hi": 7,
+    "count": 6.0,
+    "count_lo": 6,
+    "count_hi": 6,
+    "attributable": true
+   }
+  },
+  {
+   "principle": "utilitarian",
+   "N": 8,
+   "db_all_proven": true,
+   "db_runs": 4,
+   "total_added": {
+    "db": 10.2494,
+    "db_lo": 10.2494,
+    "db_hi": 10.2494,
+    "count": 20.3892,
+    "count_lo": 18.373,
+    "count_hi": 23.7344,
+    "attributable": true
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": 4.7712,
+    "db_hi": 4.7712,
+    "count": 3.89075,
+    "count_lo": 3.0103,
+    "count_hi": 4.7712,
+    "attributable": false
+   },
+   "occupied_tile_timesteps": {
+    "db": 10.0,
+    "db_lo": 10,
+    "db_hi": 10,
+    "count": 16.25,
+    "count_lo": 14,
+    "count_hi": 17,
+    "attributable": true
+   },
+   "stations_touched": {
+    "db": 6.0,
+    "db_lo": 6,
+    "db_hi": 6,
+    "count": 9.5,
+    "count_lo": 7,
+    "count_hi": 11,
+    "attributable": false
+   },
+   "extra_vs_baseline": {
+    "db": 0.0,
+    "db_lo": 0,
+    "db_hi": 0,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": false
+   },
+   "departure_delay_total": {
+    "db": 9.0,
+    "db_lo": 9,
+    "db_hi": 9,
+    "count": 8.0,
+    "count_lo": 8,
+    "count_hi": 8,
+    "attributable": true
+   }
+  },
+  {
+   "principle": "utilitarian",
+   "N": 14,
+   "db_all_proven": false,
+   "db_runs": 2,
+   "total_added": {
+    "db": 19.1911,
+    "db_lo": 19.1911,
+    "db_hi": 19.1911,
+    "count": 35.6749,
+    "count_lo": 31.7824,
+    "count_hi": 38.6006,
+    "attributable": null
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": 4.7712,
+    "db_hi": 4.7712,
+    "count": 4.7712,
+    "count_lo": 4.7712,
+    "count_hi": 4.7712,
+    "attributable": null
+   },
+   "occupied_tile_timesteps": {
+    "db": 12.0,
+    "db_lo": 12,
+    "db_hi": 12,
+    "count": 19.5,
+    "count_lo": 17,
+    "count_hi": 22,
+    "attributable": null
+   },
+   "stations_touched": {
+    "db": 6.0,
+    "db_lo": 6,
+    "db_hi": 6,
+    "count": 11.5,
+    "count_lo": 11,
+    "count_hi": 13,
+    "attributable": null
+   },
+   "extra_vs_baseline": {
+    "db": 0.0,
+    "db_lo": 0,
+    "db_hi": 0,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": null
+   },
+   "departure_delay_total": {
+    "db": 26.0,
+    "db_lo": 26,
+    "db_hi": 26,
+    "count": 14.0,
+    "count_lo": 14,
+    "count_hi": 14,
+    "attributable": null
+   }
+  },
+  {
+   "principle": "utilitarian",
+   "N": 16,
+   "db_all_proven": false,
+   "db_runs": 2,
+   "total_added": {
+    "db": 19.7318,
+    "db_lo": 19.7318,
+    "db_hi": 19.7318,
+    "count": 39.331824999999995,
+    "count_lo": 36.023,
+    "count_hi": 48.7341,
+    "attributable": null
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": 4.7712,
+    "db_hi": 4.7712,
+    "count": 4.7712,
+    "count_lo": 4.7712,
+    "count_hi": 4.7712,
+    "attributable": null
+   },
+   "occupied_tile_timesteps": {
+    "db": 12.0,
+    "db_lo": 12,
+    "db_hi": 12,
+    "count": 18.25,
+    "count_lo": 17,
+    "count_hi": 20,
+    "attributable": null
+   },
+   "stations_touched": {
+    "db": 6.0,
+    "db_lo": 6,
+    "db_hi": 6,
+    "count": 10.5,
+    "count_lo": 9,
+    "count_hi": 12,
+    "attributable": null
+   },
+   "extra_vs_baseline": {
+    "db": 0.0,
+    "db_lo": 0,
+    "db_hi": 0,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": null
+   },
+   "departure_delay_total": {
+    "db": 32.0,
+    "db_lo": 32,
+    "db_hi": 32,
+    "count": 16.0,
+    "count_lo": 16,
+    "count_hi": 16,
+    "attributable": null
+   }
+  },
+  {
+   "principle": "utilitarian",
+   "N": 22,
+   "db_all_proven": false,
+   "db_runs": 1,
+   "total_added": {
+    "db": 35.0623,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 54.415924999999994,
+    "count_lo": 46.8193,
+    "count_hi": 59.9897,
+    "attributable": null
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 4.7712,
+    "count_lo": 4.7712,
+    "count_hi": 4.7712,
+    "attributable": null
+   },
+   "occupied_tile_timesteps": {
+    "db": 19,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 25.25,
+    "count_lo": 24,
+    "count_hi": 26,
+    "attributable": null
+   },
+   "stations_touched": {
+    "db": 9,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 12.5,
+    "count_lo": 12,
+    "count_hi": 13,
+    "attributable": null
+   },
+   "extra_vs_baseline": {
+    "db": 12,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": null
+   },
+   "departure_delay_total": {
+    "db": 38,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 25.0,
+    "count_lo": 25,
+    "count_hi": 25,
+    "attributable": null
+   }
+  },
+  {
+   "principle": "utilitarian",
+   "N": 24,
+   "db_all_proven": false,
+   "db_runs": 1,
+   "total_added": {
+    "db": 38.3809,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 53.896950000000004,
+    "count_lo": 48.5074,
+    "count_hi": 62.0295,
+    "attributable": null
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 4.7712,
+    "count_lo": 4.7712,
+    "count_hi": 4.7712,
+    "attributable": null
+   },
+   "occupied_tile_timesteps": {
+    "db": 27,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 26.0,
+    "count_lo": 24,
+    "count_hi": 29,
+    "attributable": null
+   },
+   "stations_touched": {
+    "db": 12,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 12.75,
+    "count_lo": 12,
+    "count_hi": 13,
+    "attributable": null
+   },
+   "extra_vs_baseline": {
+    "db": 17,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": null
+   },
+   "departure_delay_total": {
+    "db": 41,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 27.0,
+    "count_lo": 27,
+    "count_hi": 27,
+    "attributable": null
+   }
+  },
+  {
+   "principle": "proportional",
+   "N": 6,
+   "db_all_proven": true,
+   "db_runs": 4,
+   "total_added": {
+    "db": 9.6041,
+    "db_lo": 9.6041,
+    "db_hi": 9.6041,
+    "count": 10.9198,
+    "count_lo": 10.9198,
+    "count_hi": 10.9198,
+    "attributable": true
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": 4.7712,
+    "db_hi": 4.7712,
+    "count": 3.0103,
+    "count_lo": 3.0103,
+    "count_hi": 3.0103,
+    "attributable": true
+   },
+   "occupied_tile_timesteps": {
+    "db": 11.0,
+    "db_lo": 11,
+    "db_hi": 11,
+    "count": 13.0,
+    "count_lo": 13,
+    "count_hi": 13,
+    "attributable": true
+   },
+   "stations_touched": {
+    "db": 6.0,
+    "db_lo": 6,
+    "db_hi": 6,
+    "count": 6.0,
+    "count_lo": 6,
+    "count_hi": 6,
+    "attributable": false
+   },
+   "extra_vs_baseline": {
+    "db": 0.0,
+    "db_lo": 0,
+    "db_hi": 0,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": false
+   },
+   "departure_delay_total": {
+    "db": 9.0,
+    "db_lo": 9,
+    "db_hi": 9,
+    "count": 6.0,
+    "count_lo": 6,
+    "count_hi": 6,
+    "attributable": true
+   }
+  },
+  {
+   "principle": "proportional",
+   "N": 8,
+   "db_all_proven": true,
+   "db_runs": 4,
+   "total_added": {
+    "db": 10.3112,
+    "db_lo": 10.3112,
+    "db_hi": 10.3112,
+    "count": 11.6269,
+    "count_lo": 11.6269,
+    "count_hi": 11.6269,
+    "attributable": true
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": 4.7712,
+    "db_hi": 4.7712,
+    "count": 3.0103,
+    "count_lo": 3.0103,
+    "count_hi": 3.0103,
+    "attributable": true
+   },
+   "occupied_tile_timesteps": {
+    "db": 11.0,
+    "db_lo": 11,
+    "db_hi": 11,
+    "count": 13.0,
+    "count_lo": 13,
+    "count_hi": 13,
+    "attributable": true
+   },
+   "stations_touched": {
+    "db": 6.0,
+    "db_lo": 6,
+    "db_hi": 6,
+    "count": 6.0,
+    "count_lo": 6,
+    "count_hi": 6,
+    "attributable": false
+   },
+   "extra_vs_baseline": {
+    "db": 0.0,
+    "db_lo": 0,
+    "db_hi": 0,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": false
+   },
+   "departure_delay_total": {
+    "db": 11.0,
+    "db_lo": 11,
+    "db_hi": 11,
+    "count": 8.0,
+    "count_lo": 8,
+    "count_hi": 8,
+    "attributable": true
+   }
+  },
+  {
+   "principle": "proportional",
+   "N": 14,
+   "db_all_proven": false,
+   "db_runs": 2,
+   "total_added": {
+    "db": 18.9793,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 19.1936,
+    "count_lo": 19.1936,
+    "count_hi": 19.1936,
+    "attributable": null
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 4.7712,
+    "count_lo": 4.7712,
+    "count_hi": 4.7712,
+    "attributable": null
+   },
+   "occupied_tile_timesteps": {
+    "db": 11,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 13.0,
+    "count_lo": 13,
+    "count_hi": 13,
+    "attributable": null
+   },
+   "stations_touched": {
+    "db": 6,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 6.0,
+    "count_lo": 6,
+    "count_hi": 6,
+    "attributable": null
+   },
+   "extra_vs_baseline": {
+    "db": 0,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": null
+   },
+   "departure_delay_total": {
+    "db": 38,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 14.0,
+    "count_lo": 14,
+    "count_hi": 14,
+    "attributable": null
+   }
+  },
+  {
+   "principle": "proportional",
+   "N": 16,
+   "db_all_proven": false,
+   "db_runs": 1,
+   "total_added": {
+    "db": 19.5232,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 19.7351,
+    "count_lo": 19.7351,
+    "count_hi": 19.7351,
+    "attributable": null
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 4.7712,
+    "count_lo": 4.7712,
+    "count_hi": 4.7712,
+    "attributable": null
+   },
+   "occupied_tile_timesteps": {
+    "db": 12,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 13.0,
+    "count_lo": 13,
+    "count_hi": 13,
+    "attributable": null
+   },
+   "stations_touched": {
+    "db": 6,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 6.0,
+    "count_lo": 6,
+    "count_hi": 6,
+    "attributable": null
+   },
+   "extra_vs_baseline": {
+    "db": 0,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": null
+   },
+   "departure_delay_total": {
+    "db": 30,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 16.0,
+    "count_lo": 16,
+    "count_hi": 16,
+    "attributable": null
+   }
+  },
+  {
+   "principle": "proportional",
+   "N": 22,
+   "db_all_proven": false,
+   "db_runs": 1,
+   "total_added": {
+    "db": 28.5187,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 28.5247,
+    "count_lo": 28.5247,
+    "count_hi": 28.5247,
+    "attributable": null
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 4.7712,
+    "count_lo": 4.7712,
+    "count_hi": 4.7712,
+    "attributable": null
+   },
+   "occupied_tile_timesteps": {
+    "db": 16,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 17.0,
+    "count_lo": 17,
+    "count_hi": 17,
+    "attributable": null
+   },
+   "stations_touched": {
+    "db": 6,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 6.0,
+    "count_lo": 6,
+    "count_hi": 6,
+    "attributable": null
+   },
+   "extra_vs_baseline": {
+    "db": 0,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": null
+   },
+   "departure_delay_total": {
+    "db": 35,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 25.0,
+    "count_lo": 25,
+    "count_hi": 25,
+    "attributable": null
+   }
+  },
+  {
+   "principle": "proportional",
+   "N": 24,
+   "db_all_proven": false,
+   "db_runs": 1,
+   "total_added": {
+    "db": 29.2237,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 28.985,
+    "count_lo": 28.985,
+    "count_hi": 28.985,
+    "attributable": null
+   },
+   "peak_added": {
+    "db": 4.7712,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 4.7712,
+    "count_lo": 4.7712,
+    "count_hi": 4.7712,
+    "attributable": null
+   },
+   "occupied_tile_timesteps": {
+    "db": 16,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 17.0,
+    "count_lo": 17,
+    "count_hi": 17,
+    "attributable": null
+   },
+   "stations_touched": {
+    "db": 7,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 6.0,
+    "count_lo": 6,
+    "count_hi": 6,
+    "attributable": null
+   },
+   "extra_vs_baseline": {
+    "db": 6,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 0.0,
+    "count_lo": 0,
+    "count_hi": 0,
+    "attributable": null
+   },
+   "departure_delay_total": {
+    "db": 39,
+    "db_lo": null,
+    "db_hi": null,
+    "count": 27.0,
+    "count_lo": 27,
+    "count_hi": 27,
+    "attributable": null
+   }
+  }
+ ],
+ "H_s": 71962.0,
+ "selftest": {
+  "checked": 27,
+  "mismatches": []
+ }
+}

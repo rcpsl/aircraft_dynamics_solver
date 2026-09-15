@@ -40,10 +40,10 @@ and the same empty objective.
 \centering
 \footnotesize
 \caption{Conditions as the solver receives them: the caps sent and the tier-1 objective,
-minimised before the arrival penalty \eqref{eq:jtime}. Utilitarian and Proportional are
-shown in the count form the study runs; their decibel forms replace $c_{m,t}$ by
-$\dbinc_m(c_{m,t})$. $\ell=\SI{6}{\dB}$; a cap not sent is \SI{30}{\dB}, which no tile on
-this map can reach.}
+minimised before the arrival penalty \eqref{eq:jtime}. For Utilitarian and Proportional
+the decibel form is the exact encoding and the count form its abstraction, which prices
+$c_{m,t}$ in place of $\dbinc_m(c_{m,t})$. $\ell=\SI{6}{\dB}$; a cap not sent is
+\SI{30}{\dB}, which no tile on this map can reach.}
 \label{tab:principles}
 \begin{tabular}{@{}lll@{}}
 \toprule
@@ -52,8 +52,10 @@ Condition & Caps sent & Tier-1 objective \\
 Equal & $U{=}\ell$, $D{=}\ell$ & none \\
 Sufficientarian & $D{=}\ell$ & none \\
 Prioritarian & $D{=}\ell$ & $\sum_{t}\sum_{p\in P}\dbinc_p(c_{p,t})$ \\
-Utilitarian & $D{=}\ell$ & $\sum_{t}\sum_{m} c_{m,t}$ \\
-Proportional & $D{=}\ell$ & $\sum_{t}\sum_{m}\pi_m\,c_{m,t}$ \\
+Utilitarian (dB) & $D{=}\ell$ & $\sum_{t}\sum_{m}\dbinc_m(c_{m,t})$ \\
+Utilitarian (count) & $D{=}\ell$ & $\sum_{t}\sum_{m} c_{m,t}$ \\
+Proportional (dB) & $D{=}\ell$ & $\sum_{t}\sum_{m}\pi_m\,\dbinc_m(c_{m,t})$ \\
+Proportional (count) & $D{=}\ell$ & $\sum_{t}\sum_{m}\pi_m\,c_{m,t}$ \\
 Baseline & none & none \\
 \bottomrule
 \end{tabular}

@@ -29,9 +29,9 @@
 \addplot[fig-prioritarian, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-prioritarian}] table[x=N, y=prioritarian, col sep=comma] {data/solve_time.csv};
 \addlegendentry{Prioritarian}
 \addplot[fig-utilitarian, line width=0.8pt, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian, col sep=comma] {data/solve_time.csv};
-\addlegendentry{Utilitarian}
+\addlegendentry{Utilitarian (count)}
 \addplot[fig-proportional, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional, col sep=comma] {data/solve_time.csv};
-\addlegendentry{Proportional}
+\addlegendentry{Proportional (count)}
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/solve_time.csv};
 \addlegendentry{Baseline}
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});

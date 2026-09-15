@@ -68,6 +68,7 @@ CONDITION_NAMES = tuple(ORDER) + (
     "baseline",
     "prioritarian_off",                             # Prioritarian's ablation control
     "utilitarian_count", "proportional_count",      # the count-weighted encodings
+    "utilitarian_db", "proportional_db",            # the decibel encodings (Exp. 5)
 )
 
 

@@ -39,6 +39,21 @@ LADDER = (6, 8, 14, 16, 22, 24)
 GRID_N = (8, 16, 24)
 CONDS = list(F.CONDITIONS)     # the five principles, then the baseline
 PRINCIPLES = list(F.ORDER)
+
+# Experiment 5: the decibel forms of the two objective principles join the ladder plots
+# as their own series -- same colour and marker as the count form, densely dashed.
+DB_METRICS = os.path.join(HERE, "results", "fleet_db_metrics.json")
+ENCODING = os.path.join(HERE, "results", "encoding.json")
+DBF = {"utilitarian": "utilitarian_db", "proportional": "proportional_db"}
+SERIES = ["equal", "sufficientarian", "prioritarian", "utilitarian", "utilitarian_db",
+          "proportional", "proportional_db", "baseline"]
+LABEL = dict(F.CLABEL, utilitarian="Utilitarian (count)",
+             proportional="Proportional (count)", utilitarian_db="Utilitarian (dB)",
+             proportional_db="Proportional (dB)")
+
+
+def base_of(c):
+    return c[:-3] if c.endswith("_db") else c
 TIERS = (45, 55, 65)
 NAN = float("nan")
 
@@ -68,6 +83,12 @@ def load_metrics():
     missing = [(c, n) for c in CONDS for n in LADDER if (c, n) not in I]
     if missing:
         raise SystemExit(f"cells missing from {METRICS}: {missing}")
+    # Decibel-form cells (encoding.py builds them through the same metrics pipeline,
+    # joined to the ladder's baseline). A cell the sweep never reached is simply absent.
+    if os.path.exists(DB_METRICS):
+        for m in json.load(io.open(DB_METRICS, encoding="utf-8")):
+            if m.get("condition") in DBF.values() and m.get("N") in LADDER:
+                I[(m["condition"], m["N"])] = m
     return I
 
 
@@ -94,7 +115,9 @@ def write_tex(name, body):
 
 
 def proven(m):
-    return m.get("optimality") == "optimal"
+    # All four orderings: a decibel cell with fewer runs has no band, and aggregate()
+    # would otherwise call a one-run cell "optimal" and plot it as a filled, band-free mean.
+    return m.get("optimality") == "optimal" and m.get("runs", 4) == 4
 
 
 def series(I, field, conds):
@@ -105,7 +128,10 @@ def series(I, field, conds):
     for n in LADDER:
         row = [n]
         for c in conds:
-            m = I[(c, n)]
+            m = I.get((c, n))
+            if m is None:                 # a decibel cell the sweep never reached
+                row += [NAN] * 4
+                continue
             v = m.get(field)
             lo, hi = m.get(field + "_min", v), m.get(field + "_max", v)
             row += [v, lo, hi, NAN] if proven(m) else [NAN, NAN, NAN, v]
@@ -136,7 +162,7 @@ def has_open(header, rows, c):
 def export_metric_panels(I):
     out = {}
     for field, _lab, with_base in PANELS:
-        conds = CONDS if with_base else PRINCIPLES
+        conds = SERIES if with_base else [c for c in SERIES if c != "baseline"]
         h, r = series(I, field, conds)
         write_csv(f"mvn_{field}.csv", h, r)
         out[field] = (h, r, conds)
@@ -238,27 +264,34 @@ def style_tex():
 def _plot_lines(csv, header, rows, conds, tag, legend):
     """Bands first, then one line per condition, then any verified-feasible markers."""
     out = []
-    for c in conds:
+    # A decibel-form series takes its principle's colour and marker, densely dashed; a
+    # series with no data at all (a form the sweep never reached) is left out entirely,
+    # legend entry included.
+    live = [c for c in conds if finite(col(header, rows, c)) or has_open(header, rows, c)]
+    for c in live:
         if not has_band(header, rows, c):
             continue
+        b = base_of(c)
         out += [rf"\addplot[name path={tag}{c}hi, draw=none, forget plot] "
                 rf"table[x=N, y={c}_hi, col sep=comma] {{{csv}}};",
                 rf"\addplot[name path={tag}{c}lo, draw=none, forget plot] "
                 rf"table[x=N, y={c}_lo, col sep=comma] {{{csv}}};",
-                rf"\addplot[fig-{c}, fill opacity=0.16, draw=none, forget plot] "
+                rf"\addplot[fig-{b}, fill opacity=0.16, draw=none, forget plot] "
                 rf"fill between[of={tag}{c}hi and {tag}{c}lo];"]
-    for c in conds:
-        full, hollow, rot = PGF_MARK[F.CMARK[c]]
-        mo = ", ".join(x for x in ("solid", f"fill=fig-{c}", rot) if x)
-        dash = ", dashed" if c == "baseline" else ""
-        out.append(rf"\addplot[fig-{c}, line width=0.8pt{dash}, mark={full}, "
+    for c in live:
+        b = base_of(c)
+        full, hollow, rot = PGF_MARK[F.CMARK[b]]
+        mo = ", ".join(x for x in ("solid", f"fill=fig-{b}", rot) if x)
+        dash = (", dashed" if c == "baseline" else
+                ", densely dashed" if c != b else "")
+        out.append(rf"\addplot[fig-{b}, line width=0.8pt{dash}, mark={full}, "
                    rf"mark size=1.6pt, mark options={{{mo}}}] "
                    rf"table[x=N, y={c}, col sep=comma] {{{csv}}};")
         if legend:
-            out.append(rf"\addlegendentry{{{F.CLABEL[c]}}}")
+            out.append(rf"\addlegendentry{{{LABEL[c]}}}")
         if has_open(header, rows, c):
             mo = ", ".join(x for x in ("solid", "fill=white", rot) if x)
-            out.append(rf"\addplot[fig-{c}, only marks, mark={hollow}, mark size=1.6pt, "
+            out.append(rf"\addplot[fig-{b}, only marks, mark={hollow}, mark size=1.6pt, "
                        rf"mark options={{{mo}}}, forget plot] "
                        rf"table[x=N, y={c}_open, col sep=comma] {{{csv}}};")
     return out
@@ -280,7 +313,7 @@ def metric_vs_N_tex(panels):
         if i >= 3:
             opts.append(r"xlabel={fleet size $N$}")
         if i == 0:
-            opts += [r"legend to name=mvnlegend", "legend columns=6",
+            opts += [r"legend to name=mvnlegend", "legend columns=4",
                      r"legend style={/tikz/every even column/.append style="
                      r"{column sep=6pt}}"]
         L.append(r"\nextgroupplot[" + ", ".join(opts) + "]")
@@ -429,8 +462,103 @@ def routes_grid_tex(panels, prot):
     write_tex("routes_grid.tex", "\n".join(L) + "\n")
 
 
+def export_exp5(I, enc):
+    """Experiment 5 data: quality loss and wall time per N, both read off encoding.json
+    (loss) and the two metrics files (count walls from the ladder, decibel walls from
+    encoding.py's per-ordering record)."""
+    cells = {(c["principle"], c["N"]): c for c in enc["cells"]}
+    lh = ["N"] + [f"{p}{s}" for p in DBF for s in ("", "_lo", "_hi", "_open")]
+    lr = []
+    for n in LADDER:
+        row = [n]
+        for p in DBF:
+            c = cells.get((p, n), {})
+            if "loss" in c:                  # J* proven: the loss itself, with its band
+                row += [100 * c["loss"]["mean"], 100 * c["loss"]["min"],
+                        100 * c["loss"]["max"], NAN]
+            elif "loss_lower_bound" in c:    # no decibel ordering proved: a lower bound
+                row += [NAN, NAN, NAN, 100 * c["loss_lower_bound"]["mean"]]
+            else:
+                row += [NAN] * 4
+        lr.append(row)
+    write_csv("exp5_loss.csv", lh, lr)
+
+    conds = ["utilitarian", "utilitarian_db", "proportional", "proportional_db"]
+    wh = ["N"] + [f"{c}{s}" for c in conds for s in ("", "_lo", "_hi", "_open")]
+    wr = []
+    for n in LADDER:
+        row = [n]
+        for c in conds:
+            if c in DBF:                     # count form: the ladder cell
+                m = I[(c, n)]
+                row += [m["wall"], m.get("wall_min", m["wall"]), m.get("wall_max", m["wall"]),
+                        NAN]
+                continue
+            e = cells.get((base_of(c), n), {})
+            wd = e.get("wall_db")
+            walls = list((e.get("db_wall") or {}).values())
+            if wd and len(e.get("db_proven", [])) == 4:
+                row += [wd["mean"], wd["min"], wd["max"], NAN]
+            elif walls:                      # not all proven: elapsed, a lower bound
+                row += [NAN, NAN, NAN, sum(walls) / len(walls)]
+            else:
+                row += [NAN] * 4
+        wr.append(row)
+    write_csv("exp5_wall.csv", wh, wr)
+    return (lh, lr), (wh, wr), enc.get("H_s")
+
+
+def exp5_tex(loss, wall, H):
+    lh, lr = loss
+    wh, wr = wall
+    L = [r"\begin{tikzpicture}",
+         r"\begin{groupplot}[group style={group size=2 by 1, horizontal sep=0.72in},",
+         r"    paperaxis, width=2.7in, height=1.25in, xlabel={fleet size $N$},",
+         rf"    {XTICKS}]",
+         r"\nextgroupplot[ylabel={loss on $J_{\mathrm{dB}}$ (\%)}, ymin=0,",
+         r"    legend columns=2, legend style={at={(0.5,-0.42)}, anchor=north,",
+         r"    /tikz/every even column/.append style={column sep=6pt}}]"]
+    csv = "data/exp5_loss.csv"
+    for p in DBF:
+        b = p
+        full, hollow, rot = PGF_MARK[F.CMARK[b]]
+        if has_band(lh, lr, p):
+            L += [rf"\addplot[name path=l{p}hi, draw=none, forget plot] "
+                  rf"table[x=N, y={p}_hi, col sep=comma] {{{csv}}};",
+                  rf"\addplot[name path=l{p}lo, draw=none, forget plot] "
+                  rf"table[x=N, y={p}_lo, col sep=comma] {{{csv}}};",
+                  rf"\addplot[fig-{b}, fill opacity=0.16, draw=none, forget plot] "
+                  rf"fill between[of=l{p}hi and l{p}lo];"]
+        mo = ", ".join(x for x in ("solid", f"fill=fig-{b}", rot) if x)
+        L += [rf"\addplot[fig-{b}, line width=0.8pt, mark={full}, mark size=1.6pt, "
+              rf"mark options={{{mo}}}] table[x=N, y={p}, col sep=comma] {{{csv}}};",
+              rf"\addlegendentry{{{F.CLABEL[b]}}}"]
+        if has_open(lh, lr, p):
+            mo = ", ".join(x for x in ("solid", "fill=white", rot) if x)
+            L.append(rf"\addplot[fig-{b}, only marks, mark={hollow}, mark size=1.6pt, "
+                     rf"mark options={{{mo}}}, forget plot] "
+                     rf"table[x=N, y={p}_open, col sep=comma] {{{csv}}};")
+    L += [r"\nextgroupplot[ylabel={wall time (s)}, ymode=log,",
+          r"    legend columns=2, legend style={at={(0.5,-0.42)}, anchor=north,",
+          r"    /tikz/every even column/.append style={column sep=6pt}}]"]
+    L += _plot_lines("data/exp5_wall.csv", wh, wr,
+                     ["utilitarian", "utilitarian_db", "proportional", "proportional_db"],
+                     "w", legend=True)
+    if H:
+        L += [rf"\addplot[draw=none, forget plot] coordinates {{(6,{H:.0f}) (24,{H:.0f})}};",
+              rf"\draw[black!50, dashed, line width=0.5pt] ({{rel axis cs:0,0}}|-{{axis cs:6,{H:.0f}}})"
+              rf" -- ({{rel axis cs:1,0}}|-{{axis cs:6,{H:.0f}}});",
+              rf"\node[anchor=south west, black!60, inner sep=1pt] at "
+              rf"({{rel axis cs:0,0}}|-{{axis cs:6,{H:.0f}}}) {{$H$}};"]
+    L += [r"\end{groupplot}", r"\end{tikzpicture}"]
+    write_tex("exp5.tex", "\n".join(L) + "\n")
+
+
 def main():
     I = load_metrics()
+    if os.path.exists(ENCODING):
+        enc = json.load(io.open(ENCODING, encoding="utf-8"))
+        exp5_tex(*export_exp5(I, enc))
     panels = export_metric_panels(I)
     st = export_solve_time(I)
     export_capacity(I)
@@ -441,7 +569,8 @@ def main():
     capacity_tex()
     routes_grid_tex(rp, prot)
     n_csv = len([f for f in os.listdir(DATA) if f.endswith(".csv")])
-    print(f"wrote {n_csv} CSVs to {os.path.relpath(DATA, HERE)} and 5 .tex files to "
+    n_tex = len([f for f in os.listdir(FIGS) if f.endswith(".tex")])
+    print(f"wrote {n_csv} CSVs to {os.path.relpath(DATA, HERE)} and {n_tex} .tex files to "
           f"{os.path.relpath(FIGS, HERE)} (N <= {max(LADDER)})")
 
 

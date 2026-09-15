@@ -1,0 +1,4108 @@
+{
+ "out": "results/fleet_db.jsonl",
+ "par": 8,
+ "wall_kill": 1000000000,
+ "checkpoint_s": 60,
+ "setup": {
+  "name": "D6_protA",
+  "slack": null,
+  "limit": 6,
+  "hard_cap": 6,
+  "aircraft_db": 45.0,
+  "demand": [
+   4,
+   2,
+   2
+  ],
+  "protected": [
+   13,
+   3,
+   7
+  ],
+  "ambient_kind": "default",
+  "objective_encoding": "count"
+ },
+ "K": 4,
+ "jobs": [
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.25|p0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     11,
+     5,
+     18,
+     5,
+     11
+    ],
+    "endPositions": [
+     11,
+     18,
+     18,
+     5,
+     11,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.25|p1",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     5,
+     11,
+     18,
+     5,
+     18,
+     11
+    ],
+    "endPositions": [
+     18,
+     5,
+     5,
+     11,
+     11,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.25|p2",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     11,
+     5,
+     11,
+     18,
+     18,
+     5
+    ],
+    "endPositions": [
+     18,
+     18,
+     5,
+     5,
+     11,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.25|p3",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     11,
+     11,
+     5,
+     5,
+     18
+    ],
+    "endPositions": [
+     5,
+     18,
+     5,
+     18,
+     11,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.25|p0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     11,
+     5,
+     18,
+     5,
+     11
+    ],
+    "endPositions": [
+     11,
+     18,
+     18,
+     5,
+     11,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.25|p1",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     5,
+     11,
+     18,
+     5,
+     18,
+     11
+    ],
+    "endPositions": [
+     18,
+     5,
+     5,
+     11,
+     11,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.25|p2",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     11,
+     5,
+     11,
+     18,
+     18,
+     5
+    ],
+    "endPositions": [
+     18,
+     18,
+     5,
+     5,
+     11,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.25|p3",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     11,
+     11,
+     5,
+     5,
+     18
+    ],
+    "endPositions": [
+     5,
+     18,
+     5,
+     18,
+     11,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.5|p0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     18,
+     11,
+     11,
+     5,
+     18,
+     5,
+     11
+    ],
+    "endPositions": [
+     11,
+     11,
+     18,
+     18,
+     18,
+     5,
+     11,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.5|p1",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     5,
+     18,
+     11,
+     11,
+     11,
+     5,
+     18
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     18,
+     5,
+     18,
+     18,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.5|p2",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     11,
+     5,
+     11,
+     11,
+     18,
+     5,
+     18
+    ],
+    "endPositions": [
+     11,
+     5,
+     18,
+     18,
+     18,
+     11,
+     11,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.5|p3",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     11,
+     18,
+     18,
+     18,
+     5,
+     11,
+     11,
+     5
+    ],
+    "endPositions": [
+     18,
+     5,
+     11,
+     11,
+     11,
+     18,
+     5,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.5|p0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     18,
+     11,
+     11,
+     5,
+     18,
+     5,
+     11
+    ],
+    "endPositions": [
+     11,
+     11,
+     18,
+     18,
+     18,
+     5,
+     11,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.5|p1",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     5,
+     18,
+     11,
+     11,
+     11,
+     5,
+     18
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     18,
+     5,
+     18,
+     18,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.5|p2",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     11,
+     5,
+     11,
+     11,
+     18,
+     5,
+     18
+    ],
+    "endPositions": [
+     11,
+     5,
+     18,
+     18,
+     18,
+     11,
+     11,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.5|p3",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     11,
+     18,
+     18,
+     18,
+     5,
+     11,
+     11,
+     5
+    ],
+    "endPositions": [
+     18,
+     5,
+     11,
+     11,
+     11,
+     18,
+     5,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.75|p0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     18,
+     18,
+     11,
+     11,
+     11,
+     5,
+     5,
+     18,
+     18,
+     5,
+     5,
+     11,
+     11
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     18,
+     18,
+     18,
+     18,
+     18,
+     5,
+     5,
+     11,
+     11,
+     5,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.75|p0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     18,
+     18,
+     11,
+     11,
+     11,
+     5,
+     5,
+     18,
+     18,
+     5,
+     5,
+     11,
+     11
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     18,
+     18,
+     18,
+     18,
+     18,
+     5,
+     5,
+     11,
+     11,
+     5,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.0|p0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     18,
+     18,
+     18,
+     11,
+     11,
+     11,
+     11,
+     5,
+     5,
+     18,
+     18,
+     5,
+     5,
+     11,
+     11
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     11,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     5,
+     5,
+     11,
+     11,
+     5,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.0|p0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     18,
+     18,
+     18,
+     11,
+     11,
+     11,
+     11,
+     5,
+     5,
+     18,
+     18,
+     5,
+     5,
+     11,
+     11
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     11,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     5,
+     5,
+     11,
+     11,
+     5,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.25|p0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     18,
+     18,
+     18,
+     18,
+     11,
+     11,
+     11,
+     11,
+     11,
+     5,
+     5,
+     5,
+     18,
+     18,
+     18,
+     5,
+     5,
+     5,
+     11,
+     11,
+     11
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     11,
+     11,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     5,
+     5,
+     5,
+     11,
+     11,
+     11,
+     5,
+     5,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.25|p0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     18,
+     18,
+     18,
+     18,
+     11,
+     11,
+     11,
+     11,
+     11,
+     5,
+     5,
+     5,
+     18,
+     18,
+     18,
+     5,
+     5,
+     5,
+     11,
+     11,
+     11
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     11,
+     11,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     5,
+     5,
+     5,
+     11,
+     11,
+     11,
+     5,
+     5,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.5|p0",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     11,
+     11,
+     11,
+     11,
+     11,
+     11,
+     5,
+     5,
+     5,
+     18,
+     18,
+     18,
+     5,
+     5,
+     5,
+     11,
+     11,
+     11
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     11,
+     11,
+     11,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     5,
+     5,
+     5,
+     11,
+     11,
+     11,
+     5,
+     5,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.5|p0",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 0,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     11,
+     11,
+     11,
+     11,
+     11,
+     11,
+     5,
+     5,
+     5,
+     18,
+     18,
+     18,
+     5,
+     5,
+     5,
+     11,
+     11,
+     11
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     11,
+     11,
+     11,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     18,
+     5,
+     5,
+     5,
+     11,
+     11,
+     11,
+     5,
+     5,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.75|p1",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     11,
+     5,
+     18,
+     18,
+     5,
+     11,
+     5,
+     18,
+     11,
+     18,
+     11,
+     11,
+     18,
+     5
+    ],
+    "endPositions": [
+     18,
+     11,
+     11,
+     5,
+     11,
+     5,
+     18,
+     11,
+     18,
+     5,
+     5,
+     18,
+     11,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.75|p1",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     11,
+     5,
+     18,
+     18,
+     5,
+     11,
+     5,
+     18,
+     11,
+     18,
+     11,
+     11,
+     18,
+     5
+    ],
+    "endPositions": [
+     18,
+     11,
+     11,
+     5,
+     11,
+     5,
+     18,
+     11,
+     18,
+     5,
+     5,
+     18,
+     11,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.0|p1",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     5,
+     11,
+     11,
+     5,
+     11,
+     18,
+     11,
+     18,
+     11,
+     11,
+     18,
+     5,
+     5,
+     18,
+     18,
+     18
+    ],
+    "endPositions": [
+     11,
+     5,
+     18,
+     18,
+     18,
+     11,
+     18,
+     5,
+     18,
+     5,
+     11,
+     18,
+     11,
+     11,
+     5,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.0|p1",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     5,
+     11,
+     11,
+     5,
+     11,
+     18,
+     11,
+     18,
+     11,
+     11,
+     18,
+     5,
+     5,
+     18,
+     18,
+     18
+    ],
+    "endPositions": [
+     11,
+     5,
+     18,
+     18,
+     18,
+     11,
+     18,
+     5,
+     18,
+     5,
+     11,
+     18,
+     11,
+     11,
+     5,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.25|p1",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     11,
+     11,
+     5,
+     18,
+     11,
+     5,
+     5,
+     5,
+     18,
+     11,
+     11,
+     11,
+     18,
+     18,
+     11,
+     11,
+     18,
+     18,
+     5,
+     18,
+     5,
+     18
+    ],
+    "endPositions": [
+     5,
+     18,
+     18,
+     11,
+     18,
+     18,
+     11,
+     11,
+     11,
+     18,
+     5,
+     18,
+     5,
+     11,
+     5,
+     18,
+     5,
+     11,
+     11,
+     5,
+     18,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.25|p1",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     11,
+     11,
+     5,
+     18,
+     11,
+     5,
+     5,
+     5,
+     18,
+     11,
+     11,
+     11,
+     18,
+     18,
+     11,
+     11,
+     18,
+     18,
+     5,
+     18,
+     5,
+     18
+    ],
+    "endPositions": [
+     5,
+     18,
+     18,
+     11,
+     18,
+     18,
+     11,
+     11,
+     11,
+     18,
+     5,
+     18,
+     5,
+     11,
+     5,
+     18,
+     5,
+     11,
+     11,
+     5,
+     18,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.5|p1",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     11,
+     18,
+     18,
+     11,
+     11,
+     18,
+     11,
+     11,
+     5,
+     18,
+     5,
+     11,
+     11,
+     5,
+     11,
+     18,
+     5,
+     5,
+     18,
+     11,
+     18,
+     18,
+     5,
+     18
+    ],
+    "endPositions": [
+     18,
+     5,
+     11,
+     5,
+     18,
+     11,
+     18,
+     18,
+     18,
+     5,
+     11,
+     5,
+     18,
+     18,
+     5,
+     11,
+     11,
+     11,
+     11,
+     18,
+     11,
+     5,
+     18,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.5|p1",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 1,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     11,
+     18,
+     18,
+     11,
+     11,
+     18,
+     11,
+     11,
+     5,
+     18,
+     5,
+     11,
+     11,
+     5,
+     11,
+     18,
+     5,
+     5,
+     18,
+     11,
+     18,
+     18,
+     5,
+     18
+    ],
+    "endPositions": [
+     18,
+     5,
+     11,
+     5,
+     18,
+     11,
+     18,
+     18,
+     18,
+     5,
+     11,
+     5,
+     18,
+     18,
+     5,
+     11,
+     11,
+     11,
+     11,
+     18,
+     11,
+     5,
+     18,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.75|p2",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     18,
+     5,
+     11,
+     11,
+     18,
+     5,
+     11,
+     18,
+     11,
+     5,
+     5,
+     11,
+     18
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     18,
+     5,
+     11,
+     11,
+     18,
+     5,
+     5,
+     18,
+     18,
+     18,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.75|p2",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     18,
+     5,
+     11,
+     11,
+     18,
+     5,
+     11,
+     18,
+     11,
+     5,
+     5,
+     11,
+     18
+    ],
+    "endPositions": [
+     11,
+     11,
+     11,
+     18,
+     5,
+     11,
+     11,
+     18,
+     5,
+     5,
+     18,
+     18,
+     18,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.0|p2",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     18,
+     11,
+     18,
+     18,
+     5,
+     11,
+     18,
+     11,
+     11,
+     5,
+     5,
+     11,
+     18,
+     11,
+     5
+    ],
+    "endPositions": [
+     11,
+     11,
+     18,
+     5,
+     5,
+     11,
+     5,
+     11,
+     18,
+     18,
+     18,
+     11,
+     5,
+     11,
+     18,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.0|p2",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     18,
+     11,
+     18,
+     18,
+     5,
+     11,
+     18,
+     11,
+     11,
+     5,
+     5,
+     11,
+     18,
+     11,
+     5
+    ],
+    "endPositions": [
+     11,
+     11,
+     18,
+     5,
+     5,
+     11,
+     5,
+     11,
+     18,
+     18,
+     18,
+     11,
+     5,
+     11,
+     18,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.25|p2",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     18,
+     5,
+     18,
+     11,
+     18,
+     5,
+     11,
+     5,
+     18,
+     11,
+     18,
+     5,
+     11,
+     11,
+     11,
+     11,
+     18,
+     18,
+     5,
+     11,
+     5
+    ],
+    "endPositions": [
+     11,
+     5,
+     11,
+     5,
+     5,
+     11,
+     11,
+     18,
+     18,
+     11,
+     18,
+     11,
+     18,
+     18,
+     5,
+     18,
+     18,
+     5,
+     11,
+     11,
+     5,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.25|p2",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     18,
+     5,
+     18,
+     11,
+     18,
+     5,
+     11,
+     5,
+     18,
+     11,
+     18,
+     5,
+     11,
+     11,
+     11,
+     11,
+     18,
+     18,
+     5,
+     11,
+     5
+    ],
+    "endPositions": [
+     11,
+     5,
+     11,
+     5,
+     5,
+     11,
+     11,
+     18,
+     18,
+     11,
+     18,
+     11,
+     18,
+     18,
+     5,
+     18,
+     18,
+     5,
+     11,
+     11,
+     5,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.5|p2",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     11,
+     5,
+     5,
+     18,
+     11,
+     18,
+     11,
+     5,
+     18,
+     11,
+     18,
+     18,
+     11,
+     18,
+     5,
+     11,
+     11,
+     18,
+     5,
+     11,
+     11,
+     18,
+     5
+    ],
+    "endPositions": [
+     11,
+     18,
+     18,
+     11,
+     11,
+     18,
+     5,
+     18,
+     11,
+     11,
+     5,
+     5,
+     11,
+     18,
+     11,
+     18,
+     5,
+     5,
+     11,
+     11,
+     18,
+     18,
+     5,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.5|p2",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 2,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     11,
+     5,
+     5,
+     18,
+     11,
+     18,
+     11,
+     5,
+     18,
+     11,
+     18,
+     18,
+     11,
+     18,
+     5,
+     11,
+     11,
+     18,
+     5,
+     11,
+     11,
+     18,
+     5
+    ],
+    "endPositions": [
+     11,
+     18,
+     18,
+     11,
+     11,
+     18,
+     5,
+     18,
+     11,
+     11,
+     5,
+     5,
+     11,
+     18,
+     11,
+     18,
+     5,
+     5,
+     11,
+     11,
+     18,
+     18,
+     5,
+     18
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|0.75|p3",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     5,
+     11,
+     11,
+     11,
+     18,
+     5,
+     18,
+     18,
+     11,
+     5,
+     18,
+     5,
+     11,
+     18
+    ],
+    "endPositions": [
+     18,
+     18,
+     18,
+     5,
+     11,
+     18,
+     11,
+     11,
+     5,
+     11,
+     5,
+     11,
+     18,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|0.75|p3",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 0.75
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     5,
+     11,
+     11,
+     11,
+     18,
+     5,
+     18,
+     18,
+     11,
+     5,
+     18,
+     5,
+     11,
+     18
+    ],
+    "endPositions": [
+     18,
+     18,
+     18,
+     5,
+     11,
+     18,
+     11,
+     11,
+     5,
+     11,
+     5,
+     11,
+     18,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.0|p3",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     11,
+     5,
+     5,
+     11,
+     5,
+     11,
+     18,
+     11,
+     18,
+     11,
+     18,
+     18,
+     5,
+     18,
+     11
+    ],
+    "endPositions": [
+     11,
+     5,
+     18,
+     11,
+     18,
+     18,
+     18,
+     11,
+     18,
+     5,
+     18,
+     11,
+     11,
+     11,
+     5,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.0|p3",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.0
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     11,
+     5,
+     5,
+     11,
+     5,
+     11,
+     18,
+     11,
+     18,
+     11,
+     18,
+     18,
+     5,
+     18,
+     11
+    ],
+    "endPositions": [
+     11,
+     5,
+     18,
+     11,
+     18,
+     18,
+     18,
+     11,
+     18,
+     5,
+     18,
+     11,
+     11,
+     11,
+     5,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.25|p3",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     18,
+     11,
+     18,
+     5,
+     11,
+     11,
+     11,
+     11,
+     18,
+     11,
+     11,
+     18,
+     5,
+     11,
+     5,
+     18,
+     5,
+     18,
+     5,
+     5,
+     18,
+     18
+    ],
+    "endPositions": [
+     11,
+     5,
+     11,
+     11,
+     18,
+     5,
+     18,
+     18,
+     11,
+     18,
+     5,
+     11,
+     18,
+     18,
+     11,
+     5,
+     18,
+     5,
+     18,
+     11,
+     5,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.25|p3",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.25
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     18,
+     11,
+     18,
+     5,
+     11,
+     11,
+     11,
+     11,
+     18,
+     11,
+     11,
+     18,
+     5,
+     11,
+     5,
+     18,
+     5,
+     18,
+     5,
+     5,
+     18,
+     18
+    ],
+    "endPositions": [
+     11,
+     5,
+     11,
+     11,
+     18,
+     5,
+     18,
+     18,
+     11,
+     18,
+     5,
+     11,
+     18,
+     18,
+     11,
+     5,
+     18,
+     5,
+     18,
+     11,
+     5,
+     11
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|utilitarian_db|1.5|p3",
+   "cfg": {
+    "principle": "utilitarian",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "utilNoiseMode": true,
+    "startPositions": [
+     11,
+     5,
+     11,
+     11,
+     5,
+     18,
+     11,
+     18,
+     18,
+     5,
+     18,
+     5,
+     18,
+     11,
+     18,
+     18,
+     11,
+     18,
+     18,
+     5,
+     11,
+     11,
+     5,
+     11
+    ],
+    "endPositions": [
+     18,
+     11,
+     18,
+     18,
+     18,
+     11,
+     5,
+     11,
+     11,
+     11,
+     5,
+     18,
+     11,
+     18,
+     11,
+     5,
+     18,
+     5,
+     11,
+     18,
+     18,
+     5,
+     11,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "key": "fleet_db|D6_protA|proportional_db|1.5|p3",
+   "cfg": {
+    "principle": "proportional",
+    "who": "communities",
+    "limit": 6,
+    "demand_factor": 1.5
+   },
+   "timeout_ms": 1000000000,
+   "setup": {
+    "name": "D6_protA",
+    "slack": null,
+    "limit": 6,
+    "hard_cap": 6,
+    "aircraft_db": 45.0,
+    "demand": [
+     4,
+     2,
+     2
+    ],
+    "protected": [
+     13,
+     3,
+     7
+    ],
+    "ambient_kind": "default",
+    "objective_encoding": "count"
+   },
+   "perm": 3,
+   "req": {
+    "D": 6.0,
+    "proximityMode": "noise",
+    "startPositions": [
+     11,
+     5,
+     11,
+     11,
+     5,
+     18,
+     11,
+     18,
+     18,
+     5,
+     18,
+     5,
+     18,
+     11,
+     18,
+     18,
+     11,
+     18,
+     18,
+     5,
+     11,
+     11,
+     5,
+     11
+    ],
+    "endPositions": [
+     18,
+     11,
+     18,
+     18,
+     18,
+     11,
+     5,
+     11,
+     11,
+     11,
+     5,
+     18,
+     11,
+     18,
+     11,
+     5,
+     18,
+     5,
+     11,
+     18,
+     18,
+     5,
+     11,
+     5
+    ],
+    "aircraftMultipliers": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  }
+ ]
+}

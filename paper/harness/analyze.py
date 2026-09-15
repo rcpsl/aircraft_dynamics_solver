@@ -38,7 +38,7 @@ ORDER = ["equal", "sufficientarian", "prioritarian", "utilitarian", "proportiona
 # quietly seat a 600 s incumbent in an unlimited-budget table, which is the error the
 # whole redirection exists to avoid. The exemption blocks it in both directions: these
 # files are neither upgraded from, nor used to upgrade.
-MERGE_EXEMPT = {"reps", "pilot", "fleet", "fleet_default", "screen", "screen3",
+MERGE_EXEMPT = {"reps", "pilot", "fleet", "fleet_default", "screen", "screen3", "fleet_db",
                 "fleet_main", "slack",
                 "captight", "perm"}
 

@@ -254,11 +254,60 @@ def _bfs(adj, src, dst, M):
     return float('inf')
 
 
+def _z3num(e):
+    """A Z3 numeral as a float, or None for -oo, epsilons and anything symbolic."""
+    import z3
+    try:
+        if z3.is_int_value(e):
+            return float(e.as_long())
+        if z3.is_rational_value(e):
+            return e.numerator_as_long() / e.denominator_as_long()
+        if z3.is_algebraic_value(e):
+            return float(e.as_decimal(12).rstrip("?"))
+    except Exception:
+        pass
+    return None
+
+
+def capture_bound(S, sink):
+    """At a phase-2 salvage, record Z3's lower bound and the incumbent's tier-1 value.
+
+    The solver is not edited. Its salvage path calls the module-level _best_so_far(opt,
+    ...) in the solving thread, right after the interrupted check returns, so wrapping
+    that one name hands this module the Optimize object at exactly the moment the bound
+    is final -- read-only queries, same thread, no cross-thread Z3 access (D2). Objective
+    0 is tier 1, the principle: the solver calls minimize() on it first. Both values are
+    in the solver's normalised units, so their ratio (the gap) is unit-free.
+    """
+    import z3
+    orig = S._best_so_far
+
+    def wrapped(opt, L, N, T):
+        try:
+            objs = opt.objectives()
+            if objs:
+                # Public handle for objective 0 (tier 1): OptimizeObjective(opt, index,
+                # is_max).lower() is Z3_optimize_get_lower wrapped as an expression.
+                lo = z3.OptimizeObjective(opt, 0, False).lower()
+                sink["tier1_lower_raw"] = str(lo)[:200]
+                sink["tier1_lower"] = _z3num(lo)
+                inc = opt.model().eval(objs[0], model_completion=True)
+                sink["tier1_incumbent_raw"] = str(inc)[:200]
+                sink["tier1_incumbent"] = _z3num(inc)
+        except Exception as e:
+            sink["tier1_bound_error"] = f"{type(e).__name__}: {e}"[:300]
+        return orig(opt, L, N, T)
+
+    S._best_so_far = wrapped
+
+
 def run(job):
     sys.path.insert(0, HERE)
     import payload as P
 
     S = load_solver()
+    bound = {}
+    capture_bound(S, bound)
     req = P.build_request(**job["cfg"])
     req.update(job.get("req", {}))
 
@@ -364,6 +413,7 @@ def run(job):
     out["wall"] = round(time.monotonic() - t0, 2)
     if ck.interrupted:
         out["stoppedEarly"] = ck.stop_reason
+    out.update(bound)          # only a salvaged (partial) phase 2 fills it
     ck.finish()
 
     if r2["status"] == "phase2_failed":

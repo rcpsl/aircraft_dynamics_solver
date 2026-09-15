@@ -29,7 +29,7 @@ both change as the fleet grows. Whether a principle changes the routing, what it
 and where it puts the noise are therefore functions of the fleet size $N$, and a
 comparison at one $N$ reports one point on each. This paper measures those functions on a
 $5\times5$ map of Austin, TX, for five principles and a no-fairness baseline, from $N=6$
-to $N=24$. Its contributions are three measurements:
+to $N=24$. Its contributions are four measurements:
 \begin{enumerate}
 \item routing and congestion against $N$ (Section~\ref{sec:routing});
 \item travel time and added noise against $N$, each difference between conditions tested
@@ -37,5 +37,8 @@ to $N=24$. Its contributions are three measurements:
       through the closed-form capacity a decibel cap grants a tile
       (Sections~\ref{sec:travel} and~\ref{sec:noise});
 \item the solve time of each principle across the ladder, every cell proven optimal
-      (Section~\ref{sec:tractability}).
+      (Section~\ref{sec:tractability});
+\item the trade-off between the exact decibel encoding of Utilitarian and Proportional and
+      a count abstraction of it: the loss on the decibel objective against solve time and
+      reach (Section~\ref{sec:exp5}).
 \end{enumerate}
