@@ -105,6 +105,12 @@ report below; everything else there still applies.
   * **Checks:** three new `verify_sec4` checks cover every new number.
   * **Left as is:**
     * Fig. 4 still has no decibel series; its times are in Fig. 5.
+* **Abstract tightened from 271 to 240 words.** The count treats a math expression or a
+  unit as one word; the PDF text layer counts 292, because it splits "N = 6" into three.
+  * Every claim and number is kept. Two sentences were merged and one list shortened.
+  * The decibel-routing sentence now sits inside the Experiment 5 sentence.
+  * The count comes from `abstract_words.py`, written in the session scratchpad and not
+    in the repository.
     * Fig. 5's right panel plots Utilitarian (dB) at N = 16 as a hollow 34,725 s. That
       is the mean elapsed time of the proven p0 and the stopped p1. Table III quotes p0's
       proven 44,439 s (1/4).
