@@ -70,6 +70,13 @@ report below; everything else there still applies.
   * §IV-C's "0.88–1.00 under every principle" at N = 24 now says "on the ladder". The
     stopped Utilitarian (dB) run reads 0.67 there, and the verified claim was always
     about the count forms.
+* **Proposition 1 (`prop:equiv`) was removed by instruction** as redundant. The session-4
+  note below that it "stays (it is cited)" is superseded.
+  * §II keeps the claim, that Equal and Sufficientarian coincide on this instance, with
+    its one-line reason: N < M = 25 leaves a tile unoccupied, so the spread equals the
+    maximum.
+  * §IV-B now cites §II. `amsthm` and `\newtheorem{proposition}` are gone from the
+    preamble, since nothing else used them.
 
 ### Claim table: new abstract claims
 
