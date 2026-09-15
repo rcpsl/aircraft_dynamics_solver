@@ -80,7 +80,7 @@
 \addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_peak_added.csv};
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/mvn_peak_added.csv};
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
-\nextgroupplot[ylabel={Shared Tile-Timesteps}, xlabel={Fleet Size $N$}]
+\nextgroupplot[ylabel={Overlaps (2+ per Tile)}, xlabel={Fleet Size $N$}]
 \addplot[name path=p3equalhi, draw=none, forget plot] table[x=N, y=equal_hi, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \addplot[name path=p3equallo, draw=none, forget plot] table[x=N, y=equal_lo, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \addplot[fig-equal, fill opacity=0.16, draw=none, forget plot] fill between[of=p3equalhi and p3equallo];

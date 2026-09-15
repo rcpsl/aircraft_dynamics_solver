@@ -3,9 +3,9 @@
 
 We encoded five distributive principles as caps and lexicographic objectives in one
 routing solver and measured their response to fleet size on one instance, from $N=6$ to
-$N=24$, every ladder cell proven optimal under four aircraft orderings.
+$N=24$, every cell of the sweep proven optimal under four aircraft orderings.
 
-Equal and Sufficientarian pose one problem on this ladder: they keep congestion within the
+Equal and Sufficientarian pose one problem across the sweep: they keep congestion within the
 solver's indifference of the baseline at all but one cell, fix the peak at 4.77\,dB once
 the cap binds at $N=14$, and pay 2.75 to 3.00 extra fleet-hops for it from $N=22$.
 Prioritarian holds its protected communities at 0\,dB at every size, narrows the fleet's
@@ -28,7 +28,7 @@ delay is taken in the air or on the ground.
 
 Utilitarian and Proportional trade exactness for scale. Their decibel encoding prices the
 noise each principle is about and, of the runs launched, proves Utilitarian to $N=16$ and
-Proportional to $N=8$ within \SI{20}{\hour}; the count abstraction proves every ladder cell, the slowest run in
+Proportional to $N=8$ within \SI{20}{\hour}; the count abstraction proves every cell, the slowest run in
 \SI{472}{\second}. The abstraction costs 16--17\,\% on Proportional's decibel objective,
 which keeps its benefit price, and 86--118\,\% on Utilitarian's, whose count objective
 reduces to airborne time and carries no information about noise. The encoding also
