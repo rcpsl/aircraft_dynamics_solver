@@ -8,7 +8,7 @@ report below; everything else there still applies.
 | item | result |
 |---|---|
 | `tex/main.pdf` | **8 pages** (limit 8), Tectonic build, 0 unresolved references |
-| `verify_sec4.py` | **42 checks, 42 passed** |
+| `verify_sec4.py` | **45 checks, 45 passed** (42 until the encoding-consistency pass) |
 | `check_tex.py` | clean |
 | new sweep | `harness/results/fleet_db.jsonl`: Utilitarian and Proportional in decibel form on `D6_protA`, N = 6 … 24 × 4 orderings = 48 runs. Launched 2026-09-14 04:00 UTC and harvested 2026-09-15 00:02 UTC, H = 20.0 h. 19 proven, 8 harvested (verified, `partial`), 21 never launched |
 | compile time | 18 s per full build (bundle cached) |
@@ -77,6 +77,37 @@ report below; everything else there still applies.
     maximum.
   * §IV-B now cites §II. `amsthm` and `\newtheorem{proposition}` are gone from the
     preamble, since nothing else used them.
+* **Encoding-consistency pass**, by instruction, after an audit of every section and
+  figure for the count and decibel forms.
+  * **General claims now name their scope.**
+    * The abstract states up front that the ladder runs the count abstraction.
+    * §IV-A names the five principles plus the baseline instead of "six conditions of
+      Table I", which now has eight rows.
+    * §IV-C says "on the ladder".
+    * §V's design paragraph is scoped to the ladder. Its old claim, that below the cap
+      Utilitarian stays within the baseline's footprint, is false for the decibel form.
+    * §V and §I say "every ladder cell proven". §V names Proportional's form and quotes
+      the slowest count run as 472 s, matching the abstract and §IV-F.
+  * **New findings in Experiments 1–4, from the proven decibel orderings:**
+    * Utilitarian (dB) at N = 14 and 16 keeps to 6 tiles with no extra hop. It holds 12
+      and 16 aircraft-timesteps more on the ground than the baseline.
+    * Its summed noise there is 19.2 and 19.7 dB, against 35.7 and 39.3 in count form.
+      Proportional's count form comes within 0.01 dB of it, at the baseline's arrival.
+    * Both decibel forms fill the 45 dBA tier (1.00) at every proven size, against
+      0.50–0.80 in count form. Concavity is why: two aircraft over one quiet tile add
+      4.77 dB, against 6.02 dB over two tiles.
+    * §IV-E notes that Prioritarian's objective is a decibel sum over three tiles that
+      reaches zero, and points to Fig. 5 for the decibel solve times.
+    * The abstract, contribution 4 and §V each gain one sentence.
+  * **Fig. 3 caption:** a hollow marker where no ordering proved is a stopped search's
+    routing, not an optimum. This covers Utilitarian (dB) at 12 and 17 extra fleet-hops
+    at N = 22 and 24.
+  * **Checks:** three new `verify_sec4` checks cover every new number.
+  * **Left as is:**
+    * Fig. 4 still has no decibel series; its times are in Fig. 5.
+    * Fig. 5's right panel plots Utilitarian (dB) at N = 16 as a hollow 34,725 s. That
+      is the mean elapsed time of the proven p0 and the stopped p1. Table III quotes p0's
+      proven 44,439 s (1/4).
 
 ### Claim table: new abstract claims
 

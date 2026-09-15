@@ -742,6 +742,72 @@ def _(I):
     return ok, f"bad {bad}, summed at N=6 {s6}, attributable {att6}"
 
 
+def _dbm():
+    return {(m["condition"], m["N"]): m
+            for m in json.load(io.open(os.path.join(RES, "fleet_db_metrics.json"),
+                                       encoding="utf-8"))}
+
+
+@check("Exp. 1-3 report the decibel forms where an ordering proved: exactly N=6, 8 for both "
+       "and N=14, 16 for Utilitarian")
+def _(I):
+    got = sorted(k for k, m in _dbm().items() if (m.get("runs_proven") or 0) > 0)
+    want = sorted([(p + "_db", n) for p in ("utilitarian", "proportional") for n in (6, 8)]
+                  + [("utilitarian_db", 14), ("utilitarian_db", 16)])
+    return got == want, f"cells with a proven ordering {got}"
+
+
+@check("Utilitarian decibel form at N=14, 16, every ordering that ran agreeing: 6 tiles, fewer "
+       "occupied tile-timesteps than the count form, no extra hop, 12 and 16 aircraft-timesteps "
+       "more departure delay than the baseline; summed 19.2 and 19.7 dB against 35.7 and 39.3 "
+       "in count form; Proportional's count form within 0.01 dB of it at the baseline's "
+       "arrival, 12 and 16 aircraft-timesteps earlier")
+def _(I):
+    dbm = _dbm()
+    same = ("stations_touched", "occupied_tile_timesteps", "extra_vs_floor",
+            "departure_delay_total", "arrivalPenalty", "total_added")
+    bad = []
+    for n, extra, s_db, s_cnt in ((14, 12, 19.2, 35.7), (16, 16, 19.7, 39.3)):
+        a = dbm[("utilitarian_db", n)]
+        cnt, b, pc = I[("utilitarian", n)], I[("baseline", n)], I[("proportional", n)]
+        if (a.get("runs_proven") or 0) < 1:
+            bad.append((n, "no proven ordering"))
+        if a["runs"] > 1 and not all(band0(a, f) for f in same):
+            bad.append((n, "orderings disagree"))
+        if a["stations_touched"] != 6 or a["extra_vs_floor"] != 0:
+            bad.append((n, "tiles/hops"))
+        if not a["occupied_tile_timesteps"] < cnt["occupied_tile_timesteps"]:
+            bad.append((n, "occupied"))
+        if a["departure_delay_total"] - b["departure_delay_total"] != extra:
+            bad.append((n, "delay"))
+        if not (pc["arrivalPenalty"] == b["arrivalPenalty"]
+                and a["arrivalPenalty"] - pc["arrivalPenalty"] == extra):
+            bad.append((n, "arrival"))
+        if not (round(a["total_added"], 1) == s_db and round(cnt["total_added"], 1) == s_cnt
+                and abs(pc["total_added"] - a["total_added"]) < 0.01
+                and band0(pc, "total_added")):
+            bad.append((n, "summed"))
+    return not bad, f"bad {bad}"
+
+
+@check("capacity: the decibel forms fill the 45 dBA tier (1.00) at every size where an "
+       "ordering proved, against 0.50-0.80 for their count forms; two aircraft over a 45 dBA "
+       "tile add 4.77 dB against 6.02 over two")
+def _(I):
+    dbm = _dbm()
+    cells = [(p, n) for p in ("utilitarian", "proportional") for n in (6, 8)]
+    cells += [("utilitarian", 14), ("utilitarian", 16)]
+    dbv = [dbm[(p + "_db", n)]["capacity_utilisation_by_tier"]["45"] for p, n in cells]
+    cv = [I[(p, n)]["capacity_utilisation_by_tier"]["45"] for p, n in cells]
+
+    def d(k, b=45.0):
+        return 10 * math.log10(1 + k * 10 ** ((45.0 - b) / 10))
+    ok = (all(approx(x, 1.0, 1e-9) for x in dbv)
+          and (round(min(cv), 2), round(max(cv), 2)) == (0.5, 0.8)
+          and round(d(2), 2) == 4.77 and round(2 * d(1), 2) == 6.02)
+    return ok, f"decibel {dbv}, count {[round(x, 2) for x in cv]}"
+
+
 def main():
     I = load()
     print(f"{len(I)} cells on disk at N <= {max(LADDER)}\n")
