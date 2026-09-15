@@ -488,3 +488,105 @@ python verify_sec4.py && python check_tex.py
 
 Stretch not run: N = 38, 40. `fleet.jsonl` (the shipped-default ladder) is untouched and
 is the reference the paper cites in one paragraph.
+
+---
+
+# Session 5 — 2026-09-14/15 — Experiment 5: the decibel form against the count form
+
+## The sweep
+
+`results/fleet_db.jsonl`, plan `plans/fleet_db.json`. Utilitarian (`utilNoiseMode: true`)
+and Proportional (`proximityMode: "noise"`, the payload default; `validate_payload.py` 0
+mismatches) in decibel form on `D6_protA`, ordered like the ladder so ordering k pairs with
+the count cell's ordering k.
+
+* **Scale:** N = 6 … 24 × 4 orderings = 48 runs, `par = 8`, no Z3 budget.
+* **Queue:** Lane 1 (N = 6, 8) ran first. Lane 2 was queued ordering-major (D30).
+* **Launch:** 2026-09-14 04:00 UTC.
+* **Harvest:** the controller placed HOLD at 00:00:13 UTC, saw all 8 running cells in phase
+  2, and placed STOP_ALL at 00:02:13. Every worker had returned by 00:02:23, and the
+  sentinels were removed. **H = 20.0 h.**
+* **Outcome:** 19 proven, 8 harvested (verified, `partial`), 21 never launched.
+* **Checks:** objective reconstruction 27/27; `verify_sec4.py` 42/42.
+
+## Proof frontier and wall times
+
+| decibel cell | orderings proven | mean wall (proven) | count form | slowdown |
+|---|---|---|---|---|
+| Utilitarian N = 6 | 4/4 | 48.7 s | 1.6 s | 30× |
+| Utilitarian N = 8 | 4/4 | 295.6 s | 2.4 s | 124× |
+| Utilitarian N = 14 | 2/4 (p0 10,611 s, p1 14,509 s) | 3.5 h | 6.0 s | — |
+| Utilitarian N = 16 | 1/4 (p0 44,439 s) | 12.3 h | 8.5 s | — |
+| Proportional N = 6 | 4/4 | 2,655 s | 4.2 s | 625× |
+| Proportional N = 8 | 4/4 | 17,793 s | 8.2 s | 2,159× |
+
+## Every harvested run
+
+| run | elapsed | incumbent J_dB | Z3 lower bound | gap |
+|---|---|---|---|---|
+| `utilitarian_db|1.0|p1` (N = 16) | 25,010 s | 19.72 | 0.012826 (normalised), equal to incumbent | 0 %: at the optimum p0 proved, stopped in the arrival tier |
+| `utilitarian_db|1.25|p0` (N = 22) | 60,229 s | 35.03 | −∞ | unavailable |
+| `utilitarian_db|1.5|p0` (N = 24) | 54,322 s | 38.34 | −∞ | unavailable |
+| `proportional_db|0.75|p0` (N = 14) | 69,504 s | 217.15 | −∞ | unavailable |
+| `proportional_db|0.75|p1` (N = 14) | 33,609 s | 217.24 | −∞ | unavailable |
+| `proportional_db|1.0|p0` (N = 16) | 68,864 s | 222.04 | −∞ | unavailable |
+| `proportional_db|1.25|p0` (N = 22) | 59,330 s | 327.32 | −∞ | unavailable |
+| `proportional_db|1.5|p0` (N = 24) | 53,152 s | 334.30 | −∞ | unavailable |
+
+## Quality loss on the decibel objective
+
+J_dB is in dB for Utilitarian and price-weighted dB for Proportional; count means are
+over four orderings.
+
+| principle | N | J* (or best reached †) | count routing | loss |
+|---|---|---|---|---|
+| Utilitarian | 6 | 9.52 | 20.79 [17.53, 24.07] | 11.27 (118 %), attributable |
+| Utilitarian | 8 | 10.24 | 20.37 [18.36, 23.71] | 10.13 (99 %), attributable |
+| Utilitarian | 14 | 19.18 | 35.66 [31.77, 38.58] | 16.48 (86 %), attributable |
+| Utilitarian | 16 | 19.72 | 39.31 [36.01, 48.71] | 19.59 (99 %), attributable |
+| Utilitarian | 22 | 35.03 † | 54.38 | ≥ 19.35 (≥ 55.2 %) |
+| Utilitarian | 24 | 38.34 † | 53.85 | ≥ 15.51 (≥ 40.5 %) |
+| Proportional | 6 | 109.43 | 128.00 (all orderings) | 18.58 (17.0 %), attributable |
+| Proportional | 8 | 115.85 | 134.43 (all orderings) | 18.58 (16.0 %), attributable |
+| Proportional | 14 | 217.15 † | 220.00 | ≥ 2.8 (≥ 1.3 %) |
+| Proportional | 16 | 222.04 † | 224.79 | ≥ 2.8 (≥ 1.2 %) |
+| Proportional | 22 | 327.32 † | 327.34 | ≥ 0.0 |
+| Proportional | 24 | 331.37 † (the count routing) | 331.37 | ≥ 0: the count routing beats the decibel incumbent's 334.30 |
+
+## Form comparison where both are proven (decibel vs count, N = 6 / N = 8)
+
+`*` marks an attributable difference.
+
+| metric | Utilitarian | Proportional |
+|---|---|---|
+| summed added noise | 9.54 vs 20.83* / 10.25 vs 20.39* | 9.60 vs 10.92* / 10.31 vs 11.63* |
+| peak added noise | 4.77 vs 3.89 / 4.77 vs 3.89 | 4.77 vs 3.01* / 4.77 vs 3.01* |
+| occupied tile-timesteps | 10 vs 15.25* / 10 vs 16.25* | 11 vs 13* / 11 vs 13* |
+| tiles overflown | 6 vs 10 / 6 vs 9.5 | 6 vs 6 / 6 vs 6 |
+| extra fleet-hops | 0 vs 0 | 0 vs 0 |
+| departure delay | 7 vs 6* / 9 vs 8* | 9 vs 6* / 11 vs 8* |
+
+## Corrections made on the way
+
+* **The brief said the loss against a harvested incumbent is an upper bound.** It is a
+  lower bound: the optimum can only lie at or below the best routing reached.
+  `encoding.py` and the paper say lower bound. An upper bound needs a finite Z3 lower
+  bound, and Z3 gives −∞.
+* **A first draft said Proportional's count routing is "within 1.3 %" above N = 8.** N = 14
+  is 1.31 %. `verify_sec4.py` failed the check, and the text now says 1.4 %.
+* **`form_compare` once marked a one-ordering decibel cell attributable,** because
+  `aggregate()` gives it a zero-width band. Bands now require four orderings, and such
+  cells are *not testable*.
+
+## Paper state
+
+8 pages, `check_tex` clean, 42 checks. §IV-F, Table III, Fig. 5, and dB rows in Table IV.
+Details and open decisions are in `../DRAFT_REPORT.md`.
+
+## Resume
+
+```bash
+cd paper/harness
+python plans.py fleet_db && python runner.py plans/fleet_db.json   # resumes the 21 unlaunched runs
+python encoding.py && python export_plot_data.py && python verify_sec4.py && python check_tex.py
+```

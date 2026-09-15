@@ -627,6 +627,121 @@ def _(I):
     return got == want, f"{got}"
 
 
+@check("Exp. 5 Utilitarian N=14, 16: 2 and 1 decibel orderings proved in a mean of 3.5 and "
+       "12.3 h; count routings 35.66 and 39.31 dB vs J* 19.18 and 19.72, loss 86 % and 99 %, "
+       "attributable")
+def _(I):
+    got = []
+    for n in (14, 16):
+        c = _cell("utilitarian", n)
+        got.append((len(c["db_proven"]), round(c["wall_db"]["mean"] / 3600, 1),
+                    round(c["J_count"]["mean"], 2), round(c["J_star"], 2),
+                    round(100 * c["loss"]["mean"]), c["loss_attributable"]))
+    return got == [(2, 3.5, 35.66, 19.18, 86, True), (1, 12.3, 39.31, 19.72, 99, True)], f"{got}"
+
+
+@check("Exp. 5 reach: H = 20.0 h; decibel proven frontier N=16 (Utilitarian) and N=8 "
+       "(Proportional); 19 proved, 8 harvested, 21 never started of 48; 7 of 8 harvested "
+       "report no finite bound, Utilitarian N=16's closed at J*; count forms' slowest run "
+       "472 s")
+def _(I):
+    e = enc()
+    rows = db_rows()
+    proven = [r for r in rows if r.get("optimality") == "optimal"]
+    harv = [r for r in rows if r.get("optimality") == "partial"]
+    front = {p: max(c["N"] for c in e["cells"] if c["principle"] == p and c["db_proven"])
+             for p in ("utilitarian", "proportional")}
+    nobound = [r for r in harv if r.get("tier1_lower") is None]
+    closed = [r for r in harv if r.get("tier1_lower") is not None]
+    closed_ok = (len(closed) == 1 and "utilitarian_db|1.0|" in closed[0]["key"]
+                 and abs(closed[0]["tier1_lower"] - closed[0]["tier1_incumbent"]) < 1e-9
+                 and round(_cell("utilitarian", 16)["J_db_by_perm"]["1"], 2) == 19.72)
+    slow = max(c["wall_count"]["max"] for c in e["cells"])
+    ok = (round(e["H_s"] / 3600, 1) == 20.0 and front == {"utilitarian": 16, "proportional": 8}
+          and (len(proven), len(harv), 48 - len(rows)) == (19, 8, 21)
+          and len(nobound) == 7 and closed_ok and round(slow) == 472)
+    return ok, (f"H {e['H_s'] / 3600:.2f} h, frontier {front}, proven/harvested/absent "
+                f"{len(proven)}/{len(harv)}/{48 - len(rows)}, no bound {len(nobound)}, "
+                f"closed {closed_ok}, slowest count run {slow:.1f} s")
+
+
+@check("Exp. 5 lower bounds: count routings lose at least 55 % and 40 % (Utilitarian N=22, "
+       "24) and 1.3, 1.2, 0.0 % (Proportional N=14, 16, 22); at N=24 the count routing's "
+       "331.37 lies below the decibel incumbent's 334.30, reached in 14.8 h")
+def _(I):
+    lb = {(p, n): round(100 * _cell(p, n)["loss_lower_bound"]["mean"], 1)
+          for p, n in (("utilitarian", 22), ("utilitarian", 24), ("proportional", 14),
+                       ("proportional", 16), ("proportional", 22))}
+    c24 = _cell("proportional", 24)
+    inc = c24["J_db_by_perm"]["0"]
+    ok = (round(lb[("utilitarian", 22)]) == 55 and round(lb[("utilitarian", 24)]) == 40
+          and lb[("proportional", 14)] == 1.3 and lb[("proportional", 16)] == 1.2
+          and lb[("proportional", 22)] == 0.0
+          and round(c24["J_count"]["mean"], 2) == 331.37 and round(inc, 2) == 334.30
+          and round(c24["db_wall"]["0"] / 3600, 1) == 14.8
+          and all(not c.get("loss") for c in enc()["cells"]
+                  if (c["principle"], c["N"]) in lb))
+    return ok, f"{lb}, N=24 count {c24['J_count']['mean']:.2f} vs incumbent {inc:.2f}"
+
+
+@check("Exp. 5 trade-off: proven decibel runs span 49 s to 12.3 h; speed-ups 30-2159x where "
+       "all four orderings prove; loss 16-17 % (Proportional) and 86-118 % (Utilitarian); "
+       "above N=8 Proportional's count routing is within 1.4 % of, or below, the best "
+       "decibel routing reached (N=14 is 1.31 %, so 'within 1.3 %' would be false)")
+def _(I):
+    e = enc()["cells"]
+    sp = [c["speedup"] for c in e if c.get("speedup")]
+    loss = {p: sorted(round(100 * c["loss"]["mean"]) for c in e if c["principle"] == p and c.get("loss"))
+            for p in ("utilitarian", "proportional")}
+    walls = [w for c in e for k, w in (c.get("db_wall") or {}).items()
+             if int(k) in c["db_proven"]]
+    lo_mean = min(c["wall_db"]["mean"] for c in e if len(c["db_proven"]) == 4)
+    prop_hi = [c for c in e if c["principle"] == "proportional" and c["N"] > 8]
+    within = all(c["J_count"]["mean"] <= 1.014 * c["J_best_known"] + 1e-9 for c in prop_hi)
+    ok = (round(min(sp)) == 30 and round(max(sp)) == 2159
+          and (loss["proportional"][0], loss["proportional"][-1]) == (16, 17)
+          and (loss["utilitarian"][0], loss["utilitarian"][-1]) == (86, 118)
+          and round(lo_mean) == 49 and round(max(walls) / 3600, 1) == 12.3 and within)
+    return ok, (f"speed-ups {min(sp):.1f}-{max(sp):.1f}, loss {loss}, proven walls "
+                f"{lo_mean:.1f} s .. {max(walls) / 3600:.2f} h, Prop within 1.3 %: {within}")
+
+
+@check("Exp. 5 decibel forms against the baseline at N=6 and 8: 6 tiles (attributably narrower), "
+       "fewer occupied tile-timesteps than their count forms, 1 and 3 aircraft-timesteps more "
+       "departure delay with no extra hop, summed 9.54 and 9.60 dB vs 17.6 at N=6, peak "
+       "4.77 dB with zero band; all attributable where stated")
+def _(I):
+    import metrics_run as MR
+    dbm = {(m["condition"], m["N"]): m
+           for m in json.load(io.open(os.path.join(RES, "fleet_db_metrics.json"),
+                                      encoding="utf-8"))}
+    bad = []
+    for p, extra in (("utilitarian", 1), ("proportional", 3)):
+        for n in (6, 8):
+            a, b, cnt = dbm[(p + "_db", n)], I[("baseline", n)], I[(p, n)]
+            if not (a["runs"] == 4 and a["all_proven"]):
+                bad.append((p, n, "not 4/4"))
+                continue
+            if not (a["stations_touched"] == 6 and MR.attributable(a, b, "stations_touched")):
+                bad.append((p, n, "tiles"))
+            if not (a["occupied_tile_timesteps"] < cnt["occupied_tile_timesteps"]
+                    and MR.attributable(a, cnt, "occupied_tile_timesteps")):
+                bad.append((p, n, "occupied"))
+            if not (a["departure_delay_total"] - b["departure_delay_total"] == extra
+                    and MR.attributable(a, b, "departure_delay_total")
+                    and a["extra_vs_baseline_max"] == 0):
+                bad.append((p, n, "delay"))
+            if not (approx(a["peak_added"], 4.7712, 0.01) and band0(a, "peak_added")):
+                bad.append((p, n, "peak"))
+    s6 = (round(dbm[("utilitarian_db", 6)]["total_added"], 2),
+          round(dbm[("proportional_db", 6)]["total_added"], 2),
+          round(I[("baseline", 6)]["total_added"], 1))
+    att6 = all(MR.attributable(dbm[(p + "_db", 6)], I[("baseline", 6)], "total_added")
+               for p in ("utilitarian", "proportional"))
+    ok = not bad and s6 == (9.54, 9.6, 17.6) and att6
+    return ok, f"bad {bad}, summed at N=6 {s6}, attributable {att6}"
+
+
 def main():
     I = load()
     print(f"{len(I)} cells on disk at N <= {max(LADDER)}\n")

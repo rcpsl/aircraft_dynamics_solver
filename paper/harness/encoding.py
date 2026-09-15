@@ -169,7 +169,9 @@ def cells(rs):
             c["lower_raw"] = {k: db[k]["tier1_lower_raw"] for k in harvested}
             if c["wall_db"] and len(proven) == 4:
                 c["speedup"] = c["wall_db"]["mean"] / c["wall_count"]["mean"]
-            elif c["elapsed_harvested"] and not c["db_absent"]:
+            elif c["elapsed_harvested"] and not proven:
+                # No ordering proved: each harvested run's elapsed time is a lower bound on
+                # its time to proof, so their mean over the count mean bounds the speed-up.
                 c["speedup_lower"] = c["elapsed_harvested"]["mean"] / c["wall_count"]["mean"]
             if proven:
                 vals = sorted(set(round(db[k]["J_db"], 6) for k in proven))
@@ -310,7 +312,8 @@ def tex_table(cs):
          r"routings (mean over four orderings), \emph{loss} the difference. Times are mean "
          r"wall seconds to a proven optimum. A dagger marks a decibel cell not proven by the "
          r"harvest: $J^*$ is then the best value reached (an upper bound on the optimum), "
-         r"the loss a lower bound, and the time and speed-up lower bounds.}",
+         r"the loss a lower bound, and the time and speed-up lower bounds. A time "
+         r"marked ($k$/4) is the mean over the $k$ orderings that proved.}",
          r"\label{tab:encoding}", r"\setlength{\tabcolsep}{3pt}",
          r"\begin{tabular}{@{}r rrr rrr@{}}", r"\toprule",
          r"$N$ & $J^*$ & count & loss & $t_{\mathrm{dB}}$ & $t_{\mathrm{count}}$ & "
@@ -329,13 +332,13 @@ def tex_table(cs):
                 # an optimum from the orderings that proved; time is not a full mean
                 row = [f"{c['J_star']:.{d}f}", f"{jc:.{d}f}",
                        f"{c['loss_abs']['mean']:.{d}f} ({100*c['loss']['mean']:.0f}\\%)",
-                       f"{len(c['db_proven'])}/4", tc, "--"]
+                       f"{c['wall_db']['mean']:.0f} ({len(c['db_proven'])}/4)", tc, "--"]
             elif "J_best_known" in c:
                 sp = (f"$>${c['speedup_lower']:.0f}$\\times$" if "speedup_lower" in c else "--")
                 el = c["elapsed_harvested"]
                 row = [f"{c['J_best_known']:.{d}f}$^\\dagger$", f"{jc:.{d}f}",
                        f"$\\ge${c['loss_abs_lower_bound']['mean']:.{d}f} "
-                       f"($\\ge${100*c['loss_lower_bound']['mean']:.0f}\\%)",
+                       f"($\\ge${100*c['loss_lower_bound']['mean']:.1f}\\%)",
                        f"$>${el['mean']:.0f}" if el else "--", tc, sp]
             else:
                 row = ["--", f"{jc:.{d}f}" if jc is not None else "--", "--", "--", tc, "--"]

@@ -29,8 +29,12 @@
 \addlegendentry{Utilitarian (count)}
 \addplot[fig-utilitarian, line width=0.8pt, densely dashed, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian_db, col sep=comma] {data/mvn_max_count.csv};
 \addlegendentry{Utilitarian (dB)}
+\addplot[fig-utilitarian, only marks, mark=diamond, mark size=1.6pt, mark options={solid, fill=white}, forget plot] table[x=N, y=utilitarian_db_open, col sep=comma] {data/mvn_max_count.csv};
 \addplot[fig-proportional, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional, col sep=comma] {data/mvn_max_count.csv};
 \addlegendentry{Proportional (count)}
+\addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_max_count.csv};
+\addlegendentry{Proportional (dB)}
+\addplot[fig-proportional, only marks, mark=triangle, mark size=1.6pt, mark options={solid, fill=white, rotate=180}, forget plot] table[x=N, y=proportional_db_open, col sep=comma] {data/mvn_max_count.csv};
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/mvn_max_count.csv};
 \addlegendentry{Baseline}
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
@@ -49,7 +53,10 @@
 \addplot[fig-prioritarian, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-prioritarian}] table[x=N, y=prioritarian, col sep=comma] {data/mvn_extra_vs_baseline.csv};
 \addplot[fig-utilitarian, line width=0.8pt, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian, col sep=comma] {data/mvn_extra_vs_baseline.csv};
 \addplot[fig-utilitarian, line width=0.8pt, densely dashed, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian_db, col sep=comma] {data/mvn_extra_vs_baseline.csv};
+\addplot[fig-utilitarian, only marks, mark=diamond, mark size=1.6pt, mark options={solid, fill=white}, forget plot] table[x=N, y=utilitarian_db_open, col sep=comma] {data/mvn_extra_vs_baseline.csv};
 \addplot[fig-proportional, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional, col sep=comma] {data/mvn_extra_vs_baseline.csv};
+\addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_extra_vs_baseline.csv};
+\addplot[fig-proportional, only marks, mark=triangle, mark size=1.6pt, mark options={solid, fill=white, rotate=180}, forget plot] table[x=N, y=proportional_db_open, col sep=comma] {data/mvn_extra_vs_baseline.csv};
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
 \draw[black!45, dashed, line width=0.5pt] ({rel axis cs:0,0}|-{axis cs:6,0}) -- ({rel axis cs:1,0}|-{axis cs:6,0});
 \nextgroupplot[ylabel={peak added noise (dB)}]
@@ -70,7 +77,10 @@
 \addplot[fig-prioritarian, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-prioritarian}] table[x=N, y=prioritarian, col sep=comma] {data/mvn_peak_added.csv};
 \addplot[fig-utilitarian, line width=0.8pt, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian, col sep=comma] {data/mvn_peak_added.csv};
 \addplot[fig-utilitarian, line width=0.8pt, densely dashed, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian_db, col sep=comma] {data/mvn_peak_added.csv};
+\addplot[fig-utilitarian, only marks, mark=diamond, mark size=1.6pt, mark options={solid, fill=white}, forget plot] table[x=N, y=utilitarian_db_open, col sep=comma] {data/mvn_peak_added.csv};
 \addplot[fig-proportional, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional, col sep=comma] {data/mvn_peak_added.csv};
+\addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_peak_added.csv};
+\addplot[fig-proportional, only marks, mark=triangle, mark size=1.6pt, mark options={solid, fill=white, rotate=180}, forget plot] table[x=N, y=proportional_db_open, col sep=comma] {data/mvn_peak_added.csv};
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/mvn_peak_added.csv};
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
 \nextgroupplot[ylabel={shared tile-timesteps}, xlabel={fleet size $N$}]
@@ -94,7 +104,10 @@
 \addplot[fig-prioritarian, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-prioritarian}] table[x=N, y=prioritarian, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \addplot[fig-utilitarian, line width=0.8pt, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \addplot[fig-utilitarian, line width=0.8pt, densely dashed, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian_db, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
+\addplot[fig-utilitarian, only marks, mark=diamond, mark size=1.6pt, mark options={solid, fill=white}, forget plot] table[x=N, y=utilitarian_db_open, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \addplot[fig-proportional, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
+\addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
+\addplot[fig-proportional, only marks, mark=triangle, mark size=1.6pt, mark options={solid, fill=white, rotate=180}, forget plot] table[x=N, y=proportional_db_open, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
 \nextgroupplot[ylabel={departure delay (ac-steps)}, xlabel={fleet size $N$}]
@@ -112,7 +125,10 @@
 \addplot[fig-prioritarian, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-prioritarian}] table[x=N, y=prioritarian, col sep=comma] {data/mvn_departure_delay_total.csv};
 \addplot[fig-utilitarian, line width=0.8pt, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian, col sep=comma] {data/mvn_departure_delay_total.csv};
 \addplot[fig-utilitarian, line width=0.8pt, densely dashed, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian_db, col sep=comma] {data/mvn_departure_delay_total.csv};
+\addplot[fig-utilitarian, only marks, mark=diamond, mark size=1.6pt, mark options={solid, fill=white}, forget plot] table[x=N, y=utilitarian_db_open, col sep=comma] {data/mvn_departure_delay_total.csv};
 \addplot[fig-proportional, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional, col sep=comma] {data/mvn_departure_delay_total.csv};
+\addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_departure_delay_total.csv};
+\addplot[fig-proportional, only marks, mark=triangle, mark size=1.6pt, mark options={solid, fill=white, rotate=180}, forget plot] table[x=N, y=proportional_db_open, col sep=comma] {data/mvn_departure_delay_total.csv};
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/mvn_departure_delay_total.csv};
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
 \nextgroupplot[ylabel={summed added noise (dB)}, xlabel={fleet size $N$}]
@@ -136,7 +152,10 @@
 \addplot[fig-prioritarian, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-prioritarian}] table[x=N, y=prioritarian, col sep=comma] {data/mvn_total_added.csv};
 \addplot[fig-utilitarian, line width=0.8pt, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian, col sep=comma] {data/mvn_total_added.csv};
 \addplot[fig-utilitarian, line width=0.8pt, densely dashed, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian_db, col sep=comma] {data/mvn_total_added.csv};
+\addplot[fig-utilitarian, only marks, mark=diamond, mark size=1.6pt, mark options={solid, fill=white}, forget plot] table[x=N, y=utilitarian_db_open, col sep=comma] {data/mvn_total_added.csv};
 \addplot[fig-proportional, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional, col sep=comma] {data/mvn_total_added.csv};
+\addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_total_added.csv};
+\addplot[fig-proportional, only marks, mark=triangle, mark size=1.6pt, mark options={solid, fill=white, rotate=180}, forget plot] table[x=N, y=proportional_db_open, col sep=comma] {data/mvn_total_added.csv};
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/mvn_total_added.csv};
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
 \end{groupplot}

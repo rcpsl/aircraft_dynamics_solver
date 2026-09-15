@@ -23,8 +23,14 @@ Proportional move the routing, onto fewer tiles. Above it, every principle fixes
 and pays the same arrival price, and the choice is which communities carry the remaining
 noise and whether the delay is taken in the air or on the ground. The cap, shared by all
 five, sets the peak and the size at which travel starts to cost; the principle sets where
-the noise goes and the currency of the cost. In count form every principle proves optimal
-across the ladder, the slowest in a mean of \SI{439}{\second} at $N=24$.
+the noise goes and the currency of the cost.
+
+Utilitarian and Proportional trade exactness for scale. Their decibel encoding prices the
+noise each principle is about and proves Utilitarian to $N=16$ and Proportional to $N=8$
+within \SI{20}{\hour}; the count abstraction proves every ladder cell, the slowest in a
+mean of \SI{439}{\second} at $N=24$. The abstraction costs 16--17\,\% on Proportional's
+decibel objective, which keeps its benefit price, and 86--118\,\% on Utilitarian's, whose
+count objective reduces to airborne time and carries no information about noise.
 
 The acoustic model is coarse, with uniform tiles and point sources without altitude or
 directivity~\cite{nasaUAMnoise2020}, and the findings rest on one instance and one cap.

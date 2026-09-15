@@ -79,9 +79,12 @@ the unconstrained baseline spans 4.77 to \SI{10.00}{\dB}. Every principle is fre
 travel time to $N=16$ and costs 3 aircraft-timesteps at $N=22$ and 24; Equal,
 Sufficientarian and Prioritarian pay mainly in distance, Utilitarian and Proportional in
 departure delay. Proportional confines the fleet to 6 of 25 tiles and cuts summed added
-noise from 37.7 to \SI{19.7}{\dB} at $N=16$. Every cell is proven optimal in all four
-orderings; the slowest condition, Proportional, takes a mean of \SI{439}{\second} at
-$N=24$.
+noise from 37.7 to \SI{19.7}{\dB} at $N=16$. On the ladder Utilitarian and Proportional
+run a count abstraction of their decibel objective. Within a \SI{20}{\hour} horizon the
+exact decibel encoding proves Utilitarian to $N=16$ and Proportional to $N=8$; the
+abstraction proves every ladder cell in all four orderings in at most \SI{472}{\second},
+at a cost on the decibel objective of 16--17\,\% for Proportional and 86--118\,\% for
+Utilitarian.
 \end{abstract}
 
 \begin{IEEEkeywords}

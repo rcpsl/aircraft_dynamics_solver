@@ -11,8 +11,10 @@
 \addplot[fig-utilitarian, fill opacity=0.16, draw=none, forget plot] fill between[of=lutilitarianhi and lutilitarianlo];
 \addplot[fig-utilitarian, line width=0.8pt, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian, col sep=comma] {data/exp5_loss.csv};
 \addlegendentry{Utilitarian}
+\addplot[fig-utilitarian, only marks, mark=diamond, mark size=1.6pt, mark options={solid, fill=white}, forget plot] table[x=N, y=utilitarian_open, col sep=comma] {data/exp5_loss.csv};
 \addplot[fig-proportional, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional, col sep=comma] {data/exp5_loss.csv};
 \addlegendentry{Proportional}
+\addplot[fig-proportional, only marks, mark=triangle, mark size=1.6pt, mark options={solid, fill=white, rotate=180}, forget plot] table[x=N, y=proportional_open, col sep=comma] {data/exp5_loss.csv};
 \nextgroupplot[ylabel={wall time (s)}, ymode=log,
     legend columns=2, legend style={at={(0.5,-0.42)}, anchor=north,
     /tikz/every even column/.append style={column sep=6pt}}]
@@ -25,12 +27,19 @@
 \addplot[name path=wproportionalhi, draw=none, forget plot] table[x=N, y=proportional_hi, col sep=comma] {data/exp5_wall.csv};
 \addplot[name path=wproportionallo, draw=none, forget plot] table[x=N, y=proportional_lo, col sep=comma] {data/exp5_wall.csv};
 \addplot[fig-proportional, fill opacity=0.16, draw=none, forget plot] fill between[of=wproportionalhi and wproportionallo];
+\addplot[name path=wproportional_dbhi, draw=none, forget plot] table[x=N, y=proportional_db_hi, col sep=comma] {data/exp5_wall.csv};
+\addplot[name path=wproportional_dblo, draw=none, forget plot] table[x=N, y=proportional_db_lo, col sep=comma] {data/exp5_wall.csv};
+\addplot[fig-proportional, fill opacity=0.16, draw=none, forget plot] fill between[of=wproportional_dbhi and wproportional_dblo];
 \addplot[fig-utilitarian, line width=0.8pt, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian, col sep=comma] {data/exp5_wall.csv};
 \addlegendentry{Utilitarian (count)}
 \addplot[fig-utilitarian, line width=0.8pt, densely dashed, mark=diamond*, mark size=1.6pt, mark options={solid, fill=fig-utilitarian}] table[x=N, y=utilitarian_db, col sep=comma] {data/exp5_wall.csv};
 \addlegendentry{Utilitarian (dB)}
+\addplot[fig-utilitarian, only marks, mark=diamond, mark size=1.6pt, mark options={solid, fill=white}, forget plot] table[x=N, y=utilitarian_db_open, col sep=comma] {data/exp5_wall.csv};
 \addplot[fig-proportional, line width=0.8pt, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional, col sep=comma] {data/exp5_wall.csv};
 \addlegendentry{Proportional (count)}
+\addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/exp5_wall.csv};
+\addlegendentry{Proportional (dB)}
+\addplot[fig-proportional, only marks, mark=triangle, mark size=1.6pt, mark options={solid, fill=white, rotate=180}, forget plot] table[x=N, y=proportional_db_open, col sep=comma] {data/exp5_wall.csv};
 \addplot[draw=none, forget plot] coordinates {(6,71962) (24,71962)};
 \draw[black!50, dashed, line width=0.5pt] ({rel axis cs:0,0}|-{axis cs:6,71962}) -- ({rel axis cs:1,0}|-{axis cs:6,71962});
 \node[anchor=south west, black!60, inner sep=1pt] at ({rel axis cs:0,0}|-{axis cs:6,71962}) {$H$};
