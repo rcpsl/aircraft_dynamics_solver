@@ -481,7 +481,7 @@ def routes_grid_tex(panels, prot):
                       rf"{b}\,dBA", 3.6 if b < 65 else 4.0))
     items.append((rf"\draw[fig-prot, line width=0.7pt, dash pattern=on 1.6pt off 1pt] "
                   rf"({{X}},{y:.2f}) rectangle ++(0.8,0.6);",
-                  "Prioritarian's protected set: stations " + ", ".join(str(s) for s in prot), 0))
+                  "Prioritarian's protected set", 0))
     for draw, label, step in items:
         L.append(draw.replace("{X}", f"{x:.2f}"))
         L.append(rf"\node[anchor=west] at ({x + 0.9:.2f},{y + 0.3:.2f}) {{{label}}};")
