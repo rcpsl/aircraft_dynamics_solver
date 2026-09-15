@@ -81,7 +81,7 @@ detours around the protected tiles.
 
 \emph{Utilitarian}'s count objective, airborne time, is minimised by flying every aircraft
 on a shortest path without hovering, which the baseline does at every size. Under the cap
-Utilitarian attains the same floor at every size, so its tier~1 keeps exactly the
+Utilitarian attains the same floor at every size, so its first objective keeps exactly the
 cap-feasible routings on shortest paths and arrival chooses among them. Its congestion
 stays within the baseline's band at every size.
 
@@ -107,14 +107,14 @@ the baseline's arrival penalty of 18, 22, 40 and 44 aircraft-timesteps in every 
 with every aircraft on a shortest path. At $N=22$ and 24 every principle pays exactly 3
 aircraft-timesteps more than the baseline (65 against 62, 69 against 66), with zero band.
 
-Equal, Sufficientarian and Prioritarian pay mainly in distance: 2.75, 3.00 and 2.50 extra
-fleet-hops at $N=22$ and 2.75, 2.75 and 2.50 at $N=24$, each attributable. Utilitarian and
-Proportional fly no extra hop at any size and pay in departure delay: 25 and 27
-aircraft-timesteps before first moves at $N=22$ and 24, against the baseline's 22 and 24,
-with zero band. The objectives account for the split. Arrival cannot tell a detour from a
-hold on the ground, and Prioritarian's objective prices only the three protected tiles;
+Equal, Sufficientarian and Prioritarian pay mainly in distance. In that order they fly
+2.75, 3.00 and 2.50 extra fleet-hops at $N=22$ and 2.75, 2.75 and 2.50 at $N=24$, each
+attributable. Utilitarian and Proportional fly no extra hop at any size and pay in
+departure delay: 25 and 27 aircraft-timesteps before first moves at $N=22$ and 24, against
+the baseline's 22 and 24, with zero band. Arrival cannot tell a detour from a hold on the
+ground. Prioritarian's objective prices only the three protected tiles;
 Utilitarian's and Proportional's price every airborne aircraft-timestep and none on the
-ground, so for them a detour costs tier~1 and a hold does not. Their decibel forms pay in
+ground, so for them a detour costs the first objective and a hold does not. Their decibel forms pay in
 travel time wherever they prove, and they pay it on the ground. At $N=6$ and 8,
 Utilitarian's waits one aircraft-timestep longer than the baseline and Proportional's
 three; at $N=14$ and 16, Utilitarian's waits 12 and 16 longer, in the orderings that
@@ -129,17 +129,17 @@ Table~\ref{tab:capacity} the capacity used per ambient tier.
 
 The capacity asymmetry of \eqref{eq:capclosed} decides where the cap acts. At
 $D=\SI{6}{\dB}$ a \SI{45}{\dBA} tile holds 2 aircraft and a \SI{65}{\dBA} tile 298, so
-the cap binds on the quiet tier alone: at $N=24$ the \SI{45}{\dBA} tiles run at
-0.88--1.00 of capacity under every principle as run here and the \SI{65}{\dBA} tiles
-at 0.02. The cap begins to act where peak demand on a quiet corridor tile passes
-$\capm_{45}=2$: the binding size follows from $\capm_{45}$ and the fleet share such a
-tile carries, and is $N=14$ here. The shipped settings test that: with
-$D=\SI{10}{\dB}$ and $\capm_{45}=9$ over the same sizes, the quiet tier runs at 0.11--0.39
-of capacity and no tile reaches it before $N=24$, where one Equal routing fills one at
-\SI{10.00}{\dB}. The decibel forms fill the quiet tier at every size where they prove, from
+the cap binds on the quiet tiles alone. At $N=24$ the \SI{45}{\dBA} tiles run at
+0.88--1.00 of capacity under every principle as run here, and the \SI{65}{\dBA} tiles at
+0.02. The cap begins to act once peak demand on a quiet corridor tile passes
+$\capm_{45}=2$, which is $N=14$ here; that size follows from $\capm_{45}$ and the fleet
+share such a tile carries. The settings the tool ships with test that: at
+$D=\SI{10}{\dB}$ the capacity is $\capm_{45}=9$, the quiet tiles run at 0.11--0.39 over
+the same sizes, and none is full before $N=24$, where one Equal routing fills one at
+\SI{10.00}{\dB}. The decibel forms fill a quiet tile at every size where they prove, from
 $N=6$: 1.00, against 0.50--0.80 for their count forms (Table~\ref{tab:capacity}).
-Concavity is the reason: two aircraft over one \SI{45}{\dBA} tile add 4.77\,dB, one over
-each of two add 6.02, so the decibel objective stacks them up to the cap.
+Concavity is the reason. Two aircraft over one \SI{45}{\dBA} tile add 4.77\,dB and one
+over each of two adds 6.02, so the decibel objective stacks them up to the cap.
 
 \input{tables/capacity}
 
@@ -152,19 +152,18 @@ and 3.98\,dB. The separation clears the band at $N=22$ for all five principles.
 
 \emph{Summed noise.} Proportional is the quietest condition at every size, and its four
 orderings agree exactly: 10.9, 11.6, 19.2, 19.7, 28.5 and 29.0\,dB from $N=6$ to 24,
-where the baseline adds 17.6, 19.4, 35.7, 37.7, 48.8 and 47.9\,dB. That gap is
-attributable at every size but $N=24$, where the baseline's own spread of 24.9\,dB
-covers it. Concentration is the reason: Proportional flies as long as the baseline but
-over 13 tile-timesteps at $N\le16$ instead of 16--19, and $\dbinc_m$ is concave, so the
-same flying spread over fewer tiles adds less. Prioritarian is attributably quieter at
-$N=14$ and 16 (29.7 and 28.0 against 35.7 and 37.7\,dB), while Equal, Sufficientarian and
-Utilitarian's count form stay inside the baseline's spread at every size. The decibel
-forms are quieter still where they prove: 9.54 (Utilitarian) and 9.60\,dB (Proportional)
-at $N=6$ against 17.6, although both already peak at 4.77\,dB at $N=6$ and 8. At $N=14$
-and 16 Utilitarian's decibel form sums to 19.2 and 19.7\,dB in the orderings that proved,
-against 35.7 and 39.3 in count form; Proportional's count form matches that within
-0.01\,dB and arrives 12 and 16 aircraft-timesteps earlier, because the solver minimises
-the principle's objective before it minimises arrival time.
+against 17.6, 19.4, 35.7, 37.7, 48.8 and 47.9\,dB for the baseline. The gap is
+attributable at every size but $N=24$, where the baseline's own spread of 24.9\,dB covers
+it. Proportional flies as long as the baseline but over fewer tile-timesteps, 13 at
+$N\le16$ instead of 16--19, and $\dbinc_m$ is concave, so the same flying adds less noise.
+Prioritarian is attributably quieter at $N=14$ and 16 (29.7 and 28.0 against 35.7 and
+37.7\,dB). Equal, Sufficientarian and Utilitarian's count form stay inside the baseline's
+spread at every size. The decibel forms are quieter still where they prove: at $N=6$ they
+sum to 9.54 (Utilitarian) and 9.60\,dB (Proportional) against 17.6, although both already
+peak at 4.77\,dB at $N=6$ and 8. Utilitarian's decibel form sums to 19.2 and 19.7\,dB at
+$N=14$ and 16 in the orderings that proved, against 35.7 and 39.3 in count form.
+Proportional's count form matches that within 0.01\,dB and arrives 12 and 16
+aircraft-timesteps earlier, because the solver minimises the principle's objective first.
 
 \subsection{Experiment 4: solver performance}
 \label{sec:tractability}
