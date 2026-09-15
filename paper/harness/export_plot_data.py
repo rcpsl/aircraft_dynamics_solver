@@ -77,7 +77,7 @@ PANELS = [
     ("max_count",             "Max Aircraft per Tile",      True,  True),
     ("extra_vs_baseline",     "Extra Fleet-Hops",           False, True),
     ("peak_added",            "Peak Added Noise (dB)",      True,  True),
-    ("shared_tile_timesteps", "Shared Tile-Timesteps",      True,  True),
+    ("shared_tile_timesteps", "Overlaps (2+ per Tile)",     True,  True),
     ("departure_hold",        "Departure Hold (ac-steps)",  True,  False),
     ("total_added",           "Summed Added Noise (dB)",    True,  True),
 ]
