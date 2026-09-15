@@ -21,12 +21,13 @@ is the verified routing its search held when stopped.}
 \centering
 \input{figs/metric_vs_N.tex}
 \caption{Congestion (left), travel time (middle) and added noise (right) against fleet
-size. Lines join the mean over four aircraft orderings; the band is the range over the
-orderings, the solver's indifference at that cell. Densely dashed lines in a principle's
-colour are its decibel form, drawn only where all four orderings proved
-(Section~\ref{sec:exp5}). Departure hold counts the aircraft-timesteps a fleet waits
-beyond its own size before its aircraft first move, so a fleet departing at once scores
-zero. The vertical line marks the nominal demand, $N=16$.}
+size. Lines join the mean over four aircraft orderings; the band is their range, the
+solver's indifference. Densely dashed lines are a principle's decibel form, joined where
+all four orderings proved and hollow where only some did ($k$/4 in
+Table~\ref{tab:encoding}); its holds of 12 and 16 at $N=14$ and 16 are off that panel's
+scale (Section~\ref{sec:travel}). Departure hold counts the aircraft-timesteps a fleet
+waits beyond its own size, so departing at once scores zero. The vertical line marks the
+nominal demand, $N=16$.}
 \label{fig:metric-vs-N}
 \end{figure*}
 
@@ -83,7 +84,7 @@ Utilitarian attains the same floor at every size, so its tier~1 keeps exactly th
 cap-feasible routings on shortest paths and arrival chooses among them. Its congestion
 stays within the baseline's band at every size. Under this cap it is therefore
 Sufficientarian with a preference: the two share an arrival penalty at every size and
-differ attributably in nothing but solve time through $N=16$, separating at $N=22$ and
+differ in nothing measured but solve time through $N=16$, separating at $N=22$ and
 24, where Sufficientarian pays 3.00 and 2.75 extra fleet-hops and Utilitarian 3
 aircraft-timesteps of hold.
 

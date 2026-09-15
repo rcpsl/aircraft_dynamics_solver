@@ -809,7 +809,7 @@ def _(I):
 
 
 @check("Utilitarian (count) against Sufficientarian: identical arrival at every size, no "
-       "attributable difference but wall time through N=16, separation at N=22 and 24 "
+       "measured difference but wall time through N=16, separation at N=22 and 24 "
        "(Sufficientarian 3.00 and 2.75 extra fleet-hops, Utilitarian 3 aircraft-timesteps of hold)")
 def _(I):
     import metrics_run as MR
@@ -840,22 +840,39 @@ def _(I):
     return ok, f"utilitarian {util}, proportional {prop}, total {sum(n_by.values())}"
 
 
-@check("Fig. 3 plots no harvested cell: every _open column of tex/data/mvn_*.csv is empty")
+@check("Fig. 3 draws a hollow marker only where an ordering proved: every _open value in "
+       "tex/data/mvn_*.csv belongs to a decibel cell with 1-3 proven orderings; "
+       "Utilitarian (dB) at N=14 and 16 appears in five panels, and never in departure "
+       "hold, where 12 and 16 would flatten a 0-3 scale")
 def _(I):
     import csv
     import glob
-    bad = []
+    dbm = _dbm()
+    bad, seen = [], {}
     for p in sorted(glob.glob(os.path.join(TEX, "data", "mvn_*.csv"))):
         for row in csv.DictReader(io.open(p, encoding="utf-8")):
+            n = int(float(row["N"]))
             for k, v in row.items():
-                if k.endswith("_open"):
-                    try:
-                        if not math.isnan(float(v)):
-                            bad.append((os.path.basename(p), k, row["N"]))
-                    except ValueError:
-                        pass
-    return not bad, f"harvested points plotted: {bad[:4]}"
-
+                if not k.endswith("_open"):
+                    continue
+                try:
+                    if math.isnan(float(v)):
+                        continue
+                except ValueError:
+                    continue
+                c = k[:-5]
+                m = dbm.get((c, n)) or I.get((c, n)) or {}
+                proved = m.get("runs_proven") or 0
+                if not 1 <= proved <= 3:
+                    bad.append((os.path.basename(p), c, n, proved))
+                seen[(c, n)] = seen.get((c, n), 0) + 1
+    missing = [k for k in (("utilitarian_db", 14), ("utilitarian_db", 16))
+               if seen.get(k, 0) != 5]
+    with io.open(os.path.join(TEX, "data", "mvn_departure_hold.csv"), encoding="utf-8") as f:
+        hold = [r for r in csv.DictReader(f)
+                for k, v in r.items() if k.endswith("_open") and v not in ("nan", "")]
+    return (not bad and not missing and not hold,
+            f"bad {bad[:4]}, missing {missing}, hold-panel hollow {len(hold)}")
 
 def main():
     I = load()
