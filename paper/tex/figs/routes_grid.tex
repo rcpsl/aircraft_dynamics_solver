@@ -9,14 +9,14 @@
     \pgfplotstablegetelem{\rtK}{col}\of\routestiles\edef\rtCol{\pgfplotsretval}%
     \pgfplotstablegetelem{\rtK}{ambient}\of\routestiles\edef\rtAmb{\pgfplotsretval}%
     \fill[fig-amb\rtAmb] (\rtCol-0.5,-\rtRow-0.5) rectangle ++(1,1);
-    \draw[white, line width=0.7pt] (\rtCol-0.5,-\rtRow-0.5) rectangle ++(1,1);
+    \draw[white, line width=0.6pt] (\rtCol-0.5,-\rtRow-0.5) rectangle ++(1,1);
   }%
   \foreach \rtK in {0,...,\routesnt}{%
     \pgfplotstablegetelem{\rtK}{protected}\of\routestiles\edef\rtProt{\pgfplotsretval}%
     \ifnum\rtProt=1
       \pgfplotstablegetelem{\rtK}{row}\of\routestiles\edef\rtRow{\pgfplotsretval}%
       \pgfplotstablegetelem{\rtK}{col}\of\routestiles\edef\rtCol{\pgfplotsretval}%
-      \draw[fig-prot, line width=0.8pt, dash pattern=on 1.8pt off 1.1pt]
+      \draw[fig-prot, line width=0.7pt, dash pattern=on 1.6pt off 1pt]
         (\rtCol-0.45,-\rtRow-0.45) rectangle ++(0.9,0.9);
     \fi
   }%
@@ -27,11 +27,11 @@
     \ifnum\rtPort=1
       \pgfplotstablegetelem{\rtK}{row}\of\routestiles\edef\rtRow{\pgfplotsretval}%
       \pgfplotstablegetelem{\rtK}{col}\of\routestiles\edef\rtCol{\pgfplotsretval}%
-      \draw[black!87, line width=0.9pt] (\rtCol,-\rtRow) circle (0.21);
+      \draw[black!87, line width=0.8pt] (\rtCol,-\rtRow) circle (0.22);
     \fi
   }%
 }
-\def\routeslegs#1#2{%
+\def\routeslegs#1#2#3{%
   \pgfplotstablegetrowsof{#1}%
   \pgfmathtruncatemacro\routesnl{\pgfplotsretval-1}%
   \foreach \rtK in {0,...,\routesnl}{%
@@ -41,176 +41,422 @@
     \pgfplotstablegetelem{\rtK}{c2}\of#1\edef\rtCb{\pgfplotsretval}%
     \pgfplotstablegetelem{\rtK}{aircraft}\of#1\edef\rtNum{\pgfplotsretval}%
     \pgfmathsetmacro\rtWid{0.7+2.6*\rtNum/#2}%
-    \draw[fig-route, draw opacity=0.8, line cap=round, line width=\rtWid pt]
+    \draw[fig-route, draw opacity=#3, line cap=round, line width=\rtWid pt]
       (\rtCa,-\rtRa) -- (\rtCb,-\rtRb);
   }%
 }
 \def\routestitle#1{%
+  \pgfplotstablegetelem{#1}{timeout}\of\routespanels\edef\rtTo{\pgfplotsretval}%
+  \ifnum\rtTo=1 \textit{timeout}\else
   \pgfplotstablegetelem{#1}{peak}\of\routespanels\edef\rtPeak{\pgfplotsretval}%
   \pgfplotstablegetelem{#1}{hops}\of\routespanels\edef\rtHops{\pgfplotsretval}%
-  \pgfplotstablegetelem{#1}{proven}\of\routespanels\edef\rtProv{\pgfplotsretval}%
   \pgfmathprintnumber[fixed,fixed zerofill,precision=2]{\rtPeak}\,dB,
-  +\pgfmathprintnumber[fixed,precision=2]{\rtHops}~hops\ifnum\rtProv=0 $^\dagger$\fi}
-\begin{tikzpicture}[x=0.2in, y=0.2in, font=\footnotesize]
-\node[anchor=base] at (2.00,1.55) {Equal};
-\node[anchor=base] at (7.55,1.55) {Sufficientarian};
-\node[anchor=base] at (13.10,1.55) {Prioritarian};
-\node[anchor=base] at (18.65,1.55) {Utilitarian};
-\node[anchor=base] at (24.20,1.55) {Proportional};
-\node[anchor=base] at (29.75,1.55) {Baseline};
-\node[rotate=90, anchor=center] at (-1.05,-2.00) {$N=8$};
+  +\pgfmathprintnumber[fixed,precision=2]{\rtHops}\fi}
+\begin{tikzpicture}[x=0.16in, y=0.16in, font=\footnotesize]
+\node[anchor=base] at (2.00,1.9) {$N=6$};
+\node[anchor=base] at (7.90,1.9) {$N=8$};
+\node[anchor=base] at (13.80,1.9) {$N=14$};
+\node[anchor=base] at (19.70,1.9) {$N=16$};
+\node[anchor=base] at (25.60,1.9) {$N=22$};
+\node[anchor=base] at (31.50,1.9) {$N=24$};
+\node[anchor=east] at (-0.8,-2.00) {Equal};
 \begin{scope}[shift={(0.00,0.00)}]
   \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N8_equal.csv}\routeslegtab
+  \pgfplotstableread[col sep=comma]{data/routes_N6_equal.csv}\routeslegtab
   \pgfplotstablegetelem{0}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{0}};
+  \node[anchor=base] at (2,0.8) {\routestitle{0}};
 \end{scope}
-\begin{scope}[shift={(5.55,0.00)}]
+\begin{scope}[shift={(5.90,0.00)}]
   \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N8_sufficientarian.csv}\routeslegtab
-  \pgfplotstablegetelem{1}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \pgfplotstableread[col sep=comma]{data/routes_N8_equal.csv}\routeslegtab
+  \pgfplotstablegetelem{8}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{1}};
+  \node[anchor=base] at (2,0.8) {\routestitle{8}};
 \end{scope}
-\begin{scope}[shift={(11.10,0.00)}]
+\begin{scope}[shift={(11.80,0.00)}]
   \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N8_prioritarian.csv}\routeslegtab
-  \pgfplotstablegetelem{2}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \pgfplotstableread[col sep=comma]{data/routes_N14_equal.csv}\routeslegtab
+  \pgfplotstablegetelem{16}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{2}};
+  \node[anchor=base] at (2,0.8) {\routestitle{16}};
 \end{scope}
-\begin{scope}[shift={(16.65,0.00)}]
-  \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N8_utilitarian.csv}\routeslegtab
-  \pgfplotstablegetelem{3}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
-  \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{3}};
-\end{scope}
-\begin{scope}[shift={(22.20,0.00)}]
-  \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N8_proportional.csv}\routeslegtab
-  \pgfplotstablegetelem{4}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
-  \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{4}};
-\end{scope}
-\begin{scope}[shift={(27.75,0.00)}]
-  \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N8_baseline.csv}\routeslegtab
-  \pgfplotstablegetelem{5}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
-  \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{5}};
-\end{scope}
-\node[rotate=90, anchor=center] at (-1.05,-8.15) {$N=16$};
-\begin{scope}[shift={(0.00,-6.15)}]
+\begin{scope}[shift={(17.70,0.00)}]
   \routesbase
   \pgfplotstableread[col sep=comma]{data/routes_N16_equal.csv}\routeslegtab
-  \pgfplotstablegetelem{6}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \pgfplotstablegetelem{24}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{6}};
+  \node[anchor=base] at (2,0.8) {\routestitle{24}};
 \end{scope}
-\begin{scope}[shift={(5.55,-6.15)}]
+\begin{scope}[shift={(23.60,0.00)}]
   \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N16_sufficientarian.csv}\routeslegtab
-  \pgfplotstablegetelem{7}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \pgfplotstableread[col sep=comma]{data/routes_N22_equal.csv}\routeslegtab
+  \pgfplotstablegetelem{32}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{7}};
+  \node[anchor=base] at (2,0.8) {\routestitle{32}};
 \end{scope}
-\begin{scope}[shift={(11.10,-6.15)}]
-  \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N16_prioritarian.csv}\routeslegtab
-  \pgfplotstablegetelem{8}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
-  \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{8}};
-\end{scope}
-\begin{scope}[shift={(16.65,-6.15)}]
-  \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N16_utilitarian.csv}\routeslegtab
-  \pgfplotstablegetelem{9}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
-  \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{9}};
-\end{scope}
-\begin{scope}[shift={(22.20,-6.15)}]
-  \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N16_proportional.csv}\routeslegtab
-  \pgfplotstablegetelem{10}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
-  \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{10}};
-\end{scope}
-\begin{scope}[shift={(27.75,-6.15)}]
-  \routesbase
-  \pgfplotstableread[col sep=comma]{data/routes_N16_baseline.csv}\routeslegtab
-  \pgfplotstablegetelem{11}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
-  \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{11}};
-\end{scope}
-\node[rotate=90, anchor=center] at (-1.05,-14.30) {$N=24$};
-\begin{scope}[shift={(0.00,-12.30)}]
+\begin{scope}[shift={(29.50,0.00)}]
   \routesbase
   \pgfplotstableread[col sep=comma]{data/routes_N24_equal.csv}\routeslegtab
-  \pgfplotstablegetelem{12}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \pgfplotstablegetelem{40}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{12}};
+  \node[anchor=base] at (2,0.8) {\routestitle{40}};
 \end{scope}
-\begin{scope}[shift={(5.55,-12.30)}]
+\node[anchor=east] at (-0.8,-8.30) {Sufficientarian};
+\begin{scope}[shift={(0.00,-6.30)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N6_sufficientarian.csv}\routeslegtab
+  \pgfplotstablegetelem{1}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{1}};
+\end{scope}
+\begin{scope}[shift={(5.90,-6.30)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N8_sufficientarian.csv}\routeslegtab
+  \pgfplotstablegetelem{9}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{9}};
+\end{scope}
+\begin{scope}[shift={(11.80,-6.30)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N14_sufficientarian.csv}\routeslegtab
+  \pgfplotstablegetelem{17}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{17}};
+\end{scope}
+\begin{scope}[shift={(17.70,-6.30)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N16_sufficientarian.csv}\routeslegtab
+  \pgfplotstablegetelem{25}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{25}};
+\end{scope}
+\begin{scope}[shift={(23.60,-6.30)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N22_sufficientarian.csv}\routeslegtab
+  \pgfplotstablegetelem{33}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{33}};
+\end{scope}
+\begin{scope}[shift={(29.50,-6.30)}]
   \routesbase
   \pgfplotstableread[col sep=comma]{data/routes_N24_sufficientarian.csv}\routeslegtab
-  \pgfplotstablegetelem{13}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \pgfplotstablegetelem{41}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{13}};
+  \node[anchor=base] at (2,0.8) {\routestitle{41}};
 \end{scope}
-\begin{scope}[shift={(11.10,-12.30)}]
+\node[anchor=east] at (-0.8,-14.60) {Prioritarian};
+\begin{scope}[shift={(0.00,-12.60)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N6_prioritarian.csv}\routeslegtab
+  \pgfplotstablegetelem{2}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{2}};
+\end{scope}
+\begin{scope}[shift={(5.90,-12.60)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N8_prioritarian.csv}\routeslegtab
+  \pgfplotstablegetelem{10}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{10}};
+\end{scope}
+\begin{scope}[shift={(11.80,-12.60)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N14_prioritarian.csv}\routeslegtab
+  \pgfplotstablegetelem{18}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{18}};
+\end{scope}
+\begin{scope}[shift={(17.70,-12.60)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N16_prioritarian.csv}\routeslegtab
+  \pgfplotstablegetelem{26}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{26}};
+\end{scope}
+\begin{scope}[shift={(23.60,-12.60)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N22_prioritarian.csv}\routeslegtab
+  \pgfplotstablegetelem{34}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{34}};
+\end{scope}
+\begin{scope}[shift={(29.50,-12.60)}]
   \routesbase
   \pgfplotstableread[col sep=comma]{data/routes_N24_prioritarian.csv}\routeslegtab
-  \pgfplotstablegetelem{14}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \pgfplotstablegetelem{42}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{14}};
+  \node[anchor=base] at (2,0.8) {\routestitle{42}};
 \end{scope}
-\begin{scope}[shift={(16.65,-12.30)}]
+\node[anchor=east] at (-0.8,-20.90) {Utilitarian (dB)};
+\begin{scope}[shift={(0.00,-18.90)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N6_utilitarian_db.csv}\routeslegtab
+  \pgfplotstablegetelem{3}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{3}};
+\end{scope}
+\begin{scope}[shift={(5.90,-18.90)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N8_utilitarian_db.csv}\routeslegtab
+  \pgfplotstablegetelem{11}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{11}};
+\end{scope}
+\begin{scope}[shift={(11.80,-18.90)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N14_utilitarian_db.csv}\routeslegtab
+  \pgfplotstablegetelem{19}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{19}};
+\end{scope}
+\begin{scope}[shift={(17.70,-18.90)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N16_utilitarian_db.csv}\routeslegtab
+  \pgfplotstablegetelem{27}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{27}};
+\end{scope}
+\begin{scope}[shift={(23.60,-18.90)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N22_utilitarian_db.csv}\routeslegtab
+  \pgfplotstablegetelem{35}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.3}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{35}};
+\end{scope}
+\begin{scope}[shift={(29.50,-18.90)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N24_utilitarian_db.csv}\routeslegtab
+  \pgfplotstablegetelem{43}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.3}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{43}};
+\end{scope}
+\node[anchor=east] at (-0.8,-27.20) {Utilitarian (count)};
+\begin{scope}[shift={(0.00,-25.20)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N6_utilitarian.csv}\routeslegtab
+  \pgfplotstablegetelem{4}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{4}};
+\end{scope}
+\begin{scope}[shift={(5.90,-25.20)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N8_utilitarian.csv}\routeslegtab
+  \pgfplotstablegetelem{12}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{12}};
+\end{scope}
+\begin{scope}[shift={(11.80,-25.20)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N14_utilitarian.csv}\routeslegtab
+  \pgfplotstablegetelem{20}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{20}};
+\end{scope}
+\begin{scope}[shift={(17.70,-25.20)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N16_utilitarian.csv}\routeslegtab
+  \pgfplotstablegetelem{28}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{28}};
+\end{scope}
+\begin{scope}[shift={(23.60,-25.20)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N22_utilitarian.csv}\routeslegtab
+  \pgfplotstablegetelem{36}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{36}};
+\end{scope}
+\begin{scope}[shift={(29.50,-25.20)}]
   \routesbase
   \pgfplotstableread[col sep=comma]{data/routes_N24_utilitarian.csv}\routeslegtab
-  \pgfplotstablegetelem{15}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \pgfplotstablegetelem{44}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{15}};
+  \node[anchor=base] at (2,0.8) {\routestitle{44}};
 \end{scope}
-\begin{scope}[shift={(22.20,-12.30)}]
+\node[anchor=east] at (-0.8,-33.50) {Proportional (dB)};
+\begin{scope}[shift={(0.00,-31.50)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N6_proportional_db.csv}\routeslegtab
+  \pgfplotstablegetelem{5}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{5}};
+\end{scope}
+\begin{scope}[shift={(5.90,-31.50)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N8_proportional_db.csv}\routeslegtab
+  \pgfplotstablegetelem{13}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{13}};
+\end{scope}
+\begin{scope}[shift={(11.80,-31.50)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N14_proportional_db.csv}\routeslegtab
+  \pgfplotstablegetelem{21}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.3}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{21}};
+\end{scope}
+\begin{scope}[shift={(17.70,-31.50)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N16_proportional_db.csv}\routeslegtab
+  \pgfplotstablegetelem{29}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.3}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{29}};
+\end{scope}
+\begin{scope}[shift={(23.60,-31.50)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N22_proportional_db.csv}\routeslegtab
+  \pgfplotstablegetelem{37}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.3}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{37}};
+\end{scope}
+\begin{scope}[shift={(29.50,-31.50)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N24_proportional_db.csv}\routeslegtab
+  \pgfplotstablegetelem{45}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.3}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{45}};
+\end{scope}
+\node[anchor=east] at (-0.8,-39.80) {Proportional (count)};
+\begin{scope}[shift={(0.00,-37.80)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N6_proportional.csv}\routeslegtab
+  \pgfplotstablegetelem{6}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{6}};
+\end{scope}
+\begin{scope}[shift={(5.90,-37.80)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N8_proportional.csv}\routeslegtab
+  \pgfplotstablegetelem{14}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{14}};
+\end{scope}
+\begin{scope}[shift={(11.80,-37.80)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N14_proportional.csv}\routeslegtab
+  \pgfplotstablegetelem{22}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{22}};
+\end{scope}
+\begin{scope}[shift={(17.70,-37.80)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N16_proportional.csv}\routeslegtab
+  \pgfplotstablegetelem{30}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{30}};
+\end{scope}
+\begin{scope}[shift={(23.60,-37.80)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N22_proportional.csv}\routeslegtab
+  \pgfplotstablegetelem{38}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{38}};
+\end{scope}
+\begin{scope}[shift={(29.50,-37.80)}]
   \routesbase
   \pgfplotstableread[col sep=comma]{data/routes_N24_proportional.csv}\routeslegtab
-  \pgfplotstablegetelem{16}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \pgfplotstablegetelem{46}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{16}};
+  \node[anchor=base] at (2,0.8) {\routestitle{46}};
 \end{scope}
-\begin{scope}[shift={(27.75,-12.30)}]
+\node[anchor=east] at (-0.8,-46.10) {Baseline};
+\begin{scope}[shift={(0.00,-44.10)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N6_baseline.csv}\routeslegtab
+  \pgfplotstablegetelem{7}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{7}};
+\end{scope}
+\begin{scope}[shift={(5.90,-44.10)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N8_baseline.csv}\routeslegtab
+  \pgfplotstablegetelem{15}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{15}};
+\end{scope}
+\begin{scope}[shift={(11.80,-44.10)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N14_baseline.csv}\routeslegtab
+  \pgfplotstablegetelem{23}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{23}};
+\end{scope}
+\begin{scope}[shift={(17.70,-44.10)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N16_baseline.csv}\routeslegtab
+  \pgfplotstablegetelem{31}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{31}};
+\end{scope}
+\begin{scope}[shift={(23.60,-44.10)}]
+  \routesbase
+  \pgfplotstableread[col sep=comma]{data/routes_N22_baseline.csv}\routeslegtab
+  \pgfplotstablegetelem{39}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
+  \routesports
+  \node[anchor=base] at (2,0.8) {\routestitle{39}};
+\end{scope}
+\begin{scope}[shift={(29.50,-44.10)}]
   \routesbase
   \pgfplotstableread[col sep=comma]{data/routes_N24_baseline.csv}\routeslegtab
-  \pgfplotstablegetelem{17}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
-  \routeslegs{\routeslegtab}{\rtMax}
+  \pgfplotstablegetelem{47}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
+  \routeslegs{\routeslegtab}{\rtMax}{0.8}
   \routesports
-  \node[anchor=base] at (2,0.72) {\routestitle{17}};
+  \node[anchor=base] at (2,0.8) {\routestitle{47}};
 \end{scope}
-\fill[fig-amb45] (7.35,-17.65) rectangle ++(0.7,0.5);
-\node[anchor=west] at (8.15,-17.40) {45\,dBA};
-\fill[fig-amb55] (10.35,-17.65) rectangle ++(0.7,0.5);
-\node[anchor=west] at (11.15,-17.40) {55\,dBA};
-\fill[fig-amb65] (13.35,-17.65) rectangle ++(0.7,0.5);
-\node[anchor=west] at (14.15,-17.40) {65\,dBA};
-\draw[fig-prot, line width=0.8pt, dash pattern=on 1.8pt off 1.1pt] (16.75,-17.65) rectangle ++(0.7,0.5);
-\node[anchor=west] at (17.55,-17.40) {protected: stations 4, 8, 14};
+\fill[fig-amb45] (6.70,-49.70) rectangle ++(0.8,0.6);
+\node[anchor=west] at (7.60,-49.40) {45\,dBA};
+\fill[fig-amb55] (10.30,-49.70) rectangle ++(0.8,0.6);
+\node[anchor=west] at (11.20,-49.40) {55\,dBA};
+\fill[fig-amb65] (13.90,-49.70) rectangle ++(0.8,0.6);
+\node[anchor=west] at (14.80,-49.40) {65\,dBA};
+\draw[fig-prot, line width=0.7pt, dash pattern=on 1.6pt off 1pt] (17.90,-49.70) rectangle ++(0.8,0.6);
+\node[anchor=west] at (18.80,-49.40) {protected: stations 4, 8, 14};
 \end{tikzpicture}

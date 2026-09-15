@@ -36,7 +36,11 @@ FIGS = os.path.join(TEX, "figs")
 METRICS = os.path.join(HERE, "results", "fleet_main_metrics.json")
 
 LADDER = (6, 8, 14, 16, 22, 24)
-GRID_N = (8, 16, 24)
+GRID_N = (6, 8, 14, 16, 22, 24)
+# Fig. 2 rows: the five principles with both forms of the two objective ones, then
+# the baseline. Each principle's two forms sit next to each other.
+GRID_ROWS = ["equal", "sufficientarian", "prioritarian", "utilitarian_db",
+             "utilitarian", "proportional_db", "proportional", "baseline"]
 CONDS = list(F.CONDITIONS)     # the five principles, then the baseline
 PRINCIPLES = list(F.ORDER)
 
@@ -195,15 +199,33 @@ def export_capacity(I):
               [[D] + [cap(D, b) for b in TIERS] for D in Ds])
 
 
+def _db_rows():
+    """Decibel-form routings to draw, keyed (condition, N): the lowest-numbered proven
+    ordering, else the lowest-numbered one stopped at the harvest."""
+    import metrics_run as MR
+    best = {}
+    for r in MR.load(["results/fleet_db.jsonl"]):
+        if r.get("status") != "sat" or not r.get("paths"):
+            continue
+        key = (str(r.get("key", "")).split("|")[2], r.get("N"))
+        rank = (0 if r.get("optimality") == "optimal" else 1, r.get("perm") or 0)
+        if key not in best or rank < best[key][0]:
+            best[key] = (rank, r)
+    return {k: v[1] for k, v in best.items()}
+
+
 def export_routes(I):
+    """One legs CSV per map. A decibel cell with no proven ordering is a *timeout*: its
+    map is the verified routing the search held when the harvest stopped it."""
     cells, _mets, setup = F._fleet()
+    dbr = _db_rows()
     prot = next(m.get("protected_stations") for m in I.values()
                 if m.get("protected_stations"))
     ambient = None
     panels = []
     for n in GRID_N:
-        for c in CONDS:
-            row = cells.get((setup, c, n))
+        for c in GRID_ROWS:
+            row = dbr.get((c, n)) if c in DBF.values() else cells.get((setup, c, n))
             if row is None:
                 raise SystemExit(f"no routing on disk for {c} N={n}")
             req = MX._req_for(row)
@@ -214,18 +236,16 @@ def export_routes(I):
             use = F._leg_usage(row, req)
             if not use:
                 raise SystemExit(f"no legs flown for {c} N={n}")
-            legs = []
-            for (a, b), k in sorted(use.items()):
-                ra, ca = divmod(a, 5)
-                rb, cb = divmod(b, 5)
-                legs.append([ra, ca, rb, cb, k])
+            legs = [[a // 5, a % 5, b // 5, b % 5, k] for (a, b), k in sorted(use.items())]
             write_csv(f"routes_N{n}_{c}.csv", ["r1", "c1", "r2", "c2", "aircraft"], legs)
-            m = I[(c, n)]
-            panels.append([n, c, m["peak_added"], m["extra_vs_floor"],
-                           1 if proven(m) else 0, max(use.values()),
-                           str(row.get("key", "")).split("|")[-1]])
+            m = I.get((c, n)) or {}
+            timeout = int(c in DBF.values() and m.get("runs_proven", 0) == 0)
+            panels.append([n, c, m.get("peak_added"), m.get("extra_vs_floor"),
+                           int(proven(m)), max(use.values()),
+                           str(row.get("key", "")).split("|")[-1], timeout])
     write_csv("routes_panels.csv",
-              ["N", "condition", "peak", "hops", "proven", "legmax", "ordering"], panels)
+              ["N", "condition", "peak", "hops", "proven", "legmax", "ordering", "timeout"],
+              panels)
     ports = set(P.vertiport_indices())
     write_csv("routes_tiles.csv", ["station", "row", "col", "ambient", "vertiport",
                                    "protected"],
@@ -370,9 +390,9 @@ def capacity_tex():
 
 
 def routes_grid_tex(panels, prot):
-    """Every scratch macro is prefixed \\rt: a bare \\k or \\aa would shadow LaTeX's
-    accent commands inside the loop body."""
-    PX, PY, U = 5.55, 6.15, "0.2in"
+    """8 condition rows x 6 fleet-size columns. Every scratch macro is prefixed \\rt: a
+    bare \\k or \\aa would shadow LaTeX's accent commands inside the loop body."""
+    PX, PY, U = 5.9, 6.3, "0.16in"
     idx = {(p[0], p[1]): i for i, p in enumerate(panels)}
     L = [r"\pgfplotstableread[col sep=comma]{data/routes_tiles.csv}\routestiles",
          r"\pgfplotstableread[col sep=comma]{data/routes_panels.csv}\routespanels",
@@ -385,14 +405,14 @@ def routes_grid_tex(panels, prot):
          r"    \pgfplotstablegetelem{\rtK}{col}\of\routestiles\edef\rtCol{\pgfplotsretval}%",
          r"    \pgfplotstablegetelem{\rtK}{ambient}\of\routestiles\edef\rtAmb{\pgfplotsretval}%",
          r"    \fill[fig-amb\rtAmb] (\rtCol-0.5,-\rtRow-0.5) rectangle ++(1,1);",
-         r"    \draw[white, line width=0.7pt] (\rtCol-0.5,-\rtRow-0.5) rectangle ++(1,1);",
+         r"    \draw[white, line width=0.6pt] (\rtCol-0.5,-\rtRow-0.5) rectangle ++(1,1);",
          r"  }%",
          r"  \foreach \rtK in {0,...,\routesnt}{%",
          r"    \pgfplotstablegetelem{\rtK}{protected}\of\routestiles\edef\rtProt{\pgfplotsretval}%",
          r"    \ifnum\rtProt=1",
          r"      \pgfplotstablegetelem{\rtK}{row}\of\routestiles\edef\rtRow{\pgfplotsretval}%",
          r"      \pgfplotstablegetelem{\rtK}{col}\of\routestiles\edef\rtCol{\pgfplotsretval}%",
-         r"      \draw[fig-prot, line width=0.8pt, dash pattern=on 1.8pt off 1.1pt]",
+         r"      \draw[fig-prot, line width=0.7pt, dash pattern=on 1.6pt off 1pt]",
          r"        (\rtCol-0.45,-\rtRow-0.45) rectangle ++(0.9,0.9);",
          r"    \fi",
          r"  }%",
@@ -404,12 +424,14 @@ def routes_grid_tex(panels, prot):
          r"    \ifnum\rtPort=1",
          r"      \pgfplotstablegetelem{\rtK}{row}\of\routestiles\edef\rtRow{\pgfplotsretval}%",
          r"      \pgfplotstablegetelem{\rtK}{col}\of\routestiles\edef\rtCol{\pgfplotsretval}%",
-         r"      \draw[black!87, line width=0.9pt] (\rtCol,-\rtRow) circle (0.21);",
+         r"      \draw[black!87, line width=0.8pt] (\rtCol,-\rtRow) circle (0.22);",
          r"    \fi",
          r"  }%",
          r"}",
-         # each leg: width 0.7 + 2.6 n / n_max pt, the rule figures._draw_map uses
-         r"\def\routeslegs#1#2{%",
+         # each leg: width 0.7 + 2.6 n / n_max pt, the rule figures._draw_map uses; #3 is
+         # the opacity, fainter for a timeout so the stopped search's routing does not
+         # read as the principle's answer
+         r"\def\routeslegs#1#2#3{%",
          r"  \pgfplotstablegetrowsof{#1}%",
          r"  \pgfmathtruncatemacro\routesnl{\pgfplotsretval-1}%",
          r"  \foreach \rtK in {0,...,\routesnl}{%",
@@ -419,44 +441,46 @@ def routes_grid_tex(panels, prot):
          r"    \pgfplotstablegetelem{\rtK}{c2}\of#1\edef\rtCb{\pgfplotsretval}%",
          r"    \pgfplotstablegetelem{\rtK}{aircraft}\of#1\edef\rtNum{\pgfplotsretval}%",
          r"    \pgfmathsetmacro\rtWid{0.7+2.6*\rtNum/#2}%",
-         r"    \draw[fig-route, draw opacity=0.8, line cap=round, line width=\rtWid pt]",
+         r"    \draw[fig-route, draw opacity=#3, line cap=round, line width=\rtWid pt]",
          r"      (\rtCa,-\rtRa) -- (\rtCb,-\rtRb);",
          r"  }%",
          r"}",
          r"\def\routestitle#1{%",
+         r"  \pgfplotstablegetelem{#1}{timeout}\of\routespanels\edef\rtTo{\pgfplotsretval}%",
+         r"  \ifnum\rtTo=1 \textit{timeout}\else",
          r"  \pgfplotstablegetelem{#1}{peak}\of\routespanels\edef\rtPeak{\pgfplotsretval}%",
          r"  \pgfplotstablegetelem{#1}{hops}\of\routespanels\edef\rtHops{\pgfplotsretval}%",
-         r"  \pgfplotstablegetelem{#1}{proven}\of\routespanels\edef\rtProv{\pgfplotsretval}%",
          r"  \pgfmathprintnumber[fixed,fixed zerofill,precision=2]{\rtPeak}\,dB,",
-         r"  +\pgfmathprintnumber[fixed,precision=2]{\rtHops}~hops\ifnum\rtProv=0 $^\dagger$\fi}",
+         r"  +\pgfmathprintnumber[fixed,precision=2]{\rtHops}\fi}",
          rf"\begin{{tikzpicture}}[x={U}, y={U}, font=\footnotesize]"]
-    for ci, c in enumerate(CONDS):
-        L.append(rf"\node[anchor=base] at ({ci * PX + 2:.2f},1.55) {{{F.CLABEL[c]}}};")
-    for ri, n in enumerate(GRID_N):
-        L.append(rf"\node[rotate=90, anchor=center] at (-1.05,{-2 - ri * PY:.2f}) {{$N={n}$}};")
-        for ci, c in enumerate(CONDS):
+    for ci, n in enumerate(GRID_N):
+        L.append(rf"\node[anchor=base] at ({ci * PX + 2:.2f},1.9) {{$N={n}$}};")
+    for ri, c in enumerate(GRID_ROWS):
+        L.append(rf"\node[anchor=east] at (-0.8,{-2 - ri * PY:.2f}) {{{LABEL[c]}}};")
+        for ci, n in enumerate(GRID_N):
             i = idx[(n, c)]
+            faint = "0.3" if panels[i][7] else "0.8"
             L += [rf"\begin{{scope}}[shift={{({ci * PX:.2f},{-ri * PY:.2f})}}]",
                   r"  \routesbase",
                   rf"  \pgfplotstableread[col sep=comma]{{data/routes_N{n}_{c}.csv}}\routeslegtab",
                   rf"  \pgfplotstablegetelem{{{i}}}{{legmax}}\of\routespanels\edef\rtMax{{\pgfplotsretval}}",
-                  r"  \routeslegs{\routeslegtab}{\rtMax}",
+                  rf"  \routeslegs{{\routeslegtab}}{{\rtMax}}{{{faint}}}",
                   r"  \routesports",
-                  rf"  \node[anchor=base] at (2,0.72) {{\routestitle{{{i}}}}};",
+                  rf"  \node[anchor=base] at (2,0.8) {{\routestitle{{{i}}}}};",
                   r"\end{scope}"]
     # one legend under the grid, centred on it
-    y = -(len(GRID_N) - 1) * PY - 5.35
-    x = 3 * PX - 9.3
+    y = -(len(GRID_ROWS) - 1) * PY - 5.6
+    x = (len(GRID_N) * PX) / 2 - 11.0
     items = []
     for b in TIERS:
-        items.append((rf"\fill[fig-amb{b}] ({{X}},{y:.2f}) rectangle ++(0.7,0.5);",
-                      rf"{b}\,dBA", 3.0 if b < 65 else 3.4))
-    items.append((rf"\draw[fig-prot, line width=0.8pt, dash pattern=on 1.8pt off 1.1pt] "
-                  rf"({{X}},{y:.2f}) rectangle ++(0.7,0.5);",
+        items.append((rf"\fill[fig-amb{b}] ({{X}},{y:.2f}) rectangle ++(0.8,0.6);",
+                      rf"{b}\,dBA", 3.6 if b < 65 else 4.0))
+    items.append((rf"\draw[fig-prot, line width=0.7pt, dash pattern=on 1.6pt off 1pt] "
+                  rf"({{X}},{y:.2f}) rectangle ++(0.8,0.6);",
                   "protected: stations " + ", ".join(str(s) for s in prot), 0))
     for draw, label, step in items:
         L.append(draw.replace("{X}", f"{x:.2f}"))
-        L.append(rf"\node[anchor=west] at ({x + 0.8:.2f},{y + 0.25:.2f}) {{{label}}};")
+        L.append(rf"\node[anchor=west] at ({x + 0.9:.2f},{y + 0.3:.2f}) {{{label}}};")
         x += step
     L.append(r"\end{tikzpicture}")
     write_tex("routes_grid.tex", "\n".join(L) + "\n")

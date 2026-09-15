@@ -1,15 +1,18 @@
 \section{Results}
 \label{sec:results}
 
-\begin{figure*}[t]
+\begin{figure*}[p]
 \centering
 \input{figs/routes_grid.tex}
-\caption{Routings at $N=8$, 16 and 24 (rows) under each condition (columns). Tiles are
-shaded by ambient level, vertiports ringed and Prioritarian's protected set outlined. Each
-map draws one of the four aircraft orderings. Line width is proportional to the aircraft
-on each leg summed over the horizon, so two maps can look alike while their routings
-differ in timing. Titles give peak added noise and extra fleet-hops over the
-shortest-path floor, averaged over the four orderings.}
+\caption{Routings under each condition (rows) at every size of the ladder (columns), with
+Utilitarian and Proportional in both their decibel (dB) and count forms. Tiles are shaded
+by ambient level, vertiports ringed and Prioritarian's protected set outlined. Each map
+draws one of the four aircraft orderings, a proven one where any proved. Line width is
+proportional to the aircraft on each leg summed over the horizon, so two maps can look
+alike while their routings differ in timing. Titles give peak added noise (dB) and extra
+fleet-hops over the shortest-path floor, averaged over the proven orderings.
+\emph{Timeout}: no ordering of that decibel cell proved within $H=20.0$\,h; the faint map
+is the verified routing its search held when stopped.}
 \label{fig:routes-grid}
 \end{figure*}
 
@@ -49,8 +52,8 @@ do not overlap; a smaller difference is stated as within the solver's indifferen
 \label{sec:routing}
 
 How do each principle's routing and tile occupancy change as the fleet grows?
-Fig.~\ref{fig:routes-grid} draws the routings at $N=8$, 16 and 24, and the left column of
-Fig.~\ref{fig:metric-vs-N} the peak occupancy and the shared tile-timesteps.
+Fig.~\ref{fig:routes-grid} draws the routings at every size of the ladder, and the left
+column of Fig.~\ref{fig:metric-vs-N} the peak occupancy and the shared tile-timesteps.
 
 Congestion grows with $N$ under every condition: peak aircraft over one tile from 1--3 at
 $N=6$ to 11--14 at $N=24$, and tile-timesteps carrying two or more aircraft from 0--3 to
