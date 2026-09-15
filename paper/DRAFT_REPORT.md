@@ -135,6 +135,28 @@ Verdicts and the edit steps, in the order they were applied.
 Not done: the related-work paragraph (no room at 8 pages), a full 25-cell instance
 table, and Fig. 4 still has no decibel series.
 
+### Second review pass, 2026-09-15
+
+The reviewer moved the paper from borderline to weak accept and left six items.
+
+| # | Item | Verdict | Edit |
+|---|---|---|---|
+| 1 | The abstract misstates the currency split: Prioritarian is an objective and pays in distance | **Accepted, it was wrong.** §IV-C had it right (2.50 hops); only the abstract generalised "the objectives" to all three | The abstract now reads "the cap conditions and Prioritarian in distance, Utilitarian and Proportional in departure delay" |
+| 2 | Page count on pdfLaTeX | **Open, and not doable here.** This machine has no TeX installation; Tectonic (XeTeX) is the only engine. The margin is now about 1.5 lines at the foot of page 8 | Still an Overleaf check before submitting |
+| 3 | §V says "within 20 h" without the launched-runs qualifier | **Accepted** | §V now reads "of the runs launched, proves Utilitarian to N=16 and Proportional to N=8 within 20 h" |
+| 4 | "Differ attributably in nothing but solve time" misuses attributability, which needs a band | **Accepted.** Wall time at par = 8 has no ordering band | §IV-B says "differ in nothing measured but solve time"; the check description follows |
+| 5 | Fig. 3 drops the decibel points where the text makes its strongest claims | **Accepted, with one exception** | Cells where 1–3 orderings proved are drawn hollow: Utilitarian (dB) at N = 14 and 16. The exception is the hold panel, where 12 and 16 against a count range of 0–3 flatten the panel's own finding; the caption sends the reader to §IV-C for them, and a check asserts both rules |
+| 6 | Confirm the verifier holds out Prioritarian's N = 22 summed noise | **Already held.** The check asserts the attributable set is exactly {14, 16} | none |
+| minor | List the 25 ambient levels as the prices are listed | **Accepted** | §III-C gives the ambient map by row; with the prices, the instance is reproducible from the text |
+| minor | §II never says the ladder runs the count form | **Accepted** | One clause added before Table I |
+| minor | "Sufficientarian with a preference" appears twice | **Accepted** | §V now says it differs "only in preferring a hold to a detour" |
+
+**Figure sizing.** These additions went to 9 pages twice. Recovered by tightening the
+Fig. 3 caption and by panel heights: Fig. 3 from 0.95 to 0.84 in with the row gap from
+0.30 to 0.34 in, Fig. 4 from 1.45 to 1.32 in. Axis labels are now `\scriptsize`: at
+0.84 in a footnotesize rotated label is taller than its panel, so the two right-column
+labels met. They now clear each other by 11 pt.
+
 **Label capitalisation, by instruction.** Every figure axis label and table column header
 is Title Case, with units and short prepositions left lowercase ("Fleet Size $N$", "Max
 Aircraft per Tile", "Departure Hold (ac-steps)", "Solve Time (s)", "Cap $D$ (dB of Added

@@ -1,7 +1,7 @@
 N,equal,equal_lo,equal_hi,equal_open,sufficientarian,sufficientarian_lo,sufficientarian_hi,sufficientarian_open,prioritarian,prioritarian_lo,prioritarian_hi,prioritarian_open,utilitarian,utilitarian_lo,utilitarian_hi,utilitarian_open,utilitarian_db,utilitarian_db_lo,utilitarian_db_hi,utilitarian_db_open,proportional,proportional_lo,proportional_hi,proportional_open,proportional_db,proportional_db_lo,proportional_db_hi,proportional_db_open,baseline,baseline_lo,baseline_hi,baseline_open
 6,1.25,1,2,nan,2.5,2,3,nan,2,2,2,nan,2.5,2,3,nan,4,4,4,nan,3,3,3,nan,3,3,3,nan,2.25,2,3,nan
 8,3.75,3,4,nan,4.25,3,5,nan,3.75,3,4,nan,2.75,2,3,nan,5,5,5,nan,5,5,5,nan,5,5,5,nan,3.5,3,4,nan
-14,5.75,4,8,nan,5.75,4,7,nan,5,4,7,nan,6,4,8,nan,nan,nan,nan,nan,8,8,8,nan,nan,nan,nan,nan,6,5,8,nan
-16,7.75,6,10,nan,8.5,7,10,nan,8.25,7,10,nan,6.75,6,8,nan,nan,nan,nan,nan,10,10,10,nan,nan,nan,nan,nan,6.75,4,9,nan
+14,5.75,4,8,nan,5.75,4,7,nan,5,4,7,nan,6,4,8,nan,nan,nan,nan,8,8,8,8,nan,nan,nan,nan,nan,6,5,8,nan
+16,7.75,6,10,nan,8.5,7,10,nan,8.25,7,10,nan,6.75,6,8,nan,nan,nan,nan,10,10,10,10,nan,nan,nan,nan,nan,6.75,4,9,nan
 22,11.5,9,14,nan,11.5,10,14,nan,10.75,8,14,nan,10.25,9,12,nan,nan,nan,nan,nan,12,12,12,nan,nan,nan,nan,nan,8,6,11,nan
 24,13.25,10,16,nan,13.25,10,16,nan,12.5,11,16,nan,10.75,10,12,nan,nan,nan,nan,nan,14,14,14,nan,nan,nan,nan,nan,12.5,9,15,nan

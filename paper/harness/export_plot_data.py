@@ -69,13 +69,17 @@ PGF_MARK = {"o": ("*", "o", ""), "s": ("square*", "square", ""),
             "v": ("triangle*", "triangle", "rotate=180"), "x": ("x", "x", "")}
 
 # Columns are the metric families Sec. IV reports: congestion | travel time | noise.
+# (field, y label, include the baseline, draw hollow markers for part-proven decibel
+# cells). Departure hold takes no hollow marker: the decibel holds at N = 14 and 16 are
+# 12 and 16 against a count-form range of 0 to 3, and plotting them flattens the panel's
+# own finding. Section IV-C gives them instead.
 PANELS = [
-    ("max_count",             "Max Aircraft per Tile",      True),
-    ("extra_vs_baseline",     "Extra Fleet-Hops",           False),
-    ("peak_added",            "Peak Added Noise (dB)",      True),
-    ("shared_tile_timesteps", "Shared Tile-Timesteps",      True),
-    ("departure_hold",         "Departure Hold (ac-steps)",  True),
-    ("total_added",           "Summed Added Noise (dB)",    True),
+    ("max_count",             "Max Aircraft per Tile",      True,  True),
+    ("extra_vs_baseline",     "Extra Fleet-Hops",           False, True),
+    ("peak_added",            "Peak Added Noise (dB)",      True,  True),
+    ("shared_tile_timesteps", "Shared Tile-Timesteps",      True,  True),
+    ("departure_hold",        "Departure Hold (ac-steps)",  True,  False),
+    ("total_added",           "Summed Added Noise (dB)",    True,  True),
 ]
 
 
@@ -132,7 +136,7 @@ def proven(m):
     return m.get("optimality") == "optimal" and m.get("runs", 4) == 4
 
 
-def series(I, field, conds, keep_open=True):
+def series(I, field, conds, open_mode="all"):
     """One row per N; per condition: mean, band low, band high (proven cells), and the
     value of a verified feasible cell in `_open` (NaN when proven)."""
     header = ["N"] + [f"{c}{s}" for c in conds for s in ("", "_lo", "_hi", "_open")]
@@ -146,8 +150,14 @@ def series(I, field, conds, keep_open=True):
                 continue
             v = m.get(field)
             lo, hi = m.get(field + "_min", v), m.get(field + "_max", v)
-            row += ([v, lo, hi, NAN] if proven(m)
-                    else [NAN, NAN, NAN, v if keep_open else NAN])
+            if proven(m):
+                row += [v, lo, hi, NAN]
+            else:
+                # A cell where some ordering proved is a real optimum with no band, drawn
+                # hollow; a cell where none did is a stopped search and is not plotted.
+                show = (open_mode == "all"
+                        or (open_mode == "proven" and (m.get("runs_proven") or 0) >= 1))
+                row += [NAN, NAN, NAN, v if show else NAN]
         rows.append(row)
     return header, rows
 
@@ -174,9 +184,9 @@ def has_open(header, rows, c):
 # ------------------------------------------------------------ stage 1: data
 def export_metric_panels(I):
     out = {}
-    for field, _lab, with_base in PANELS:
+    for field, _lab, with_base, hollow in PANELS:
         conds = SERIES if with_base else [c for c in SERIES if c != "baseline"]
-        h, r = series(I, field, conds, keep_open=False)
+        h, r = series(I, field, conds, open_mode="proven" if hollow else "none")
         write_csv(f"mvn_{field}.csv", h, r)
         out[field] = (h, r, conds)
     return out
@@ -282,7 +292,9 @@ def style_tex():
               r"\pgfplotsset{",
               r"  paperaxis/.style={scale only axis, axis lines*=left,",
               r"    font=\footnotesize, tick label style={font=\footnotesize},",
-              r"    label style={font=\footnotesize}, tick align=outside,",
+              # Axis labels one size down: at the panel heights Fig. 3 uses, a
+              # footnotesize label is taller than its panel and meets its neighbour's.
+              r"    label style={font=\scriptsize}, tick align=outside,",
               r"    tick style={black!70}, unbounded coords=jump,",
               r"    legend style={font=\footnotesize, draw=none, fill=none},",
               r"    legend cell align=left},",
@@ -334,9 +346,9 @@ XTICKS = "xmin=4.8, xmax=25.2, xtick={6,8,14,16,22,24}"
 def metric_vs_N_tex(panels):
     L = [r"\begin{tikzpicture}",
          r"\begin{groupplot}[group style={group size=3 by 2, horizontal sep=0.60in,",
-         r"    vertical sep=0.30in}, paperaxis, width=1.72in, height=0.95in,",
+         r"    vertical sep=0.34in}, paperaxis, width=1.72in, height=0.84in,",
          rf"    {XTICKS}]"]
-    for i, (field, ylab, _wb) in enumerate(PANELS):
+    for i, (field, ylab, _wb, _ho) in enumerate(PANELS):
         h, r, conds = panels[field]
         opts = [f"ylabel={{{ylab}}}"]
         if i >= 3:
@@ -361,7 +373,7 @@ def metric_vs_N_tex(panels):
 
 def solve_time_tex(h, r):
     L = [r"\begin{tikzpicture}",
-         r"\begin{axis}[paperaxis, width=2.55in, height=1.45in, ymode=log,",
+         r"\begin{axis}[paperaxis, width=2.55in, height=1.32in, ymode=log,",
          rf"    {XTICKS}, xlabel={{Fleet Size $N$}}, ylabel={{Solve Time (s)}},",
          r"    legend columns=3, legend style={at={(0.5,-0.36)}, anchor=north,",
          r"    /tikz/every even column/.append style={column sep=5pt}}]"]
