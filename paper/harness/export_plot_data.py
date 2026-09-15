@@ -396,7 +396,7 @@ def routes_grid_tex(panels, prot):
     idx = {(p[0], p[1]): i for i, p in enumerate(panels)}
     L = [r"\pgfplotstableread[col sep=comma]{data/routes_tiles.csv}\routestiles",
          r"\pgfplotstableread[col sep=comma]{data/routes_panels.csv}\routespanels",
-         # tiles shaded by ambient tier, then the protected outline (zorder 0 and 2)
+         # tiles shaded by ambient tier (zorder 0)
          r"\def\routesbase{%",
          r"  \pgfplotstablegetrowsof{\routestiles}%",
          r"  \pgfmathtruncatemacro\routesnt{\pgfplotsretval-1}%",
@@ -407,6 +407,10 @@ def routes_grid_tex(panels, prot):
          r"    \fill[fig-amb\rtAmb] (\rtCol-0.5,-\rtRow-0.5) rectangle ++(1,1);",
          r"    \draw[white, line width=0.6pt] (\rtCol-0.5,-\rtRow-0.5) rectangle ++(1,1);",
          r"  }%",
+         r"}",
+         # Prioritarian's protected set, outlined in the Prioritarian row only: the one
+         # condition whose objective refers to it (zorder 2)
+         r"\def\routesprot{%",
          r"  \foreach \rtK in {0,...,\routesnt}{%",
          r"    \pgfplotstablegetelem{\rtK}{protected}\of\routestiles\edef\rtProt{\pgfplotsretval}%",
          r"    \ifnum\rtProt=1",
@@ -461,7 +465,7 @@ def routes_grid_tex(panels, prot):
             i = idx[(n, c)]
             faint = "0.3" if panels[i][7] else "0.8"
             L += [rf"\begin{{scope}}[shift={{({ci * PX:.2f},{-ri * PY:.2f})}}]",
-                  r"  \routesbase",
+                  r"  \routesbase" + (r"\routesprot" if c == "prioritarian" else ""),
                   rf"  \pgfplotstableread[col sep=comma]{{data/routes_N{n}_{c}.csv}}\routeslegtab",
                   rf"  \pgfplotstablegetelem{{{i}}}{{legmax}}\of\routespanels\edef\rtMax{{\pgfplotsretval}}",
                   rf"  \routeslegs{{\routeslegtab}}{{\rtMax}}{{{faint}}}",
@@ -477,7 +481,7 @@ def routes_grid_tex(panels, prot):
                       rf"{b}\,dBA", 3.6 if b < 65 else 4.0))
     items.append((rf"\draw[fig-prot, line width=0.7pt, dash pattern=on 1.6pt off 1pt] "
                   rf"({{X}},{y:.2f}) rectangle ++(0.8,0.6);",
-                  "protected: stations " + ", ".join(str(s) for s in prot), 0))
+                  "Prioritarian's protected set: stations " + ", ".join(str(s) for s in prot), 0))
     for draw, label, step in items:
         L.append(draw.replace("{X}", f"{x:.2f}"))
         L.append(rf"\node[anchor=west] at ({x + 0.9:.2f},{y + 0.3:.2f}) {{{label}}};")

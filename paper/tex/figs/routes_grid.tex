@@ -11,6 +11,8 @@
     \fill[fig-amb\rtAmb] (\rtCol-0.5,-\rtRow-0.5) rectangle ++(1,1);
     \draw[white, line width=0.6pt] (\rtCol-0.5,-\rtRow-0.5) rectangle ++(1,1);
   }%
+}
+\def\routesprot{%
   \foreach \rtK in {0,...,\routesnt}{%
     \pgfplotstablegetelem{\rtK}{protected}\of\routestiles\edef\rtProt{\pgfplotsretval}%
     \ifnum\rtProt=1
@@ -159,7 +161,7 @@
 \end{scope}
 \node[anchor=east] at (-0.8,-14.60) {Prioritarian};
 \begin{scope}[shift={(0.00,-12.60)}]
-  \routesbase
+  \routesbase\routesprot
   \pgfplotstableread[col sep=comma]{data/routes_N6_prioritarian.csv}\routeslegtab
   \pgfplotstablegetelem{2}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
   \routeslegs{\routeslegtab}{\rtMax}{0.8}
@@ -167,7 +169,7 @@
   \node[anchor=base] at (2,0.8) {\routestitle{2}};
 \end{scope}
 \begin{scope}[shift={(5.90,-12.60)}]
-  \routesbase
+  \routesbase\routesprot
   \pgfplotstableread[col sep=comma]{data/routes_N8_prioritarian.csv}\routeslegtab
   \pgfplotstablegetelem{10}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
   \routeslegs{\routeslegtab}{\rtMax}{0.8}
@@ -175,7 +177,7 @@
   \node[anchor=base] at (2,0.8) {\routestitle{10}};
 \end{scope}
 \begin{scope}[shift={(11.80,-12.60)}]
-  \routesbase
+  \routesbase\routesprot
   \pgfplotstableread[col sep=comma]{data/routes_N14_prioritarian.csv}\routeslegtab
   \pgfplotstablegetelem{18}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
   \routeslegs{\routeslegtab}{\rtMax}{0.8}
@@ -183,7 +185,7 @@
   \node[anchor=base] at (2,0.8) {\routestitle{18}};
 \end{scope}
 \begin{scope}[shift={(17.70,-12.60)}]
-  \routesbase
+  \routesbase\routesprot
   \pgfplotstableread[col sep=comma]{data/routes_N16_prioritarian.csv}\routeslegtab
   \pgfplotstablegetelem{26}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
   \routeslegs{\routeslegtab}{\rtMax}{0.8}
@@ -191,7 +193,7 @@
   \node[anchor=base] at (2,0.8) {\routestitle{26}};
 \end{scope}
 \begin{scope}[shift={(23.60,-12.60)}]
-  \routesbase
+  \routesbase\routesprot
   \pgfplotstableread[col sep=comma]{data/routes_N22_prioritarian.csv}\routeslegtab
   \pgfplotstablegetelem{34}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
   \routeslegs{\routeslegtab}{\rtMax}{0.8}
@@ -199,7 +201,7 @@
   \node[anchor=base] at (2,0.8) {\routestitle{34}};
 \end{scope}
 \begin{scope}[shift={(29.50,-12.60)}]
-  \routesbase
+  \routesbase\routesprot
   \pgfplotstableread[col sep=comma]{data/routes_N24_prioritarian.csv}\routeslegtab
   \pgfplotstablegetelem{42}{legmax}\of\routespanels\edef\rtMax{\pgfplotsretval}
   \routeslegs{\routeslegtab}{\rtMax}{0.8}
@@ -458,5 +460,5 @@
 \fill[fig-amb65] (13.90,-49.70) rectangle ++(0.8,0.6);
 \node[anchor=west] at (14.80,-49.40) {65\,dBA};
 \draw[fig-prot, line width=0.7pt, dash pattern=on 1.6pt off 1pt] (17.90,-49.70) rectangle ++(0.8,0.6);
-\node[anchor=west] at (18.80,-49.40) {protected: stations 4, 8, 14};
+\node[anchor=west] at (18.80,-49.40) {Prioritarian's protected set: stations 4, 8, 14};
 \end{tikzpicture}
