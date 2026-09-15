@@ -64,21 +64,22 @@ The routing objective of an urban air mobility (UAM) network decides which commu
 bear its noise. We encode five principles of distributive justice (Equal,
 Sufficientarian, Prioritarian, Utilitarian and Proportional) as hard constraints and
 lexicographic objectives in one optimising SMT routing solver and measure how each
-responds to fleet size in routing, congestion, travel time and added noise. On a
-$5\times5$ map of Austin, TX with three vertiports and a \SI{6}{\dB} cap on added noise,
-fleets run from $N=6$ to 24 aircraft, with Utilitarian and Proportional in a count
-abstraction of their decibel objective, and every cell is solved under four aircraft
-orderings to measure the solver's indifference. From $N=14$ every principle holds the
-most-exposed community at exactly \SI{4.77}{\dB} above ambient in every ordering, where
-the unconstrained baseline spans 4.77 to \SI{10.00}{\dB}. Every principle is free in
-travel time to $N=16$ and costs 3 aircraft-timesteps at $N=22$ and 24, Equal,
-Sufficientarian and Prioritarian mainly in distance, Utilitarian and Proportional in
-departure delay. Proportional confines the fleet to 6 of 25 tiles and cuts summed added
-noise from 37.7 to \SI{19.7}{\dB} at $N=16$. Within \SI{20}{\hour} the exact decibel
-encoding proves Utilitarian to $N=16$ and Proportional to $N=8$, and where it proves,
-Utilitarian keeps to 6 tiles and waits on the ground; the abstraction proves every cell
-in every ordering within \SI{472}{\second}, at a cost on the decibel objective of
-16--17\,\% for Proportional and 86--118\,\% for Utilitarian.
+responds to fleet size. On a $5\times5$ map of Austin, TX with three vertiports and a
+\SI{6}{\dB} cap on added noise, fleets run from $N=6$ to 24 aircraft, each cell solved
+under four aircraft orderings to measure the solver's indifference; Utilitarian and
+Proportional run a count abstraction of their decibel objective. The principles differ in
+where noise goes: Proportional confines the fleet to 6 of 25 tiles and cuts summed added
+noise from 37.7 to \SI{19.7}{\dB} at $N=16$; Prioritarian holds three protected
+communities at \SI{0}{\dB} on 8--9 tiles. What they share is the cap's: from $N=14$ every
+principle holds the most-exposed
+community at exactly \SI{4.77}{\dB} above ambient, and above $N=16$ each pays 3
+aircraft-timesteps more than the baseline, the caps in distance and the objectives in
+departure delay. Of the decibel runs
+that started, the exact encoding proves Utilitarian to $N=16$ and Proportional to $N=8$
+within \SI{20}{\hour}, and where it proves, Utilitarian keeps to 6 tiles and waits on the
+ground; the abstraction proves every cell in every ordering within \SI{472}{\second}, at
+a cost on the decibel objective of 16--17\,\% for Proportional and 86--118\,\% for
+Utilitarian.
 \end{abstract}
 
 \begin{IEEEkeywords}
