@@ -157,6 +157,27 @@ Fig. 3 caption and by panel heights: Fig. 3 from 0.95 to 0.84 in with the row ga
 0.84 in a footnotesize rotated label is taller than its panel, so the two right-column
 labels met. They now clear each other by 11 pt.
 
+### Third review pass, 2026-09-15
+
+| # | Item | Verdict | Edit |
+|---|---|---|---|
+| 1 | Scale reads as a toy; §I never says why this scale is right | **Accepted** | §I gains a paragraph: every number is a proven optimum tested against the ordering band, which is what fixes the scale, and what carries to a larger map is the capacity rule, not the size |
+| 2 | Page count on pdfLaTeX | **Open; cannot be run here.** No TeX installation on this machine, Tectonic (XeTeX) only | 8 pages with about 2 lines of slack at the foot of page 8 |
+| 2′ | D = 10 robustness from data on disk | **Accepted, with a correction to the reviewer's prediction** | The shipped ladder sends D = 10 for the caps only, κ45 = 9. The quiet tier runs 0.11–0.39 of capacity and no tile reaches capacity before N = 24, where one Equal routing fills one at 10.00 dB. So the cap does bind at the very top, rather than "not through N = 24"; §IV-D says that, and a check asserts it |
+| 3 | "Five principles" delivers three behaviours | **Accepted, and narrowed to what tests true** | On footprint, only Prioritarian (N = 6, 14, 16) and Proportional (N = 6–22) differ attributably from the baseline; Equal, Sufficientarian and Utilitarian never do. The abstract, contribution 1 and §V therefore say **three distinct footprints**, not "three routings": Utilitarian does differ from the caps at N = 22 and 24 by holding instead of detouring, so the stronger phrasing would be false |
+| 4 | Experiment 5 takes too much of the abstract | **Accepted** | Two sentences, and the 20 h figure is gone from the abstract |
+| 5 | Related work is two UAM references | **Deferred.** Two fair-division citations (Moulin 2003, Walsh 2020, both already in `refs.bib` and checked) were drafted and reverted: the added bibliography entries cost more lines than the paper had | none |
+| 6 | Acoustic model | **Nothing to do**, the limitation paragraph covers it | none |
+| 7 | Anonymised repository | **Not done.** It cannot be created or hosted from here, and a fabricated URL is worse than none | none |
+
+**Page budget.** The additions ran to 9 pages three times. Recovered, in this order:
+Table II cut to N = 8 and 24 (the reviewer's nominated cut, and it reverses the earlier
+instruction to add N = 16 — one line in `analyze.py` to restore); Table III's two
+vacuous Proportional rows dropped, which was the reviewer's earlier item 10; §V's design
+paragraph compressed, since it repeated the new three-footprints sentence; the §IV-D peak
+framing sentence, a §IV-B clause and the §IV-F trade-off paragraph tightened; Fig. 3
+panels 0.84 → 0.80 in, Fig. 4 1.32 → 1.22 in, Fig. 5 1.05 → 0.95 in.
+
 **Label capitalisation, by instruction.** Every figure axis label and table column header
 is Title Case, with units and short prepositions left lowercase ("Fleet Size $N$", "Max
 Aircraft per Tile", "Departure Hold (ac-steps)", "Solve Time (s)", "Cap $D$ (dB of Added

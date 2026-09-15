@@ -874,6 +874,34 @@ def _(I):
     return (not bad and not missing and not hold,
             f"bad {bad[:4]}, missing {missing}, hold-panel hollow {len(hold)}")
 
+@check("three footprints: only Prioritarian (N=6, 14, 16) and Proportional (N=6-22) differ "
+       "attributably from the baseline in stations touched; Equal, Sufficientarian and "
+       "Utilitarian never do")
+def _(I):
+    prio = sorted(n for _c, n in _att_set(I, ("prioritarian",), "stations_touched"))
+    prop = sorted(n for _c, n in _att_set(I, ("proportional",), "stations_touched"))
+    flat = _att_set(I, ("equal", "sufficientarian", "utilitarian"), "stations_touched")
+    ok = prio == [6, 14, 16] and prop == [6, 8, 14, 16, 22] and not flat
+    return ok, f"prioritarian {prio}, proportional {prop}, flat set {sorted(flat)}"
+
+
+@check("robustness at D=10 (the shipped settings, where only the caps send it): kappa45 = 9, "
+       "the quiet tier runs 0.11-0.39 of capacity over the ladder, no tile reaches capacity "
+       "before N=24, and Equal fills one there at 10.00 dB")
+def _(I):
+    R = load(REF)
+    cells = [(c, n) for c in ("equal", "sufficientarian") for n in LADDER]
+    t45 = [round((R[(c, n)].get("capacity_utilisation_by_tier") or {}).get("45", 0), 2)
+           for c, n in cells]
+    mx = {(c, n): round(R[(c, n)]["capacity_utilisation_max"], 2) for c, n in cells}
+    ok = (_cap(10, 45) == 9 and (min(t45), max(t45)) == (0.11, 0.39)
+          and all(v < 1.0 for (c, n), v in mx.items() if n < 24)
+          and mx[("equal", 24)] == 1.0 and mx[("sufficientarian", 24)] < 1.0
+          and approx(R[("equal", 24)]["peak_added"], 10.0, 0.01))
+    return ok, (f"kappa45 {_cap(10, 45)}, tier45 {min(t45)}-{max(t45)}, "
+                f"max at N=24 {mx[('equal', 24)]}")
+
+
 def main():
     I = load()
     print(f"{len(I)} cells on disk at N <= {max(LADDER)}\n")

@@ -312,9 +312,9 @@ def tex_table(cs):
          r"routings (mean over four orderings), \emph{Loss} the difference. Times are mean "
          r"wall seconds to a proven optimum. A dagger marks a decibel cell not proven by the "
          r"harvest: $J^*$ is then the best value reached (an upper bound on the optimum), "
-         r"the loss a lower bound, and the time and speed-up lower bounds. A loss of "
-         r"\emph{none} means no decibel run reached a routing better than the count "
-         r"form's, so no positive bound exists. A time "
+         r"the loss a lower bound, and the time and speed-up lower bounds. A cell where "
+         r"no decibel run reached a routing better than the count form's carries no "
+         r"positive bound and is left out: Proportional at $N=22$ and 24. A time "
          r"marked ($k$/4) is the mean over the $k$ orderings that proved.}",
          r"\label{tab:encoding}", r"\setlength{\tabcolsep}{3pt}",
          r"\begin{tabular}{@{}r rrr rrr@{}}", r"\toprule",
@@ -338,11 +338,12 @@ def tex_table(cs):
             elif "J_best_known" in c:
                 sp = (f"$>${c['speedup_lower']:.0f}$\\times$" if "speedup_lower" in c else "--")
                 el = c["elapsed_harvested"]
-                # No decibel run reached a routing better than the count form's, so the
-                # bound is 0 and says nothing; "none" states that instead of ">= 0.0 %".
+                # No decibel run reached a routing better than the count form's: the bound
+                # is 0 and says nothing, so the row is left out and the caption says so.
                 lb = c["loss_abs_lower_bound"]["mean"]
-                loss_cell = ("none" if round(lb, d) <= 0 else
-                             f"$\\ge${lb:.{d}f} "
+                if round(lb, d) <= 0:
+                    continue
+                loss_cell = (f"$\\ge${lb:.{d}f} "
                              f"($\\ge${100*c['loss_lower_bound']['mean']:.1f}\\%)")
                 row = [f"{c['J_best_known']:.{d}f}$^\\dagger$", f"{jc:.{d}f}", loss_cell,
                        f"$>${el['mean']:.0f}" if el else "--", tc, sp]
