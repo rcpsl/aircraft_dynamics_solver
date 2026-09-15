@@ -219,36 +219,32 @@ about noise, and loses 86--118\,\%.
 
 Table~\ref{tab:response} collects each principle's response to fleet size.
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \footnotesize
-\caption{Response of each principle to fleet size: the change against the baseline and
-the sizes $N$ at which it holds. ``As baseline'' is within the solver's indifference at
-every size, except Sufficientarian's fewer overlaps at $N=16$. Travel time
-is free to $N=16$ for the conditions as run and costs 3 aircraft-timesteps at $N=22$ and
-24; the column gives the currency. The peak is fixed at \SI{4.77}{\dB} with zero band
-from $N=14$. Prioritarian's narrower footprint is attributable at $N=6$, 14 and 16.
-Utilitarian and Proportional rows are the count forms; the indented \emph{dB form} rows
-are their decibel forms, over the sizes where all four decibel orderings are proven.
-\emph{Wall}: mean seconds to a proven optimum at $N=24$; for a decibel form, the largest
-$N$ proven in any ordering within $H$.}
+\caption{Response of each condition to fleet size. Each cell names what the condition
+does and the fleet sizes at which its difference from the baseline is attributable;
+\emph{no change} means the difference stays within the solver's indifference at every
+size, with one exception, Sufficientarian's fewer overlaps at $N=16$. Utilitarian and
+Proportional are the count forms, and their decibel forms are listed separately over the
+sizes where all four orderings proved. \emph{Wall} is the mean seconds to a proven
+optimum at $N=24$, and \emph{reach} the largest size proven within $H=20.0$\,h.}
 \label{tab:response}
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lllll@{}}
+\begin{tabular}{@{}llllrl@{}}
 \toprule
- & Congestion & Travel Time & Added Noise & Wall (s) \\
+Condition & Congestion & Travel Time & Added Noise & Wall (s) & Reach \\
 \midrule
-Equal & as baseline & distance, 22+ & peak fixed, 14+ & 107 \\
-Sufficientarian & as baseline & distance, 22+ & peak fixed, 14+ & 109 \\
-Prioritarian & 8--9 tiles & distance, 22+ & $P$ at 0\,dB; peak 14+ & 191 \\
-Utilitarian & as baseline & delay, 22+ & peak fixed, 14+ & 151 \\
-\quad dB form & 6 tiles, 6--8 & delay, 6--8 & sum 6--8; peak 6--8 & $N{\le}16$ \\
-Proportional & 6 tiles, 6--22 & delay, 22+ & sum 6--22; peak 14+ & 439 \\
-\quad dB form & 6 tiles, 6--8 & delay, 6--8 & sum 6--8; peak 6--8 & $N{\le}8$ \\
-Baseline & -- & -- & set by ordering & 200 \\
+Equal & no change & distance, from $N=22$ & peak fixed, from $N=14$ & 107 & $N=24$ \\
+Sufficientarian & no change & distance, from $N=22$ & peak fixed, from $N=14$ & 109 & $N=24$ \\
+Prioritarian & 8--9 tiles, $N=6$, 14, 16 & distance, from $N=22$ & protected set at \SI{0}{\dB}; peak fixed, from $N=14$ & 191 & $N=24$ \\
+Utilitarian & no change & delay, from $N=22$ & peak fixed, from $N=14$ & 151 & $N=24$ \\
+Utilitarian (dB) & 6 tiles, $N=6$ and 8 & delay, $N=6$ and 8 & sum and peak, $N=6$ and 8 & -- & $N=16$ \\
+Proportional & 6 tiles, $N=6$ to 22 & delay, from $N=22$ & sum, $N=6$ to 22; peak fixed, from $N=14$ & 439 & $N=24$ \\
+Proportional (dB) & 6 tiles, $N=6$ and 8 & delay, $N=6$ and 8 & sum and peak, $N=6$ and 8 & -- & $N=8$ \\
+Baseline & -- & -- & set by the aircraft ordering & 200 & $N=24$ \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 % Generated and current, deliberately not \input: tables/fleet_main.tex,
 % tables/reference.tex, tables/response.tex (superseded by tab:response above, which is
