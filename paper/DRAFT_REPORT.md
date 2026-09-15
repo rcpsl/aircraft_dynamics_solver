@@ -111,6 +111,35 @@ report below; everything else there still applies.
   * The decibel-routing sentence now sits inside the Experiment 5 sentence.
   * The count comes from `abstract_words.py`, written in the session scratchpad and not
     in the repository.
+
+### Review-response pass, 2026-09-15
+
+A reviewer's opinion on the candidate, tested item by item before anything was edited.
+Verdicts and the edit steps, in the order they were applied.
+
+| # | Reviewer's item | Tested | Verdict | Edit |
+|---|---|---|---|---|
+| 1 | Headline results are the cap's, not the principles' | Peak 4.77 dB from N=14 under every principle, against the baseline's 5.64–7.70; the arrival cost of 3 aircraft-timesteps is shared; what differs is footprint (Prioritarian 8–9, Proportional 6 tiles), summed noise and currency | **Accepted** | The abstract now leads with what separates the principles and says the shared results are the cap's |
+| 2 | "Utilitarian (count)" is not utilitarian | Against Sufficientarian it differs attributably in *nothing but wall time* through N=16, shares its arrival penalty at every size, and separates only at N=22, 24 (hops 3.00/2.75 against 3 aircraft-timesteps of hold) | **Accepted as a finding, rename rejected.** The label already says "count", and Table I gives both objectives; renaming every row would hide a measured result | §IV-B and §V state the equivalence and where it breaks; a new check asserts it |
+| 3 | Reach claim confounded by scheduling | 27 of 48 decibel runs started; N≥14 cells carry 1–2 orderings | **Accepted** | Abstract, §IV-A and §IV-F scope the reach to the runs that started; a new check asserts 27 and the per-cell counts |
+| 4 | Harvested incumbents contaminate Fig. 3 | They stretched the hops axis from 3.00 to 17.00 and the hold axis from 27 to 41 | **Accepted** | `export_plot_data.series(keep_open=False)` for Fig. 3; caption updated; a new check asserts no `_open` value is plotted |
+| 5 | N=14/16 decibel claims rest on 2/4 and 1/4 orderings | Confirmed | **Accepted** | §IV-C and §IV-D say "in the orderings that proved" |
+| 6 | Reproducibility | The prices take 19 values from 1.62 to 90.60 and are not derivable from the text | **Partly accepted** | §III-C gives row-major numbering, the vertiport stations and all 25 prices. The ambient map stays as Fig. 2's shading, which the numbering now makes readable; a 25-cell table did not fit in 8 pages |
+| 7 | Generalise the activation size | — | **Accepted** | §IV-D gives it in terms of κ45 = 2 and the fleet share of a quiet corridor tile |
+| 8 | Internal tension on stacking | The count objective is indifferent to how aircraft distribute; Proportional's count form stacks because of the price, not a stacking reward | **Accepted** | §III-D now says the count form charges a tile-timestep the same however many aircraft share it |
+| 9 | Delay panel hides its finding | Departure delay is exactly N + hold; as hold the series separate (0 baseline, 0.2–0.5 caps, 3.0 objectives) | **Accepted** | Fig. 3's middle-bottom panel plots `departure_hold`, a derived metric; caption updated |
+| 10 | Table III's unproven Proportional rows say nothing | At N=22 and 24 the best decibel routing equals the count routing, so the bound is 0 | **Accepted** | `encoding.py` prints "none" and the caption explains it; §IV-F matches |
+| 11 | Utilitarian (count) faster than the baseline is unexplained | Not directly measurable | **Accepted with hedge** | §IV-E attributes it to tier 1 excluding detours before arrival is searched |
+| minor | 180 s conversion, "arrival made sticky", missing noun, bibliography | Z3 pp. 337–340, νZ pp. 194–199, Stern pp. 151–158 all match the proceedings; the Surynek entry is an arXiv preprint with no page range | **Accepted** | 9 aircraft-minutes in §IV-C; "a landed aircraft required to stay landed"; "Prioritarian's objective sums" |
+
+Not done: the related-work paragraph (no room at 8 pages), a full 25-cell instance
+table, and Fig. 4 still has no decibel series.
+
+**Page budget.** The additions took the paper to 9 pages. It is back to 8 by wording
+cuts that keep every claim (the §III-C screen paragraph, one redundant topic sentence in
+§IV-C, two figure captions, one clause in §IV-F) and by Fig. 5's panels going from 1.25
+to 1.05 in, which returns about twice that height in column text because the figure
+spans both columns.
     * Fig. 5's right panel plots Utilitarian (dB) at N = 16 as a hollow 34,725 s. That
       is the mean elapsed time of the proven p0 and the stopped p1. Table III quotes p0's
       proven 44,439 s (1/4).

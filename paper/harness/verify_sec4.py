@@ -808,6 +808,55 @@ def _(I):
     return ok, f"decibel {dbv}, count {[round(x, 2) for x in cv]}"
 
 
+@check("Utilitarian (count) against Sufficientarian: identical arrival at every size, no "
+       "attributable difference but wall time through N=16, separation at N=22 and 24 "
+       "(Sufficientarian 3.00 and 2.75 extra fleet-hops, Utilitarian 3 aircraft-timesteps of hold)")
+def _(I):
+    import metrics_run as MR
+    fields = ("stations_touched", "occupied_tile_timesteps", "max_count", "extra_vs_baseline",
+              "departure_delay_total", "arrivalPenalty", "total_added", "peak_added")
+    same = all(I[("utilitarian", n)]["arrivalPenalty"] == I[("sufficientarian", n)]["arrivalPenalty"]
+               for n in LADDER)
+    quiet = [(n, f) for n in (6, 8, 14, 16) for f in fields
+             if MR.attributable(I[("utilitarian", n)], I[("sufficientarian", n)], f)]
+    hops = [round(I[("sufficientarian", n)]["extra_vs_baseline"], 2) for n in (22, 24)]
+    hold = [round(I[("utilitarian", n)]["departure_delay_total"] - n, 2) for n in (22, 24)]
+    sep = all(MR.attributable(I[("utilitarian", n)], I[("sufficientarian", n)], f)
+              for n in (22, 24) for f in ("extra_vs_baseline", "departure_delay_total"))
+    ok = same and not quiet and hops == [3.0, 2.75] and hold == [3.0, 3.0] and sep
+    return ok, f"arrival equal {same}, differences through 16 {quiet}, hops {hops}, hold {hold}"
+
+
+@check("Exp. 5 coverage: 27 of the 48 decibel runs started -- 4/4 at N=6 and 8, then "
+       "Utilitarian 2, 2, 1, 1 and Proportional 2, 1, 1, 1 over N=14, 16, 22, 24")
+def _(I):
+    n_by = {}
+    for r in db_rows():
+        k = str(r.get("key", "")).split("|")
+        n_by[(k[2], r.get("N"))] = n_by.get((k[2], r.get("N")), 0) + 1
+    util = [n_by.get(("utilitarian_db", n), 0) for n in LADDER]
+    prop = [n_by.get(("proportional_db", n), 0) for n in LADDER]
+    ok = sum(n_by.values()) == 27 and util == [4, 4, 2, 2, 1, 1] and prop == [4, 4, 2, 1, 1, 1]
+    return ok, f"utilitarian {util}, proportional {prop}, total {sum(n_by.values())}"
+
+
+@check("Fig. 3 plots no harvested cell: every _open column of tex/data/mvn_*.csv is empty")
+def _(I):
+    import csv
+    import glob
+    bad = []
+    for p in sorted(glob.glob(os.path.join(TEX, "data", "mvn_*.csv"))):
+        for row in csv.DictReader(io.open(p, encoding="utf-8")):
+            for k, v in row.items():
+                if k.endswith("_open"):
+                    try:
+                        if not math.isnan(float(v)):
+                            bad.append((os.path.basename(p), k, row["N"]))
+                    except ValueError:
+                        pass
+    return not bad, f"harvested points plotted: {bad[:4]}"
+
+
 def main():
     I = load()
     print(f"{len(I)} cells on disk at N <= {max(LADDER)}\n")

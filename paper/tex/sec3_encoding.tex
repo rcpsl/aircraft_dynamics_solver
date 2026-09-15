@@ -62,8 +62,11 @@ and 298. Below $D=\SI{3.01}{\dB}$ a \SI{45}{\dBA} tile holds none.}
 \label{sec:instance}
 
 The instance is a $5\times5$ grid over Austin, TX, with 8 tiles at \SI{45}{\dBA}, 12 at
-\SI{55}{\dBA} and 5 at \SI{65}{\dBA}. Vertiports sit at an airport and a downtown core,
-both \SI{65}{\dBA}, and at an exurban commuter town at \SI{45}{\dBA}. Aircraft fly both
+\SI{55}{\dBA} and 5 at \SI{65}{\dBA}. Tiles are numbered row-major from the top left, 1
+to 25, and Fig.~\ref{fig:routes-grid} shades each one by its ambient level. Vertiports
+sit at an airport and a
+downtown core, stations 11 and 18, both \SI{65}{\dBA}, and at an exurban commuter town,
+station 5, at \SI{45}{\dBA}. Aircraft fly both
 directions of the three vertiport pairs: at demand factor $f=1$, 4 per direction between
 airport and downtown and 2 on each pair involving the town, $N=16$. Scaling $f$ from 0.25
 to 1.5 gives the ladder $N\in\{6,8,14,16,22,24\}$. The source level is
@@ -77,18 +80,19 @@ vertiport corridors. The Proportional price is
 \end{equation}
 with base $\gamma=5$, factor scores $\sigma_f(m)\in[0,3]$ for income, ambient level,
 distance to the nearest vertiport and population, and rank weights
-$\rho=(0.4,0.3,0.2,0.1)$. A low price marks a community that benefits from the network
+$\rho=(0.4,0.3,0.2,0.1)$. On this instance the prices are, by row, 27.09 5.42 13.13
+31.83 14.23 / 40.52 10.32 71.17 13.13 15.43 / 8.78 9.52 3.62 90.60 13.13 / 12.12 15.43
+1.62 9.52 8.10 / 6.37 43.91 9.52 13.13 18.12, and the solver uses them to two decimals. A low price marks a community that benefits from the network
 (higher income, louder, nearer a vertiport, less populated), and the objective loads it
 with traffic.
 
 Every principle faces $D=\SI{6}{\dB}$, so the five share one hard constraint and differ
 in tier~1. The shipped settings, $D=\SI{10}{\dB}$ for Equal and Sufficientarian and a
-protected set of the three loudest non-vertiport tiles (stations 16, 20 and 25), leave
-the principles little to act on here: at $N=16$ no cap fills more than 0.44 of a tile's
-capacity, and the baseline routing never enters that protected set at any size of the
-ladder. A screen over the cap and the protected set, four orderings per cell, selected
-$D=\SI{6}{\dB}$ and the corridor set; at $N=16$ the cap then runs at full capacity under
-every principle (Section~\ref{sec:routing}).
+protected set of the three loudest non-vertiport tiles (16, 20 and 25), leave the
+principles little to act on: no cap fills more than 0.44 of a tile at $N=16$, and the
+baseline never enters that set at any size. A screen over both, four orderings per cell,
+selected $D=\SI{6}{\dB}$ and the corridor set, under which the cap runs at full capacity
+from $N=14$ (Section~\ref{sec:routing}).
 
 The \emph{baseline} is the same fleet with both caps at \SI{30}{\dB} and no tier-1
 objective: the arrival-optimal routing without a principle.
@@ -110,7 +114,7 @@ selects among the routings that tie on it.
 The conditions form two lanes. In the \emph{cap lane}, Equal and Sufficientarian have no
 tier-1 objective, so among cap-feasible routings arrival alone decides. In the
 \emph{objective lane}, Prioritarian, Utilitarian and Proportional face the same cap and
-minimise their own objective first. Prioritarian's sums added decibels over $P$ only.
+minimise their own objective first. Prioritarian's objective sums added decibels over $P$ only.
 Utilitarian's and Proportional's price every audible aircraft-timestep, and neither
 charges an aircraft waiting on the ground.
 
@@ -119,8 +123,9 @@ $\dbinc_m(c_{m,t})$, the quantity the principle is about, and is the exact encod
 \emph{count form} prices $c_{m,t}$ instead: $\sum_{t,m}c_{m,t}$ is the fleet's airborne
 time and $\sum_{t,m}\pi_m c_{m,t}$ its price-weighted counterpart. The abstraction drops
 the shape of \eqref{eq:db}. It no longer separates a quiet tile from a loud one, where one
-aircraft adds \SI{3.01}{\dB} and \SI{0.04}{\dB} respectively, and it no longer rewards
-stacking aircraft on one tile, which concavity makes cheaper in decibels. Both forms face
+aircraft adds \SI{3.01}{\dB} and \SI{0.04}{\dB} respectively, and it charges a
+tile-timestep the same however many aircraft share it, losing the discount concavity
+gives for stacking them. Both forms face
 the same cap, so the capacity asymmetry of \eqref{eq:capclosed} constrains both.
 Section~\ref{sec:exp5} measures what the abstraction costs and what it buys.
 
@@ -130,4 +135,5 @@ Section~\ref{sec:exp5} measures what the abstraction costs and what it buys.
 The horizon starts one timestep above the Chebyshev lower bound on trip length (at the
 bound for Utilitarian). Phase~1 raises it where the caps need more; phase~2 fixes it and
 optimises both tiers with Z3's $\nu$Z optimiser~\cite{demoura2008z3,bjorner2015nuz}, with
-arrival made sticky so aircraft can stagger their landings within the horizon.
+a landed aircraft required to stay landed, so aircraft can stagger their landings within
+the horizon.

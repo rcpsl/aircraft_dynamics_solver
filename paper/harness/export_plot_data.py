@@ -74,7 +74,7 @@ PANELS = [
     ("extra_vs_baseline",     "extra fleet-hops",           False),
     ("peak_added",            "peak added noise (dB)",      True),
     ("shared_tile_timesteps", "shared tile-timesteps",      True),
-    ("departure_delay_total", "departure delay (ac-steps)", True),
+    ("departure_hold",         "departure hold (ac-steps)",  True),
     ("total_added",           "summed added noise (dB)",    True),
 ]
 
@@ -93,6 +93,14 @@ def load_metrics():
         for m in json.load(io.open(DB_METRICS, encoding="utf-8")):
             if m.get("condition") in DBF.values() and m.get("N") in LADDER:
                 I[(m["condition"], m["N"])] = m
+    # Departure hold: aircraft-timesteps held beyond the fleet's own size. The raw total
+    # is N + hold, so every condition sits on one diagonal and the difference between
+    # them is invisible; the hold is what the objectives actually pay.
+    for (c, n), m in I.items():
+        for suf in ("", "_min", "_max"):
+            v = m.get("departure_delay_total" + suf)
+            if v is not None:
+                m["departure_hold" + suf] = v - n
     return I
 
 
@@ -124,7 +132,7 @@ def proven(m):
     return m.get("optimality") == "optimal" and m.get("runs", 4) == 4
 
 
-def series(I, field, conds):
+def series(I, field, conds, keep_open=True):
     """One row per N; per condition: mean, band low, band high (proven cells), and the
     value of a verified feasible cell in `_open` (NaN when proven)."""
     header = ["N"] + [f"{c}{s}" for c in conds for s in ("", "_lo", "_hi", "_open")]
@@ -138,7 +146,8 @@ def series(I, field, conds):
                 continue
             v = m.get(field)
             lo, hi = m.get(field + "_min", v), m.get(field + "_max", v)
-            row += [v, lo, hi, NAN] if proven(m) else [NAN, NAN, NAN, v]
+            row += ([v, lo, hi, NAN] if proven(m)
+                    else [NAN, NAN, NAN, v if keep_open else NAN])
         rows.append(row)
     return header, rows
 
@@ -167,7 +176,7 @@ def export_metric_panels(I):
     out = {}
     for field, _lab, with_base in PANELS:
         conds = SERIES if with_base else [c for c in SERIES if c != "baseline"]
-        h, r = series(I, field, conds)
+        h, r = series(I, field, conds, keep_open=False)
         write_csv(f"mvn_{field}.csv", h, r)
         out[field] = (h, r, conds)
     return out
@@ -541,7 +550,7 @@ def exp5_tex(loss, wall, H):
     wh, wr = wall
     L = [r"\begin{tikzpicture}",
          r"\begin{groupplot}[group style={group size=2 by 1, horizontal sep=0.72in},",
-         r"    paperaxis, width=2.7in, height=1.25in, xlabel={fleet size $N$},",
+         r"    paperaxis, width=2.7in, height=1.05in, xlabel={fleet size $N$},",
          rf"    {XTICKS}]",
          r"\nextgroupplot[ylabel={loss on $J_{\mathrm{dB}}$ (\%)}, ymin=0,",
          r"    legend columns=2, legend style={at={(0.5,-0.42)}, anchor=north,",
