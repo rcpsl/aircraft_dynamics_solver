@@ -20,21 +20,9 @@ Equal and Sufficientarian are encoded as caps and contribute no objective. Prior
 needs a protected set $P$ and Proportional a benefit price $\pi_m$, both inputs from
 outside the noise model (Section~\ref{sec:instance}). Equal is comparative and
 Sufficientarian absolute, yet under one limit $\ell$ they coincide on this instance.
-
-\begin{proposition}
-\label{prop:equiv}
-Let $\delta_{m,t}\ge0$ be the added noise on tile $m$ at time $t$, zero on an unoccupied
-tile. At each $t$, $\max_m\delta_{m,t}\le\ell$ implies
-$\max_m\delta_{m,t}-\min_m\delta_{m,t}\le\ell$. The converse holds whenever some tile is
-unoccupied, which is guaranteed when the fleet is smaller than the map, $N<M$.
-\end{proposition}
-\begin{proof}
-Since $\min_m\delta_{m,t}\ge0$, the spread is at most the maximum. An unoccupied tile
-makes the minimum zero and the spread equal to the maximum.
-\end{proof}
-
-Every fleet in this study has $N<M=25$, so the two principles have the same feasible set
-and the same empty objective.
+Every fleet in this study has $N<M=25$, so some tile is always unoccupied, the smallest
+added noise is zero and the spread equals the maximum. The two principles have the same
+feasible set and the same empty objective.
 
 \begin{table}[t]
 \centering
