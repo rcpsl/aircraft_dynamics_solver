@@ -29,9 +29,19 @@ both change as the fleet grows. Whether a principle changes the routing, what it
 and where it puts the noise are therefore functions of the fleet size $N$, and a
 comparison at one $N$ reports one point on each. This paper measures those functions on a
 $5\times5$ map of Austin, TX, for five principles and a no-fairness baseline, from $N=6$
-to $N=24$. Its contributions are four measurements:
+to $N=24$.
+
+The scale follows from what is measured. Every number here is a proven optimum, tested
+against the band four aircraft orderings leave, which needs an instance small enough to
+close each cell and large enough for the cap to bind; a heuristic planner reaches hundreds
+of agents but returns one feasible routing, from which neither can be read. What carries
+to a larger map is the rule, not the size: a cap acts once demand on a tile passes the
+capacity \eqref{eq:capclosed} grants it (Section~\ref{sec:noise}).
+
+Its contributions are four measurements:
 \begin{enumerate}
-\item routing and congestion against $N$ (Section~\ref{sec:routing});
+\item routing and congestion against $N$, and the three distinct footprints the five
+      principles produce (Section~\ref{sec:routing});
 \item travel time and added noise against $N$, each difference between conditions tested
       against the solver's indifference among equally optimal routings, and explained
       through the closed-form capacity a decibel cap grants a tile

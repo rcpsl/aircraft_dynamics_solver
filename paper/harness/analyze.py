@@ -1273,9 +1273,9 @@ def table_capacity():
     p = os.path.join(RES, "fleet_db_metrics.json")
     db = ({(m.get("condition"), m.get("N")): m for m in json.load(io.open(p, encoding="utf-8"))}
           if os.path.exists(p) else {})
-    # Below the cap's activation, the decibel forms' proof frontier, and the top of the
-    # ladder. Every count cell is proven in all four orderings at each.
-    sizes = [n for n in (8, 16, 24) if any(k[0] == setup and k[2] == n for k in idx)]
+    # Below the cap's activation and at the top of the ladder. N = 16 was dropped when
+    # the review response needed the page: its rows repeat the pattern of the other two.
+    sizes = [n for n in (8, 24) if any(k[0] == setup and k[2] == n for k in idx)]
     if not sizes:
         return
     rows = [("equal", "Equal"), ("sufficientarian", "Sufficientarian"),

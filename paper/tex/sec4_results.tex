@@ -75,8 +75,8 @@ tile. Sufficientarian carries fewer shared tile-timesteps than the baseline at $
 
 \emph{Prioritarian} holds the protected set at 0.00\,dB of added noise at every size in
 every ordering. Staying off three corridor tiles narrows its footprint to 8--9 tiles
-against the baseline's 10--12, attributably at $N=6$, 14 and 16. Its cap binds from $N=14$
-as in the cap lane, and from $N=22$ it detours around the protected tiles.
+against the baseline's 10--12, attributably at $N=6$, 14 and 16, and from $N=22$ it
+detours around the protected tiles.
 
 \emph{Utilitarian}'s count objective, airborne time, is minimised by flying every aircraft
 on a shortest path without hovering, which the baseline does at every size. Under the cap
@@ -138,7 +138,10 @@ the cap binds on the quiet tier alone: at $N=24$ the \SI{45}{\dBA} tiles run at
 0.88--1.00 of capacity under every principle on the ladder and the \SI{65}{\dBA} tiles
 at 0.02. The cap begins to act where peak demand on a quiet corridor tile passes
 $\capm_{45}=2$: the binding size follows from $\capm_{45}$ and the fleet share such a
-tile carries, and is $N=14$ here. The decibel forms fill the quiet tier at every size where they prove, from
+tile carries, and is $N=14$ here. The shipped settings test that: with
+$D=\SI{10}{\dB}$ and $\capm_{45}=9$ on the same ladder, the quiet tier runs at 0.11--0.39
+of capacity and no tile reaches it before $N=24$, where one Equal routing fills one at
+\SI{10.00}{\dB}. The decibel forms fill the quiet tier at every size where they prove, from
 $N=6$: 1.00, against 0.50--0.80 for their count forms (Table~\ref{tab:capacity}).
 Concavity is the reason: two aircraft over one \SI{45}{\dBA} tile add 4.77\,dB, one over
 each of two add 6.02, so the decibel objective stacks them up to the cap.
@@ -150,8 +153,7 @@ the baseline's band; one aircraft over a quiet tile adds 3.01\,dB. From $N=14$ e
 principle returns exactly 4.77\,dB in every ordering at every size: two aircraft over a
 \SI{45}{\dBA} tile, the most \eqref{eq:capclosed} admits there. Over $N=14$, 16, 22 and 24
 the baseline's peak averages 5.64, 5.88, 6.70 and 7.70\,dB with bands of 2.22, 2.22, 1.76
-and 3.98\,dB. The binding cap fixes the principles' peak and the aircraft ordering sets
-the baseline's. The separation clears the band at $N=22$ for all five principles.
+and 3.98\,dB. The separation clears the band at $N=22$ for all five principles.
 
 \emph{Summed noise.} Proportional's summed added noise has zero band at every size: 10.9,
 11.6, 19.2, 19.7, 28.5 and 29.0\,dB from $N=6$ to 24, against the baseline's 17.6, 19.4,
@@ -239,11 +241,10 @@ every cell to $N=24$, the slowest in 472\,s.
 
 \emph{The trade-off.} The exact encoding proves only at the bottom of the ladder, in 49\,s
 to 12.3\,h; the abstraction proves the whole ladder in minutes, 30 to 2159 times faster
-where both prove. Its cost depends on what it keeps. Proportional's count form keeps the
-benefit price: it loses 16--17\,\% on the decibel objective where the optimum is known,
-and above $N=8$ it lies within 1.4\,\% of the best decibel routing reached in 20\,h, or
-below it. Utilitarian's reduces to airborne time, which carries no information about
-noise, and loses 86--118\,\%.
+where both prove. Proportional's count form keeps the benefit price and loses
+16--17\,\% where the optimum is known, staying within 1.4\,\% of the best decibel routing
+reached above $N=8$; Utilitarian's reduces to airborne time, which carries no information
+about noise, and loses 86--118\,\%.
 
 \begin{figure*}[t]
 \centering
