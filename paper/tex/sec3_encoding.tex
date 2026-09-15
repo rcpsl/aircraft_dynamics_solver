@@ -62,15 +62,14 @@ and 298. Below $D=\SI{3.01}{\dB}$ a \SI{45}{\dBA} tile holds none.}
 \label{sec:instance}
 
 The instance is a $5\times5$ grid over Austin, TX, with 8 tiles at \SI{45}{\dBA}, 12 at
-\SI{55}{\dBA} and 5 at \SI{65}{\dBA}. Tiles are numbered row-major from the top left, 1
-to 25; the ambient map reads, by row, 45 55 55 55 45 / 45 45 45 55 45 / 65 55 55 45 55 /
-65 45 65 55 65 / 55 55 55 55 \SI{65}{\dBA}, and Fig.~\ref{fig:routes-grid} shades each
-tile by it. Vertiports
-sit at an airport and a
-downtown core, stations 11 and 18, both \SI{65}{\dBA}, and at an exurban commuter town,
-station 5, at \SI{45}{\dBA}. Aircraft fly both
-directions of the three vertiport pairs: at demand factor $f=1$, 4 per direction between
-airport and downtown and 2 on each pair involving the town, $N=16$. Scaling $f$ from 0.25
+\SI{55}{\dBA} and 5 at \SI{65}{\dBA}, each shaded by its level in
+Fig.~\ref{fig:routes-grid}. Tiles are numbered row-major from the top left, 1 to 25, and
+the ambient map reads, by row, 45 55 55 55 45 / 45 45 45 55 45 / 65 55 55 45 55 / 65 45
+65 55 65 / 55 55 55 55 \SI{65}{\dBA}. Vertiports sit at an airport and a downtown core,
+stations 11 and 18, both \SI{65}{\dBA}, and at an exurban commuter town, station 5, at
+\SI{45}{\dBA}. Aircraft fly both directions of the three vertiport pairs. At demand
+factor $f=1$ that is 4 per direction between airport and downtown and 2 on each pair
+involving the town, $N=16$. Scaling $f$ from 0.25
 to 1.5 gives the fleet-size sweep $N\in\{6,8,14,16,22,24\}$. The source level is
 $\alpha=\SI{45}{\dBA}$ and a timestep is \SI{180}{\second}.
 
@@ -89,33 +88,32 @@ $\rho=(0.4,0.3,0.2,0.1)$. On this instance the prices are, by row, 27.09 5.42 13
 with traffic.
 
 Every principle faces $D=\SI{6}{\dB}$, so the five share one hard constraint and differ
-in tier~1. The shipped settings, $D=\SI{10}{\dB}$ for Equal and Sufficientarian and a
-protected set of the three loudest non-vertiport tiles (16, 20 and 25), leave the
-principles little to act on: no cap fills more than 0.44 of a tile at $N=16$, and the
-baseline never enters that set at any size. A screen over both, four orderings per cell,
-selected $D=\SI{6}{\dB}$ and the corridor set, under which the cap runs at full capacity
-from $N=14$ (Section~\ref{sec:routing}).
+only in the objective minimised first. We chose that cap over the settings the tool ships
+with, four orderings per cell: $D=\SI{10}{\dB}$ for Equal and Sufficientarian, and the
+three loudest non-vertiport tiles (16, 20 and 25) protected. Those leave the principles
+little to act on: no cap fills more than 0.44 of a tile at $N=16$, and the baseline never
+enters that set at any size. With the corridor set the cap runs at full capacity from
+$N=14$ (Section~\ref{sec:routing}).
 
-The \emph{baseline} is the same fleet with both caps at \SI{30}{\dB} and no tier-1
-objective: the arrival-optimal routing without a principle.
+The \emph{baseline} is the same fleet with both caps at \SI{30}{\dB} and no objective of
+its own: the arrival-optimal routing without a principle.
 
 \subsection{Objectives}
 \label{sec:objectives}
 
-Each condition minimises two tiers lexicographically. Tier~1 is the principle's objective
-(Table~\ref{tab:principles}). Tier~2, minimised only among tier-1 optima, is the arrival
-penalty
+Each condition minimises two objectives in order. It minimises the principle's own
+objective first (Table~\ref{tab:principles}), and then, among the routings that tie on
+it, the arrival penalty
 \begin{equation}
 J_{\mathrm{time}}=\textstyle\sum_{i}\sum_{t}\,[\,\neg\mathrm{ha}_{i,t}\,] ,
 \label{eq:jtime}
 \end{equation}
 the aircraft-timesteps before arrival, where $\mathrm{ha}_{i,t}$ marks aircraft $i$ as
-landed; time held at the origin counts. Arrival cannot cost a unit of tier~1, and it
-selects among the routings that tie on it.
+landed; time held at the origin counts. Arrival cannot cost a unit of the first
+objective, and it selects among the routings that tie on it.
 
-The conditions form two lanes. In the \emph{cap lane}, Equal and Sufficientarian have no
-tier-1 objective, so among cap-feasible routings arrival alone decides. In the
-\emph{objective lane}, Prioritarian, Utilitarian and Proportional face the same cap and
+Equal and Sufficientarian have no objective of their own, so among cap-feasible routings
+arrival alone decides. Prioritarian, Utilitarian and Proportional face the same cap and
 minimise their own objective first. Prioritarian's objective sums added decibels over $P$ only.
 Utilitarian's and Proportional's price every audible aircraft-timestep, and neither
 charges an aircraft waiting on the ground.

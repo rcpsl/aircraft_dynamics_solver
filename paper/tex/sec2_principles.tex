@@ -3,8 +3,9 @@
 
 The burden is the noise aircraft add to a community's ambient level, and a principle
 chooses among routings rather than among arbitrary allocations. We state each principle's
-general claim and its reading for routing; Table~\ref{tab:principles} gives what the
-solver receives, in the notation of Section~\ref{sec:encoding}.
+general claim and its reading for routing. Table~\ref{tab:principles} gives what the
+solver receives in the notation of Section~\ref{sec:encoding}: the caps sent, and the
+objective minimised first, ahead of arrival time.
 
 \emph{Equal}: everyone receives the same share~\cite{dworkin1981}; added noise should be
 as equal as possible across communities. \emph{Sufficientarian}: everyone should reach a
@@ -29,15 +30,15 @@ feasible set and the same empty objective.
 \begin{table}[t]
 \centering
 \footnotesize
-\caption{Conditions as the solver receives them: the caps sent and the tier-1 objective,
-minimised before the arrival penalty \eqref{eq:jtime}. For Utilitarian and Proportional
+\caption{Conditions as the solver receives them: the caps sent and the objective
+minimised first, ahead of the arrival penalty \eqref{eq:jtime}. For Utilitarian and Proportional
 the decibel form is the exact encoding and the count form its abstraction, which prices
 $c_{m,t}$ in place of $\dbinc_m(c_{m,t})$. $\ell=\SI{6}{\dB}$; a cap not sent is
 \SI{30}{\dB}, which no tile on this map can reach.}
 \label{tab:principles}
 \begin{tabular}{@{}lll@{}}
 \toprule
-Condition & Caps Sent & Tier-1 Objective \\
+Condition & Caps Sent & First Objective \\
 \midrule
 Equal & $U{=}\ell$, $D{=}\ell$ & none \\
 Sufficientarian & $D{=}\ell$ & none \\
