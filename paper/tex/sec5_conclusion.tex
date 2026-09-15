@@ -3,7 +3,7 @@
 
 We encoded five distributive principles as caps and lexicographic objectives in one
 routing solver and measured their response to fleet size on one instance, from $N=6$ to
-$N=24$, every cell proven optimal under four aircraft orderings.
+$N=24$, every ladder cell proven optimal under four aircraft orderings.
 
 Equal and Sufficientarian pose one problem on this ladder: they keep congestion within the
 solver's indifference of the baseline at all but one cell, fix the peak at 4.77\,dB once
@@ -11,15 +11,16 @@ the cap binds at $N=14$, and pay 2.75 to 3.00 extra fleet-hops for it from $N=22
 Prioritarian holds its protected communities at 0\,dB at every size, narrows the fleet's
 footprint, lowers summed noise at $N=14$ and 16, and pays in distance from $N=22$.
 Utilitarian, in count form, keeps every aircraft on a shortest path at every size and pays
-the same price as departure delay. Proportional confines the fleet to six tiles with zero
+the same price as departure delay. Proportional, also in count form, confines the fleet
+to six tiles with zero
 band at every size, holds summed added noise below the baseline's from $N=6$ to 22, and
 also pays on the ground. The baseline's peak varies with the aircraft ordering alone, by
 up to 3.98\,dB.
 
-For a designer, fleet size decides what the choice of principle buys. Below the size at
-which the cap fills, Equal, Sufficientarian and Utilitarian return routings within the
-solver's indifference of the baseline, and only the objectives of Prioritarian and
-Proportional move the routing, onto fewer tiles. Above it, every principle fixes the peak
+For a designer, fleet size decides what the choice of principle buys. On the ladder,
+below the size at which the cap fills, Equal, Sufficientarian and Utilitarian return
+routings within the solver's indifference of the baseline, and only the objectives of
+Prioritarian and Proportional move the routing, onto fewer tiles. Above it, every principle fixes the peak
 and pays the same arrival price, and the choice is which communities carry the remaining
 noise and whether the delay is taken in the air or on the ground. The cap, shared by all
 five, sets the peak and the size at which travel starts to cost; the principle sets where
@@ -27,10 +28,14 @@ the noise goes and the currency of the cost.
 
 Utilitarian and Proportional trade exactness for scale. Their decibel encoding prices the
 noise each principle is about and proves Utilitarian to $N=16$ and Proportional to $N=8$
-within \SI{20}{\hour}; the count abstraction proves every ladder cell, the slowest in a
-mean of \SI{439}{\second} at $N=24$. The abstraction costs 16--17\,\% on Proportional's
-decibel objective, which keeps its benefit price, and 86--118\,\% on Utilitarian's, whose
-count objective reduces to airborne time and carries no information about noise.
+within \SI{20}{\hour}; the count abstraction proves every ladder cell, the slowest run in
+\SI{472}{\second}. The abstraction costs 16--17\,\% on Proportional's decibel objective,
+which keeps its benefit price, and 86--118\,\% on Utilitarian's, whose count objective
+reduces to airborne time and carries no information about noise. The encoding also
+decides what Utilitarian does to the routing. In decibel form, wherever it proves, it
+confines the fleet to 6 tiles, fills the quiet tiles from $N=6$ and pays in departure
+delay, 16 aircraft-timesteps at $N=16$, for summed noise that Proportional's count form
+matches within 0.01\,dB at no delay.
 
 The acoustic model is coarse, with uniform tiles and point sources without altitude or
 directivity~\cite{nasaUAMnoise2020}, and the findings rest on one instance and one cap.

@@ -24,7 +24,8 @@ is the verified routing its search held when stopped.}
 size. Lines join the mean over four aircraft orderings; the band is the range over the
 orderings, the solver's indifference at that cell. Densely dashed lines in a principle's
 colour are its decibel form (Section~\ref{sec:exp5}); a hollow marker is a decibel cell
-not proven in all four orderings. Departure delay counts aircraft-timesteps before each
+not proven in all four orderings and, where none proved, the routing its search held when
+stopped, not an optimum. Departure delay counts aircraft-timesteps before each
 aircraft's first move, the origin step included, so a fleet departing at once scores $N$.
 Summed added noise adds $\dbinc_m(c_{m,t})$ over tiles and timesteps. The vertical line
 marks the nominal demand, $N=16$.}
@@ -34,12 +35,14 @@ marks the nominal demand, $N=16$.}
 \subsection{Setup}
 \label{sec:setup}
 
-The six conditions of Table~\ref{tab:principles} run at every size of the ladder, from
-$N=6$ to 24, on the operating point of Section~\ref{sec:instance}; the nominal demand,
-$N=16$, is marked in every plot. No solver timeout was set, and every ladder cell is
-proven optimal. On the ladder Utilitarian and Proportional run in count form. Their
-decibel forms run on the same orderings in Experiment~5, where a run not proven within a
-harvest horizon of $H=20.0$\,h was stopped and its verified routing kept.
+The five principles and the baseline run at every size of the ladder, from $N=6$ to 24,
+on the operating point of Section~\ref{sec:instance}, with Utilitarian and Proportional in
+count form (Table~\ref{tab:principles}); the nominal demand, $N=16$, is marked in every
+plot. No solver timeout was set, and every ladder cell is proven optimal. The decibel
+forms run on the same orderings in Experiment~5, where a run not proven within a harvest
+horizon of $H=20.0$\,h was stopped and its verified routing kept. Experiments~1--3 report
+them where an ordering proved: at $N=6$ and 8 for both, and at $N=14$ and 16 for
+Utilitarian.
 
 A solve returns one member of a set of equally optimal routings, and which member depends
 on the order in which the aircraft are listed. Every cell is therefore solved under four
@@ -87,8 +90,10 @@ vertiports and the three \SI{55}{\dBA} tiles between them (stations 9, 12 and 13
 against the baseline's 10--12, attributably from $N=6$ to 22. It loads them: peak
 occupancy is 3, 5, 8, 10, 12 and 14 aircraft from $N=6$ to 24, identical in all four
 orderings, and attributably above the baseline at $N=8$ (5 against 3.5). Where they are
-proven, at $N=6$ and 8, the decibel forms of both objective principles also confine the
-fleet to 6 tiles, and occupy fewer tile-timesteps than their count forms.
+proven, at $N=6$ and 8 for both and at $N=14$ and 16 for Utilitarian, the decibel forms
+of both objective principles also confine the fleet to 6 tiles, and occupy fewer
+tile-timesteps than their count forms. Utilitarian's footprint is therefore set by its
+encoding: the baseline's in count form, six tiles in decibel form.
 
 \subsection{Experiment 2: travel time}
 \label{sec:travel}
@@ -97,7 +102,8 @@ What does each principle cost against the baseline, in distance and in departure
 The middle column of Fig.~\ref{fig:metric-vs-N} gives both; the arrival penalty
 \eqref{eq:jtime} counts both.
 
-Through $N=16$ every principle is free in travel time. At $N=6$, 8, 14 and 16 each attains
+On the ladder every principle is free in travel time through $N=16$. At $N=6$, 8, 14 and
+16 each attains
 the baseline's arrival penalty of 18, 22, 40 and 44 aircraft-timesteps in every ordering,
 with every aircraft on a shortest path. At $N=22$ and 24 every principle pays exactly 3
 aircraft-timesteps more than the baseline (65 against 62, 69 against 66), with zero band.
@@ -111,8 +117,9 @@ with zero band. The objectives account for the split. Arrival cannot tell a deto
 hold on the ground, and Prioritarian's objective prices only the three protected tiles;
 Utilitarian's and Proportional's price every airborne aircraft-timestep and none on the
 ground, so for them a detour costs tier~1 and a hold does not. Their decibel forms pay
-before the cap binds: at $N=6$ and 8 they hold 1 (Utilitarian) and 3 (Proportional)
-aircraft-timesteps more on the ground than the baseline, with no extra hop.
+at every size where they prove: at $N=6$ and 8 they hold 1 (Utilitarian) and 3
+(Proportional) aircraft-timesteps more on the ground than the baseline, and Utilitarian's
+holds 12 and 16 more at $N=14$ and 16, all with no extra hop.
 
 \subsection{Experiment 3: added noise and capacity}
 \label{sec:noise}
@@ -125,7 +132,10 @@ The capacity asymmetry of \eqref{eq:capclosed} decides where the cap acts. At
 $D=\SI{6}{\dB}$ a \SI{45}{\dBA} tile holds 2 aircraft and a \SI{65}{\dBA} tile 298, so
 the cap binds on the quiet tier alone: at $N=24$ the \SI{45}{\dBA} tiles run at
 0.88--1.00 of capacity under every principle on the ladder and the \SI{65}{\dBA} tiles
-at 0.02.
+at 0.02. The decibel forms fill the quiet tier at every size where they prove, from
+$N=6$: 1.00, against 0.50--0.80 for their count forms (Table~\ref{tab:capacity}).
+Concavity is the reason: two aircraft over one \SI{45}{\dBA} tile add 4.77\,dB, one over
+each of two add 6.02, so the decibel objective stacks them up to the cap.
 
 \input{tables/capacity}
 
@@ -144,26 +154,34 @@ where the baseline's band is 24.9\,dB wide. Proportional occupies 13 tile-timest
 $N\le16$ against the baseline's 16--19 with the same airborne time, and since $\dbinc_m$ is
 concave, fewer occupied tile-timesteps add less in sum. Prioritarian's summed noise is
 attributably lower at $N=14$ and 16 (29.7 and 28.0 against 35.7 and 37.7\,dB). Equal,
-Sufficientarian and Utilitarian stay within the baseline's band at every size. The
-decibel forms add 9.54 (Utilitarian) and 9.60\,dB (Proportional) summed at $N=6$, against
-the baseline's 17.6, and already peak at 4.77\,dB at $N=6$ and 8.
+Sufficientarian and Utilitarian's count form stay within the baseline's band at every
+size. The decibel forms add 9.54 (Utilitarian) and 9.60\,dB (Proportional) summed at
+$N=6$, against the baseline's 17.6, and already peak at 4.77\,dB at $N=6$ and 8. At
+$N=14$ and 16 Utilitarian's decibel form sums to 19.2 and 19.7\,dB, against 35.7 and 39.3
+in count form. Proportional's count form sums to the same within 0.01\,dB and arrives with
+the baseline, 12 and 16 aircraft-timesteps before it: the lexicographic tier~1 takes any
+saving in noise over any delay.
 
 \subsection{Experiment 4: solver performance}
 \label{sec:tractability}
 
 How does solve time grow with the fleet? Fig.~\ref{fig:solve-time} gives the mean wall
 time to a proven optimum over the four orderings, with eight solves running in parallel
-on one 14-core workstation. Every condition proves every cell. Equal, Sufficientarian and
-Prioritarian solve within a factor of two of the baseline at every size, and the baseline
-takes 5.9\,s at $N=6$ and 200\,s at $N=24$. Utilitarian is the fastest condition through
-$N=16$, at 1.6\,s for $N=6$ and 8.5\,s for $N=16$ against the baseline's 5.9 and 55.3\,s.
-Proportional is the slowest at $N=22$ and 24, at 227 and 439\,s.
+on one 14-core workstation. Every ladder condition proves every cell. Equal,
+Sufficientarian and Prioritarian solve within a factor of two of the baseline at every
+size, and the baseline takes 5.9\,s at $N=6$ and 200\,s at $N=24$. Utilitarian in count
+form is the fastest condition through $N=16$, at 1.6\,s for $N=6$ and 8.5\,s for $N=16$
+against the baseline's 5.9 and 55.3\,s. Proportional in count form is the slowest at
+$N=22$ and 24, at 227 and 439\,s. Prioritarian's tier~1 is a decibel sum too, but over its
+three protected tiles, and it reaches zero at every size; the decibel forms of Utilitarian
+and Proportional sum over all 25 tiles, and Fig.~\ref{fig:exp5} gives their solve times.
 
 \begin{figure}[t]
 \centering
 \input{figs/solve_time.tex}
 \caption{Mean wall time to a proven optimum over four orderings, eight solves in
-parallel; the band is the range over the orderings.}
+parallel; the band is the range over the orderings. Utilitarian and Proportional are in
+count form; Fig.~\ref{fig:exp5} gives their decibel forms.}
 \label{fig:solve-time}
 \end{figure}
 
