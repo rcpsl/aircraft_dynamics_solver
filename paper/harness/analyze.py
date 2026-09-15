@@ -1318,7 +1318,7 @@ def table_capacity():
            r"$H=20.0$\,h; its values come from the orderings that ran, proven or "
            r"stopped at $H$ (Sec.~\ref{sec:exp5}).}",
            r"\label{tab:capacity}",
-           r"\footnotesize", r"\setlength{\tabcolsep}{2.5pt}",
+           r"\footnotesize", r"\setlength{\tabcolsep}{4pt}",
            r"\begin{tabular}{r l rrr r}", r"\toprule",
            r"$N$ & Condition & 45\,dBA & 55\,dBA & 65\,dBA & max \\",
            r"\midrule"]
