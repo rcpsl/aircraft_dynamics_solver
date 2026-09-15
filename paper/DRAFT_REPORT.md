@@ -55,6 +55,21 @@ report below; everything else there still applies.
     only, and the caption and legend say so.
   * Every change is in `routes_grid_tex` and `export_routes` in `export_plot_data.py`;
     there are no data changes.
+  * The legend entry reads "Prioritarian's protected set", with no station list.
+* **Table II (capacity) was revised by instruction** in `analyze.py` `table_capacity`.
+  * Sizes are N = 8, 16 and 24; the old table had N = 8 and 24.
+  * The Baseline row is gone, and Utilitarian (dB) and Proportional (dB) rows are added
+    from `fleet_db_metrics.json`.
+  * Rows follow Fig. 2's order, and the count rows are labelled "(count)".
+  * With the Baseline gone, D (6) and the tile capacity (2/29/298) are the same in every
+    row. The two columns were replaced by one caption sentence, which the generator
+    computes and asserts is constant.
+  * A dagger marks a decibel cell not proven in all four orderings within H. These are
+    Utilitarian (dB) at N = 16 (p0 proven, p1 stopped) and both decibel forms at N = 24
+    and Proportional (dB) at N = 16 (one stopped run each).
+  * §IV-C's "0.88–1.00 under every principle" at N = 24 now says "on the ladder". The
+    stopped Utilitarian (dB) run reads 0.67 there, and the verified claim was always
+    about the count forms.
 
 ### Claim table: new abstract claims
 

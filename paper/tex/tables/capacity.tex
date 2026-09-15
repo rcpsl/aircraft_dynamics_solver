@@ -1,26 +1,36 @@
 \begin{table}[t]
 \centering
-\caption{Capacity utilisation by ambient tier: peak aircraft over a community as a fraction of the capacity \eqref{eq:capclosed} grants a tile at that ambient level, averaged over the tier's tiles that carried traffic, for the first aircraft ordering. \emph{max} is the largest utilisation on any tile, averaged over the four orderings. \emph{cap.} is the capacity in aircraft at 45/55/65\,dBA under the row's $D$. Every principle sends $D{=}6$; the baseline sends the wide cap $D{=}30$.}
+\caption{Capacity utilisation by ambient tier: peak aircraft over a community as a fraction of the capacity \eqref{eq:capclosed} grants a tile at that ambient level, averaged over the tier's tiles that carried traffic, for the first aircraft ordering. \emph{max} is the largest utilisation on any tile, averaged over the orderings. Every row sends $D{=}6$, which grants 2/29/298 aircraft at 45/55/65\,dBA. A dagger marks a decibel-form cell not proven in all four orderings within $H=20.0$\,h; its values come from the orderings that ran, proven or stopped at $H$ (Sec.~\ref{sec:exp5}).}
 \label{tab:capacity}
 \footnotesize
 \setlength{\tabcolsep}{2.5pt}
-\begin{tabular}{r l r l rrr r}
+\begin{tabular}{r l rrr r}
 \toprule
-$N$ & Condition & $D$ & cap. & 45\,dBA & 55\,dBA & 65\,dBA & max \\
+$N$ & Condition & 45\,dBA & 55\,dBA & 65\,dBA & max \\
 \midrule
-8 & Equal & 6 & 2/29/298 & 0.50 & 0.06 & 0.01 & 0.62 \\
-8 & Sufficientarian & 6 & 2/29/298 & 0.50 & 0.06 & 0.01 & 0.50 \\
-8 & Prioritarian & 6 & 2/29/298 & 0.50 & 0.08 & 0.01 & 0.50 \\
-8 & Utilitarian & 6 & 2/29/298 & 0.50 & 0.06 & 0.01 & 0.75 \\
-8 & Proportional & 6 & 2/29/298 & 0.50 & 0.11 & 0.01 & 0.50 \\
-8 & Baseline & 30 & 999/9990/99900 & 0.00 & 0.00 & 0.00 & 0.00 \\
+8 & Equal & 0.50 & 0.06 & 0.01 & 0.62 \\
+8 & Sufficientarian & 0.50 & 0.06 & 0.01 & 0.50 \\
+8 & Prioritarian & 0.50 & 0.08 & 0.01 & 0.50 \\
+8 & Utilitarian (dB) & 1.00 & 0.13 & 0.01 & 1.00 \\
+8 & Utilitarian (count) & 0.50 & 0.06 & 0.01 & 0.75 \\
+8 & Proportional (dB) & 1.00 & 0.13 & 0.01 & 1.00 \\
+8 & Proportional (count) & 0.50 & 0.11 & 0.01 & 0.50 \\
 \midrule
-24 & Equal & 6 & 2/29/298 & 0.92 & 0.19 & 0.02 & 1.00 \\
-24 & Sufficientarian & 6 & 2/29/298 & 0.92 & 0.19 & 0.02 & 1.00 \\
-24 & Prioritarian & 6 & 2/29/298 & 0.88 & 0.22 & 0.02 & 1.00 \\
-24 & Utilitarian & 6 & 2/29/298 & 0.92 & 0.13 & 0.02 & 1.00 \\
-24 & Proportional & 6 & 2/29/298 & 1.00 & 0.32 & 0.02 & 1.00 \\
-24 & Baseline & 30 & 999/9990/99900 & 0.00 & 0.00 & 0.00 & 0.01 \\
+16 & Equal & 0.80 & 0.12 & 0.01 & 1.00 \\
+16 & Sufficientarian & 0.67 & 0.13 & 0.01 & 1.00 \\
+16 & Prioritarian & 0.83 & 0.20 & 0.01 & 1.00 \\
+16 & Utilitarian (dB)$^\dagger$ & 1.00 & 0.23 & 0.02 & 1.00 \\
+16 & Utilitarian (count) & 0.70 & 0.20 & 0.01 & 1.00 \\
+16 & Proportional (dB)$^\dagger$ & 1.00 & 0.25 & 0.01 & 1.00 \\
+16 & Proportional (count) & 1.00 & 0.23 & 0.01 & 1.00 \\
+\midrule
+24 & Equal & 0.92 & 0.19 & 0.02 & 1.00 \\
+24 & Sufficientarian & 0.92 & 0.19 & 0.02 & 1.00 \\
+24 & Prioritarian & 0.88 & 0.22 & 0.02 & 1.00 \\
+24 & Utilitarian (dB)$^\dagger$ & 0.67 & 0.13 & 0.02 & 1.00 \\
+24 & Utilitarian (count) & 0.92 & 0.13 & 0.02 & 1.00 \\
+24 & Proportional (dB)$^\dagger$ & 1.00 & 0.32 & 0.03 & 1.00 \\
+24 & Proportional (count) & 1.00 & 0.32 & 0.02 & 1.00 \\
 \bottomrule
 \end{tabular}
 \end{table}

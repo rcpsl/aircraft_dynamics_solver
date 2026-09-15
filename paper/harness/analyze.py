@@ -1255,70 +1255,83 @@ def table_fleet():
 
 
 def table_capacity():
-    """Capacity utilisation per ambient tier, at the two anchor fleet sizes.
+    """Capacity utilisation per ambient tier, at three sizes of the ladder.
 
     Utilisation is peak occupancy over what the cap D actually grants a tile at that
     ambient level. It is the number that says a uniform cap is not a uniform rule: the
     same D buys a 65 dBA tile many times the capacity it buys a 45 dBA one.
+
+    Rows are the five principles, Utilitarian and Proportional in both their decibel and
+    count forms (Experiment 5), in Fig. 2's order. Every row sends the same D, so D and
+    the tile capacity it grants go in the caption, not in a column.
     """
     idx, setup = _main_cells()
     if not idx:
         return
-    # One size below the cap's activation and one above it, both proven in every
-    # ordering for every condition (N = 32 has harvested cells and no Equal row).
-    sizes = [n for n in (8, 24) if any(k[0] == setup and k[2] == n for k in idx)]
+    # Decibel-form cells, built by encoding.py through the same metrics pipeline. A cell
+    # the sweep never reached is absent and its row is skipped.
+    p = os.path.join(RES, "fleet_db_metrics.json")
+    db = ({(m.get("condition"), m.get("N")): m for m in json.load(io.open(p, encoding="utf-8"))}
+          if os.path.exists(p) else {})
+    # Below the cap's activation, the decibel forms' proof frontier, and the top of the
+    # ladder. Every count cell is proven in all four orderings at each.
+    sizes = [n for n in (8, 16, 24) if any(k[0] == setup and k[2] == n for k in idx)]
     if not sizes:
         return
-    conds = [c for c in CORDER if any(k[0] == setup and k[1] == c for k in idx)]
+    rows = [("equal", "Equal"), ("sufficientarian", "Sufficientarian"),
+            ("prioritarian", "Prioritarian"), ("utilitarian_db", "Utilitarian (dB)"),
+            ("utilitarian", "Utilitarian (count)"), ("proportional_db", "Proportional (dB)"),
+            ("proportional", "Proportional (count)")]
     tiers = ("45", "55", "65")
 
+    def get(c, n):
+        return db.get((c, n)) if c.endswith("_db") else idx.get((setup, c, n))
+
+    table = [(n, c, lab, get(c, n)) for n in sizes for c, lab in rows if get(c, n)]
+    D = {fmt(m.get("D"), 0) for *_, m in table}
+    caps = {"/".join(str((m.get("tile_capacity") or {}).get(t, "--")) for t in tiers)
+            for *_, m in table}
+    if len(D) != 1 or len(caps) != 1:
+        raise SystemExit(f"capacity table: rows differ in D {D} or tile capacity {caps}")
+    D, caps = D.pop(), caps.pop()
+
     md("\n## Capacity utilisation by ambient tier\n")
-    md("Peak aircraft over a community, divided by what its cap $D$ allows a tile at "
-       "that ambient level to hold. Mean over touched tiles in the tier; a blank tier "
-       "carried no traffic.\n")
-    md("| N | condition | D | tile capacity 45/55/65 | " +
-       " | ".join(f"{t} dBA" for t in tiers) + " | fleet max |")
-    md("|---|---|---|---|---|---|---|---|")
-    for n in sizes:
-        for c in conds:
-            m = idx.get((setup, c, n))
-            if m is None:
-                continue
-            bt = m.get("capacity_utilisation_by_tier") or {}
-            tc = m.get("tile_capacity") or {}
-            cells = [("--" if bt.get(t) is None else f"{bt[t]:.2f}") for t in tiers]
-            md(f"| {n} | {CLABEL[c]} | {fmt(m.get('D'),0)} | "
-               f"{'/'.join(str(tc.get(t,'--')) for t in tiers)} | "
-               + " | ".join(cells) + f" | {_cell(m,'capacity_utilisation_max')} |")
+    md(f"Peak aircraft over a community, divided by what the cap $D$ = {D} allows a tile "
+       f"at that ambient level to hold ({caps} aircraft at 45/55/65 dBA). Mean over "
+       "touched tiles in the tier; a blank tier carried no traffic.\n")
+    md("| N | condition | " + " | ".join(f"{t} dBA" for t in tiers) + " | fleet max |")
+    md("|---|---|---|---|---|---|")
+    for n, c, lab, m in table:
+        bt = m.get("capacity_utilisation_by_tier") or {}
+        cells = [("--" if bt.get(t) is None else f"{bt[t]:.2f}") for t in tiers]
+        md(f"| {n} | {lab}{'†' if _dag(m) else ''} | " + " | ".join(cells) +
+           f" | {fmt(m.get('capacity_utilisation_max'))} |")
 
     tex = [r"\begin{table}[t]", r"\centering",
            r"\caption{Capacity utilisation by ambient tier: peak aircraft over a "
            r"community as a fraction of the capacity \eqref{eq:capclosed} grants a "
            r"tile at that ambient level, averaged over the tier's tiles that carried "
            r"traffic, for the first aircraft ordering. \emph{max} is the largest "
-           r"utilisation on any tile, averaged over the four orderings. \emph{cap.} is "
-           r"the capacity in aircraft at 45/55/65\,dBA under the row's $D$. Every "
-           r"principle sends $D{=}6$; the baseline sends the wide cap $D{=}30$.}",
+           r"utilisation on any tile, averaged over the orderings. Every row sends "
+           rf"$D{{=}}{D}$, which grants {caps} aircraft at 45/55/65\,dBA. A dagger "
+           r"marks a decibel-form cell not proven in all four orderings within "
+           r"$H=20.0$\,h; its values come from the orderings that ran, proven or "
+           r"stopped at $H$ (Sec.~\ref{sec:exp5}).}",
            r"\label{tab:capacity}",
-           # footnotesize: the baseline's 999/9990/99900 column overruns one IEEE
-           # column at normal size.
            r"\footnotesize", r"\setlength{\tabcolsep}{2.5pt}",
-           r"\begin{tabular}{r l r l rrr r}", r"\toprule",
-           r"$N$ & Condition & $D$ & cap. & 45\,dBA & 55\,dBA & 65\,dBA & max \\",
+           r"\begin{tabular}{r l rrr r}", r"\toprule",
+           r"$N$ & Condition & 45\,dBA & 55\,dBA & 65\,dBA & max \\",
            r"\midrule"]
     for i, n in enumerate(sizes):
         if i:
             tex.append(r"\midrule")
-        for c in conds:
-            m = idx.get((setup, c, n))
-            if m is None:
+        for n2, c, lab, m in table:
+            if n2 != n:
                 continue
             bt = m.get("capacity_utilisation_by_tier") or {}
-            tc = m.get("tile_capacity") or {}
             cells = [("--" if bt.get(t) is None else f"{bt[t]:.2f}") for t in tiers]
-            cap = "/".join(str(tc.get(t, "--")) for t in tiers)
-            tex.append(f"{n} & {CLABEL[c]} & {fmt(m.get('D'),0)} & {cap} & " +
-                       " & ".join(cells) + f" & {_cell(m,'capacity_utilisation_max')} " + r"\\")
+            tex.append(f"{n} & {lab}{_dag(m)} & " + " & ".join(cells) +
+                       f" & {fmt(m.get('capacity_utilisation_max'))} " + r"\\")
     tex += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     io.open(os.path.join(TEXDIR, "capacity.tex"), "w", encoding="utf-8",
             newline="\n").write("\n".join(tex) + "\n")
