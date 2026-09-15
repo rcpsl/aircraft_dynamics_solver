@@ -135,6 +135,17 @@ Verdicts and the edit steps, in the order they were applied.
 Not done: the related-work paragraph (no room at 8 pages), a full 25-cell instance
 table, and Fig. 4 still has no decibel series.
 
+**Label capitalisation, by instruction.** Every figure axis label and table column header
+is Title Case, with units and short prepositions left lowercase ("Fleet Size $N$", "Max
+Aircraft per Tile", "Departure Hold (ac-steps)", "Solve Time (s)", "Cap $D$ (dB of Added
+Noise)"). Twelve axis labels in `export_plot_data.py`; Table I's "Caps Sent" and "Tier-1
+Objective"; Table II's "Max"; Table III's "Count", "Loss" and "Speed-up"; Table IV's
+"Travel Time", "Added Noise" and the bare "s" column, now "Wall (s)". The captions that
+name a column in italics were changed with it (\emph{Max}, \emph{Count}, \emph{Loss},
+\emph{Wall}), so caption and header agree. Legend entries and row labels were already
+capitalised. The generated but un-inputted tables in `analyze.py` (fleet_main, reference,
+scaling) keep their old headers; they are not in the paper.
+
 **Page budget.** The additions took the paper to 9 pages. It is back to 8 by wording
 cuts that keep every claim (the §III-C screen paragraph, one redundant topic sentence in
 §IV-C, two figure captions, one clause in §IV-F) and by Fig. 5's panels going from 1.25

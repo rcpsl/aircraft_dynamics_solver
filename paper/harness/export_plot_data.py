@@ -70,12 +70,12 @@ PGF_MARK = {"o": ("*", "o", ""), "s": ("square*", "square", ""),
 
 # Columns are the metric families Sec. IV reports: congestion | travel time | noise.
 PANELS = [
-    ("max_count",             "max aircraft per tile",      True),
-    ("extra_vs_baseline",     "extra fleet-hops",           False),
-    ("peak_added",            "peak added noise (dB)",      True),
-    ("shared_tile_timesteps", "shared tile-timesteps",      True),
-    ("departure_hold",         "departure hold (ac-steps)",  True),
-    ("total_added",           "summed added noise (dB)",    True),
+    ("max_count",             "Max Aircraft per Tile",      True),
+    ("extra_vs_baseline",     "Extra Fleet-Hops",           False),
+    ("peak_added",            "Peak Added Noise (dB)",      True),
+    ("shared_tile_timesteps", "Shared Tile-Timesteps",      True),
+    ("departure_hold",         "Departure Hold (ac-steps)",  True),
+    ("total_added",           "Summed Added Noise (dB)",    True),
 ]
 
 
@@ -340,7 +340,7 @@ def metric_vs_N_tex(panels):
         h, r, conds = panels[field]
         opts = [f"ylabel={{{ylab}}}"]
         if i >= 3:
-            opts.append(r"xlabel={fleet size $N$}")
+            opts.append(r"xlabel={Fleet Size $N$}")
         if i == 0:
             opts += [r"legend to name=mvnlegend", "legend columns=4",
                      r"legend style={/tikz/every even column/.append style="
@@ -362,7 +362,7 @@ def metric_vs_N_tex(panels):
 def solve_time_tex(h, r):
     L = [r"\begin{tikzpicture}",
          r"\begin{axis}[paperaxis, width=2.55in, height=1.45in, ymode=log,",
-         rf"    {XTICKS}, xlabel={{fleet size $N$}}, ylabel={{solve time (s)}},",
+         rf"    {XTICKS}, xlabel={{Fleet Size $N$}}, ylabel={{Solve Time (s)}},",
          r"    legend columns=3, legend style={at={(0.5,-0.36)}, anchor=north,",
          r"    /tikz/every even column/.append style={column sep=5pt}}]"]
     L += _plot_lines("data/solve_time.csv", h, r, CONDS, "st", legend=True)
@@ -382,7 +382,7 @@ def capacity_tex():
          r"\begin{axis}[paperaxis, width=2.65in, height=1.30in, ymode=log,",
          r"    log ticks with fixed point, ytick={1,10,100,1000},",
          r"    xmin=0.5, xmax=15, ymin=0.3, ymax=5000, xtick={2,4,6,8,10,12,14},",
-         r"    xlabel={cap $D$ (dB of added noise)}, ylabel={aircraft per tile}]",
+         r"    xlabel={Cap $D$ (dB of Added Noise)}, ylabel={Aircraft per Tile}]",
          r"\fill[black!8] (axis cs:0.5,0.3) rectangle (axis cs:15,0.55);",
          r"\node[anchor=east, black!60] at (axis cs:14.8,0.41) {capacity 0};",
          r"\draw[black!35, line width=0.4pt] (axis cs:0.5,1) -- (axis cs:15,1);"]
@@ -550,9 +550,9 @@ def exp5_tex(loss, wall, H):
     wh, wr = wall
     L = [r"\begin{tikzpicture}",
          r"\begin{groupplot}[group style={group size=2 by 1, horizontal sep=0.72in},",
-         r"    paperaxis, width=2.7in, height=1.05in, xlabel={fleet size $N$},",
+         r"    paperaxis, width=2.7in, height=1.05in, xlabel={Fleet Size $N$},",
          rf"    {XTICKS}]",
-         r"\nextgroupplot[ylabel={loss on $J_{\mathrm{dB}}$ (\%)}, ymin=0,",
+         r"\nextgroupplot[ylabel={Loss on $J_{\mathrm{dB}}$ (\%)}, ymin=0,",
          r"    legend columns=2, legend style={at={(0.5,-0.42)}, anchor=north,",
          r"    /tikz/every even column/.append style={column sep=6pt}}]"]
     csv = "data/exp5_loss.csv"
@@ -575,7 +575,7 @@ def exp5_tex(loss, wall, H):
             L.append(rf"\addplot[fig-{b}, only marks, mark={hollow}, mark size=1.6pt, "
                      rf"mark options={{{mo}}}, forget plot] "
                      rf"table[x=N, y={p}_open, col sep=comma] {{{csv}}};")
-    L += [r"\nextgroupplot[ylabel={wall time (s)}, ymode=log,",
+    L += [r"\nextgroupplot[ylabel={Wall Time (s)}, ymode=log,",
           r"    legend columns=2, legend style={at={(0.5,-0.42)}, anchor=north,",
           r"    /tikz/every even column/.append style={column sep=6pt}}]"]
     L += _plot_lines("data/exp5_wall.csv", wh, wr,

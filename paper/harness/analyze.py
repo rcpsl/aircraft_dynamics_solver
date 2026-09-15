@@ -1311,7 +1311,7 @@ def table_capacity():
            r"\caption{Capacity utilisation by ambient tier: peak aircraft over a "
            r"community as a fraction of the capacity \eqref{eq:capclosed} grants a "
            r"tile at that ambient level, averaged over the tier's tiles that carried "
-           r"traffic, for the first aircraft ordering. \emph{max} is the largest "
+           r"traffic, for the first aircraft ordering. \emph{Max} is the largest "
            r"utilisation on any tile, averaged over the orderings. Every row sends "
            rf"$D{{=}}{D}$, which grants {caps} aircraft at 45/55/65\,dBA. A dagger "
            r"marks a decibel-form cell not proven in all four orderings within "
@@ -1320,7 +1320,7 @@ def table_capacity():
            r"\label{tab:capacity}",
            r"\footnotesize", r"\setlength{\tabcolsep}{4pt}",
            r"\begin{tabular}{r l rrr r}", r"\toprule",
-           r"$N$ & Condition & 45\,dBA & 55\,dBA & 65\,dBA & max \\",
+           r"$N$ & Condition & 45\,dBA & 55\,dBA & 65\,dBA & Max \\",
            r"\midrule"]
     for i, n in enumerate(sizes):
         if i:

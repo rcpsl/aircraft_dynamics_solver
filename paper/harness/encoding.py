@@ -308,8 +308,8 @@ def tex_table(cs):
     T = [r"\begin{table}[t]", r"\centering", r"\footnotesize",
          r"\caption{Experiment 5. $J_{\mathrm{dB}}$ is the decibel objective: summed added "
          r"noise in dB for Utilitarian, price-weighted dB for Proportional. $J^*$ is its "
-         r"optimum, proven by the decibel form; \emph{count} is its value on the count-form "
-         r"routings (mean over four orderings), \emph{loss} the difference. Times are mean "
+         r"optimum, proven by the decibel form; \emph{Count} is its value on the count-form "
+         r"routings (mean over four orderings), \emph{Loss} the difference. Times are mean "
          r"wall seconds to a proven optimum. A dagger marks a decibel cell not proven by the "
          r"harvest: $J^*$ is then the best value reached (an upper bound on the optimum), "
          r"the loss a lower bound, and the time and speed-up lower bounds. A loss of "
@@ -318,8 +318,8 @@ def tex_table(cs):
          r"marked ($k$/4) is the mean over the $k$ orderings that proved.}",
          r"\label{tab:encoding}", r"\setlength{\tabcolsep}{3pt}",
          r"\begin{tabular}{@{}r rrr rrr@{}}", r"\toprule",
-         r"$N$ & $J^*$ & count & loss & $t_{\mathrm{dB}}$ & $t_{\mathrm{count}}$ & "
-         r"speed-up \\", r"\midrule"]
+         r"$N$ & $J^*$ & Count & Loss & $t_{\mathrm{dB}}$ & $t_{\mathrm{count}}$ & "
+         r"Speed-up \\", r"\midrule"]
     for p in FORMS:
         T.append(r"\multicolumn{7}{@{}l}{\emph{" + p.capitalize() + r"}} \\")
         for c in [c for c in cs if c["principle"] == p]:

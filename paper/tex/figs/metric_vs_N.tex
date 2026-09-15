@@ -3,7 +3,7 @@
 \begin{groupplot}[group style={group size=3 by 2, horizontal sep=0.60in,
     vertical sep=0.30in}, paperaxis, width=1.72in, height=0.95in,
     xmin=4.8, xmax=25.2, xtick={6,8,14,16,22,24}]
-\nextgroupplot[ylabel={max aircraft per tile}, legend to name=mvnlegend, legend columns=4, legend style={/tikz/every even column/.append style={column sep=6pt}}]
+\nextgroupplot[ylabel={Max Aircraft per Tile}, legend to name=mvnlegend, legend columns=4, legend style={/tikz/every even column/.append style={column sep=6pt}}]
 \addplot[name path=p0equalhi, draw=none, forget plot] table[x=N, y=equal_hi, col sep=comma] {data/mvn_max_count.csv};
 \addplot[name path=p0equallo, draw=none, forget plot] table[x=N, y=equal_lo, col sep=comma] {data/mvn_max_count.csv};
 \addplot[fig-equal, fill opacity=0.16, draw=none, forget plot] fill between[of=p0equalhi and p0equallo];
@@ -36,7 +36,7 @@
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/mvn_max_count.csv};
 \addlegendentry{Baseline}
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
-\nextgroupplot[ylabel={extra fleet-hops}]
+\nextgroupplot[ylabel={Extra Fleet-Hops}]
 \addplot[name path=p1equalhi, draw=none, forget plot] table[x=N, y=equal_hi, col sep=comma] {data/mvn_extra_vs_baseline.csv};
 \addplot[name path=p1equallo, draw=none, forget plot] table[x=N, y=equal_lo, col sep=comma] {data/mvn_extra_vs_baseline.csv};
 \addplot[fig-equal, fill opacity=0.16, draw=none, forget plot] fill between[of=p1equalhi and p1equallo];
@@ -55,7 +55,7 @@
 \addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_extra_vs_baseline.csv};
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
 \draw[black!45, dashed, line width=0.5pt] ({rel axis cs:0,0}|-{axis cs:6,0}) -- ({rel axis cs:1,0}|-{axis cs:6,0});
-\nextgroupplot[ylabel={peak added noise (dB)}]
+\nextgroupplot[ylabel={Peak Added Noise (dB)}]
 \addplot[name path=p2equalhi, draw=none, forget plot] table[x=N, y=equal_hi, col sep=comma] {data/mvn_peak_added.csv};
 \addplot[name path=p2equallo, draw=none, forget plot] table[x=N, y=equal_lo, col sep=comma] {data/mvn_peak_added.csv};
 \addplot[fig-equal, fill opacity=0.16, draw=none, forget plot] fill between[of=p2equalhi and p2equallo];
@@ -77,7 +77,7 @@
 \addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_peak_added.csv};
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/mvn_peak_added.csv};
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
-\nextgroupplot[ylabel={shared tile-timesteps}, xlabel={fleet size $N$}]
+\nextgroupplot[ylabel={Shared Tile-Timesteps}, xlabel={Fleet Size $N$}]
 \addplot[name path=p3equalhi, draw=none, forget plot] table[x=N, y=equal_hi, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \addplot[name path=p3equallo, draw=none, forget plot] table[x=N, y=equal_lo, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \addplot[fig-equal, fill opacity=0.16, draw=none, forget plot] fill between[of=p3equalhi and p3equallo];
@@ -102,7 +102,7 @@
 \addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/mvn_shared_tile_timesteps.csv};
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
-\nextgroupplot[ylabel={departure hold (ac-steps)}, xlabel={fleet size $N$}]
+\nextgroupplot[ylabel={Departure Hold (ac-steps)}, xlabel={Fleet Size $N$}]
 \addplot[name path=p4equalhi, draw=none, forget plot] table[x=N, y=equal_hi, col sep=comma] {data/mvn_departure_hold.csv};
 \addplot[name path=p4equallo, draw=none, forget plot] table[x=N, y=equal_lo, col sep=comma] {data/mvn_departure_hold.csv};
 \addplot[fig-equal, fill opacity=0.16, draw=none, forget plot] fill between[of=p4equalhi and p4equallo];
@@ -121,7 +121,7 @@
 \addplot[fig-proportional, line width=0.8pt, densely dashed, mark=triangle*, mark size=1.6pt, mark options={solid, fill=fig-proportional, rotate=180}] table[x=N, y=proportional_db, col sep=comma] {data/mvn_departure_hold.csv};
 \addplot[fig-baseline, line width=0.8pt, dashed, mark=x, mark size=1.6pt, mark options={solid, fill=fig-baseline}] table[x=N, y=baseline, col sep=comma] {data/mvn_departure_hold.csv};
 \draw[black!18, line width=0.5pt] ({axis cs:16,1}|-{rel axis cs:0,0}) -- ({axis cs:16,1}|-{rel axis cs:0,1});
-\nextgroupplot[ylabel={summed added noise (dB)}, xlabel={fleet size $N$}]
+\nextgroupplot[ylabel={Summed Added Noise (dB)}, xlabel={Fleet Size $N$}]
 \addplot[name path=p5equalhi, draw=none, forget plot] table[x=N, y=equal_hi, col sep=comma] {data/mvn_total_added.csv};
 \addplot[name path=p5equallo, draw=none, forget plot] table[x=N, y=equal_lo, col sep=comma] {data/mvn_total_added.csv};
 \addplot[fig-equal, fill opacity=0.16, draw=none, forget plot] fill between[of=p5equalhi and p5equallo];
