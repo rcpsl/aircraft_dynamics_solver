@@ -58,7 +58,10 @@ print(f"scanned {len(seen)} tex files")
 # that happened. \r is included since a lone CR is the same class of damage.
 for p in sorted(seen):
     s = read(p)
-    bad = [(i, c) for i, c in enumerate(s) if ord(c) < 32 and c not in "\n\t"]
+    # A CR that is half of a CRLF pair is a Windows line ending (git's autocrlf writes
+    # them on checkout), not damage; only a lone CR is.
+    bad = [(i, c) for i, c in enumerate(s) if ord(c) < 32 and c not in "\n\t"
+           and not (c == "\r" and s[i + 1:i + 2] == "\n")]
     for i, c in bad[:5]:
         note("CONTROL CHAR", f"{os.path.relpath(p, TEX)} has {hex(ord(c))} at {i}: "
                              f"{s[max(0,i-30):i+20]!r}")
