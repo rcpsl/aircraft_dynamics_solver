@@ -202,6 +202,93 @@ def _model_is_feasible(opt, L, model, N, T):
     return _guarded_check(s.check) == sat
 
 
+def _enumerate_alternatives(opt, L, wcnt_by_t, T_penalty, pins, seed_model, K, distinct_on,
+                            N, T, M, start_positions, end_positions,
+                            baseline, aircraft_dB, int_mult):
+    """Up to K distinct routings satisfying every hard constraint, the first being
+    seed_model's own. Returns (list, why_it_stopped).
+
+    Equal and Sufficientarian set no objective at all (see _principle_name): their
+    rule is the hard D/U cap, so EVERY routing inside the cap satisfies the principle
+    equally and the single answer /solve returns is picked by the arrival-time
+    tie-break and then by Z3's search order. Returning several makes that
+    arbitrariness visible instead of implying a preference the principle never
+    expressed. It works for the objective-bearing principles too, where `pins` keeps
+    the alternatives at the optimum the served answer reached.
+
+    Built on a plain Solver seeded from opt.assertions() — the same copy
+    _model_is_feasible relies on — which carries the D/U caps, adjacency, the
+    start/end pins, the active-noise tracking and sticky arrival, but NOT the
+    minimize directives, which is exactly why the enumeration is free to wander
+    among equally-good answers. `pins` puts back as much of the objective as is
+    wanted.
+
+    distinct_on decides what "different" means, and the difference is not cosmetic.
+    Identical aircraft are interchangeable: the 5x5 dashboard's default demand sends
+    4+4+2+2+2+2 aircraft over six shared start/end pairs, so one routing has
+    4! * 4! * 2!^4 = 9216 relabellings, and blocking on L PERMITS all of them — a
+    relabelling satisfies the clause while changing nothing anyone hears. Whether Z3
+    actually returns them is down to its search order, and on small cases tried here
+    it did not, so this is a risk the default removes rather than a measured failure.
+    Blocking on the weighted-count matrix instead — the variable the D/U caps are
+    enforced on and the one the noise output is computed from — makes the guarantee
+    unconditional: two alternatives differ in what some community hears at some
+    timestep, or they are not two alternatives.
+
+    "paths" is kept for the case where the aircraft are genuinely distinguishable
+    (per-aircraft multipliers, or a question about one operator's trajectory), where
+    two routings with the same count matrix are still different answers.
+    """
+    s = Solver()
+    for a in opt.assertions():
+        s.add(a)
+    for p in pins:
+        s.add(p)
+    # A fresh full budget, not the remainder of phase 2's: the enumeration is opt-in
+    # and a caller asking for it has accepted that it costs another solve.
+    s.set("timeout", _timeout_ms())
+
+    def block(model):
+        """A clause forbidding this model's projection, so the next check must differ
+        somewhere that matters. model_completion because Z3 may leave a variable it
+        no longer cares about unassigned, and a None here would crash the loop."""
+        if distinct_on == "paths":
+            return Or([L[i][t] != model.evaluate(L[i][t], model_completion=True).as_long()
+                       for i in range(N) for t in range(T)])
+        return Or([wcnt_by_t[t][m] != model.evaluate(wcnt_by_t[t][m], model_completion=True).as_long()
+                   for t in range(T) for m in range(M)])
+
+    out = []
+    model = seed_model
+    while True:
+        paths = [
+            [model.evaluate(L[i][t], model_completion=True).as_long() for t in range(T)]
+            for i in range(N)
+        ]
+        count_matrix, noise_matrix_dB = _active_output_matrices(
+            paths, start_positions, end_positions, N, M, T, baseline, aircraft_dB,
+            multipliers=int_mult
+        )
+        entry = {"paths": paths, "countMatrix": count_matrix, "noiseMatrix": noise_matrix_dB}
+        if T_penalty is not None:
+            entry["arrivalPenalty"] = model.evaluate(T_penalty, model_completion=True).as_long()
+        out.append(entry)
+
+        if len(out) >= K:
+            return out, "limit"
+        s.add(block(model))
+        _check_cancelled()
+        verdict = _guarded_check(s.check)
+        if verdict == sat:
+            model = s.model()
+            continue
+        # An interrupt also reads as unknown, so ask before blaming the clock.
+        _check_cancelled()
+        # "exhausted" is a real answer and a strong one: it says no other routing
+        # meets the conditions, so the one served is not an arbitrary pick after all.
+        return out, ("timeout" if verdict == unknown else "exhausted")
+
+
 def _principle_name(optimize_prox, optimize_prior, optimize_util,
                     util_noise_mode, weighted_by_people):
     """The objective phase 2 was asked to optimize, in the dashboard's own words.
@@ -810,7 +897,9 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                         util_noise_mode,
                         aircraft_multipliers,
                         baseline, aircraft_dB,
-                        proximity_mode="noise", proximity_noise_ref=None):
+                        proximity_mode="noise", proximity_noise_ref=None,
+                        enumerate_n=0, enumerate_distinct="counts",
+                        enumerate_at_optimum=True):
     """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
     minimize a weighted combination of transit time and protected-station noise (dB).
 
@@ -1248,6 +1337,33 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
               "countMatrix": count_matrix, "noiseMatrix": noise_matrix_dB}
     result["T_used"] = T
 
+    # ── Alternative routings (opt-in, `enumerate` in the request) ─────────────
+    # Off by default, so a request that does not ask for it gets a byte-identical
+    # reply and the dashboard's response cache is unaffected.
+    #
+    # enumerate_at_optimum pins each RAW principle metric and the arrival penalty to
+    # the value this model reached, rather than pinning the weighted sum. That is
+    # deliberately stronger: pinning the sum would let two live terms trade against
+    # each other and call the result "equally good", when the point of the list is to
+    # show routings that are equally good on every term at once. For Equal and
+    # Sufficientarian there are no principle metrics, so this reduces to pinning
+    # arrival time — the only thing that chose the answer in the first place.
+    if enumerate_n > 0:
+        pins = []
+        if enumerate_at_optimum:
+            for expr in (total_util_noise, total_transit, protected_noise_dB,
+                         proximity_cost, T_penalty):
+                if expr is not None:
+                    pins.append(expr == model.evaluate(expr, model_completion=True).as_long())
+        alternatives, why = _enumerate_alternatives(
+            opt, L, wcnt_by_t, T_penalty, pins, model, enumerate_n, enumerate_distinct,
+            N, T, M, start_positions, end_positions, baseline, aircraft_dB, int_mult
+        )
+        result["alternatives"]         = alternatives
+        result["alternativesStatus"]   = why
+        result["alternativesDistinct"] = enumerate_distinct
+        result["alternativesAtOptimum"] = bool(enumerate_at_optimum and pins)
+
     if eff_w_util > 0:
         if util_noise_mode:
             raw_util_noise = model.evaluate(total_util_noise).as_long()
@@ -1577,6 +1693,29 @@ def _solve_impl():
         w_time = 1.0
     if w_time < 0: w_time = 0.0
 
+    # ── Alternative-routing enumeration (opt-in) ──────────────────────────────
+    # `enumerate`: how many routings to return, the first being the one /solve would
+    # have returned on its own. 0 (the default) keeps the reply exactly as it was.
+    # Capped because every extra routing is another Z3 check and the reply carries a
+    # full count and noise matrix per entry.
+    enumerate_n = data.get("enumerate", 0)
+    try:
+        enumerate_n = int(enumerate_n)
+    except (TypeError, ValueError):
+        return jsonify({"error": "enumerate must be an integer"}), 400
+    if enumerate_n < 0:
+        return jsonify({"error": "enumerate must be >= 0"}), 400
+    if enumerate_n > 50:
+        return jsonify({"error": "enumerate must be <= 50"}), 400
+
+    enumerate_distinct = data.get("enumerateDistinct", "counts")
+    if enumerate_distinct not in ("counts", "paths"):
+        return jsonify({"error": "enumerateDistinct must be 'counts' or 'paths'"}), 400
+
+    enumerate_at_optimum = data.get("enumerateAtOptimum", True)
+    if not isinstance(enumerate_at_optimum, bool):
+        enumerate_at_optimum = True
+
     aircraft_multipliers = None
     raw_mult = data.get("aircraftMultipliers")
     if raw_mult is not None:
@@ -1632,7 +1771,11 @@ def _solve_impl():
             if any(w < 0 for w in station_transit_weights):
                 return jsonify({"error": "stationTransitWeights values must be non-negative"}), 400
 
-    should_optimize = optimize_util or optimize_prior or optimize_prox or soft_T
+    # enumerate_n is in here because the enumeration lives in phase 2: under hard T
+    # with no objective, phase 2 would otherwise be skipped entirely and a caller
+    # asking for alternatives would silently get one route.
+    should_optimize = (optimize_util or optimize_prior or optimize_prox or soft_T
+                       or enumerate_n > 0)
     if result["status"] != "sat" or not should_optimize:
         return jsonify(result)
 
@@ -1651,6 +1794,9 @@ def _solve_impl():
             baseline, aircraft_dB,
             proximity_mode=proximity_mode,
             proximity_noise_ref=proximity_noise_ref,
+            enumerate_n=enumerate_n,
+            enumerate_distinct=enumerate_distinct,
+            enumerate_at_optimum=enumerate_at_optimum
         )
     except SolveCancelled:
         raise   # not an error — must reach solve()'s handler, not become a 500
