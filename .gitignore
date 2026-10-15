@@ -1,0 +1,9 @@
+# Python bytecode. The data folders carry the harness scripts that produced each
+# experiment, so __pycache__ turns up throughout them.
+__pycache__/
+*.py[cod]
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+*.swp
