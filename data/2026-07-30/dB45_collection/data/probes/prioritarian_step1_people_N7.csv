@@ -1,0 +1,5 @@
+combo,fleet,lens,lensSelector,protectedStations,N,demandPct,status,protectedNoise,degenerate,maxAvgAdded,maxPeakAdded,T,elapsed_s
+s2-65_s6-55,people_N7,low_income,"Income == Low","[3, 8, 10, 12, 15, 16]",7,12.5,sat,0.17,no,0.5201,1.4613,5,23.5
+s2-65_s6-55,people_N7,people_of_color,"Race not Mixed and not Mostly white","[8, 12]",7,12.5,sat,0.0,YES,0.5201,1.4613,5,4.6
+s2-65_s6-55,people_N7,transit_desert,"Transport == Desert","[8, 12, 15]",7,12.5,sat,0.0,YES,0.5201,1.4613,5,4.6
+s2-65_s6-55,people_N7,few_jobs,"Employment == "Few local jobs"","[4, 8, 12, 14]",7,12.5,sat,0.0,YES,0.5201,1.4613,5,4.8

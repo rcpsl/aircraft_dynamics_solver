@@ -1,0 +1,8 @@
+[runner] 4 jobs, 0 already done, 4 to run, par=4
+[start] count|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions
+[start] ref:55|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions
+[start] alpha:0.6|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions
+[start] base|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions
+[done ] count|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions sat                   50s tier={'45': 4, '55': 28, '65': 12} peak=4.771 (1 done, 0 queued, 49s elapsed)
+[done ] base|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions sat                  526s tier={'45': 4, '55': 28, '65': 12} peak=4.771 (2 done, 0 queued, 526s elapsed)
+[done ] alpha:0.6|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions sat                 1326s tier={'45': 4, '55': 28, '65': 12} peak=4.771 (3 done, 0 queued, 1325s elapsed)

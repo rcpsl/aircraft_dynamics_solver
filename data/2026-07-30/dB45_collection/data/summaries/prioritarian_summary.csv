@@ -1,0 +1,33 @@
+combo,mode,lens,protectedStations,protectedNoise,degenerate,maxAvgAddedDb,maxPeakAddedDb,T,demandFulfilledPct,avgTravelTimeWeighted,zoneTableGroup,routingGroup
+s2-65_s6-55,community,low_income,"[3, 8, 10, 12, 15, 16]",1.04,no,2.3185,5.9106,5,100.0,3.0,0,0
+s2-65_s6-55,community,people_of_color,"[8, 12]",0.0,YES,2.3185,5.9106,5,100.0,3.0,0,0
+s2-65_s6-55,community,transit_desert,"[8, 12, 15]",0.0,YES,2.3185,5.9106,5,100.0,3.0,0,0
+s2-65_s6-55,community,few_jobs,"[4, 8, 12, 14]",0.0,YES,2.3185,5.9106,5,100.0,3.0,0,0
+s2-65_s6-55,people,low_income,"[3, 8, 10, 12, 15, 16]",1.04,no,2.8982,5.9106,4,100.0,3.0,0,0
+s2-65_s6-55,people,people_of_color,"[8, 12]",0.0,YES,2.8982,5.9106,4,100.0,3.0,0,0
+s2-65_s6-55,people,transit_desert,"[8, 12, 15]",0.0,YES,2.8982,5.9106,4,100.0,3.0,0,0
+s2-65_s6-55,people,few_jobs,"[4, 8, 12, 14]",0.0,YES,2.8982,5.9106,4,100.0,3.0,0,0
+s2-65_s6-45,community,low_income,"[3, 8, 10, 12, 15, 16]",1.04,no,5.8486,14.7712,5,100.0,3.0,0,0
+s2-65_s6-45,community,people_of_color,"[8, 12]",0.0,YES,5.8486,14.7712,5,100.0,3.0,0,0
+s2-65_s6-45,community,transit_desert,"[8, 12, 15]",0.0,YES,5.8486,14.7712,5,100.0,3.0,0,0
+s2-65_s6-45,community,few_jobs,"[4, 8, 12, 14]",0.0,YES,5.8486,14.7712,5,100.0,3.0,0,0
+s2-65_s6-45,people,low_income,"[3, 8, 10, 12, 15, 16]",1.04,no,7.3107,14.7712,4,100.0,3.0,0,0
+s2-65_s6-45,people,people_of_color,"[8, 12]",0.0,YES,7.3107,14.7712,4,100.0,3.0,0,0
+s2-65_s6-45,people,transit_desert,"[8, 12, 15]",0.0,YES,7.3107,14.7712,4,100.0,3.0,0,0
+s2-65_s6-45,people,few_jobs,"[4, 8, 12, 14]",0.0,YES,7.3107,14.7712,4,100.0,3.0,0,0
+s2-55_s6-55,community,low_income,"[3, 8, 10, 12, 15, 16]",1.04,no,2.3185,5.9106,5,100.0,3.0,0,0
+s2-55_s6-55,community,people_of_color,"[8, 12]",0.0,YES,2.3185,5.9106,5,100.0,3.0,0,0
+s2-55_s6-55,community,transit_desert,"[8, 12, 15]",0.0,YES,2.3185,5.9106,5,100.0,3.0,0,0
+s2-55_s6-55,community,few_jobs,"[4, 8, 12, 14]",0.0,YES,2.3185,5.9106,5,100.0,3.0,0,0
+s2-55_s6-55,people,low_income,"[3, 8, 10, 12, 15, 16]",1.04,no,2.8982,5.9106,4,100.0,3.0,0,0
+s2-55_s6-55,people,people_of_color,"[8, 12]",0.0,YES,2.8982,5.9106,4,100.0,3.0,0,0
+s2-55_s6-55,people,transit_desert,"[8, 12, 15]",0.0,YES,2.8982,5.9106,4,100.0,3.0,0,0
+s2-55_s6-55,people,few_jobs,"[4, 8, 12, 14]",0.0,YES,2.8982,5.9106,4,100.0,3.0,0,0
+s2-55_s6-45,community,low_income,"[3, 8, 10, 12, 15, 16]",1.04,no,5.8486,14.7712,5,100.0,3.0,0,0
+s2-55_s6-45,community,people_of_color,"[8, 12]",0.0,YES,5.8486,14.7712,5,100.0,3.0,0,0
+s2-55_s6-45,community,transit_desert,"[8, 12, 15]",0.0,YES,5.8486,14.7712,5,100.0,3.0,0,0
+s2-55_s6-45,community,few_jobs,"[4, 8, 12, 14]",0.0,YES,5.8486,14.7712,5,100.0,3.0,0,0
+s2-55_s6-45,people,low_income,"[3, 8, 10, 12, 15, 16]",1.04,no,7.3107,14.7712,4,100.0,3.0,0,0
+s2-55_s6-45,people,people_of_color,"[8, 12]",0.0,YES,7.3107,14.7712,4,100.0,3.0,0,0
+s2-55_s6-45,people,transit_desert,"[8, 12, 15]",0.0,YES,7.3107,14.7712,4,100.0,3.0,0,0
+s2-55_s6-45,people,few_jobs,"[4, 8, 12, 14]",0.0,YES,7.3107,14.7712,4,100.0,3.0,0,0

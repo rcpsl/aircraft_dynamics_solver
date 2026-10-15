@@ -1,0 +1,72 @@
+# domain,prioritarian
+# combo,s2-65_s6-45
+# mode,people
+# lens,people_of_color
+# protectedStations,[8, 12]
+# lensSelector,Race not Mixed and not Mostly white
+# protectedNoise,0.0
+# protectedNoiseDegenerate,True
+# D,18.0
+# Dbinding,False
+# Drole,non-binding by construction (max added dB at 45 dB/craft is 17.56)
+# U,50.0
+# Ubinding,False
+# hardT,False
+# T_max,4
+# T_floor,4
+# routingForcedByT,True
+# weightTime,0.1
+# optimizePrioritarian,True
+# weightPrioritarian,1.0
+# optimizeUtilitarian,True
+# maxAvgAddedDb,7.3107
+# maxPeakAddedDb,14.7712
+# demandRole,share of the 56-unit base fleet modelled; not unserved demand
+# avgAddedDbComparability,averaged over T=4; compare modes on peak, not avg
+# weightUtilitarian,1.0
+# stationTransitWeights,[10, 5, 10, 5, 10, 5, 5, 10, 5, 10, 5, 5, 5, 5, 1, 5]
+# dbPerCraft,45
+# N,14
+# aircraftMultipliers,[2, 5, 5, 5, 5, 5, 5, 5, 5, 2, 5, 3, 2, 2]
+# totalTraffic,56
+# maxTraffic,56
+# demandFulfilledPct,100.0
+# avgTravelTimeWeighted,3.0
+# minTravelTime,3
+# maxTravelTime,3
+Time Steps (T),4
+
+Routing (station per aircraft per timestep):
+Aircraft,Multiplier,Start,End,T0,T1,T2,T3
+1,2,1,16,1,6,11,16
+2,5,1,16,1,6,11,16
+3,5,1,16,1,6,11,16
+4,5,1,16,1,6,11,16
+5,5,16,1,16,11,6,1
+6,5,16,1,16,11,6,1
+7,5,16,1,16,11,6,1
+8,5,16,1,16,11,6,1
+9,5,16,1,16,11,6,1
+10,2,16,1,16,11,6,1
+11,5,1,16,1,6,11,16
+12,3,1,16,1,6,11,16
+13,2,1,16,1,6,11,16
+14,2,16,1,16,11,6,1
+
+Zone,Avg Added dB,Avg Total dB,Peak Added dB,Peak Total dB,Avg Aircraft,Peak Aircraft
+Zone 1,0.28,65.28,1.11,66.11,7.25,29
+Zone 2,0.00,65.00,0.00,65.00,0.00,0
+Zone 3,0.00,55.00,0.00,55.00,0.00,0
+Zone 4,0.00,45.00,0.00,45.00,0.00,0
+Zone 5,0.00,55.00,0.00,55.00,0.00,0
+Zone 6,7.31,52.31,14.77,59.77,14.00,29
+Zone 7,0.00,55.00,0.00,55.00,0.00,0
+Zone 8,0.00,55.00,0.00,55.00,0.00,0
+Zone 9,0.00,55.00,0.00,55.00,0.00,0
+Zone 10,0.00,55.00,0.00,55.00,0.00,0
+Zone 11,2.90,57.90,5.91,60.91,14.00,29
+Zone 12,0.00,65.00,0.00,65.00,0.00,0
+Zone 13,0.00,45.00,0.00,45.00,0.00,0
+Zone 14,0.00,45.00,0.00,45.00,0.00,0
+Zone 15,0.00,65.00,0.00,65.00,0.00,0
+Zone 16,0.26,65.26,1.04,66.04,6.75,27

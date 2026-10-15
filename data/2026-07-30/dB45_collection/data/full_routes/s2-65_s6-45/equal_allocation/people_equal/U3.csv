@@ -1,0 +1,62 @@
+# domain,equal_allocation
+# combo,s2-65_s6-45
+# mode,people_equal
+# U,3.0
+# Urole,hard disparity cap (a real constraint, not a label)
+# D,50.0
+# Dbinding,False
+# variant,N14_mult1
+# fullFleetFeasible,False
+# hardT,False
+# T_max,7
+# weightTime,0.1
+# optimizeUtilitarian,True
+# weightUtilitarian,2.0
+# stationTransitWeights,[10, 5, 10, 5, 10, 5, 5, 10, 5, 10, 5, 5, 5, 5, 1, 5]
+# maxAvgAddedDb,0.6498
+# maxPeakAddedDb,2.7875
+# dbPerCraft,45
+# N,14
+# aircraftMultipliers,[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+# totalTraffic,14
+# maxTraffic,56
+# demandFulfilledPct,25.0
+# avgTravelTimeWeighted,4.357
+# minTravelTime,4
+# maxTravelTime,5
+Time Steps (T),7
+
+Routing (station per aircraft per timestep):
+Aircraft,Multiplier,Start,End,T0,T1,T2,T3,T4,T5,T6
+1,1,1,16,1,1,2,7,11,16,16
+2,1,1,16,1,2,7,11,16,16,16
+3,1,1,16,1,1,2,7,11,16,16
+4,1,1,16,1,2,7,11,16,16,16
+5,1,16,1,16,16,11,7,2,1,1
+6,1,16,1,16,12,7,2,1,1,1
+7,1,16,1,16,16,11,7,2,1,1
+8,1,16,1,16,12,7,2,1,1,1
+9,1,16,1,16,12,7,2,1,1,1
+10,1,16,1,16,12,7,2,1,1,1
+11,1,1,16,1,2,7,11,16,16,16
+12,1,1,16,1,1,2,7,12,16,16
+13,1,1,16,1,2,7,11,16,16,16
+14,1,16,1,16,11,7,2,1,1,1
+
+Zone,Avg Added dB,Avg Total dB,Peak Added dB,Peak Total dB,Avg Aircraft,Peak Aircraft
+Zone 1,0.04,65.04,0.21,65.21,1.00,5
+Zone 2,0.09,65.09,0.21,65.21,2.00,5
+Zone 3,0.00,55.00,0.00,55.00,0.00,0
+Zone 4,0.00,45.00,0.00,45.00,0.00,0
+Zone 5,0.00,55.00,0.00,55.00,0.00,0
+Zone 6,0.00,45.00,0.00,45.00,0.00,0
+Zone 7,0.65,55.65,2.79,57.79,2.00,9
+Zone 8,0.00,55.00,0.00,55.00,0.00,0
+Zone 9,0.00,55.00,0.00,55.00,0.00,0
+Zone 10,0.00,55.00,0.00,55.00,0.00,0
+Zone 11,0.49,55.49,1.46,56.46,1.29,4
+Zone 12,0.03,65.03,0.17,65.17,0.71,4
+Zone 13,0.00,45.00,0.00,45.00,0.00,0
+Zone 14,0.00,45.00,0.00,45.00,0.00,0
+Zone 15,0.00,65.00,0.00,65.00,0.00,0
+Zone 16,0.04,65.04,0.17,65.17,1.00,4

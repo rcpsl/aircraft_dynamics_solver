@@ -1,0 +1,5 @@
+=== proportional on port 5056, 3 reps ===
+  rep 1      71s  optimality=optimal  proximityCost=367.56  mode=lex  arrPen=44
+  rep 2      80s  optimality=optimal  proximityCost=367.56  mode=lex  arrPen=44
+  rep 3      68s  optimality=optimal  proximityCost=367.56  mode=lex  arrPen=44
+  --- 3/3 returned: min 68s  median 71s  max 80s; 3 proven optimal

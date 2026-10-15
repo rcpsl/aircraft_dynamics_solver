@@ -1,0 +1,12 @@
+=== salvage value, port 5057 ===
+  payload: Utilitarian + People, which solves to proven-optimal in ~620s
+
+  5s -> phase-1 route    optimality=none     utilNoise=   82.56  [ 13s]
+  30s -> salvaged        optimality=none     utilNoise=  101.27  [ 38s]
+      vs phase 1: +18.70  WORSE than phase 1
+  60s -> salvaged        optimality=partial  utilNoise=  105.55  [ 68s]
+      vs phase 1: +22.98  WORSE than phase 1
+  120s -> salvaged       optimality=partial  utilNoise=   82.17  [128s]
+      vs phase 1: -0.39  BETTER
+  240s -> salvaged       optimality=optimal  utilNoise=   39.73  [244s]
+      vs phase 1: -42.84  BETTER

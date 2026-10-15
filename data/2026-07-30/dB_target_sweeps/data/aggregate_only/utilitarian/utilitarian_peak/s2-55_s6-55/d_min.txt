@@ -1,0 +1,4 @@
+D_feasibility_min=8.0
+D_used_for_final_csvs=12.0
+T_max=7
+U=50

@@ -1,0 +1,14 @@
+[runner] 6 jobs, 0 already done, 6 to run, par=6
+[start] ref:55|income-ambient-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[start] alpha:0.6|income-ambient-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[start] base|income-ambient-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[start] ref:55|income-ambient-distance-population|P|T5|N=6|aircraftMultipliers|demandFactor=0.25|endPositions|startPositions
+[start] alpha:0.6|income-ambient-distance-population|P|T5|N=6|aircraftMultipliers|demandFactor=0.25|endPositions|startPositions
+[start] base|income-ambient-distance-population|P|T5|N=6|aircraftMultipliers|demandFactor=0.25|endPositions|startPositions
+[done ] base|income-ambient-distance-population|P|T5|N=6|aircraftMultipliers|demandFactor=0.25|endPositions|startPositions sat                   38s tier={'45': 2, '55': 12, '65': 4} peak=3.01 (1 done, 0 queued, 38s elapsed)
+[done ] alpha:0.6|income-ambient-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                   48s tier={'45': 2, '55': 14, '65': 6} peak=3.01 (2 done, 0 queued, 48s elapsed)
+[done ] alpha:0.6|income-ambient-distance-population|P|T5|N=6|aircraftMultipliers|demandFactor=0.25|endPositions|startPositions sat                   52s tier={'45': 2, '55': 12, '65': 4} peak=3.01 (3 done, 0 queued, 52s elapsed)
+[done ] ref:55|income-ambient-distance-population|P|T5|N=6|aircraftMultipliers|demandFactor=0.25|endPositions|startPositions sat                   56s tier={'45': 2, '55': 12, '65': 4} peak=3.01 (4 done, 0 queued, 56s elapsed)
+[done ] ref:55|income-ambient-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                   62s tier={'45': 2, '55': 14, '65': 6} peak=3.01 (5 done, 0 queued, 62s elapsed)
+[done ] base|income-ambient-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                   74s tier={'45': 2, '55': 14, '65': 6} peak=3.01 (6 done, 0 queued, 74s elapsed)
+[runner] all done in 74s

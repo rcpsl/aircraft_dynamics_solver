@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UAM Fairness Dashboard — v1.4 (MOCK DATA)</title>
+<style>
+  :root{
+    --ink:#191c1e; --paper:#ffffff; --page:#f2f1ec; --line:#dedbd2;
+    --teal:#0c5f68; --boxblue:#f2f6f7;
+    --loud:#c6382d; --moderate:#c88911; --quiet:#4d7e34;
+    --loudT:#faeae8; --moderateT:#faf3df; --quietT:#edf3ea;
+    --bad:#a52d23; --good:#3c672a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; background:var(--page); color:var(--ink); font-size:19px; line-height:1.5}
+  .lbl{font-size:12.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--teal)}
+
+  .top{position:sticky; top:0; z-index:50; background:var(--paper); border-bottom:2px solid var(--line); padding:10px 18px; display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+  .top h1{font-size:18px; font-weight:800; margin-right:4px}
+  .mockflag{background:#fff3cd; border:1.5px dashed #c9a227; color:#7a5d00; font-weight:700; font-size:12.5px; padding:3px 9px; border-radius:6px}
+  .steps{display:flex; gap:6px; flex-wrap:wrap; margin-left:auto}
+  .steps button{font-size:14.5px; font-weight:700; padding:8px 13px; border:2px solid #c9c6bc; background:var(--paper); color:var(--ink); border-radius:99px; cursor:pointer}
+  .steps button.on{background:var(--teal); color:#fff; border-color:var(--teal)}
+  .steps button.gear{border-style:dashed}
+
+  section.screen{display:none} section.screen.on{display:block}
+  .wrap{max-width:1160px; margin:20px auto 50px; padding:0 18px}
+  .board{background:var(--paper); border-radius:16px; border:1px solid var(--line); padding:26px; box-shadow:0 2px 10px rgba(0,0,0,.05)}
+  h2.title{font-size:30px; font-weight:800; margin-bottom:14px}
+  p.lede{font-size:18px; color:#4d4a44; max-width:74ch; margin-bottom:18px}
+  .unv{background:#fff3cd; padding:0 6px; border-radius:4px; font-weight:700}
+  .next{margin-top:22px; text-align:right}
+  .next button{font-size:18px; font-weight:800; padding:12px 24px; border-radius:11px; border:2px solid var(--teal); background:var(--teal); color:#fff; cursor:pointer}
+
+  /* grid + tiles — white, dark text, band color = top edge + dot. Uniform size. */
+  .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+  .cell{position:relative; border-radius:10px; height:158px; padding:10px 12px 11px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; background:#fff; color:var(--ink); border:1.5px solid var(--line); border-top-width:8px; box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  .cell .nm{font-weight:800; font-size:16.5px; line-height:1.18; display:block}
+  .cell .band{font-size:13px; font-weight:600; color:#4d4a44; margin-top:4px; display:flex; align-items:center; gap:6px}
+  .cell .val{font-size:24px; font-weight:900; text-align:right; font-variant-numeric:tabular-nums}
+  .cell.slot{background:#f6f5f1; border:2px dashed #ccc8bc; color:#8f8b80; justify-content:center; text-align:center; font-size:14px; font-weight:600; cursor:default; box-shadow:none}
+  .b-quiet{background:var(--quiet)} .b-moderate{background:var(--moderate)} .b-loud{background:var(--loud)}
+  .cell.b-quiet,.cell.b-moderate,.cell.b-loud{background:#fff}
+  .cell.b-quiet{border-top-color:var(--quiet)} .cell.b-moderate{border-top-color:var(--moderate)} .cell.b-loud{border-top-color:var(--loud)}
+  .cell.added{border-width:3px; border-color:var(--ink); border-top-width:8px}  /* participant-created: heavy border */
+  .dot{width:11px; height:11px; border-radius:99px; display:inline-block; flex-shrink:0}
+  .dot.quiet{background:var(--quiet)} .dot.moderate{background:var(--moderate)} .dot.loud{background:var(--loud)}
+  .cell.protected{outline:4px solid var(--ink); outline-offset:2px}
+  .vpbadge{display:inline-block; width:fit-content; background:#16323f; color:#fff; font-size:10.5px; font-weight:800; letter-spacing:.05em; padding:2px 8px; border-radius:6px; margin-bottom:5px}
+  .vpbadge.new{background:#7a1d13}
+
+  /* choices screen */
+  .rules .q{margin-bottom:26px}
+  .rules h3{font-size:24px; font-weight:800; margin-bottom:4px}
+  .rules p.why{font-size:16px; color:#4d4a44; margin-bottom:10px; max-width:70ch}
+  .bigopts{display:flex; gap:14px; flex-wrap:wrap}
+  .bigopts .opt{flex:1 1 300px; min-width:300px; border:3px solid #c9c6bc; border-radius:14px; padding:16px; cursor:pointer; background:var(--paper)}
+  .bigopts .opt.on{border-color:var(--teal); background:var(--boxblue)}
+  .bigopts .opt h4{font-size:20px; font-weight:800; margin-bottom:4px}
+  .bigopts .opt small{font-size:15px; color:#4d4a44; display:block}
+  .lockedline{margin-top:6px; font-size:15px; color:#4d4a44}
+
+  /* locked-choices strip */
+  .rulestrip{background:var(--boxblue); border:1.5px solid #d7e4e6; border-radius:11px; padding:11px 16px; margin-bottom:18px; display:flex; gap:10px 28px; flex-wrap:wrap; align-items:flex-start}
+  .rulestrip .seg b{font-size:18px; display:block}
+  .rulestrip .seg small{font-size:13.5px; color:#4d4a44; display:block; max-width:34ch}
+  .rulestrip .edit{margin-left:auto; font-size:15px; font-weight:800; color:var(--teal); cursor:pointer; text-decoration:underline; align-self:center}
+
+  /* fairness */
+  .cardtabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px}
+  .cardtabs button{font-size:17px; font-weight:800; padding:10px 16px; border-radius:11px; border:2px solid #c9c6bc; background:var(--paper); color:var(--ink); cursor:pointer}
+  .cardtabs button.on{background:var(--teal); border-color:var(--teal); color:#fff}
+  .sentence{font-size:28px; font-weight:600; line-height:1.7; max-width:46ch; margin-bottom:4px}
+  .blank{display:inline-block; border:none; border-bottom:4px solid var(--teal); background:var(--boxblue); color:var(--teal); font-weight:800; font-size:25px; font-family:inherit; padding:1px 8px; border-radius:8px 8px 0 0; cursor:pointer}
+  .chiplock{display:inline-block; background:#efeee9; border-bottom:4px solid #a9a69c; color:#55524a; font-weight:800; font-size:25px; padding:1px 10px; border-radius:8px 8px 0 0; cursor:pointer}
+  .chiplock:hover::after{content:" ✎"; font-size:16px}
+  .whyline{font-size:16px; color:#4d4a44; margin:8px 0 14px; line-height:1.65}
+  .priorpicks{display:flex; gap:14px; flex-wrap:wrap; margin:8px 0 12px}
+  .priorpicks label{font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--teal); display:flex; flex-direction:column; gap:4px}
+  .priorpicks select{font-size:17px; font-weight:700; padding:9px 10px; border-radius:9px; border:2px solid #c9c6bc; background:#fff; min-width:210px; color:var(--ink)}
+  .mapctl{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:4px 0 12px}
+  .viewseg{display:inline-flex; border:2px solid #c9c6bc; border-radius:10px; overflow:hidden}
+  .viewseg button{font-size:15px; font-weight:700; padding:8px 14px; border:none; background:#fff; color:var(--ink); cursor:pointer}
+  .viewseg button.on{background:var(--ink); color:#fff}
+  .pinbtn{margin-left:auto; font-size:15px; font-weight:800; padding:8px 14px; border-radius:9px; border:2px solid var(--ink); background:var(--paper); color:var(--ink); cursor:pointer}
+  .split{display:grid; grid-template-columns:3fr 2fr; gap:24px; align-items:start; margin-top:6px}
+  .ledger h4{font-size:13.5px; text-transform:uppercase; letter-spacing:.08em; padding-bottom:6px; border-bottom:3px solid var(--ink); margin-bottom:2px; color:var(--ink)}
+  .ledger .hurt h4{border-color:var(--bad); color:var(--bad)}
+  .ledger .gain h4{border-color:var(--good); color:var(--good)}
+  .ledger .blockx{margin-bottom:18px}
+  .ledger .hint{font-size:13px; color:#6b6860; margin:4px 0 2px; line-height:1.4}
+  .ledger .row{display:flex; justify-content:space-between; align-items:baseline; padding:9px 0; border-bottom:1px solid #e8e5dc; font-size:18.5px; gap:10px}
+  .ledger .row b{font-weight:800}
+  .ledger .row small{display:block; font-size:13.5px; color:#4d4a44; font-weight:400}
+  .ledger .n{font-weight:900; font-variant-numeric:tabular-nums; font-size:20px; flex-shrink:0}
+  .ledger .hurt .n{color:var(--bad)} .ledger .gain .n{color:var(--good)}
+  .epachip{display:inline-block; background:var(--boxblue); border:2px solid var(--teal); color:var(--teal); font-weight:800; font-size:15px; padding:6px 12px; border-radius:10px; margin-top:2px}
+  .datastate{margin-top:14px; font-size:14px; color:#7a5d00; background:#fff8e1; border:1.5px dashed #c9a227; border-radius:8px; padding:8px 12px}
+
+  /* compare */
+  .cmpgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px}
+  .cmpcard{background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:14px; box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  .cmpcard h4{font-size:17px; font-weight:800; margin-bottom:8px}
+  .cmpcard .grid .cell{height:58px; padding:5px 6px; border-radius:7px; border-top-width:5px}
+  .cmpcard .grid .cell .nm{font-size:9.5px; font-weight:700} .cmpcard .grid .cell .val{font-size:14px}
+  .cmpcard .grid .cell .band{display:none}
+  .cmpcard .mini{font-size:14.5px; margin-top:8px}
+  .cmpcard .mini b{color:var(--bad)}
+  .cmpcard button.rm{margin-top:8px; font-size:13px; border:1.5px solid #c9c6bc; background:var(--paper); border-radius:7px; padding:4px 9px; cursor:pointer}
+
+  /* right-hand community panel */
+  .sidepanel{position:fixed; top:0; right:0; width:400px; max-width:94vw; height:100vh; background:var(--paper); border-left:2px solid var(--line); box-shadow:-10px 0 26px rgba(0,0,0,.2); z-index:70; overflow-y:auto; transform:translateX(105%); transition:transform .22s ease}
+  .sidepanel.on{transform:none}
+  .sp-close{position:absolute; top:10px; right:12px; font-size:28px; font-weight:800; border:none; background:none; cursor:pointer; color:#666; line-height:1; z-index:2}
+  .sp-head{padding:20px 22px 4px; color:var(--ink); background:#fff}
+  .sp-name{font-size:26px; font-weight:800; line-height:1.15; margin:2px 0 12px; padding-right:28px}
+  .sp-noise{border-radius:10px; padding:11px 14px; border-left:8px solid; margin-bottom:6px}
+  .sp-noise.tint-quiet{background:var(--quietT); border-color:var(--quiet)}
+  .sp-noise.tint-moderate{background:var(--moderateT); border-color:var(--moderate)}
+  .sp-noise.tint-loud{background:var(--loudT); border-color:var(--loud)}
+  .sp-noise .nv{font-size:22px; font-weight:800}
+  .sp-noise .db{font-size:14px; font-weight:700; color:#4d4a44; margin-left:6px}
+  .sp-noise .snd{font-size:14px; color:#4d4a44; margin-top:2px}
+  .sp-vp{display:inline-block; background:#16323f; color:#fff; font-size:12px; font-weight:800; padding:3px 10px; border-radius:6px; margin-bottom:8px}
+  .sp-body{padding:18px 22px 26px}
+  .sp-scen{background:var(--boxblue); border:1.5px solid #d7e4e6; border-radius:10px; padding:11px 14px; margin-bottom:16px; font-size:16px}
+  .sp-scen .big{font-size:23px; font-weight:900}
+  .featbox{background:var(--boxblue); border:1.5px solid #e0e8ea; border-radius:12px; padding:12px 14px; margin-bottom:12px}
+  .featbox .fv{font-size:20px; font-weight:800; margin:1px 0 5px}
+  .pills{display:flex; gap:5px; margin-bottom:7px}
+  .pills span{width:34px; height:7px; border-radius:99px; background:#cfdcdf}
+  .pills span.f{background:var(--teal)}
+  .featbox p{font-size:14.5px; color:#41525a; line-height:1.45}
+  .sp-table{border:1.5px solid var(--line); border-radius:12px; overflow:hidden; margin-top:6px}
+  .sp-cellrow{display:grid; grid-template-columns:1fr 1fr; border-bottom:1.5px solid var(--line)}
+  .sp-cellrow:last-child{border-bottom:none}
+  .sp-cell{padding:10px 13px; border-right:1.5px solid var(--line)}
+  .sp-cell:last-child{border-right:none}
+  .sp-cell .cv{font-size:18px; font-weight:800; margin-top:1px}
+  .sp-cell.wide{grid-column:1 / -1}
+  details.sp-pri{margin-top:18px; font-size:15px}
+  details.sp-pri summary{cursor:pointer; font-weight:700; color:#4d4a44}
+  details.sp-pri .prow{display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #e8e5dc; font-size:14.5px}
+
+  /* admin */
+  .admin .aform{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:14px}
+  .admin label{font-size:15px; font-weight:700; display:flex; flex-direction:column; gap:4px}
+  .admin input,.admin select{font-size:16px; padding:8px; border-radius:8px; border:2px solid #c9c6bc; background:#fff; min-width:170px}
+  .admin button.add{font-size:16px; font-weight:800; padding:10px 16px; border-radius:10px; border:2px solid var(--teal); background:var(--teal); color:#fff; cursor:pointer; align-self:end}
+  .admin .note{font-size:15px; color:#4d4a44; margin-bottom:14px; max-width:80ch}
+  .admin table{border-collapse:collapse; font-size:15px; margin-top:10px}
+  .admin td,.admin th{border:1px solid var(--line); padding:6px 10px; text-align:left}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>UAM Fairness Dashboard <span style="color:#a29a83">v1</span></h1>
+  <span class="mockflag">MOCK DATA — solver files not loaded yet</span>
+  <div class="steps">
+    <button class="on" onclick="go(0,this)">1 The communities</button>
+    <button onclick="go(1,this)">2 Measurement options</button>
+    <button onclick="go(2,this)">3 Fairness</button>
+    <button onclick="go(3,this)">4 Compare</button>
+    <button class="gear" onclick="go(4,this)">⚙ Admin</button>
+  </div>
+</div>
+
+<!-- 1 COMMUNITIES -->
+<section class="screen on"><div class="wrap"><div class="board">
+  <h2 class="title">The sixteen communities</h2>
+  <div class="grid" id="zonegrid"></div>
+  <div class="next"><button onclick="go(1)">Measurement options →</button></div>
+</div></div></section>
+
+<!-- 2 CHOICES THAT HOLD THE DAY -->
+<section class="screen"><div class="wrap"><div class="board rules">
+  <h2 class="title">Measurement options — how we measure fairness</h2>
+  <p class="lede">These apply to every fairness principle we try. We can come back and change them.</p>
+  <div class="q">
+    <h3>1&nbsp; When we say "fair," are we counting communities, or counting people?</h3>
+    <p class="why">A community is a zone on the map, whatever its size. Counting people means flights are routed to protect the most people, so bigger communities matter more.</p>
+    <div class="bigopts" id="qCount">
+      <div class="opt on" onclick="setRule('count','zone',this)"><h4>Communities</h4><small>every community counts the same, no matter the population</small></div>
+      <div class="opt" onclick="setRule('count','people',this)"><h4>People</h4><small>flights are routed to protect the most people, not the most communities</small></div>
+    </div>
+  </div>
+  <div class="q">
+    <h3>2&nbsp; How do we measure the noise a community gets?</h3>
+    <div class="bigopts" id="qMeasure">
+      <div class="opt on" onclick="setRule('measure','total',this)"><h4>Total noise over <span class="unv">time</span></h4><small>every flight's noise a community hears, combined across the time period</small></div>
+      <div class="opt" onclick="setRule('measure','peak',this)"><h4>The loudest moment</h4><small>the worst single instant</small></div>
+    </div>
+  </div>
+  <p class="lockedline">These two answers appear pre-filled in every fairness sentence, like this: <span class="chiplock" style="font-size:18px">community</span></p>
+  <div class="next"><button onclick="go(2)">Lock it in — start with Equal →</button></div>
+</div></div></section>
+
+<!-- 3 FAIRNESS -->
+<section class="screen"><div class="wrap"><div class="board">
+  <div class="rulestrip" id="rulestrip1"></div>
+  <div class="cardtabs" id="cardtabs">
+    <button class="on" onclick="setCard('equal',this)">Equal</button>
+    <button onclick="setCard('util',this)">Utilitarian</button>
+    <button onclick="setCard('suff',this)">Sufficientarian</button>
+    <button onclick="setCard('prior',this)">Prioritarian</button>
+  </div>
+  <div id="sentencearea"></div>
+  <div class="mapctl">
+    <div class="viewseg">
+      <button id="vchg" class="on" onclick="setView('chg')">Increase (+dB)</button>
+      <button id="vabs" onclick="setView('abs')">New noise level (dB)</button>
+    </div>
+    <button class="pinbtn" onclick="pinScenario()">📌 Pin to Compare</button>
+  </div>
+  <div class="split">
+    <div><div class="grid" id="fgrid"></div></div>
+    <div>
+      <div class="ledger" id="fledger"></div>
+      <div class="datastate">MOCK — invented placeholder numbers in the exact shape of the solver files. When Jeff's data lands, only the data block changes.</div>
+    </div>
+  </div>
+</div></div></section>
+
+<!-- 4 COMPARE -->
+<section class="screen"><div class="wrap"><div class="board">
+  <h2 class="title">Compare up to three, side by side</h2>
+  <div class="rulestrip" id="rulestrip2"></div>
+  <div class="cmpgrid" id="cmpgrid"></div>
+</div></div></section>
+
+<!-- ADMIN -->
+<section class="screen"><div class="wrap"><div class="board admin">
+  <h2 class="title">⚙ Admin — add the room's communities</h2>
+  <p class="note">Facilitator only. Circle the categories the group chose on their worksheet; the community appears on the board with a heavy border and its <b>prioritarian protection numbers fill in automatically</b> by the fixed translation rules (10/5/1 — see zone-priority-categorizations.md). Solver noise for participant communities depends on the precompute plan with Yasser/Jeff.</p>
+  <div class="aform">
+    <label>Name <input id="aname" placeholder="e.g. Riverside"></label>
+    <label>Income <select id="ainc"><option>Low</option><option>Medium</option><option>High</option></select></label>
+    <label>Demographic profile <select id="arace"><option>Mostly White</option><option>Mostly Hispanic</option><option>Mostly Black</option><option>Mostly Asian</option><option>Mixed</option></select></label>
+    <label>Life stage <select id="alife"><option>Families</option><option>Older adults</option><option>Younger adults</option><option>Mixed ages</option></select></label>
+    <label>Housing <select id="ahouse"><option>Renters</option><option>Mixed</option><option>Owners</option></select></label>
+    <label>Transport <select id="atrans"><option>Desert</option><option>Some</option><option>Oasis</option></select></label>
+    <label>Employment <select id="aemp"><option>Few local jobs</option><option>Balance</option><option>Hub</option></select></label>
+    <label>Noise today <select id="anoise"><option>Quiet</option><option>Moderate</option><option>Loud</option></select></label>
+    <label>Sensitive landmark? <select id="alm"><option>Yes — school/hospital/park/university</option><option>No</option></select></label>
+    <button class="add" onclick="addCommunity()">Add to the board</button>
+  </div>
+  <div id="alist"></div>
+</div></div></section>
+
+<div class="sidepanel" id="sidepanel">
+  <button class="sp-close" onclick="closePanel()" aria-label="Close">×</button>
+  <div id="spbody"></div>
+</div>
+
+<script>
+/* =========================================================================
+   DATA — names, categories, noise glosses, and description text from the
+   "12 Community Cards" deck + Sample Communities sheet (canonical).
+   SCENARIOS[key].chg[i]: change in total noise, dB (MOCK). Absolute = amb+chg.
+   ========================================================================= */
+const NOISE_GLOSS = {
+  loud:{word:"Loud", db:"65+ dBA"},
+  moderate:{word:"Moderate", db:"~55 dBA"},
+  quiet:{word:"Quiet", db:"below 50 dBA"},
+};
+const ZONES = [
+  {no:6, n:"Affluent Suburban Neighborhood", internal:"Westlake", band:"quiet", amb:50, pop:"Medium", vp:false,
+   snd:"birds, distant traffic, and household hum",
+   tDesc:"Travel is car-dependent, but car ownership and ridehail access make daily trips manageable.",
+   eDesc:"Most residents live here but travel elsewhere for work.",
+   cats:{Income:"High",Race:"Mostly White","Life stage":"Families",Housing:"Owners",Transport:"Oasis",Employment:"Few local jobs","Land use":"Residential",Landmark:"Schools · Parks"}},
+  {no:3, n:"Retail and Entertainment Center", internal:"Domain", band:"moderate", amb:60, pop:"High", vp:false,
+   snd:"busy-neighborhood hum and local traffic",
+   tDesc:"Roads and ridehail are available, but wait times, costs, and transit reliability can vary.",
+   eDesc:"A hotspot for service, retail, hospitality, and entertainment jobs people commute into.",
+   cats:{Income:"High",Race:"Mostly White","Life stage":"Younger adults",Housing:"Renters",Transport:"Some",Employment:"Hub","Land use":"Commercial",Landmark:"Business · Retail · Entertainment"}},
+  {no:12, n:"Mixed Urban Community", internal:"Rundberg/N Lamar", band:"moderate", amb:60, pop:"High", vp:false,
+   snd:"busy-neighborhood hum and local traffic",
+   tDesc:"Transit, ridehail, and roads are available, but not everyone can use them equally.",
+   eDesc:"Local businesses provide some jobs, while the community is shaped by both living and working.",
+   cats:{Income:"Low",Race:"Mixed","Life stage":"Families",Housing:"Renters",Transport:"Some",Employment:"Balance","Land use":"Mixed",Landmark:"Schools · Business"}},
+  {slot:true, n:"Your community #1"},
+  {no:4, n:"Popular Urban Residence with Shops", internal:"South Congress", band:"moderate", amb:60, pop:"Medium", vp:false,
+   snd:"busy-neighborhood hum and local traffic",
+   tDesc:"Walkable streets, frequent transit, local stores, and ridehail make everyday trips easier.",
+   eDesc:"Many people work near where they live or have shorter commute times.",
+   cats:{Income:"High",Race:"Mostly White","Life stage":"Mixed ages",Housing:"Mixed",Transport:"Oasis",Employment:"Balance","Land use":"Mixed",Landmark:"Retail · Entertainment"}},
+  {no:1, n:"Downtown", internal:"Downtown", band:"loud", amb:68, pop:"High", vp:true,
+   snd:"constant traffic, buses, and street activity",
+   tDesc:"Transit, rideshare, and road access are plentiful, so getting around is relatively easy.",
+   eDesc:"Jobs are concentrated here, and many workers travel in for offices, retail, and service work.",
+   cats:{Income:"High",Race:"Mixed","Life stage":"Younger adults",Housing:"Renters",Transport:"Oasis",Employment:"Hub","Land use":"Commercial",Landmark:"Business · Retail · Entertainment"}},
+  {no:7, n:"University", internal:"UT", band:"moderate", amb:60, pop:"High", vp:false,
+   snd:"busy-neighborhood hum and local traffic",
+   tDesc:"Transit, walking, and nearby services support students and reduce the need for car access.",
+   eDesc:"The university and surrounding services concentrate jobs and daily activity here.",
+   cats:{Income:"Low",Race:"Mixed","Life stage":"Younger adults",Housing:"Renters",Transport:"Oasis",Employment:"Hub","Land use":"Mixed",Landmark:"University · Hospital"}},
+  {slot:true, n:"Your community #2"},
+  {slot:true, n:"Your community #3"},
+  {no:9, n:"Gentrifying Neighborhood", internal:"E Cesar Chavez/Holly", band:"moderate", amb:60, pop:"Medium", vp:false,
+   snd:"busy-neighborhood hum and local traffic",
+   tDesc:"Transit and ridehail are available, but access differs between renters, homeowners, and destinations.",
+   eDesc:"Some jobs are nearby, but the neighborhood is shaped by both living and working.",
+   cats:{Income:"Medium",Race:"Mixed","Life stage":"Mixed ages",Housing:"Mixed",Transport:"Some",Employment:"Balance","Land use":"Mixed",Landmark:"Parks · Schools"}},
+  {no:2, n:"Airport", internal:"ABIA district", band:"loud", amb:68, pop:"Medium", vp:true,
+   snd:"constant traffic, buses, and aircraft/industrial sound",
+   tDesc:"Several highways, ridehail, and some transit connect here, but trips can be long or unreliable.",
+   eDesc:"Airport operations and nearby offices make this a major job center that people commute to.",
+   cats:{Income:"Low",Race:"Mixed","Life stage":"Mixed",Housing:"Renters",Transport:"Some",Employment:"Hub","Land use":"Industrial",Landmark:"Airport"}},
+  {no:5, n:"Underdeveloped Neighborhood", internal:"Del Valle", band:"loud", amb:66, pop:"Medium", vp:false,
+   snd:"constant traffic, buses, and aircraft/industrial sound",
+   tDesc:"Public transportation is limited; daily travel may require long walks, waits, or unreliable routes.",
+   eDesc:"Residents often must travel or commute to another neighborhood for work.",
+   cats:{Income:"Low",Race:"Mostly Hispanic","Life stage":"Families",Housing:"Mixed",Transport:"Desert",Employment:"Few local jobs","Land use":"Residential",Landmark:"Airport · Schools"}},
+  {no:10, n:"Lower-Income Urban Neighborhood", internal:"Dove Springs", band:"moderate", amb:60, pop:"High", vp:false,
+   snd:"busy-neighborhood hum and local traffic",
+   tDesc:"Transit is limited relative to need; many trips are time-consuming or inconvenient.",
+   eDesc:"Fewer nearby jobs mean people often have to travel or commute elsewhere for work.",
+   cats:{Income:"Low",Race:"Mostly Hispanic","Life stage":"Families",Housing:"Mixed",Transport:"Desert",Employment:"Few local jobs","Land use":"Residential",Landmark:"Schools · Parks"}},
+  {no:11, n:"Industrial Center", internal:"Burleson Rd corridor", band:"loud", amb:67, pop:"Low", vp:false,
+   snd:"constant traffic, buses, and aircraft/industrial sound",
+   tDesc:"Public transportation is limited, so access depends heavily on roads, vehicles, and longer trips.",
+   eDesc:"Industrial and logistics uses create many local jobs even though few people live nearby.",
+   cats:{Income:"Low",Race:"Mixed","Life stage":"Mixed",Housing:"Renters",Transport:"Desert",Employment:"Hub","Land use":"Industrial",Landmark:"Factory"}},
+  {slot:true, n:"Your community #4"},
+  {no:8, n:"Rural-Suburban Outskirts", internal:"Buda", band:"quiet", amb:50, pop:"Medium", vp:false,
+   snd:"birds, distant traffic, and household hum",
+   tDesc:"Some options exist, but many trips still rely on cars, longer distances, and higher ridehail costs.",
+   eDesc:"There are limited nearby jobs, so work often requires commuting elsewhere.",
+   cats:{Income:"Medium",Race:"Mixed","Life stage":"Families",Housing:"Owners",Transport:"Some",Employment:"Few local jobs","Land use":"Residential",Landmark:"Schools · Parks"}},
+];
+const PRI = {
+  "Low income":            z=>({High:1,Medium:5}[ (z.cats.Income||"").split(" ")[0] ] ?? 10),
+  "Communities of color":  z=>/hispanic|black|asian/i.test(z.cats.Race)?10:(/mixed/i.test(z.cats.Race)?5:1),
+  "Already loud":          z=>({loud:10,moderate:5,quiet:1}[z.band]),
+  "Transit desert":        z=>({Desert:10,Some:5,Oasis:1}[z.cats.Transport]),
+  "Few local jobs":        z=>({"Few local jobs":10,Balance:5,Hub:1}[z.cats.Employment]),
+  "Mostly renters":        z=>({Renters:10,Mixed:5,Owners:1}[z.cats.Housing]),
+  "Children / older adults":z=>({Families:10,"Older adults":10,"Mixed ages":5,"Mixed":5,"Younger adults":1}[z.cats["Life stage"]] ?? 5),
+  "School, hospital, park": z=>/school|hospital|park|university/i.test(z.cats.Landmark||"")?10:1,
+};
+const DIMDEFS = {
+  "Low income": "Communities where most households earn below 80% of the area median income (from the card's Income circle).",
+  "Communities of color": "Communities that are mostly Hispanic, Black, or Asian get full protection; mixed communities get half (from the card's Demographic profile).",
+  "Already loud": "Communities already at 65+ dBA today — carrying an existing noise burden (from the card's Noise circle).",
+  "Transit desert": "Communities where the need for transit exceeds the service available (from the card's Transport circle).",
+  "Few local jobs": "Communities where most people must commute elsewhere to work (from the card's Employment circle).",
+  "Mostly renters": "Communities where most homes are rented — typically less housing power than owners (from the card's Housing circle).",
+  "Children / older adults": "Communities that are mostly families with children or mostly older adults — the noise-sensitive life stages (from the card's Life stage circle).",
+  "School, hospital, park": "Communities containing a school, hospital, park, or university — places where noise disrupts learning, healing, or recreation (from the card's Landmarks).",
+};
+// MOCK scenario library, keyed the way real files will be named.
+const SCENARIOS = {
+  "equal_3":  {label:"Equal · within 3 dB", chg:[2,2,2, 2,1,2, 3,1,3,3,1, 2], epa:"No community reaches complaint territory"},
+  "equal_8":  {label:"Equal · within 8 dB", chg:[3,4,4, 3,2,4, 6,2,5,6,2, 3], epa:"Several communities enter “sporadic complaints”"},
+  "equal_18": {label:"Equal · within 18 dB", chg:[1,5,3, 2,3,4, 9,4,2,1,6, 1], epa:"Corridor communities reach “widespread complaints”"},
+  "util":     {label:"Utilitarian", chg:[0,1,1, 1,3,1, 7,3,2,0,5, 0], epa:"The Gentrifying Neighborhood enters “sporadic–widespread” territory"},
+  "suff_inc3":{label:"Sufficientarian · cap +3 dB", chg:[2,2,2, 2,2,2, 3,2,3,3,2, 2], epa:"Every community held at or below its +3 dB cap"},
+  "suff_inc8":{label:"Sufficientarian · cap +8 dB", chg:[3,4,4, 3,2,4, 7,2,5,6,2, 3], epa:"Every community held at or below its +8 dB cap"},
+  "suff_inc18":{label:"Sufficientarian · cap +18 dB", chg:[1,5,3, 2,3,4, 10,4,2,1,6, 1], epa:"Caps rarely bind — routing close to the efficient corridor"},
+  "suff_abs55":{label:"Sufficientarian · cap 55 dB total", chg:[1,4,4, 3,3,4, 4,3,2,1,4, 1], epa:"Quiet communities protected below 55 dB; loud ones absorb more"},
+  "suff_custom":{label:"Sufficientarian · custom cap", chg:[1,4,4, 3,3,4, 4,3,2,1,4, 1], epa:"Custom cap — MOCK routing shown"},
+  "prop_3port":{label:"Proportional · 3 vertiports · medium price", chg:[1,2,2, 2,3,2, 4,3,2,2,3, 1], epa:"Vertiport hosts carry the most"},
+  "prop_4port":{label:"Proportional · 4 vertiports · medium price", chg:[1,2,2, 2,3,2, 4,3,2,6,3, 2], epa:"The new host jumps +6 dB"},
+};
+
+/* custom sufficientarian cap (MOCK): traffic follows the efficient pattern but each
+   community's increase is clipped so ambient+increase never exceeds the cap.
+   Communities already above the cap get 0 added. */
+function suffCustomScenario(cap){
+  const base = SCENARIOS["equal_18"].chg;
+  const chg = realZones().map((z,i)=> Math.max(0, Math.min(base[i], cap - z.amb)));
+  return {label:"Sufficientarian · cap "+cap+" dB total", chg};
+}
+
+function priorScenario(dims){
+  const real = ZONES.filter(z=>!z.slot);
+  const base = SCENARIOS["util"].chg;
+  const chg = real.map((z,i)=>{
+    const avg = dims.reduce((s,d)=>s+PRI[d](z),0)/dims.length;
+    return avg>=8 ? Math.min(base[i],1) : Math.min(base[i]+2,9);
+  });
+  return {label:"Prioritarian · protect: "+dims.join(", "), chg,
+    epa:"Protected communities held to ≤1 dB; unprotected corridor absorbs more"};
+}
+
+/* ============================ state ============================ */
+const state = {count:"zone", measure:"total", view:"chg", card:"equal",
+  picks:{equal:"equal_3", suff:"suff_inc3", prop:"prop_3port"},
+  customDb:60, priorDims:["Low income"], pinned:[]};
+
+/* ============================ helpers ============================ */
+const realZones = ()=>ZONES.filter(z=>!z.slot);
+function scenario(){
+  if(state.card==="equal") return SCENARIOS[state.picks.equal];
+  if(state.card==="util")  return SCENARIOS["util"];
+  if(state.card==="suff")  return state.picks.suff==="suff_custom"
+      ? suffCustomScenario(+state.customDb) : SCENARIOS[state.picks.suff];
+  if(state.card==="prop")  return SCENARIOS[state.picks.prop];
+  return priorScenario(state.priorDims);
+}
+function dispVal(z,i,sc){
+  let v = sc.chg[i];
+  if(state.measure==="peak") v += 2;                       // MOCK peak
+  if(state.view==="abs") return (z.amb + v)+" dB";
+  return "+"+v+" dB";
+}
+const bandWord = {quiet:"Quiet", moderate:"Moderate", loud:"Loud"};
+const bandOf = db => db>=65 ? "loud" : (db>=55 ? "moderate" : "quiet");  // FAA 55/65 lines
+
+const popW = {Low:1, Medium:2, High:3};
+
+const newVP = ()=> (state.card==="prop" && state.picks.prop==="prop_4port") ? "Lower-Income Urban Neighborhood" : null;
+function vpBadge(z){
+  if(z.vp) return `<span class="vpbadge">✈ VERTIPORT</span>`;
+  if(z.n===newVP()) return `<span class="vpbadge new">✈ NEW PORT</span>`;
+  return "";
+}
+function tileHTML(z,i,sc,protectedSet){
+  if(z.slot) return `<div class="cell slot">${z.n}</div>`;
+  const j = realZones().indexOf(z);
+  const isProt = protectedSet && protectedSet.has(z.n);
+  const prot = isProt ? " protected":"";
+  const addcls = z.added ? " added":"";
+  const protChip = isProt ? '<span class="vpbadge" style="background:var(--teal)">PROTECTED</span>' : "";
+  let bandLine = `<span class="dot ${z.band}"></span>${bandWord[z.band]}`;
+  if(sc){
+    const raw = sc.chg[j] + (state.measure==="peak"?2:0);
+    const nb = bandOf(z.amb + raw);
+    if(nb!==z.band) bandLine += ` → <span class="dot ${nb}"></span><b>${bandWord[nb]}</b>`;
+  }
+  return `<div class="cell b-${z.band}${prot}${addcls}" onclick="openPanel('${z.n}')">
+    <div>${protChip}${vpBadge(z)}<span class="nm">${z.n}</span><div class="band">${bandLine}</div></div>
+    <div class="val">${sc?dispVal(z,j,sc):""}</div></div>`;
+}
+
+function renderZoneGrid(){
+  document.getElementById("zonegrid").innerHTML =
+    ZONES.map(z=> z.slot ? `<div class="cell slot">${z.n}</div>` :
+      `<div class="cell b-${z.band}${z.added?' added':''}" onclick="openPanel('${z.n}')">
+        <div>${z.vp?'<span class="vpbadge">✈ VERTIPORT</span>':''}<span class="nm">${z.n}</span><div class="band"><span class="dot ${z.band}"></span>${bandWord[z.band]}</div></div>
+        <div class="val" style="font-size:15px;font-weight:700">${z.pop} pop.</div></div>`).join("");
+}
+
+
+/* what THIS community's card says, per protection dimension — shown next to each number */
+const DIMCARD = {
+  "Low income":            z=>z.cats.Income+" income",
+  "Communities of color":  z=>z.cats.Race,
+  "Already loud":          z=>bandWord[z.band]+" background noise",
+  "Transit desert":        z=>"Transport: "+z.cats.Transport,
+  "Few local jobs":        z=>"Employment: "+z.cats.Employment,
+  "Mostly renters":        z=>"Housing: "+z.cats.Housing,
+  "Children / older adults":z=>"Life stage: "+z.cats["Life stage"],
+  "School, hospital, park": z=>/school|hospital|park|university/i.test(z.cats.Landmark||"")?"has one":"none",
+};
+
+/* right-hand community panel */
+const LEVELS = {Oasis:3, Some:2, Desert:1, Hub:3, Balance:2, "Few local jobs":1};
+const pills = v => `<div class="pills">${[1,2,3].map(k=>`<span class="${k<=(LEVELS[v]||0)?'f':''}"></span>`).join("")}</div>`;
+function openPanel(name){
+  const z = ZONES.find(x=>x.n===name); if(!z || z.slot) return;
+  const j = realZones().indexOf(z);
+  const sc = scenario();
+  const onFairness = document.querySelectorAll("section.screen")[2].classList.contains("on");
+  const g = NOISE_GLOSS[z.band];
+  const cell = (k,v)=>`<div class="sp-cell"><span class="lbl">${k}</span><div class="cv">${v}</div></div>`;
+  const pris = Object.entries(PRI).map(([d,f])=>
+    `<div class="prow"><span title="${DIMDEFS[d]}">${d}<small style="display:block;color:#6b6860;font-size:12.5px">this card: ${DIMCARD[d](z)}</small></span><b>${f(z)}</b></div>`).join("");
+  document.getElementById("spbody").innerHTML = `
+    <div class="sp-head">
+      <span class="lbl">Community ${z.no ? String(z.no).padStart(2,"0") : "—"}</span>
+      <div class="sp-name">${z.n}</div>
+      ${z.vp?'<span class="sp-vp">✈ HOSTS A VERTIPORT</span><br>':''}
+      ${z.n===newVP()?'<span class="sp-vp" style="background:#7a1d13">✈ NEW VERTIPORT IN THIS SCENARIO</span><br>':''}
+      <div class="sp-noise tint-${z.band}">
+        <span class="lbl">Noise</span><br>
+        <span class="nv">${g.word}</span><span class="db">${g.db}</span>
+        <div class="snd">Sounds like: ${z.snd || "—"}</div>
+      </div>
+    </div>
+    <div class="sp-body">
+      ${onFairness?`<div class="sp-scen">In this scenario: <span class="big">${dispVal(z,j,sc)}</span><br><span style="font-size:14px;color:#4d4a44">${sc.label} · MOCK</span></div>`:""}
+      <div class="featbox">
+        <span class="lbl">Transport</span>
+        <div class="fv">${z.cats.Transport}</div>
+        ${pills(z.cats.Transport)}
+        <p>${z.tDesc || ""}</p>
+      </div>
+      <div class="featbox">
+        <span class="lbl">Employment</span>
+        <div class="fv">${z.cats.Employment}</div>
+        ${pills(z.cats.Employment)}
+        <p>${z.eDesc || ""}</p>
+      </div>
+      <div class="sp-table">
+        <div class="sp-cellrow">${cell("Population", z.pop)}${cell("Income", z.cats.Income)}</div>
+        <div class="sp-cellrow">${cell("Demographic profile", z.cats.Race)}${cell("Life stage", z.cats["Life stage"])}</div>
+        <div class="sp-cellrow">${cell("Housing", z.cats.Housing)}${cell("Land use", z.cats["Land use"]||"—")}</div>
+        <div class="sp-cellrow"><div class="sp-cell wide"><span class="lbl">Landmarks</span><div class="cv">${z.cats.Landmark}</div></div></div>
+      </div>
+      <details class="sp-pri"><summary>Protection priorities (10 = protect most; hover a name for its definition)</summary>${pris}</details>
+    </div>`;
+  document.getElementById("sidepanel").classList.add("on");
+}
+function closePanel(){ document.getElementById("sidepanel").classList.remove("on"); }
+
+/* ============================ choices ============================ */
+function setRule(k,v,el){
+  state[k]=v;
+  el.parentElement.querySelectorAll(".opt").forEach(o=>o.classList.remove("on"));
+  el.classList.add("on");
+}
+function setView(v){
+  state.view=v;
+  document.getElementById("vchg").classList.toggle("on", v==="chg");
+  document.getElementById("vabs").classList.toggle("on", v==="abs");
+  renderFair();
+}
+
+/* ============================ fairness ============================ */
+const countWord = ()=> state.count==="zone" ? "community" : "person";
+const countPlural = ()=> state.count==="zone" ? "communities" : "people";
+const measureWord = ()=> state.measure==="total" ? "total noise" : "peak noise";
+const lockChip = w => `<span class="chiplock" title="Set in measurement options — tap to revisit" onclick="go(1)">${w}</span>`;
+
+const EPA_LINES = `3 dB over current noise — typically no community reaction<br>
+8 dB — sporadic complaints<br>
+18 dB — widespread complaints<br>
+<span style="font-size:13.5px;color:#6b6860">EPA community-reaction scale</span>`;
+
+function sentenceHTML(){
+  const c = lockChip(countWord()), m = lockChip(measureWord());
+  if(state.card==="equal") return `
+    <div class="sentence">Every ${c} should get the same ${m}, within
+      <select class="blank" onchange="state.picks.equal=this.value; renderFair()">
+        <option value="equal_3" ${sel('equal_3','equal')}>3 dB</option>
+        <option value="equal_8" ${sel('equal_8','equal')}>8 dB</option>
+        <option value="equal_18" ${sel('equal_18','equal')}>18 dB</option>
+      </select> of each other.</div>
+    <p class="whyline">${EPA_LINES}</p>`;
+  if(state.card==="util") return `
+    <div class="sentence">Minimize the ${m} for the most ${lockChip(countPlural())}.</div>
+    <p class="whyline">This one is fully defined by your measurement options.</p>`;
+  if(state.card==="suff") return `
+    <div class="sentence">No ${c} should go above
+      <select class="blank" onchange="suffPick(this.value)">
+        <option value="suff_inc3" ${sel('suff_inc3','suff')}>3 dB over current noise</option>
+        <option value="suff_inc8" ${sel('suff_inc8','suff')}>8 dB over current noise</option>
+        <option value="suff_inc18" ${sel('suff_inc18','suff')}>18 dB over current noise</option>
+        <option value="suff_abs55" ${sel('suff_abs55','suff')}>55 dB total (FAA line)</option>
+        <option value="suff_custom" ${sel('suff_custom','suff')}>choose your own…</option>
+      </select>.</div>
+    ${state.picks.suff==="suff_custom" ? `<p class="whyline">Custom cap:
+      <input type="number" value="${state.customDb}" min="30" max="90" style="font-size:18px;font-weight:800;width:80px;padding:5px;border:2px solid var(--teal);border-radius:8px"
+        oninput="state.customDb=this.value; renderFair()"> dB total<br>${capNote()}</p>` :
+      `<p class="whyline">${EPA_LINES}</p>`}`;
+  // prioritarian — three labeled dropdowns, hover a dimension for its definition
+  const opts = used => `<option value="">—</option>` + Object.keys(PRI).map(d=>
+    `<option value="${d}" title="${DIMDEFS[d]}" ${state.priorDims[used]===d?"selected":""}>${d}</option>`).join("");
+  return `
+    <div class="sentence">Protect these ${lockChip(countPlural())} first from ${m}:</div>
+    <div class="priorpicks">
+      <label title="${DIMDEFS[state.priorDims[0]]||''}">Pick 1<select onchange="priorPick(0,this.value)">${opts(0)}</select></label>
+      <label title="${DIMDEFS[state.priorDims[1]]||''}">Pick 2 (optional)<select onchange="priorPick(1,this.value)">${opts(1)}</select></label>
+      <label title="${DIMDEFS[state.priorDims[2]]||''}">Pick 3 (optional)<select onchange="priorPick(2,this.value)">${opts(2)}</select></label>
+    </div>
+    <p class="whyline">Hover any option for what it means. All picked dimensions count equally — the routing averages them, so the order doesn’t matter. Protection numbers come from each community’s own card categories (10/5/1 rules); protected communities are outlined and labeled PROTECTED on the map.</p>`;
+}
+
+/* plain-language feedback for the custom cap: name what the cap does to zones already above it */
+function capNote(){
+  const cap = +state.customDb;
+  const over = realZones().filter(z=>z.amb>=cap).length;
+  if(over===0) return `Every community sits below ${cap} dB today — flights are added until a community would cross the cap.`;
+  if(over===realZones().length) return `<b>All ${over} communities are already at or above ${cap} dB today</b> — no flight noise fits anywhere, so every tile shows +0 dB.`;
+  return `<b>${over} of ${realZones().length} communities are already at or above ${cap} dB today</b> — nothing can be added there (they show +0 dB); the rest absorb the traffic.`;
+}
+
+function sel(v,card){ return state.picks[card]===v?"selected":""; }
+function suffPick(v){ state.picks.suff=v; renderFair(); }
+function priorPick(slotIdx, v){
+  const dims = [...state.priorDims];
+  dims[slotIdx] = v || undefined;
+  state.priorDims = [...new Set(dims.filter(Boolean))];
+  if(state.priorDims.length===0) state.priorDims=["Low income"];
+  renderFair();
+}
+function setCard(c, btn){
+  state.card=c;
+  document.querySelectorAll("#cardtabs button").forEach(b=>b.classList.remove("on"));
+  if(btn) btn.classList.add("on");
+  renderFair();
+}
+
+/* dimension-level burden */
+const DIMLABELS = {
+  "Low income": ["Low-income communities","high-income"],
+  "Communities of color": ["Communities of color","mostly-white"],
+  "Already loud": ["Already-loud communities","quiet"],
+  "Transit desert": ["Transit deserts","transport oases"],
+  "Few local jobs": ["Job-poor communities","job hubs"],
+  "Mostly renters": ["Renter communities","owner communities"],
+  "Children / older adults": ["Family & older-adult communities","younger-adult"],
+  "School, hospital, park": ["Communities with schools/parks","those without"],
+};
+function dimSummary(sc){
+  const real = realZones();
+  const weight = z => 1;   // count choice changes the SOLVER RUN, never the display math (Whit, 2026-07-16)
+  const avg = a => a.reduce((s,[c,w])=>s+c*w,0)/a.reduce((s,[,w])=>s+w,0);
+  const rows = [];
+  for(const [d,f] of Object.entries(PRI)){
+    const hi=[], lo=[];
+    real.forEach((z,i)=>{ const p=f(z); if(p>=8) hi.push([sc.chg[i],weight(z)]); else if(p<=3) lo.push([sc.chg[i],weight(z)]); });
+    if(!hi.length || !lo.length) continue;
+    rows.push({d, ah:avg(hi), al:avg(lo), gap:avg(hi)-avg(lo)});
+  }
+  // only show groups that actually carry MORE than their opposite (Whit, 2026-07-16)
+  return rows.filter(r=>r.gap>0.05).sort((a,b)=>b.gap-a.gap).slice(0,3);
+}
+
+
+/* EPA reaction line — computed from the data so it always follows the band logic:
+   increase <=3 no reaction · 3-8 sporadic complaints · 8-18 widespread · 18+ legal action */
+function epaLine(sc){
+  const real = realZones();
+  let mx = -1, who = "";
+  real.forEach((z,i)=>{ if(sc.chg[i]>mx){ mx=sc.chg[i]; who=z.n; } });
+  if(mx<=3) return `No community reaches complaint territory — largest increase +${mx} dB (EPA)`;
+  if(mx<=8) return `Largest increase: +${mx} dB (${who}) — sporadic complaints territory (EPA)`;
+  if(mx<=18) return `Largest increase: +${mx} dB (${who}) — widespread complaints territory (EPA)`;
+  return `Largest increase: +${mx} dB (${who}) — threats-of-legal-action territory (EPA)`;
+}
+
+function ledgerHTML(sc){
+  const real = realZones();
+  const scored = real.map((z,i)=>({z, chg:sc.chg[i], score:sc.chg[i]}))
+                     .sort((a,b)=>b.score-a.score);
+  const most = scored.slice(0,3), least = scored.slice(-3).reverse();
+  const fmt = e=>`<div class="row"><span><b>${e.z.n}</b><small>${bandWord[e.z.band].toLowerCase()} background noise</small></span><span class="n">+${e.chg} dB</span></div>`;
+  const dimRows = dimSummary(sc);
+  const dims = dimRows.length ? dimRows.map(r=>
+    `<div class="row"><span><b title="${DIMDEFS[r.d]}">${DIMLABELS[r.d][0]}</b><small>vs ${DIMLABELS[r.d][1]}: +${r.al.toFixed(1)} dB average</small></span><span class="n">+${r.ah.toFixed(1)} dB</span></div>`).join("")
+    : `<div class="row"><small>Under this scenario, no group of communities carries more than its opposite group.</small></div>`;
+  return `
+    <div class="blockx hurt"><h4>Carries the most burden</h4>${most.map(fmt).join("")}</div>
+    <div class="blockx hurt"><h4>Carries the most burden, by dimension</h4>
+      <div class="hint">How this works: take the communities in a group (say, low-income) and average their noise increases. Do the same for the opposite group (high-income). A row appears only when the first group's average is higher — meaning that kind of community is carrying more.</div>
+      ${dims}</div>
+    <div class="blockx"><h4>Carries the least burden</h4>${least.map(fmt).join("")}</div>
+    <div class="blockx gain"><h4>Gains the most benefit</h4>
+      <div class="row"><span><b>Downtown</b><small>hosts a vertiport</small></span><span class="n">access</span></div>
+      <div class="row"><span><b>Airport</b><small>hosts a vertiport</small></span><span class="n">access</span></div>
+      <div class="row"><span><b>Several communities</b><small>one step from a vertiport</small></span><span class="n">near access</span></div>
+    </div>
+    <span class="epachip">${epaLine(sc)}</span>`;
+}
+
+function renderRules(){
+  const measureName = state.measure==="total" ? "Total noise over time" : "The loudest moment";
+  const measureDef = state.measure==="total" ? "every flight's noise a community hears, combined across the time period" : "the worst single instant";
+  const countName = state.count==="zone" ? "Communities" : "People";
+  const countDef = state.count==="zone" ? "every community counts the same, no matter the population" : "flights are routed to protect the most people — data for this option coming";
+  const html = `
+    <div class="seg"><span class="lbl">Counting</span><b>${countName}</b><small>${countDef}</small></div>
+    <div class="seg"><span class="lbl">Measuring</span><b>${measureName}</b><small>${measureDef}</small></div>
+    <span class="edit" onclick="go(1)">change</span>`;
+  ["rulestrip1","rulestrip2"].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML=html;
+  });
+}
+function renderFair(){
+  renderRules();
+  const sc = scenario();
+  document.getElementById("sentencearea").innerHTML = sentenceHTML();
+  let protectedSet = null;
+  if(state.card==="prior"){
+    protectedSet = new Set(realZones().filter(z=>
+      state.priorDims.reduce((s,d)=>s+PRI[d](z),0)/state.priorDims.length >= 8).map(z=>z.n));
+  }
+  document.getElementById("fgrid").innerHTML = ZONES.map((z,i)=>tileHTML(z,i,sc,protectedSet)).join("");
+  document.getElementById("fledger").innerHTML = ledgerHTML(sc);
+}
+
+/* ============================ compare ============================ */
+function pinScenario(){
+  if(state.pinned.length>=3){ alert("Three pinned — remove one on the Compare screen first."); return; }
+  const sc = scenario();
+  state.pinned.push({label:sc.label, chg:[...sc.chg], rules:`${countPlural()} · ${measureWord()}`});
+  renderCompare();
+  go(3);
+}
+function unpin(i){ state.pinned.splice(i,1); renderCompare(); }
+function renderCompare(){
+  renderRules();
+  const real = realZones();
+  document.getElementById("cmpgrid").innerHTML = state.pinned.length===0
+    ? `<p style="font-size:18px;color:#4d4a44">Nothing pinned yet — pick a fairness card and pin its result.</p>`
+    : state.pinned.map((p,k)=>{
+      let j=0;
+      const tiles = ZONES.map(z=> z.slot ? `<div class="cell slot"></div>` :
+        `<div class="cell b-${z.band}"><span class="nm">${z.n}</span><span class="val">+${p.chg[j++]}</span></div>`).join("");
+      const scored = real.map((z,i)=>({n:z.n, c:p.chg[i]})).sort((a,b)=>b.c-a.c);
+      return `<div class="cmpcard"><h4>${p.label}</h4>
+        <div style="font-size:13px;color:#4d4a44;margin-bottom:6px">${p.rules} · MOCK</div>
+        <div class="grid">${tiles}</div>
+        <div class="mini">Carries the most: <b>${scored[0].n} +${scored[0].c}</b>, ${scored[1].n} +${scored[1].c}</div>
+        <button class="rm" onclick="unpin(${k})">Remove</button></div>`;
+    }).join("");
+}
+
+/* ============================ admin ============================ */
+const added = [];
+function addCommunity(){
+  const name = document.getElementById("aname").value.trim() || "Unnamed";
+  const cats = {Income:val("ainc"), Race:val("arace"), "Life stage":val("alife"),
+    Housing:val("ahouse"), Transport:val("atrans"), Employment:val("aemp"),
+    "Land use":"—", Landmark:val("alm").startsWith("Yes")?"school/hospital/park":"—"};
+  const band = {Quiet:"quiet",Moderate:"moderate",Loud:"loud"}[val("anoise")];
+  const slotIdx = ZONES.findIndex(z=>z.slot);
+  if(slotIdx<0){ alert("All four participant slots are filled."); return; }
+  const snd = {quiet:"birds, distant traffic, and household hum",
+               moderate:"busy-neighborhood hum and local traffic",
+               loud:"constant traffic and industrial sound"}[band];
+  ZONES[slotIdx] = {no:12+added.length+1, n:name, internal:"participant-created", band, added:true,
+    amb:{quiet:50,moderate:60,loud:66}[band], pop:"Medium", vp:false, snd,
+    tDesc:"Created by this room from the community worksheet.", eDesc:"", cats};
+  Object.values(SCENARIOS).forEach(sc=>sc.chg.splice(realZones().length-1,0,2));
+  added.push(name);
+  renderZoneGrid(); renderFair(); renderAdmin();
+  document.getElementById("aname").value="";
+}
+const val = id => document.getElementById(id).value;
+function renderAdmin(){
+  if(!added.length){ document.getElementById("alist").innerHTML=""; return; }
+  document.getElementById("alist").innerHTML = "<h3 style='font-size:18px;margin-bottom:6px'>Added this session</h3>" +
+    "<table><tr><th>Community</th>"+Object.keys(PRI).map(d=>`<th>${d}</th>`).join("")+"</tr>"+
+    added.map(n=>{ const z=ZONES.find(x=>x.n===n);
+      return `<tr><td><b>${n}</b></td>${Object.values(PRI).map(f=>`<td>${f(z)}</td>`).join("")}</tr>`; }).join("")+"</table>"+
+    "<p style='font-size:14px;color:#7a5d00;margin-top:8px'>⚠ Map noise for added communities shows a +2 dB placeholder until the precompute plan covers participant zones.</p>";
+}
+
+/* ============================ nav ============================ */
+function go(i, btn){
+  closePanel();
+  document.querySelectorAll("section.screen").forEach((s,k)=>s.classList.toggle("on",k===i));
+  const btns=document.querySelectorAll(".steps button");
+  btns.forEach((b,k)=>b.classList.toggle("on",k===i));
+  window.scrollTo(0,0);
+  if(i===2) renderFair();
+  if(i===3) renderCompare();
+}
+
+renderZoneGrid(); renderFair(); renderCompare();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+
+=== s2-55_s6-45 / people_equal ===
+  skip U3.csv (exists)
+  U=8.0   baseline_mult  phase2 retry seed=1 -> phase2_failed (262s)
+  U=8.0   baseline_mult  phase2 retry seed=7 -> phase2_failed (263s)
+  U=8.0   baseline_mult  phase2 retry seed=42 -> phase2_failed (273s)
+  U=8.0   baseline_mult  PHASE-2 UNRESOLVED at 100.0% demand -- feasible but not optimizable in budget; NOT cutting demand
+  skip U18.csv (exists)
+=== s2-55_s6-45/people_equal done in 1058s ===

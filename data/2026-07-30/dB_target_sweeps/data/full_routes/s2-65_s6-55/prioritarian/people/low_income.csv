@@ -1,0 +1,47 @@
+# domain,prioritarian
+# combo,s2-65_s6-55
+# mode,people
+# lens,low_income
+# protectedStations,[6, 12]
+# D,18.0
+# U,50.0
+# hardT,False
+# T_max,5
+# weightTime,0.1
+# weightPrioritarian,1.0
+# optimizePrioritarian,True
+# optimizeUtilitarian,True
+# N,7
+# aircraftMultipliers,[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+# totalTraffic,7.0
+# maxTraffic,56
+# demandFulfilledPct,12.5
+Time Steps (T),5
+
+Routing (station per aircraft per timestep):
+Aircraft,Multiplier,Start,End,T0,T1,T2,T3,T4
+1,1.0,1,16,1,2,7,11,16
+2,1.0,1,16,1,2,7,11,16
+3,1.0,16,1,16,11,7,2,1
+4,1.0,16,1,16,11,7,2,1
+5,1.0,16,1,16,11,7,2,1
+6,1.0,1,16,1,2,7,11,16
+7,1.0,1,16,1,2,7,11,16
+
+Zone,Avg Added dB,Avg Total dB,Peak Added dB,Peak Total dB,Avg Aircraft,Peak Aircraft
+Zone 1,0.23,65.23,1.14,66.14,0.60,3
+Zone 2,0.52,65.52,1.46,66.46,1.40,4
+Zone 3,0.00,55.00,0.00,55.00,0.00,0
+Zone 4,0.00,45.00,0.00,45.00,0.00,0
+Zone 5,0.00,55.00,0.00,55.00,0.00,0
+Zone 6,0.00,55.00,0.00,55.00,0.00,0
+Zone 7,1.81,56.81,9.03,64.03,1.40,7
+Zone 8,0.00,55.00,0.00,55.00,0.00,0
+Zone 9,0.00,55.00,0.00,55.00,0.00,0
+Zone 10,0.00,55.00,0.00,55.00,0.00,0
+Zone 11,2.60,57.60,6.99,61.99,1.40,4
+Zone 12,0.00,65.00,0.00,65.00,0.00,0
+Zone 13,0.00,45.00,0.00,45.00,0.00,0
+Zone 14,0.00,45.00,0.00,45.00,0.00,0
+Zone 15,0.00,65.00,0.00,65.00,0.00,0
+Zone 16,0.29,65.29,1.46,66.46,0.80,4

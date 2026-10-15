@@ -1,0 +1,6 @@
+=== step1 people_N7: combo s2-65_s6-55, N=7, demand=12.5%, D=18.0 (non-binding), T_max=5 ===
+  low_income       [3, 8, 10, 12, 15, 16] protectedNoise=0.17     degenerate=no   peak=1.461 (23s)
+  people_of_color  [8, 12]                protectedNoise=0.0      degenerate=YES  peak=1.461 (5s)
+  transit_desert   [8, 12, 15]            protectedNoise=0.0      degenerate=YES  peak=1.461 (5s)
+  few_jobs         [4, 8, 12, 14]         protectedNoise=0.0      degenerate=YES  peak=1.461 (5s)
+=== -> D:\Documents\EECS_199_Shoukry\dB45_collection\data\probes\prioritarian_step1_people_N7.csv ===

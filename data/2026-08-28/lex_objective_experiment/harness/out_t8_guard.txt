@@ -1,0 +1,4 @@
+--- salvage WITH the feasibility guard, port 5058 ---
+timeoutMs=5000    elapsed=  8s  optimality=none     phase2Failed=True  principleOptimized=False
+timeoutMs=60000   elapsed= 63s  optimality=partial  phase2Failed=False  principleOptimized=True
+   verified utilNoise = 92.73

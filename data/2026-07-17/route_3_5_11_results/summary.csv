@@ -1,0 +1,6 @@
+example,N,M,D,U,status,T,T_min,totalTransit,totalUtilNoise,elapsed_s
+1,30,16,90,9.0,sat,7,,,,268.7
+2,30,16,90,9.5,sat,7,,,,266.0
+3,30,16,90,10.0,sat,7,,,,267.8
+4,30,16,90,10.5,sat,6,,,,260.4
+5,30,16,90,11.0,sat,6,,,,260.3

@@ -1,0 +1,13 @@
+
+=== s2-55_s6-55 / community_equal ===
+  U=3.0   baseline_mult  avg= 1.413 peak= 2.788 T=7 demand=100.0% travel=4.125 (61s)
+  U=8.0   baseline_mult  avg= 1.656 peak= 5.911 T=7 demand=100.0% travel=3.0 (35s)
+  U=18.0  baseline_mult  avg= 1.656 peak= 5.911 T=7 demand=100.0% travel=3.0 (20s)
+=== s2-55_s6-55/community_equal done in 116s ===
+
+=== s2-55_s6-55 / people_equal ===
+  U=3.0   baseline_mult  phase2_failed/timeout (262s) -> stepping down
+  U=3.0   N14_mult1      avg= 0.658 peak= 2.304 T=7 demand=25.0% travel=3.0 (24s)  [DEMAND CUT]
+  U=8.0   baseline_mult  avg= 1.656 peak= 5.911 T=7 demand=100.0% travel=3.0 (140s)
+  U=18.0  baseline_mult  avg= 1.656 peak= 5.911 T=7 demand=100.0% travel=3.0 (21s)
+=== s2-55_s6-55/people_equal done in 446s ===

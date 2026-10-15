@@ -1,0 +1,41 @@
+config,U,status,reason,elapsed_s
+N14_mult1,0.0,unsat,timeout,137.4
+N14_mult1,1.0,error,timed out,290.0
+N14_mult1,2.0,error,timed out,290.0
+N14_mult1,3.0,error,timed out,290.0
+N14_mult1,4.0,error,timed out,290.0
+N14_mult1,5.0,error,timed out,290.0
+N14_mult1,8.0,error,timed out,290.0
+N14_mult1,10.0,error,timed out,290.0
+N14_mult1,14.0,error,timed out,290.0
+N4_mult1,0.0,unsat,timeout,120.5
+N4_mult1,1.0,unsat,timeout,226.7
+N4_mult1,2.0,unsat,timeout,232.6
+N4_mult1,3.0,unsat,timeout,241.2
+N4_mult1,4.0,error,timed out,290.0
+N4_mult1,10.0,error,timed out,290.0
+N4_mult1,16.0,error,timed out,290.0
+N7_mult1,0.0,error,timed out,290.0
+N7_mult1,1.0,error,timed out,290.0
+N7_mult1,2.0,error,timed out,290.0
+N7_mult1,3.0,error,timed out,290.0
+N7_mult1,6.0,error,timed out,290.0
+N7_mult1,7.0,error,timed out,290.0
+N7_mult1,8.0,error,timed out,290.0
+N7_mult1,9.0,error,timed out,290.0
+N7_mult1,15.0,error,timed out,290.0
+baseline_mult,0.0,unsat,timeout,199.3
+baseline_mult,1.0,error,timed out,290.0
+baseline_mult,2.0,unsat,timeout,81.2
+baseline_mult,3.0,unsat,timeout,51.9
+baseline_mult,4.0,unsat,timeout,23.0
+baseline_mult,5.0,unsat,timeout,23.8
+baseline_mult,6.0,unsat,timeout,200.7
+baseline_mult,7.0,error,timed out,290.0
+baseline_mult,8.0,error,timed out,290.0
+baseline_mult,9.0,error,timed out,290.0
+baseline_mult,11.0,error,timed out,290.0
+baseline_mult,12.0,error,timed out,290.0
+baseline_mult,13.0,error,timed out,290.0
+baseline_mult,14.0,error,timed out,290.0
+baseline_mult,15.0,error,timed out,290.0

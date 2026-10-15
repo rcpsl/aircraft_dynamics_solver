@@ -1,0 +1,35 @@
+######## test4_terms ########
+
+prioritarian + people  (PRODUCTION)  [460s]  peak=+10.41dB
+  term                    weight       value         max  % of range      pull
+  prioritarian               1.0        0.00  (no max)
+  utilitarian/People         0.3       82.00      192.00       42.7%     15.7%
+  time penalty               1.0       44.00       64.00       68.8%     84.3%
+
+prioritarian + communities  (PRODUCTION)  [128s]  peak=+4.77dB
+  term                    weight       value         max  % of range      pull
+  prioritarian               1.0        0.00  (no max)
+  time penalty               1.0       44.00       80.00       55.0%    100.0%
+
+utilitarian + people  (PRODUCTION)  [658s]  peak=+4.77dB
+  term                    weight       value         max  % of range      pull
+  utilitarian/People         1.0       39.73     1789.20        2.2%      3.1%
+  time penalty               1.0       44.00       64.00       68.8%     96.9%
+
+equal + people  (PRODUCTION)  [383s]  peak=+10.00dB
+  term                    weight       value         max  % of range      pull
+  utilitarian/People         0.3       83.00      192.00       43.2%     15.9%
+  time penalty               1.0       44.00       64.00       68.8%     84.1%
+
+######## test2_util_people ########
+
+==================================================================
+LEX (port 5056)
+==================================================================
+
+Utilitarian + People  (utilNoiseMode=True, weightUtilitarian=1.0, T_max=5)
+
+######## test1_lex ########
+=== LEX (port 5056) ===
+
+--- 1. fairness value per principle ---

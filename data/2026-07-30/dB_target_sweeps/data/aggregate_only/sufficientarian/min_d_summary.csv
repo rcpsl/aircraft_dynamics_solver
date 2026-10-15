@@ -1,0 +1,9 @@
+combo,weighted,min_D,variant,N,out_path
+s2-55_s6-45,False,3.02,V3_N7_mult1,7,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-45\unweighted\Dmin_3.02.csv
+s2-55_s6-55,False,3.02,V3_N7_mult1,7,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-55\unweighted\Dmin_3.02.csv
+s2-65_s6-45,False,3.02,V3_N7_mult1,7,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-45\unweighted\Dmin_3.02.csv
+s2-65_s6-55,False,3.02,V3_N7_mult1,7,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-55\unweighted\Dmin_3.02.csv
+s2-55_s6-45,True,3.02,V4_N4_mult1,4,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-45\weighted\Dmin_3.02.csv
+s2-55_s6-55,True,3.02,V4_N4_mult1,4,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-55_s6-55\weighted\Dmin_3.02.csv
+s2-65_s6-45,True,3.02,V4_N4_mult1,4,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-45\weighted\Dmin_3.02.csv
+s2-65_s6-55,True,3.02,V4_N4_mult1,4,d:\Documents\EECS_199_Shoukry\dB_target_sweeps\sufficientarian\s2-65_s6-55\weighted\Dmin_3.02.csv

@@ -1,0 +1,5 @@
+mode,U,variant,N,totalTraffic,demandPct,status,reason,elapsed_s
+community_equal,3.0,baseline_mult,14,56,100.0,unsat,timeout,21.9
+community_equal,3.0,N14_mult1,14,14,25.0,sat,,6.8
+community_equal,8.0,baseline_mult,14,56,100.0,sat,,41.0
+community_equal,18.0,baseline_mult,14,56,100.0,sat,,21.1

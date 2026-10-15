@@ -1,0 +1,30 @@
+# combo,s2-55_s6-45
+# weighted,False
+# D,3.02
+# U,999
+# variant,V3_N7_mult1
+# N,7
+# aircraftMultipliers,[1, 1, 1, 1, 1, 1, 1]
+# startPositions,[1, 1, 16, 16, 16, 1, 1]
+# endPositions,[16, 16, 1, 1, 1, 16, 16]
+# T_used,7
+# note,smallest achievable D found by adaptive search (D=3 is structurally impossible)
+Time Steps (T),7
+
+Zone,Avg Added dB,Avg Total dB,Peak Added dB,Peak Total dB,Avg Aircraft,Peak Aircraft
+Zone 1,0.18,65.18,0.41,65.41,0.43,1
+Zone 2,1.72,56.72,3.01,58.01,0.57,1
+Zone 3,0.43,55.43,3.01,58.01,0.14,1
+Zone 4,0.00,45.00,0.00,45.00,0.00,0
+Zone 5,1.29,56.29,3.01,58.01,0.43,1
+Zone 6,0.00,45.00,0.00,45.00,0.00,0
+Zone 7,1.29,56.29,3.01,58.01,0.43,1
+Zone 8,0.43,55.43,3.01,58.01,0.14,1
+Zone 9,0.00,55.00,0.00,55.00,0.00,0
+Zone 10,1.29,56.29,3.01,58.01,0.43,1
+Zone 11,2.15,57.15,3.01,58.01,0.71,1
+Zone 12,0.12,65.12,0.41,65.41,0.29,1
+Zone 13,0.00,45.00,0.00,45.00,0.00,0
+Zone 14,0.00,45.00,0.00,45.00,0.00,0
+Zone 15,0.00,65.00,0.00,65.00,0.00,0
+Zone 16,0.23,65.23,0.79,65.79,0.57,2

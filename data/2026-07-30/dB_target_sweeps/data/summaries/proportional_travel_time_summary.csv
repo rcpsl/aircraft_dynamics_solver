@@ -1,0 +1,16 @@
+# supplementary,proportional average aircraft travel time
+# definition,travel time = timestep index of first arrival at End (0-indexed = move-steps to finish)
+# source,derived from the routing table in each full_routes/<combo>/proportional/*.csv (no re-solve)
+combo,mode,cyoScenario,N,T,avgTravel,avgTravelWeighted,minTravel,maxTravel
+s2-65_s6-55,high_benefit,default,14,5,3.286,3.357,3,4
+s2-65_s6-55,all_benefited,default,7,5,3.571,3.571,3,4
+s2-65_s6-55,all_benefited,c11-tech,7,5,3.571,3.571,3,4
+s2-65_s6-45,high_benefit,default,14,5,3.714,3.839,3,4
+s2-65_s6-45,all_benefited,default,7,5,3.571,3.571,3,4
+s2-65_s6-45,all_benefited,c11-tech,7,5,3.571,3.571,3,4
+s2-55_s6-55,high_benefit,default,14,5,3.286,3.357,3,4
+s2-55_s6-55,all_benefited,default,7,5,3.714,3.714,3,4
+s2-55_s6-55,all_benefited,c11-tech,7,5,3.714,3.714,3,4
+s2-55_s6-45,high_benefit,default,14,5,3.714,3.839,3,4
+s2-55_s6-45,all_benefited,default,7,5,3.714,3.714,3,4
+s2-55_s6-45,all_benefited,c11-tech,7,5,3.714,3.714,3,4

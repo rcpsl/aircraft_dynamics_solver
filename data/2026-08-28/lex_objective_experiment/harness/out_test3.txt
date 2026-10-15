@@ -1,0 +1,27 @@
+=== phase-2 forced to fail (tight timeoutMs) ===
+
+  PROD Proportional               FELL BACK, paths T=5 [16s]
+       warning: This routing does NOT reflect your fairness choices. Phase-2 optimization ran out of time after 6s at T=6 without finding a weighted solution, so the map shows a plain feasible route instead. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.
+  LEX  Proportional               FELL BACK, paths T=5 [16s]  [phase2Failed=True reason=timeout principleImposed=False]
+       warning: This routing does NOT apply the Proportional (proximity) objective. Phase-2 optimization failed, so the map shows a plain feasible route that ignores it. It ran out of time after 6s at T=6; the route shown is phase 1's at T=5. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.
+
+  PROD Prioritarian               FELL BACK, paths T=5 [18s]
+       warning: This routing does NOT reflect your fairness choices. Phase-2 optimization ran out of time after 6s at T=6 without finding a weighted solution, so the map shows a plain feasible route instead. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.
+  LEX  Prioritarian               FELL BACK, paths T=5 [18s]  [phase2Failed=True reason=timeout principleImposed=False]
+       warning: This routing does NOT apply the Prioritarian (protected-community) objective. Phase-2 optimization failed, so the map shows a plain feasible route that ignores it. It ran out of time after 6s at T=6; the route shown is phase 1's at T=5. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.
+
+  PROD Utilitarian+People         FELL BACK, paths T=5 [17s]
+       warning: This routing does NOT reflect your fairness choices. Phase-2 optimization ran out of time after 6s at T=5 without finding a weighted solution, so the map shows a plain feasible route instead. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.
+  LEX  Utilitarian+People         FELL BACK, paths T=5 [17s]  [phase2Failed=True reason=timeout principleImposed=False]
+       warning: This routing does NOT apply the Utilitarian (total-noise) objective. Phase-2 optimization failed, so the map shows a plain feasible route that ignores it. It ran out of time after 6s at T=5; the route shown is phase 1's at T=5. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.
+
+  PROD Sufficientarian            FELL BACK, paths T=5 [18s]
+       warning: This routing does NOT reflect your fairness choices. Phase-2 optimization ran out of time after 6s at T=6 without finding a weighted solution, so the map shows a plain feasible route instead. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.
+  LEX  Sufficientarian            FELL BACK, paths T=5 [18s]  [phase2Failed=True reason=timeout principleImposed=True]
+       warning: Your noise limit is still enforced, but arrival times were not optimized. No fairness objective was active ！ this rule is the hard D/U cap, which phase 1 applied ！ so the routing below is valid. It ran out of time after 6s at T=6; the route shown is phase 1's at T=5. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.
+
+  PROD Equal                      FELL BACK, paths T=5 [18s]
+       warning: This routing does NOT reflect your fairness choices. Phase-2 optimization ran out of time after 6s at T=6 without finding a weighted solution, so the map shows a plain feasible route instead. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.
+  LEX  Equal                      FELL BACK, paths T=5 [18s]  [phase2Failed=True reason=timeout principleImposed=True]
+       warning: Your noise limit is still enforced, but arrival times were not optimized. No fairness objective was active ！ this rule is the hard D/U cap, which phase 1 applied ！ so the routing below is valid. It ran out of time after 6s at T=6; the route shown is phase 1's at T=5. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.
+

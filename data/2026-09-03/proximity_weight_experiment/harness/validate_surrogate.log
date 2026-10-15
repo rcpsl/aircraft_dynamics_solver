@@ -1,0 +1,32 @@
+income|ambient|distance|population             MATCH
+income|ambient|population|distance             MATCH
+income|distance|ambient|population             MATCH
+income|distance|population|ambient             TIE (surrogate 0.74160022 <= z3 0.74160022)
+income|population|ambient|distance             MATCH
+income|population|distance|ambient             MATCH
+ambient|income|distance|population             MATCH
+ambient|income|population|distance             MATCH
+ambient|distance|income|population             MATCH
+ambient|distance|population|income             MATCH
+ambient|population|income|distance             MATCH
+ambient|population|distance|income             MATCH
+distance|income|ambient|population             MATCH
+distance|income|population|ambient             MATCH
+distance|ambient|income|population             MATCH
+distance|ambient|population|income             MATCH
+distance|population|income|ambient             MATCH
+distance|population|ambient|income             MATCH
+population|income|ambient|distance             MATCH
+population|income|distance|ambient             MATCH
+population|ambient|income|distance             MATCH
+population|ambient|distance|income             MATCH
+population|distance|income|ambient             MATCH
+population|distance|ambient|income             MATCH
+income|ambient|distance|NOPOP                  MATCH
+income|distance|ambient|NOPOP                  MATCH
+ambient|income|distance|NOPOP                  MATCH
+ambient|distance|income|NOPOP                  MATCH
+distance|income|ambient|NOPOP                  MATCH
+distance|ambient|income|NOPOP                  MATCH
+
+29 match, 1 tie, 0 worse (restarts=30)

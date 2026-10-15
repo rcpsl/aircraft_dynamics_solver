@@ -1,0 +1,7 @@
+
+=== s2-55_s6-45 / people (N=14, demand=100.0%) ===
+  low_income       protectedNoise=1.04     avg= 7.311 peak=14.771 T=4 demand=100.0% travel=3.0 (26s)
+  people_of_color  protectedNoise=0.0      avg= 7.311 peak=14.771 T=4 demand=100.0% travel=3.0 (31s)  [DEGENERATE: protectedNoise=0]
+  transit_desert   protectedNoise=0.0      avg= 7.311 peak=14.771 T=4 demand=100.0% travel=3.0 (27s)  [DEGENERATE: protectedNoise=0]
+  few_jobs         protectedNoise=0.0      avg= 7.311 peak=14.771 T=4 demand=100.0% travel=3.0 (25s)  [DEGENERATE: protectedNoise=0]
+=== s2-55_s6-45/people done in 109s ===

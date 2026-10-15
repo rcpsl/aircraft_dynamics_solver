@@ -1,0 +1,16 @@
+timeout 600s, T_max ladder [5, 4, 9] (domain default 7)
+
+--- s2-65_s6-55 U=3.0 (people_equal, 100% demand) ---
+    T_max=5: phase2_failed/timeout (625s)
+    T_max=4: phase2_failed/timeout (624s)
+    T_max=9: phase2_failed/timeout (644s)
+    still unresolved at every T_max
+--- s2-55_s6-55 U=3.0 (people_equal, 100% demand) ---
+    T_max=5: phase2_failed/timeout (628s)
+    T_max=4: phase2_failed/timeout (637s)
+    T_max=9: phase2_failed/timeout (633s)
+    still unresolved at every T_max
+
+=== written 0, still unresolved 2 ===
+  FAIL s2-65_s6-55 U=3.0
+  FAIL s2-55_s6-55 U=3.0

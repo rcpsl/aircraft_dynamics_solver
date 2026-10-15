@@ -1,0 +1,37 @@
+benefit map: {st: tier} = {1: 3, 2: 1, 5: 2, 6: 1, 16: 3}
+flat all_benefited = [1, 2, 5, 6, 16]
+tiered (multiplicity = tier) = [1, 1, 1, 16, 16, 16, 5, 5, 2, 6]
+
+s2-65_s6-55   flat    proportionalNoise=2.9 (5s)
+    station 1   tier=3 baseline=65  avgAdded= 0.026  peakAdded= 0.128
+    station 2   tier=1 baseline=65  avgAdded= 0.000  peakAdded= 0.000
+    station 5   tier=2 baseline=55  avgAdded= 0.000  peakAdded= 0.000
+    station 6   tier=1 baseline=55  avgAdded= 0.520  peakAdded= 1.461
+    station 16  tier=3 baseline=65  avgAdded= 0.034  peakAdded= 0.170
+    -> min(medium)=0.000 vs max(low)=0.520  ORDERING VIOLATED
+
+s2-65_s6-55   tiered  proportionalNoise=3.5 (6s)
+    station 1   tier=3 baseline=65  avgAdded= 0.026  peakAdded= 0.128
+    station 2   tier=1 baseline=65  avgAdded= 0.000  peakAdded= 0.000
+    station 5   tier=2 baseline=55  avgAdded= 0.000  peakAdded= 0.000
+    station 6   tier=1 baseline=55  avgAdded= 0.520  peakAdded= 1.461
+    station 16  tier=3 baseline=65  avgAdded= 0.034  peakAdded= 0.170
+    -> min(medium)=0.000 vs max(low)=0.520  ORDERING VIOLATED
+
+s2-65_s6-45   flat    proportionalNoise=20.3 (5s)
+    station 1   tier=3 baseline=65  avgAdded= 0.026  peakAdded= 0.128
+    station 2   tier=1 baseline=65  avgAdded= 0.000  peakAdded= 0.000
+    station 5   tier=2 baseline=55  avgAdded= 0.000  peakAdded= 0.000
+    station 6   tier=1 baseline=45  avgAdded= 4.000  peakAdded= 6.990
+    station 16  tier=3 baseline=65  avgAdded= 0.034  peakAdded= 0.128
+    -> min(medium)=0.000 vs max(low)=4.000  ORDERING VIOLATED
+
+s2-65_s6-45   tiered  proportionalNoise=18.68 (6s)
+    station 1   tier=3 baseline=65  avgAdded= 0.026  peakAdded= 0.086
+    station 2   tier=1 baseline=65  avgAdded= 0.000  peakAdded= 0.000
+    station 5   tier=2 baseline=55  avgAdded= 0.000  peakAdded= 0.000
+    station 6   tier=1 baseline=45  avgAdded= 3.556  peakAdded= 6.990
+    station 16  tier=3 baseline=65  avgAdded= 0.034  peakAdded= 0.170
+    -> min(medium)=0.000 vs max(low)=3.556  ORDERING VIOLATED
+
+-> D:\Documents\EECS_199_Shoukry\dB45_collection\data\probes\proportional_tiers.csv

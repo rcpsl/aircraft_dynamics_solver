@@ -1,0 +1,19 @@
+
+==================================================================
+PRODUCTION (port 5057)
+==================================================================
+
+Utilitarian + People  (utilNoiseMode=True, weightUtilitarian=1.0, T_max=5)
+  objective ON   weighted dB=    39.73  peak=+ 4.77dB  arr= 44  [619s]  (solver reported 39.72, matches)
+  objective OFF  weighted dB=    77.39  peak=+ 6.02dB  arr= 44  [19s]
+  --> WORKING: objective improves weighted dB by 37.66 (48.7%).
+
+Utilitarian + Communities  (utilNoiseMode=True, weightUtilitarian=1.0, T_max=5)
+  objective ON   weighted dB=    19.74  peak=+ 4.77dB  arr= 44  [867s]  (solver reported 19.73, matches)
+  objective OFF  weighted dB=    33.88  peak=+10.00dB  arr= 44  [19s]
+  --> WORKING: objective improves weighted dB by 14.15 (41.8%).
+
+Equal + People  (utilNoiseMode=False, weightUtilitarian=0.3, T_max=5)
+  objective ON   weighted transit=    83.00  peak=+10.00dB  arr= 44  [325s]  (solver reported 8300, MISMATCH vs 83.00)
+  objective OFF  weighted transit=    96.00  peak=+ 6.99dB  arr= 44  [17s]
+  --> WORKING: objective improves weighted transit by 13.00 (13.5%).

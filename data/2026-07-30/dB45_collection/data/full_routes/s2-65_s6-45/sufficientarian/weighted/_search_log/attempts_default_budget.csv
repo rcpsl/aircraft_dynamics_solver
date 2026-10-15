@@ -1,0 +1,8 @@
+mode,D,variant,N,totalTraffic,demandPct,status,reason,elapsed_s
+weighted,3.0,baseline_mult,14,56,100.0,unsat,timeout,25.3
+weighted,3.0,N14_mult1,14,14,25.0,sat,,11.8
+weighted,8.0,baseline_mult,14,56,100.0,phase2_failed,timeout,262.6
+weighted,8.0,baseline_mult,14,56,100.0,phase2_failed,seed1:timeout,262.4
+weighted,8.0,baseline_mult,14,56,100.0,phase2_failed,seed7:timeout,263.8
+weighted,8.0,baseline_mult,14,56,100.0,phase2_failed,seed42:timeout,262.8
+weighted,18.0,baseline_mult,14,56,100.0,sat,,24.2

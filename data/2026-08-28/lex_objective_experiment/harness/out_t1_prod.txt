@@ -1,0 +1,17 @@
+=== PRODUCTION (port 5057) ===
+
+--- 1. fairness value per principle ---
+  proportional                           peak=+ 4.77dB  arr= 44  prox=367.56  Tpen=44  [50s]
+  prioritarian                           peak=+ 6.99dB  arr= 44  prot=0.0  Tpen=44  [65s]
+  equal                                  peak=+ 7.78dB  arr= 44  Tpen=44  [20s]
+  sufficientarian                        peak=+ 6.02dB  arr= 44  Tpen=44  [19s]
+
+--- 2. principle weight 1.0 vs 8.0 ---
+    under lex this CANNOT change the answer; under a weighted sum it can
+  weightProximity=1.0                    peak=+ 4.77dB  arr= 44  prox=367.56  Tpen=44  [57s]
+  weightProximity=8.0                    peak=+ 4.77dB  arr= 44  prox=367.56  Tpen=44  [73s]
+
+--- 3. weightTime 1.0 / 8.0 / 0.0 ---
+  weightTime=1.0                         peak=+ 4.77dB  arr= 44  prox=367.56  Tpen=44  [55s]
+  weightTime=8.0                         peak=+ 4.77dB  arr= 44  prox=367.56  Tpen=44  [51s]
+  weightTime=0.0                         peak=+ 6.02dB  arr= 63  prox=367.56  [72s]

@@ -1,0 +1,17 @@
+=== LEX (port 5056) ===
+
+--- 1. fairness value per principle ---
+  proportional                           peak=+ 4.77dB  arr= 44  prox=367.56  Tpen=44  [70s]
+  prioritarian                           peak=+ 4.77dB  arr= 44  prot=0.0  Tpen=44  [34s]
+  equal                                  peak=+ 7.78dB  arr= 44  Tpen=44  [21s]
+  sufficientarian                        peak=+ 4.77dB  arr= 44  Tpen=44  [20s]
+
+--- 2. principle weight 1.0 vs 8.0 ---
+    under lex this CANNOT change the answer; under a weighted sum it can
+  weightProximity=1.0                    peak=+ 4.77dB  arr= 44  prox=367.56  Tpen=44  [74s]
+  weightProximity=8.0                    peak=+ 4.77dB  arr= 44  prox=367.56  Tpen=44  [72s]
+
+--- 3. weightTime 1.0 / 8.0 / 0.0 ---
+  weightTime=1.0                         peak=+ 4.77dB  arr= 44  prox=367.56  Tpen=44  [75s]
+  weightTime=8.0                         peak=+ 4.77dB  arr= 44  prox=367.56  Tpen=44  [71s]
+  weightTime=0.0                         peak=+ 6.99dB  arr= 68  prox=367.56  [67s]

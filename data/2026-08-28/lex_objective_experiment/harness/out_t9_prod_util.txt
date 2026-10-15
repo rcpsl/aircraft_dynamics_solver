@@ -1,0 +1,4 @@
+=== utilpeople on port 5059, 2 reps ===
+  rep 1     349s  optimality=optimal  utilNoise=39.72658570559432  mode=weighted  arrPen=44
+  rep 2     202s  optimality=optimal  utilNoise=39.72658570559432  mode=weighted  arrPen=44
+  --- 2/2 returned: min 202s  median 275s  max 349s; 2 proven optimal

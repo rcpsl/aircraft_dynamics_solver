@@ -1,0 +1,22 @@
+phase-2 budget raised to 900s (runtime override)
+
+4 unwritten variant(s):
+  s2-65_s6-55/community/low_income__gain_11  [3, 8, 10, 11, 12, 15, 16]
+  s2-65_s6-45/community/low_income__gain_11  [3, 8, 10, 11, 12, 15, 16]
+  s2-55_s6-55/community/low_income__gain_11  [3, 8, 10, 11, 12, 15, 16]
+  s2-55_s6-45/community/low_income__gain_11  [3, 8, 10, 11, 12, 15, 16]
+
+--- s2-65_s6-55/community ---
+  low_income__gain_11                protNoise=12.63    avg= 2.319 peak= 5.911 T=5 (260s)
+    (260s)
+--- s2-65_s6-45/community ---
+  low_income__gain_11                protNoise=12.63    avg= 5.849 peak=14.771 T=5 (300s)
+    (300s)
+--- s2-55_s6-55/community ---
+  low_income__gain_11                protNoise=12.63    avg= 2.319 peak= 5.911 T=5 (166s)
+    (166s)
+--- s2-55_s6-45/community ---
+  low_income__gain_11                protNoise=12.63    avg= 5.849 peak=14.771 T=5 (242s)
+    (242s)
+
+still unwritten after 900s budget: 0

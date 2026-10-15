@@ -1,0 +1,68 @@
+# domain,sufficientarian
+# combo,s2-65_s6-45
+# mode,unweighted
+# D,3.0
+# Drole,hard floor of acceptable conditions (no station may exceed D added dB at any timestep)
+# Dbinding,True
+# U,999.0
+# Urole,disparity deliberately off
+# hardT,False
+# T_max,7
+# weightTime,0.1
+# optimizeUtilitarian,True
+# utilNoiseMode,False
+# weightUtilitarian,1.0
+# objective,minimise weighted aircraft-timesteps in transit (count-based term, NOT the summed-dB term)
+# objectiveNote,count-based: minimises weighted aircraft-timesteps in transit. BASELINE-BLIND -- the objective never sees which stations are loud, so it does not concentrate burden on already-noisy stations by construction (as a summed-dB objective would). But added dB still depends on baseline (65 dB station gains 1.93 dB at full fleet vs 17.56 dB at 45 dB), so read the traffic distribution against the baselines rather than assuming it is neutral
+# capBehaviourWarning,D is a CAP, not a target -- it forbids exceeding and gives no incentive to go below, and the objective does not contain noise. The dB values here are NOT minimised; they are whatever transit minimisation produced within the cap, and they can sit right against it. Relaxing the cap licenses louder outcomes rather than leaving them unchanged (measured: s6-45 combos, D=8 -> D=18 raised peak added dB 7.782 -> 14.771 to save one timestep of travel). Do not read these values as optimised-for-quiet
+# variant,N14_mult1
+# fullFleetFeasible,False
+# phase2TimeoutMs,240000
+# maxAvgAddedDb,0.3647
+# maxPeakAddedDb,2.5527
+# totalTransit,5600
+# dbPerCraft,45
+# N,14
+# aircraftMultipliers,[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+# totalTraffic,14
+# maxTraffic,56
+# demandFulfilledPct,25.0
+# avgTravelTimeWeighted,4.0
+# minTravelTime,4
+# maxTravelTime,4
+Time Steps (T),7
+
+Routing (station per aircraft per timestep):
+Aircraft,Multiplier,Start,End,T0,T1,T2,T3,T4,T5,T6
+1,1,1,16,1,5,10,15,16,16,16
+2,1,1,16,1,2,7,11,16,16,16
+3,1,1,16,1,2,7,11,16,16,16
+4,1,1,16,1,2,7,12,16,16,16
+5,1,16,1,16,15,10,5,1,1,1
+6,1,16,1,16,11,7,2,1,1,1
+7,1,16,1,16,11,7,2,1,1,1
+8,1,16,1,16,15,10,5,1,1,1
+9,1,16,1,16,15,10,5,1,1,1
+10,1,16,1,16,15,10,5,1,1,1
+11,1,1,16,1,2,7,11,16,16,16
+12,1,1,16,1,5,10,15,16,16,16
+13,1,1,16,1,2,7,12,16,16,16
+14,1,16,1,16,12,7,2,1,1,1
+
+Zone,Avg Added dB,Avg Total dB,Peak Added dB,Peak Total dB,Avg Aircraft,Peak Aircraft
+Zone 1,0.04,65.04,0.29,65.29,1.00,7
+Zone 2,0.05,65.05,0.21,65.21,1.14,5
+Zone 3,0.00,55.00,0.00,55.00,0.00,0
+Zone 4,0.00,45.00,0.00,45.00,0.00,0
+Zone 5,0.32,55.32,1.46,56.46,0.86,4
+Zone 6,0.00,45.00,0.00,45.00,0.00,0
+Zone 7,0.36,55.36,2.55,57.55,1.14,8
+Zone 8,0.00,55.00,0.00,55.00,0.00,0
+Zone 9,0.00,55.00,0.00,55.00,0.00,0
+Zone 10,0.29,55.29,2.04,57.04,0.86,6
+Zone 11,0.28,55.28,1.14,56.14,0.71,3
+Zone 12,0.02,65.02,0.09,65.09,0.43,2
+Zone 13,0.00,45.00,0.00,45.00,0.00,0
+Zone 14,0.00,45.00,0.00,45.00,0.00,0
+Zone 15,0.04,65.04,0.17,65.17,0.86,4
+Zone 16,0.04,65.04,0.29,65.29,1.00,7

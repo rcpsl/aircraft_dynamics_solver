@@ -1,0 +1,7 @@
+ * Serving Flask app 'S_lex5058'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5058
+Press CTRL+C to quit
+127.0.0.1 - - [25/Aug/2026 19:00:06] "POST /solve HTTP/1.1" 200 -
+127.0.0.1 - - [25/Aug/2026 19:30:09] "POST /solve HTTP/1.1" 200 -

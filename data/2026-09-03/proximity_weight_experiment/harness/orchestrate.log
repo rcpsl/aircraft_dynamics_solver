@@ -1,0 +1,8 @@
+[02:45:27] surr.jsonl complete at 3360 rows
+[02:45:27] START surr_t6  (slack 1, the dashboard's real horizon)
+[02:55:32] DONE  surr_t6  (slack 1, the dashboard's real horizon)  rc=0 (605s)
+[02:55:32] START ties     (how degenerate is each scheme's optimum)
+[02:57:28] DONE  ties     (how degenerate is each scheme's optimum)  rc=0 (116s)
+[02:57:28] START timing   (Z3, alone, 900s cap)
+[03:27:37] DONE  timing   (Z3, alone, 900s cap)  rc=0 (1809s)
+all blocks complete

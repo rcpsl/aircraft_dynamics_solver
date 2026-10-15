@@ -1,0 +1,9 @@
+[runner] 8 jobs, 0 already done, 8 to run, par=8
+[start] ref:55|income-ambient-distance-population|P|T5|weightTime=0.0
+[start] ref:55|income-ambient-distance-population|P|T5|hardT=True
+[start] ref:55|income-ambient-distance-population|P|T5|D7
+[start] ref:55|income-ambient-distance-population|P|T5|D7|weightTime=0.0
+[start] alpha:0.6|income-ambient-distance-population|P|T5|weightTime=0.0
+[start] alpha:0.6|income-ambient-distance-population|P|T5|hardT=True
+[start] alpha:0.6|income-ambient-distance-population|P|T5|D7
+[start] alpha:0.6|income-ambient-distance-population|P|T5|D7|weightTime=0.0

@@ -1,0 +1,3 @@
+subdomain,mode,D,status,reason,elapsed_s
+utilitarian_peak,no_weight,2.0,phase2_failed,timeout,1816.6
+utilitarian_peak,weighted,2.0,phase2_failed,timeout,1824.9

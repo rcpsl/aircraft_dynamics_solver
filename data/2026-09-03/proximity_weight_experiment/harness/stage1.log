@@ -1,0 +1,71 @@
+[runner] 63 jobs, 0 already done, 63 to run, par=14
+[start] ref:45|income-ambient-distance-population|P|T5
+[start] ref:45|ambient-income-population-distance|P|T5
+[start] ref:45|income-ambient-population-distance|P|T5
+[start] ref:45|income-distance-ambient-population|P|T5
+[start] ref:45|income-distance-population-ambient|P|T5
+[start] ref:45|income-population-distance-ambient|P|T5
+[start] ref:45|distance-population-income-ambient|P|T5
+[start] ref:45|population-ambient-distance-income|P|T5
+[start] ref:45|distance-ambient-income-population|NOPOP|T5
+[start] ref:55|income-ambient-distance-population|P|T5
+[start] ref:55|ambient-income-population-distance|P|T5
+[start] ref:55|income-ambient-population-distance|P|T5
+[start] ref:55|income-distance-ambient-population|P|T5
+[start] ref:55|income-distance-population-ambient|P|T5
+[done ] ref:45|income-ambient-distance-population|P|T5             phase2_timeout      1507s tier=None peak=None (1 done, 49 queued, 1507s elapsed)
+[done ] ref:45|ambient-income-population-distance|P|T5             phase2_timeout      1507s tier=None peak=None (2 done, 49 queued, 1507s elapsed)
+[done ] ref:45|income-ambient-population-distance|P|T5             phase2_timeout      1507s tier=None peak=None (3 done, 49 queued, 1507s elapsed)
+[done ] ref:45|income-distance-ambient-population|P|T5             phase2_timeout      1507s tier=None peak=None (4 done, 49 queued, 1507s elapsed)
+[done ] ref:45|income-distance-population-ambient|P|T5             phase2_timeout      1507s tier=None peak=None (5 done, 49 queued, 1507s elapsed)
+[done ] ref:45|income-population-distance-ambient|P|T5             phase2_timeout      1507s tier=None peak=None (6 done, 49 queued, 1507s elapsed)
+[done ] ref:45|distance-population-income-ambient|P|T5             phase2_timeout      1507s tier=None peak=None (7 done, 49 queued, 1507s elapsed)
+[done ] ref:45|population-ambient-distance-income|P|T5             phase2_timeout      1507s tier=None peak=None (8 done, 49 queued, 1507s elapsed)
+[done ] ref:45|distance-ambient-income-population|NOPOP|T5         phase2_timeout      1507s tier=None peak=None (9 done, 49 queued, 1507s elapsed)
+[done ] ref:55|income-ambient-distance-population|P|T5             phase2_timeout      1507s tier=None peak=None (10 done, 49 queued, 1507s elapsed)
+[done ] ref:55|ambient-income-population-distance|P|T5             phase2_timeout      1507s tier=None peak=None (11 done, 49 queued, 1507s elapsed)
+[done ] ref:55|income-ambient-population-distance|P|T5             phase2_timeout      1507s tier=None peak=None (12 done, 49 queued, 1507s elapsed)
+[done ] ref:55|income-distance-ambient-population|P|T5             phase2_timeout      1507s tier=None peak=None (13 done, 49 queued, 1507s elapsed)
+[done ] ref:55|income-distance-population-ambient|P|T5             phase2_timeout      1507s tier=None peak=None (14 done, 49 queued, 1507s elapsed)
+[start] ref:55|income-population-distance-ambient|P|T5
+[start] ref:55|distance-population-income-ambient|P|T5
+[start] ref:55|population-ambient-distance-income|P|T5
+[start] ref:55|distance-ambient-income-population|NOPOP|T5
+[start] ref:65|income-ambient-distance-population|P|T5
+[start] ref:65|ambient-income-population-distance|P|T5
+[start] ref:65|income-ambient-population-distance|P|T5
+[start] ref:65|income-distance-ambient-population|P|T5
+[start] ref:65|income-distance-population-ambient|P|T5
+[start] ref:65|income-population-distance-ambient|P|T5
+[start] ref:65|distance-population-income-ambient|P|T5
+[start] ref:65|population-ambient-distance-income|P|T5
+[start] ref:65|distance-ambient-income-population|NOPOP|T5
+[start] alpha:0.5|income-ambient-distance-population|P|T5
+[done ] ref:55|income-population-distance-ambient|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (15 done, 35 queued, 1607s elapsed)
+[done ] ref:55|distance-population-income-ambient|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (16 done, 35 queued, 1607s elapsed)
+[done ] ref:55|population-ambient-distance-income|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (17 done, 35 queued, 1607s elapsed)
+[done ] ref:55|distance-ambient-income-population|NOPOP|T5         NO_OUTPUT rc=4294967295     100s tier=None peak=None (18 done, 35 queued, 1607s elapsed)
+[done ] ref:65|income-ambient-distance-population|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (19 done, 35 queued, 1607s elapsed)
+[done ] ref:65|ambient-income-population-distance|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (20 done, 35 queued, 1607s elapsed)
+[done ] ref:65|income-ambient-population-distance|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (21 done, 35 queued, 1607s elapsed)
+[done ] ref:65|income-distance-ambient-population|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (22 done, 35 queued, 1607s elapsed)
+[done ] ref:65|income-distance-population-ambient|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (23 done, 35 queued, 1607s elapsed)
+[done ] ref:65|income-population-distance-ambient|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (24 done, 35 queued, 1607s elapsed)
+[done ] ref:65|distance-population-income-ambient|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (25 done, 35 queued, 1607s elapsed)
+[done ] ref:65|population-ambient-distance-income|P|T5             NO_OUTPUT rc=4294967295     100s tier=None peak=None (26 done, 35 queued, 1607s elapsed)
+[done ] ref:65|distance-ambient-income-population|NOPOP|T5         NO_OUTPUT rc=4294967295     100s tier=None peak=None (27 done, 35 queued, 1607s elapsed)
+[done ] alpha:0.5|income-ambient-distance-population|P|T5          NO_OUTPUT rc=4294967295     100s tier=None peak=None (28 done, 35 queued, 1607s elapsed)
+[start] alpha:0.5|ambient-income-population-distance|P|T5
+[start] alpha:0.5|income-ambient-population-distance|P|T5
+[start] alpha:0.5|income-distance-ambient-population|P|T5
+[start] alpha:0.5|income-distance-population-ambient|P|T5
+[start] alpha:0.5|income-population-distance-ambient|P|T5
+[start] alpha:0.5|distance-population-income-ambient|P|T5
+[start] alpha:0.5|population-ambient-distance-income|P|T5
+[start] alpha:0.5|distance-ambient-income-population|NOPOP|T5
+[start] alpha:0.75|income-ambient-distance-population|P|T5
+[start] alpha:0.75|ambient-income-population-distance|P|T5
+[start] alpha:0.75|income-ambient-population-distance|P|T5
+[start] alpha:0.75|income-distance-ambient-population|P|T5
+[start] alpha:0.75|income-distance-population-ambient|P|T5
+[start] alpha:0.75|income-population-distance-ambient|P|T5

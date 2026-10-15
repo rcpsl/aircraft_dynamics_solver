@@ -1,0 +1,26 @@
+=== port 5057 ===
+
+--- 1. a principle that IS optimized, proven ---
+  proportional                       [  138s] ok
+      objectiveMode=weighted  optimality=optimal  principleOptimized=True  phase2Failed=False  principleImposed=True  arrivalPenalty=44
+  prioritarian                       [  170s] ok
+      objectiveMode=weighted  optimality=optimal  principleOptimized=True  phase2Failed=False  principleImposed=True  arrivalPenalty=44
+
+--- 2. principles with NO objective term ---
+    principleOptimized must be False, principleImposed still True
+  equal                              [   43s] ok
+      objectiveMode=weighted  optimality=optimal  principleOptimized=False  phase2Failed=False  principleImposed=True  arrivalPenalty=44
+  sufficientarian                    [   53s] ok
+      objectiveMode=weighted  optimality=optimal  principleOptimized=False  phase2Failed=False  principleImposed=True  arrivalPenalty=44
+
+--- 3. salvage: 60s on a payload that needs ~10min ---
+    partial + the objective applied, NOT a fallback to phase 1
+  utilitarian+people @60s            [   70s] ok
+      objectiveMode=weighted  optimality=partial  principleOptimized=True  phase2Failed=False  principleImposed=True  arrivalPenalty=62
+      NOTICE: This routing DOES apply the Utilitarian objective (total noise, weighted by population), but it is the best found within 60s rather than a proven best. A longer time limit in Admin may turn up a slightly better one; the noise limits are exact either way.
+
+--- 4. the floor: 5s, too short to reach ANY solution ---
+    the salvage must not invent one -- this still fails, and still says so
+  utilitarian+people @5s             [   12s] ok
+      objectiveMode=weighted  optimality=none  principleOptimized=False  phase2Failed=True  principleImposed=False
+      WARNING: This routing does NOT apply the Utilitarian objective (total noise, weighted by population). Phase-2 optimization failed, so the map shows a plain feasible route that ignores it. It ran out of time after 5s at T=5 without reaching any solution at all; the route shown is phase 1's at T=5. Raise the time limit in Admin, or tighten D/U, lower T_max, reduce the station weight, or reduce N/aircraft multipliers.

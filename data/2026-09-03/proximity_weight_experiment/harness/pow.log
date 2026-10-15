@@ -1,0 +1,20 @@
+[runner] 9 jobs, 0 already done, 9 to run, par=6
+[start] powa:10_0.7|income-ambient-distance-population|P|T5
+[start] pow:125|income-ambient-distance-population|P|T5
+[start] pow:25|income-ambient-distance-population|P|T5
+[start] powa:10_0.7|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions
+[start] powa:10_0.7|income-ambient-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[start] powa:10_0.7|income-population-distance-ambient|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[done ] powa:10_0.7|income-ambient-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                  146s tier={'45': 2, '55': 14, '65': 6} peak=3.01 (1 done, 3 queued, 146s elapsed)
+[start] pow:125|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions
+[done ] powa:10_0.7|income-population-distance-ambient|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                  164s tier={'45': 8, '55': 8, '65': 6} peak=7.782 (2 done, 2 queued, 164s elapsed)
+[start] pow:125|income-ambient-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[done ] pow:125|income-ambient-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                   92s tier={'45': 2, '55': 14, '65': 6} peak=3.01 (3 done, 1 queued, 256s elapsed)
+[start] pow:125|income-population-distance-ambient|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[done ] pow:125|income-population-distance-ambient|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                   98s tier={'45': 2, '55': 14, '65': 6} peak=3.01 (4 done, 0 queued, 354s elapsed)
+[done ] pow:125|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions sat                  376s tier={'45': 4, '55': 28, '65': 12} peak=4.771 (5 done, 0 queued, 522s elapsed)
+[done ] pow:125|income-ambient-distance-population|P|T5            sat                  632s tier={'45': 4, '55': 28, '65': 12} peak=4.771 (6 done, 0 queued, 632s elapsed)
+[done ] pow:25|income-ambient-distance-population|P|T5             sat                  744s tier={'45': 4, '55': 28, '65': 12} peak=4.771 (7 done, 0 queued, 744s elapsed)
+[done ] powa:10_0.7|income-ambient-distance-population|P|T5        phase2_timeout       911s tier=None peak=None (8 done, 0 queued, 910s elapsed)
+[done ] powa:10_0.7|income-ambient-distance-population|P|T5|N=12|aircraftMultipliers|endPositions|split=True|startPositions phase2_timeout       911s tier=None peak=None (9 done, 0 queued, 910s elapsed)
+[runner] all done in 910s

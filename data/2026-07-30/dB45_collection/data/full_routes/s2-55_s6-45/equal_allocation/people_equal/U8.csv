@@ -1,0 +1,64 @@
+# domain,equal_allocation
+# combo,s2-55_s6-45
+# mode,people_equal
+# solvedAs,community_equal
+# substituted,True
+# substitutionBasis,"routing copied from the community_equal solve at the same combo and U. Basis: all 6 loose-constraint pairs already solved (U=8 x2, U=18 x4) have BYTE-IDENTICAL routing and zone tables across the two modes, so the population weighting provably does not change the solution at this U. The people_equal objective was NOT run for this file."
+# optimizeUtilitarian,False (substituted file - people objective not applied)
+# stationTransitWeights,(not applied - see substitutionBasis)
+# U,8.0
+# Urole,hard disparity cap (a real constraint, not a label)
+# D,50.0
+# Dbinding,False
+# variant,baseline_mult
+# fullFleetFeasible,True
+# hardT,False
+# T_max,7
+# weightTime,0.1
+# maxAvgAddedDb,3.1087
+# maxPeakAddedDb,7.7815
+# dbPerCraft,45
+# N,14
+# aircraftMultipliers,[2, 5, 5, 5, 5, 5, 5, 5, 5, 2, 5, 3, 2, 2]
+# totalTraffic,56
+# maxTraffic,56
+# demandFulfilledPct,100.0
+# avgTravelTimeWeighted,3.857
+# minTravelTime,3
+# maxTravelTime,4
+Time Steps (T),7
+
+Routing (station per aircraft per timestep):
+Aircraft,Multiplier,Start,End,T0,T1,T2,T3,T4,T5,T6
+1,2,1,16,1,6,11,16,16,16,16
+2,5,1,16,1,2,7,12,16,16,16
+3,5,1,16,1,2,7,11,16,16,16
+4,5,1,16,1,5,10,15,16,16,16
+5,5,16,1,16,12,7,2,1,1,1
+6,5,16,1,16,11,7,2,1,1,1
+7,5,16,1,16,12,7,2,1,1,1
+8,5,16,1,16,11,7,2,1,1,1
+9,5,16,1,16,11,11,6,1,1,1
+10,2,16,1,16,11,6,1,1,1,1
+11,5,1,16,1,2,7,12,16,16,16
+12,3,1,16,1,2,7,11,16,16,16
+13,2,1,16,1,6,11,16,16,16,16
+14,2,16,1,16,11,6,1,1,1,1
+
+Zone,Avg Added dB,Avg Total dB,Peak Added dB,Peak Total dB,Avg Aircraft,Peak Aircraft
+Zone 1,0.16,65.16,0.97,65.97,4.14,25
+Zone 2,1.32,56.32,4.77,59.77,5.43,20
+Zone 3,0.00,55.00,0.00,55.00,0.00,0
+Zone 4,0.00,45.00,0.00,45.00,0.00,0
+Zone 5,0.25,55.25,1.76,56.76,0.71,5
+Zone 6,3.11,48.11,7.78,52.78,1.86,5
+Zone 7,0.97,55.97,6.81,61.81,5.43,38
+Zone 8,0.00,55.00,0.00,55.00,0.00,0
+Zone 9,0.00,55.00,0.00,55.00,0.00,0
+Zone 10,0.25,55.25,1.76,56.76,0.71,5
+Zone 11,1.42,56.42,4.62,59.62,5.14,19
+Zone 12,0.12,65.12,0.41,65.41,2.86,10
+Zone 13,0.00,45.00,0.00,45.00,0.00,0
+Zone 14,0.00,45.00,0.00,45.00,0.00,0
+Zone 15,0.03,65.03,0.21,65.21,0.71,5
+Zone 16,0.15,65.15,0.90,65.90,3.86,23

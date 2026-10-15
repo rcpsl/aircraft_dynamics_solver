@@ -1,0 +1,9 @@
+
+==================================================================
+LEX (port 5056)
+==================================================================
+
+Utilitarian + People  (utilNoiseMode=True, weightUtilitarian=1.0, T_max=5)
+  objective ON   PHASE-2 FELL BACK [2087s] -- objective not applied
+
+Utilitarian + Communities  (utilNoiseMode=True, weightUtilitarian=1.0, T_max=5)

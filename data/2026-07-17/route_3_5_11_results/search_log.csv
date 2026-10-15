@@ -1,0 +1,8 @@
+U,status,reason,T,elapsed_s
+14.0,sat,,4,5.6
+7.0,unsat,timeout,,46.2
+10.5,sat,,6,10.0
+9.0,sat,,7,15.7
+8.0,unsat,timeout,,125.2
+8.5,unsat,timeout,,108.8
+8.5,unsat,timeout,,96.1

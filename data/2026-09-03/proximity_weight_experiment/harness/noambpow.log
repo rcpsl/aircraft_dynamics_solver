@@ -1,0 +1,16 @@
+[runner] 7 jobs, 0 already done, 7 to run, par=7
+[start] pow:10|income-distance-population|P|T5
+[start] pow:10|income-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[start] pow:15|income-distance-population|P|T5
+[start] pow:15|income-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[start] pow:25|income-distance-population|P|T5
+[start] pow:25|income-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[start] pow:15|population-income-distance|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions
+[done ] pow:15|population-income-distance|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                  134s tier={'45': 7, '55': 9, '65': 6} peak=7.782 (1 done, 0 queued, 134s elapsed)
+[done ] pow:15|income-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                  144s tier={'45': 2, '55': 14, '65': 6} peak=3.01 (2 done, 0 queued, 144s elapsed)
+[done ] pow:10|income-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                  154s tier={'45': 2, '55': 14, '65': 6} peak=3.01 (3 done, 0 queued, 154s elapsed)
+[done ] pow:25|income-distance-population|P|T5|N=8|aircraftMultipliers|demandFactor=0.5|endPositions|startPositions sat                  182s tier={'45': 2, '55': 14, '65': 6} peak=3.01 (4 done, 0 queued, 182s elapsed)
+[done ] pow:10|income-distance-population|P|T5                     sat                  570s tier={'45': 4, '55': 28, '65': 12} peak=4.771 (5 done, 0 queued, 570s elapsed)
+[done ] pow:25|income-distance-population|P|T5                     sat                  572s tier={'45': 4, '55': 28, '65': 12} peak=4.771 (6 done, 0 queued, 572s elapsed)
+[done ] pow:15|income-distance-population|P|T5                     sat                  876s tier={'45': 4, '55': 28, '65': 12} peak=4.771 (7 done, 0 queued, 876s elapsed)
+[runner] all done in 876s

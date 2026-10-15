@@ -1,0 +1,4 @@
+=== utilpeople on port 5058, 2 reps ===
+  rep 1    1804s  optimality=partial  utilNoise=37.554081042741814  mode=lex  arrPen=58
+  rep 2    1803s  optimality=partial  utilNoise=36.756450034836945  mode=lex  arrPen=58
+  --- 2/2 returned: min 1803s  median 1803s  max 1804s; 0 proven optimal

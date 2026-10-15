@@ -1,0 +1,9 @@
+combo,weighted,D,status,last_reason,last_detail
+s2-65_s6-45,False,3,unsat,timed out,timed out
+s2-65_s6-45,True,3,unsat,timed out,timed out
+s2-65_s6-55,False,3,unsat,timed out,timed out
+s2-65_s6-55,True,3,unsat,timed out,timed out
+s2-55_s6-55,False,3,unsat,timed out,timed out
+s2-55_s6-55,True,3,unsat,timed out,timed out
+s2-55_s6-45,False,3,unsat,timed out,timed out
+s2-55_s6-45,True,3,unsat,timed out,timed out
