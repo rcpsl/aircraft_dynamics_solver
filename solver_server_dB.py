@@ -7,10 +7,24 @@ from collections import deque
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from z3 import (Int, And, Or, Not, Implies, Sum, If, Solver, Optimize, Bool, sat, unknown,
-                main_ctx)
+                main_ctx, Z3Exception)
 
 app = Flask(__name__)
 CORS(app)
+
+# Which objective scheme this solver applies, reported on every phase-2 reply.
+#
+# "lex" since 2026-08-27: the chosen fairness principle is minimized FIRST and
+# arrival time only breaks ties among routings that already achieve the principle's
+# optimum. Before that this file was "weighted" — one weighted sum in which arrival
+# time outvoted the principle roughly 31:1, because the normalization divisors are
+# loose by very different amounts (the time penalty reached 68.8% of its normalized
+# range against the utilitarian term's 2.2%).
+#
+# The field stays in the reply because the two schemes give different answers where
+# the principle and the clock genuinely trade, and a stored result is not
+# interpretable without knowing which produced it. See the minimize() block below.
+OBJECTIVE_MODE = "lex"
 
 # Shared by both phases' Z3 timeout and by /progress's elapsed/max display,
 # so the two can never drift apart.
@@ -141,6 +155,173 @@ def _guarded_check(fn):
             _in_check = False
 
 
+def _best_so_far(opt, L, N, T):
+    """Z3's incumbent model after a phase-2 timeout, or None if there isn't one.
+
+    A timeout does not mean the search found nothing. Optimize keeps the best
+    solution it has reached and typically spends its last stretch only trying to
+    prove that solution optimal, so on timeout there is usually a model in hand
+    which satisfies every hard constraint — the D/U caps, adjacency, arrival — and
+    is merely unproven. Serving that beats the alternative, which is falling back
+    to phase 1's route with no objective applied at all.
+
+    Optimize.model() raises when no solution was ever found, and can also hand back
+    one with location variables unassigned, so every L[i][t] is read here rather
+    than trusted.
+    """
+    try:
+        model = opt.model()
+    except Z3Exception:
+        return None
+    for i in range(N):
+        for t in range(T):
+            if model[L[i][t]] is None:
+                return None
+    return model
+
+
+def _model_is_feasible(opt, L, model, N, T):
+    """Replay a salvaged model against the hard constraints and confirm it holds.
+
+    The entire case for serving _best_so_far's incumbent is that it satisfies every
+    hard constraint — the D/U noise caps above all. Z3 is only ever expected to hold
+    a satisfying assignment as its incumbent, but "expected to" is not good enough
+    for a number a room full of people will read as a guarantee, so it is checked.
+
+    Cheap, because pinning the aircraft positions determines every other variable by
+    propagation. Any verdict other than sat — including this check itself timing out
+    — counts as failure: an unverified route must not be served.
+    """
+    s = Solver()
+    for a in opt.assertions():
+        s.add(a)
+    for i in range(N):
+        for t in range(T):
+            s.add(L[i][t] == model[L[i][t]].as_long())
+    s.set("timeout", 30000)
+    return _guarded_check(s.check) == sat
+
+
+def _enumerate_alternatives(opt, L, wcnt_by_t, T_penalty, pins, seed_model, K, distinct_on,
+                            N, T, M, start_positions, end_positions,
+                            baseline, aircraft_dB, int_mult):
+    """Up to K distinct routings satisfying every hard constraint, the first being
+    seed_model's own. Returns (list, why_it_stopped).
+
+    Equal and Sufficientarian set no objective at all (see _principle_name): their
+    rule is the hard D/U cap, so EVERY routing inside the cap satisfies the principle
+    equally and the single answer /solve returns is picked by the arrival-time
+    tie-break and then by Z3's search order. Returning several makes that
+    arbitrariness visible instead of implying a preference the principle never
+    expressed. It works for the objective-bearing principles too, where `pins` keeps
+    the alternatives at the optimum the served answer reached.
+
+    Built on a plain Solver seeded from opt.assertions() — the same copy
+    _model_is_feasible relies on — which carries the D/U caps, adjacency, the
+    start/end pins, the active-noise tracking and sticky arrival, but NOT the
+    minimize directives, which is exactly why the enumeration is free to wander
+    among equally-good answers. `pins` puts back as much of the objective as is
+    wanted.
+
+    distinct_on decides what "different" means, and the difference is not cosmetic.
+    Identical aircraft are interchangeable: the 5x5 dashboard's default demand sends
+    4+4+2+2+2+2 aircraft over six shared start/end pairs, so one routing has
+    4! * 4! * 2!^4 = 9216 relabellings, and blocking on L PERMITS all of them — a
+    relabelling satisfies the clause while changing nothing anyone hears. Whether Z3
+    actually returns them is down to its search order, and on small cases tried here
+    it did not, so this is a risk the default removes rather than a measured failure.
+    Blocking on the weighted-count matrix instead — the variable the D/U caps are
+    enforced on and the one the noise output is computed from — makes the guarantee
+    unconditional: two alternatives differ in what some community hears at some
+    timestep, or they are not two alternatives.
+
+    "paths" is kept for the case where the aircraft are genuinely distinguishable
+    (per-aircraft multipliers, or a question about one operator's trajectory), where
+    two routings with the same count matrix are still different answers.
+    """
+    s = Solver()
+    for a in opt.assertions():
+        s.add(a)
+    for p in pins:
+        s.add(p)
+    # A fresh full budget, not the remainder of phase 2's: the enumeration is opt-in
+    # and a caller asking for it has accepted that it costs another solve.
+    s.set("timeout", _timeout_ms())
+
+    def block(model):
+        """A clause forbidding this model's projection, so the next check must differ
+        somewhere that matters. model_completion because Z3 may leave a variable it
+        no longer cares about unassigned, and a None here would crash the loop."""
+        if distinct_on == "paths":
+            return Or([L[i][t] != model.evaluate(L[i][t], model_completion=True).as_long()
+                       for i in range(N) for t in range(T)])
+        return Or([wcnt_by_t[t][m] != model.evaluate(wcnt_by_t[t][m], model_completion=True).as_long()
+                   for t in range(T) for m in range(M)])
+
+    out = []
+    model = seed_model
+    while True:
+        paths = [
+            [model.evaluate(L[i][t], model_completion=True).as_long() for t in range(T)]
+            for i in range(N)
+        ]
+        count_matrix, noise_matrix_dB = _active_output_matrices(
+            paths, start_positions, end_positions, N, M, T, baseline, aircraft_dB,
+            multipliers=int_mult
+        )
+        entry = {"paths": paths, "countMatrix": count_matrix, "noiseMatrix": noise_matrix_dB}
+        if T_penalty is not None:
+            entry["arrivalPenalty"] = model.evaluate(T_penalty, model_completion=True).as_long()
+        out.append(entry)
+
+        if len(out) >= K:
+            return out, "limit"
+        s.add(block(model))
+        _check_cancelled()
+        verdict = _guarded_check(s.check)
+        if verdict == sat:
+            model = s.model()
+            continue
+        # An interrupt also reads as unknown, so ask before blaming the clock.
+        _check_cancelled()
+        # "exhausted" is a real answer and a strong one: it says no other routing
+        # meets the conditions, so the one served is not an arbitrary pick after all.
+        return out, ("timeout" if verdict == unknown else "exhausted")
+
+
+def _principle_name(optimize_prox, optimize_prior, optimize_util,
+                    util_noise_mode, weighted_by_people):
+    """The objective phase 2 was asked to optimize, in the dashboard's own words.
+
+    Returns None when there was no objective at all: Equal and Sufficientarian set
+    none, their rule being the hard D/U cap that phase 1 already enforced. That
+    distinction decides what a message about phase 2 should say, so it must not be
+    flattened into a generic "your fairness choices" — it would send an Equal user
+    hunting for a problem that is not there.
+
+    The People toggle is not an objective of its own — it switches
+    optimizeUtilitarian on and supplies stationTransitWeights — so it shows up here
+    as a qualifier on whichever utilitarian branch is live, not as an entry.
+    """
+    if optimize_prox:
+        name = "the Proportional (proximity) objective"
+    elif optimize_prior:
+        name = "the Prioritarian (protected-community) objective"
+    elif optimize_util and util_noise_mode:
+        name = ("the Utilitarian objective (total noise"
+                + (", weighted by population)" if weighted_by_people else ")"))
+    elif optimize_util:
+        name = ("the People objective (travel time"
+                + (", weighted by population)" if weighted_by_people else ")"))
+    else:
+        return None
+    # Prioritarian/Proportional with People on carry a second live term. Say so, or
+    # the reader is told one objective was affected when two were.
+    if weighted_by_people and (optimize_prox or optimize_prior):
+        name += " or the People objective alongside it"
+    return name
+
+
 def _drain_interrupt():
     """Absorb a stray interrupt before starting a solve.
 
@@ -267,6 +448,61 @@ def proximity_weights_from_vertiports(adjacency, vertiport_stations, M, base, ma
         layers = [min(l, max_layer) for l in layers]
 
     return [float(base) ** l for l in layers], layers
+
+
+def _max_weighted_price(price_table, int_pw, D_count, budget, M, T):
+    """Exact maximum of  Sum_m price_table[m][n_m] * int_pw[m]  over one timestep,
+    subject to  Sum_m n_m <= budget  and  n_m <= D_count[m],  times T.
+
+    Used to normalize the proximity objective in "noise" mode. The obvious bound —
+    M * T * max_price * max_pw, which is what the utilitarian-noise path uses —
+    describes every one of the M stations simultaneously carrying the whole fleet.
+    That needs M * budget aircraft-units when only `budget` exist, and on the 5x5 map
+    it overstates the reachable maximum by 16x. Dividing by it would leave the
+    proximity term unable to exceed ~6% of its nominal range while the soft-T
+    penalty, whose N*(T-1) bound IS tight, reaches 55-69% of its own — so
+    "weightProximity 1.0, weightTime 1.0" would silently behave like 0.06 vs 1.0.
+    Nothing would error; the routes would just stop responding to the weights.
+    (Under the lexicographic scheme below the time term can no longer outvote the
+    principle, but the divisor still sets how two live principle terms trade — People
+    alongside Proportional — so it still has to be tight.)
+
+    A bounded knapsack DP rather than the greedy marginal allocation the concavity
+    of the dB curve would otherwise license, because build_scaled_table ROUNDS to
+    integer centi-dB and rounding destroys concavity: baseline 65 dB gives the row
+    [0, 4, 9, 13, 17, 21], whose marginals are 4, 5, 4, 4, 4 — the second aircraft
+    appears to add more than the first, where the true marginals fall 4.32, 4.28,
+    4.24. Greedy then undershoots the real maximum (found by brute force on random
+    cases), and undershooting is the harmful direction: too small a divisor
+    over-weights the term instead of under-weighting it. The DP assumes nothing
+    about the curve's shape and is exact, so the normalization is tight as well as
+    sound. O(M * budget^2) — a few thousand operations at 5x5 scale.
+
+    Reachability is NOT modelled: the winning arrangement may be unreachable within
+    T moves, which leaves the result a valid upper bound on what the solver can
+    actually attain, only slightly loose.
+    """
+    if not int_pw or budget <= 0 or T <= 0:
+        return 0
+    # dp[b] = best single-timestep total using the stations seen so far and at most
+    # b aircraft-units. Initialised to 0 across the whole range, which is what makes
+    # the constraint "<= budget" rather than "== budget".
+    dp = [0] * (budget + 1)
+    for m in range(M):
+        cap = min(budget, D_count[m])
+        if cap <= 0:
+            continue
+        row, w = price_table[m], int_pw[m]
+        nxt = dp[:]
+        for b in range(1, budget + 1):
+            best = dp[b]
+            for k in range(1, min(b, cap) + 1):
+                cand = dp[b - k] + w * row[k]
+                if cand > best:
+                    best = cand
+            nxt[b] = best
+        dp = nxt
+    return dp[budget] * T
 
 
 def min_moves(adjacency, src, dst, M, allowed=None):
@@ -660,7 +896,10 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                         station_transit_weights,
                         util_noise_mode,
                         aircraft_multipliers,
-                        baseline, aircraft_dB):
+                        baseline, aircraft_dB,
+                        proximity_mode="noise", proximity_noise_ref=None,
+                        enumerate_n=0, enumerate_distinct="counts",
+                        enumerate_at_optimum=True):
     """Phase-2 optimizer: rebuild all constraints in a fresh Optimize instance and
     minimize a weighted combination of transit time and protected-station noise (dB).
 
@@ -685,6 +924,32 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     # Weighted dB table covers 0..max_weighted_count aircraft
     scaled_table_w = build_scaled_table(M, max_weighted_count, baseline, aircraft_dB)
 
+    # Noise cap and global disparity (counting only active aircraft).
+    # Built from the weighted table so D/U hard constraints are checked against
+    # the same weighted counts used for the displayed noise matrix below.
+    D_count = _compute_d_counts(M, max_weighted_count, D_scaled, scaled_table_w)
+
+    # Guard: a generous D combined with large aircraft multipliers can push D_count
+    # close to max_weighted_count for every station. Per timestep the model emits
+    # O(M * D_count) If-chain nodes plus O(M * N) count-sum terms; back when the
+    # pairwise U table made this O(M^2 * D_count), too large a product crashed Z3
+    # with an access violation. The metric reflects what is actually emitted, and
+    # the 75_000 ceiling matches it — see the note on SAFE_CONSTRAINT_VOLUME in
+    # find_min_T for why the old 150_000 would be far too permissive here.
+    max_d_count = max(D_count) if D_count else 0
+    if T * M * (max_d_count + N) > 75_000:
+        raise ValueError(
+            f"Noise-constraint search space too large for phase-2 optimization "
+            f"(stations can hold up to {max_d_count} weighted aircraft-units under "
+            f"the current D). This is usually caused by a generous D combined with "
+            f"large aircraft multipliers. Lower D, reduce aircraft multipliers, "
+            f"reduce T_max, or reduce N/M to continue."
+        )
+
+    # (D_count and its guard are computed here, well before the constraints they
+    # feed, because the proximity normalization below needs the per-station cap —
+    # and the volume guard is a precondition worth failing before Optimize() exists.)
+
     # ── Metric normalization ──────────────────────────────────────────────────
     # All metrics are divided by their theoretical maximums so that weights
     # operate on a comparable scale regardless of N, T, M, D.
@@ -703,17 +968,89 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     max_transit   = sum(int_mult) * (T - 1) * max(1, max_tw)
     max_T_penalty = N * (T - 1)
 
-    # Proximity: occupancy x per-station weight. Weights arrive as floats (base**layer,
-    # or a client-supplied vector), so scale them to integers the same way the
-    # station-weighted transit path does, keeping the Z3 term in integer arithmetic.
+    # Proximity: per-station weight x the burden that station carries. Weights arrive
+    # as floats (base**layer, or a client-supplied vector), so scale them to integers
+    # the same way the station-weighted transit path does, keeping the Z3 term in
+    # integer arithmetic.
     P_SCALE = 100
     if proximity_weights is not None:
         int_pw = [round(w * P_SCALE) for w in proximity_weights]
     else:
         int_pw = None
-    # Every aircraft-unit occupies exactly one station per active timestep, for at
-    # most T timesteps, at worst on the costliest station — that product is the bound.
-    max_proximity = sum(int_mult) * T * max(int_pw) if int_pw else 0
+
+    # What "burden" means is the proximity_mode:
+    #
+    #   "noise" (the default since 2026-09-03) — weight x the dB INCREASE the station
+    #     suffers. This is the burden a community actually experiences, and it is what
+    #     the term prices. Measured against the old count term over 30 rankings
+    #     (proximity_noise_experiment/README.md): never a louder peak, 4.8-5.6 dB
+    #     quieter in 11 of 28, and traffic over 45 dB tiles pinned to its floor of 4
+    #     aircraft-timesteps every time. Two consequences worth knowing, because
+    #     neither is a bug:
+    #       * dB is CONCAVE in the count, so stacking aircraft on one tile is
+    #         cheaper than spreading them (3 on a 45 dB tile costs 6.02 dB, three
+    #         separate tiles cost 9.03). The objective therefore concentrates
+    #         traffic, where the count mode was indifferent to concentration.
+    #       * the increase depends on the station's own baseline — one aircraft adds
+    #         3.01 dB at a 45 dB tile and 0.043 dB at a 65 dB tile, a ~160x implicit
+    #         price gradient favouring already-loud tiles. If the caller ALSO prices
+    #         ambient noise inside proximity_weights (the 5x5 dashboard does, as one
+    #         of four participant-ranked factors), ambient is counted twice and the
+    #         copy the participant cannot control is the stronger one: the curve fits
+    #         an ambient rank weight of ~0.88 where the participant's maximum is 0.40,
+    #         so the ranking moves the routing much less than it does under count.
+    #         proximity_noise_ref exists for exactly that case. The same gradient is
+    #         also what Z3 prunes with, which is why this mode is ~28x slower.
+    #
+    #   "count" — weight x occupancy, the original term: every aircraft-unit-timestep
+    #     on a station costs that station's weight, linearly, regardless of baseline
+    #     or of who else is there. Separable across aircraft, so far cheaper for
+    #     Optimize (median 38 s against noise mode's 1029 s on the 5x5 payload), and
+    #     it leaves the participants' ranking the strongest force in the objective.
+    #     Kept as the escape hatch for a session that must finish inside the timeout,
+    #     and to reproduce any answer stored before 2026-09-03.
+    #
+    # proximity_noise_ref, if set, prices every station off ONE reference baseline
+    # instead of its own. That keeps the concavity (burden still is not linear in
+    # overflights) while removing the implicit ambient gradient, leaving ambient
+    # wholly in the caller's weight vector.
+    if proximity_mode not in ("noise", "count"):
+        raise ValueError(f"proximity_mode must be 'noise' or 'count', got {proximity_mode!r}")
+    if proximity_mode == "count":
+        prox_price_table = None   # the Z3 term is the count variable itself
+    elif proximity_noise_ref is None:
+        prox_price_table = scaled_table_w          # per-station, mode A
+    else:
+        ref_row = [round(dB_increase(proximity_noise_ref, n, aircraft_dB) * SCALE)
+                   for n in range(max_weighted_count + 1)]
+        prox_price_table = [ref_row] * M           # one shared curve, mode B
+
+    if int_pw is None:
+        max_proximity = 0
+    elif proximity_mode == "count":
+        # Every aircraft-unit occupies exactly one station per active timestep, for
+        # at most T timesteps, at worst on the costliest station. Greedy over the
+        # linear table n -> n gives the same answer; spelled out to keep this mode
+        # bit-identical to what it produced before the noise term existed.
+        max_proximity = sum(int_mult) * T * max(int_pw)
+    else:
+        max_proximity = _max_weighted_price(
+            prox_price_table, int_pw, D_count, sum(int_mult), M, T
+        )
+
+    # A zero bound means the term would vanish from the objective without any
+    # complaint — all-zero weights, or a reference baseline so high that no station
+    # can be made to cost anything. That is the silent-failure mode this whole
+    # normalization block is trying to avoid, so say it out loud instead.
+    if optimize_prox and w_prox > 0 and max_proximity <= 0:
+        raise ValueError(
+            "The proximity objective would have no effect: its maximum possible "
+            "value is zero. Check that proximityWeights were supplied and are not "
+            "all zero"
+            + (f" and that proximityNoiseRef={proximity_noise_ref} is a plausible "
+               f"ambient level in dB" if proximity_noise_ref is not None else "")
+            + "."
+        )
 
     # Use scaled (integer) units for dB normalization bounds so all objective
     # terms live in the same numeric range as the Z3 dB expressions (×SCALE).
@@ -779,30 +1116,14 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
             opt.add(moved[i][t]  == Or(moved[i][t - 1],  Not(L[i][t] == start_positions[i])))
             opt.add(active[i][t] == And(moved[i][t], Not(ha[i][t - 1])))
 
-    # Noise cap and global disparity (counting only active aircraft).
-    # Built from the weighted table so D/U hard constraints are checked against
-    # the same weighted counts used for the displayed noise matrix below.
-    D_count = _compute_d_counts(M, max_weighted_count, D_scaled, scaled_table_w)
-
-    # Guard: a generous D combined with large aircraft multipliers can push D_count
-    # close to max_weighted_count for every station. Per timestep the model emits
-    # O(M * D_count) If-chain nodes plus O(M * N) count-sum terms; back when the
-    # pairwise U table made this O(M^2 * D_count), too large a product crashed Z3
-    # with an access violation. The metric reflects what is actually emitted, and
-    # the 75_000 ceiling matches it — see the note on SAFE_CONSTRAINT_VOLUME in
-    # find_min_T for why the old 150_000 would be far too permissive here.
-    max_d_count = max(D_count) if D_count else 0
-    if T * M * (max_d_count + N) > 75_000:
-        raise ValueError(
-            f"Noise-constraint search space too large for phase-2 optimization "
-            f"(stations can hold up to {max_d_count} weighted aircraft-units under "
-            f"the current D). This is usually caused by a generous D combined with "
-            f"large aircraft multipliers. Lower D, reduce aircraft multipliers, "
-            f"reduce T_max, or reduce N/M to continue."
-        )
-
     wdB_by_t = []
     wcnt_by_t = []
+    # Only populated when the proximity term needs a dB curve OTHER than each
+    # station's own — i.e. proximity_noise_ref is set. Mode A reuses wdB_by_t, so it
+    # adds no Z3 nodes at all; mode B pays for a second If-chain per station-timestep.
+    prox_dB_by_t = []
+    need_prox_table = (eff_w_prox > 0 and proximity_mode == "noise"
+                       and proximity_noise_ref is not None)
     for t in range(T):
         # Weighted-count variables drive both the D/U hard constraints and the
         # soft dB objectives/output, so displayed noise never exceeds what's enforced.
@@ -817,6 +1138,10 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         _add_noise_constraints(opt, wcnt_t, wdB_exprs_t, M, D_count, U_scaled, f"p2_{t}")
         wdB_by_t.append(wdB_exprs_t)
         wcnt_by_t.append(wcnt_t)
+        if need_prox_table:
+            prox_dB_by_t.append([
+                make_dB_expr(wcnt_t[m], m, prox_price_table, D_count[m]) for m in range(M)
+            ])
 
     # ── Build objective terms ─────────────────────────────────────────────────
     objective_terms = []
@@ -827,6 +1152,10 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
     total_util_noise = None
     protected_noise_dB = None
     proximity_cost = None
+    # Hoisted for the same reason, plus one more: the result block reports it, and
+    # it is never built at all when the arrival tie-break is off (soft_T false, or
+    # w_time 0).
+    T_penalty = None
 
     # Sticky arrival: once an aircraft reaches its destination it must stay there.
     # Without this, in soft mode aircraft can drift away between arrival and T-1.
@@ -882,18 +1211,34 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         objective_terms.append(eff_w_prior * protected_noise_dB)
 
     if eff_w_prox > 0:
-        # wcnt_by_t[t][m] is the multiplier-weighted count of *active* aircraft on
-        # station m at t — the same variable that drives the D/U caps and the
-        # displayed count matrix, so the burden being priced here is exactly the
-        # burden being reported. Each aircraft-unit-timestep on m costs int_pw[m],
-        # which is what "1 time step on a tile costs that tile's weight" means once
-        # aircraft multipliers are folded in.
+        # Both burden measures come off wcnt_by_t[t][m], the multiplier-weighted count
+        # of *active* aircraft on station m at t — the same variable that drives the
+        # D/U caps and the displayed count matrix — so the burden being priced here is
+        # exactly the burden being reported.
+        #
+        #   count mode: wcnt itself. Each aircraft-unit-timestep on m costs int_pw[m],
+        #     which is what "1 time step on a tile costs that tile's weight" means once
+        #     aircraft multipliers are folded in.
+        #   noise mode: the dB increase wcnt implies, which is wdB_by_t (per-station)
+        #     or prox_dB_by_t (one reference baseline). Note the units differ by
+        #     SCALE between the two modes; the reported value below divides
+        #     accordingly, and max_proximity was computed in matching units.
+        if proximity_mode == "count":
+            prox_burden = wcnt_by_t
+        else:
+            prox_burden = prox_dB_by_t if need_prox_table else wdB_by_t
         proximity_cost = Sum([
-            wcnt_by_t[t][m] * int_pw[m]
+            prox_burden[t][m] * int_pw[m]
             for t in range(T)
             for m in range(M)
         ])
         objective_terms.append(eff_w_prox * proximity_cost)
+
+    # Counted here, before the arrival tie-break is built, so that "was a principle
+    # optimized?" answers the question the caller means. objective_terms holds only
+    # principle terms at this point; arrival time is minimized separately below and
+    # deliberately never joins this list.
+    n_principle_terms = len(objective_terms)
 
     if eff_w_time > 0:
         # Arrival time proxy: counts pre-arrival timesteps per aircraft.
@@ -905,15 +1250,56 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
             for i in range(N)
             for t in range(T)
         ])
-        objective_terms.append(eff_w_time * T_penalty)
 
+    # ---- LEXICOGRAPHIC: principle first, arrival time only as a tie-break ----
+    #
+    # This file used to fold eff_w_time * T_penalty into one weighted sum with the
+    # principle terms. That let arrival time trade against the fairness objective,
+    # and because the normalization divisors are loose by very different amounts the
+    # time term outvoted the principle roughly 31:1 on the measured payload (68.8% of
+    # its normalized range against the utilitarian term's 2.2%). Z3 was mostly just
+    # minimizing arrival time.
+    #
+    # Z3's Optimize defaults to priority='lex' and applies objectives in CALL ORDER,
+    # so minimizing the principle first makes it strictly dominant: the time tier can
+    # only choose among solutions that already achieve the principle's optimum. It
+    # provably cannot cost a single unit of fairness.
+    #
+    # The principle tier stays a weighted sum rather than becoming further tiers,
+    # because when the People toggle is on with a non-Utilitarian principle BOTH
+    # optimize_prox/prior and optimize_util are set, and the 0.3 vs 1.0 weighting
+    # between them is a deliberate dashboard choice (see buildSolveRequest). Only
+    # time is demoted; the weights that were meant to trade against each other
+    # still do.
+    #
+    # Consequences worth knowing:
+    #   - w_time no longer sets a magnitude, only whether the tie-break runs at all.
+    #     Its normalization (max_T_penalty) is now used solely to decide eff_w_time > 0.
+    #   - With a single principle term live, that term's weight cannot move the
+    #     argmin. Scaling weightProximity/weightPrioritarian/weightUtilitarian alone
+    #     is mathematically inert. Two live terms (People alongside a principle)
+    #     still trade at their stated ratio.
+    #   - weightTime 0 is the one input where this is identical to the old weighted
+    #     scheme: eff_w_time == 0 means T_penalty is never built, so there is no
+    #     second tier to add.
+    #
+    # Measured before adopting (lex_objective_experiment/, 2026-08-25): fairness is
+    # EXACTLY equal to the weighted scheme on Proportional, Prioritarian, Equal and
+    # Sufficientarian; ~1.4x slower on Proportional, ~2x FASTER on Prioritarian, even
+    # on the other two. On Utilitarian + People the two genuinely diverge and lex
+    # reaches a 5.5-7.5% better noise value, but did not prove optimality within a
+    # 1800s cap where the weighted scheme proves it in 202-658s. That case now relies
+    # on the best-so-far salvage below.
     if objective_terms:
         opt.minimize(Sum(objective_terms))
+    if T_penalty is not None:
+        opt.minimize(T_penalty)
 
     # Building the phase-2 encoding above is itself slow at large N; check before
     # committing to the search rather than after.
     _check_cancelled()
     check_result = _guarded_check(opt.check)
+    partial = False
     if check_result != sat:
         _check_cancelled()   # an interrupt reads as unknown; don't call it a timeout
         # Distinguish a timed-out search (unknown — Z3 ran out of the SOLVE_TIMEOUT_MS
@@ -921,9 +1307,23 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         # phase-1 already confirmed sat at this T, ignoring objectives/weights).
         # Callers must not treat this as a normal phase-1 fallback silently — the
         # caller is expected to surface why phase-2 didn't produce a weighted result.
-        return {"status": "phase2_failed", "reason": "timeout" if check_result == unknown else "unsat_unexpected"}
-
-    model = opt.model()
+        #
+        # But a timeout is only a real failure when Z3 never reached a solution.
+        # When it did, that incumbent has the objective applied and satisfies every
+        # hard constraint; it is unproven, not invalid. Return it marked partial
+        # rather than discarding the whole of phase 2's work for phase 1's route.
+        model = _best_so_far(opt, L, N, T) if check_result == unknown else None
+        if model is not None and not _model_is_feasible(opt, L, model, N, T):
+            # An interrupt makes that replay return unknown too, and a cancelled solve
+            # must read as cancelled rather than as an unverifiable model.
+            _check_cancelled()
+            model = None          # could not be verified; fall back rather than serve it
+        if model is None:
+            return {"status": "phase2_failed",
+                    "reason": "timeout" if check_result == unknown else "unsat_unexpected"}
+        partial = True
+    else:
+        model = opt.model()
     paths = [
         [model[L[i][t]].as_long() for t in range(T)]
         for i in range(N)
@@ -937,11 +1337,47 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
               "countMatrix": count_matrix, "noiseMatrix": noise_matrix_dB}
     result["T_used"] = T
 
+    # ── Alternative routings (opt-in, `enumerate` in the request) ─────────────
+    # Off by default, so a request that does not ask for it gets a byte-identical
+    # reply and the dashboard's response cache is unaffected.
+    #
+    # enumerate_at_optimum pins each RAW principle metric and the arrival penalty to
+    # the value this model reached, rather than pinning the weighted sum. That is
+    # deliberately stronger: pinning the sum would let two live terms trade against
+    # each other and call the result "equally good", when the point of the list is to
+    # show routings that are equally good on every term at once. For Equal and
+    # Sufficientarian there are no principle metrics, so this reduces to pinning
+    # arrival time — the only thing that chose the answer in the first place.
+    if enumerate_n > 0:
+        pins = []
+        if enumerate_at_optimum:
+            for expr in (total_util_noise, total_transit, protected_noise_dB,
+                         proximity_cost, T_penalty):
+                if expr is not None:
+                    pins.append(expr == model.evaluate(expr, model_completion=True).as_long())
+        alternatives, why = _enumerate_alternatives(
+            opt, L, wcnt_by_t, T_penalty, pins, model, enumerate_n, enumerate_distinct,
+            N, T, M, start_positions, end_positions, baseline, aircraft_dB, int_mult
+        )
+        result["alternatives"]         = alternatives
+        result["alternativesStatus"]   = why
+        result["alternativesDistinct"] = enumerate_distinct
+        result["alternativesAtOptimum"] = bool(enumerate_at_optimum and pins)
+
     if eff_w_util > 0:
         if util_noise_mode:
             raw_util_noise = model.evaluate(total_util_noise).as_long()
             result["totalUtilNoise"] = raw_util_noise / SCALE / W_SCALE if int_tw is not None else raw_util_noise / SCALE
         else:
+            # UNITS WARNING, deliberately not fixed. These two go out RAW while
+            # totalUtilNoise on the line above is divided by SCALE and W_SCALE — so
+            # totalTransit reads 8300 where the natural value is 83. It is wrong and
+            # it is load-bearing: dB45_collection/ has already stamped raw values into
+            # its published CSVs and its scripts read them back at this scale, so
+            # rescaling here would silently invalidate that whole collection. The 5x5
+            # dashboard sidesteps it by measuring trip length from the returned paths
+            # instead (see its comment at ~:1628). Divide at the point of display, or
+            # migrate dB45_collection first.
             result["transitTimes"] = [model.evaluate(transit[i]).as_long() for i in range(N)]
             result["totalTransit"] = model.evaluate(total_transit).as_long()
 
@@ -950,7 +1386,38 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
         result["protectedStations"] = protected_stations
 
     if eff_w_prox > 0:
-        result["proximityCost"] = model.evaluate(proximity_cost).as_long() / P_SCALE
+        raw_prox = model.evaluate(proximity_cost).as_long()
+        # count mode sums plain counts (P_SCALE only); noise mode sums ×SCALE dB
+        # expressions, so it carries both scales.
+        result["proximityCost"] = (raw_prox / P_SCALE if proximity_mode == "count"
+                                   else raw_prox / SCALE / P_SCALE)
+        # Echo how the burden was priced: the same request payload produces different
+        # numbers under different modes, and a stored result with no mode on it cannot
+        # be told apart from a pre-2026-09-03 one.
+        result["proximityMode"] = proximity_mode
+        if proximity_noise_ref is not None:
+            result["proximityNoiseRef"] = proximity_noise_ref
+
+    # ---- Reported by both solvers, so neither can be told from the other by the
+    # shape of its reply; objectiveMode is the one field whose VALUE differs.
+    #   optimality           "optimal" = proven best. "partial" = best reached
+    #                        before the clock ran out: the objective is applied,
+    #                        just not proven best. (A phase-2 failure, handled in
+    #                        solve(), reports "none".)
+    #   principleOptimized   False for Equal and Sufficientarian, which set no
+    #                        objective — it separates a result that is at its
+    #                        principle's optimum from one where no principle was
+    #                        ever being optimized. The two look alike in a routing.
+    #   arrivalPenalty       pre-arrival aircraft-timesteps summed over the fleet.
+    #                        The ONE field that is not always present: it is omitted
+    #                        when the arrival term is off in either solver, and on a
+    #                        phase-2 failure, where there is no phase-2 model to
+    #                        evaluate it against.
+    result["objectiveMode"]      = OBJECTIVE_MODE
+    result["optimality"]         = "partial" if partial else "optimal"
+    result["principleOptimized"] = n_principle_terms > 0
+    if T_penalty is not None:
+        result["arrivalPenalty"] = model.evaluate(T_penalty).as_long()
 
     return result
 
@@ -1108,6 +1575,8 @@ def _solve_impl():
     # the flight adjacency (Manhattan, say) — the solver never needs to know which.
     proximity_weights  = None
     derived_proximity  = False
+    proximity_mode      = "noise"
+    proximity_noise_ref = None
     if optimize_prox:
         raw_pw = data.get("proximityWeights")
         if raw_pw is not None:
@@ -1151,6 +1620,33 @@ def _solve_impl():
                 adjacency, vertiport_stations, M, prox_base, prox_max_layer
             )
             derived_proximity = True
+
+        # How the burden is priced. Defaults to "noise" — weight x the dB increase the
+        # station suffers — so a client that sends nothing gets the noise term, which
+        # is Proportional's shipped behaviour since 2026-09-03. "count" reproduces the
+        # older weight x occupancy term: cheaper for Z3 by roughly 28x, and the mode in
+        # which the participants' ranking has the most influence over the routing. See
+        # the long note in optimize_objectives for the trade.
+        proximity_mode = data.get("proximityMode", "noise")
+        if proximity_mode not in ("noise", "count"):
+            return jsonify({"error": "proximityMode must be 'noise' or 'count'"}), 400
+
+        # Optional: price every station off ONE ambient level instead of its own, so
+        # the dB curve stops re-expressing a caller's ambient-noise weighting. See the
+        # long note in optimize_objectives for why that matters.
+        raw_ref = data.get("proximityNoiseRef", None)
+        if raw_ref is not None:
+            if proximity_mode != "noise":
+                return jsonify({"error": "proximityNoiseRef only applies when proximityMode is 'noise'"}), 400
+            try:
+                proximity_noise_ref = float(raw_ref)
+            except (TypeError, ValueError):
+                return jsonify({"error": "proximityNoiseRef must be numeric"}), 400
+            # Range-checked because the failure is silent, not loud: a reference far
+            # above the aircraft level makes every station's increase round to zero,
+            # which would quietly delete the objective rather than raise anything.
+            if not (0 < proximity_noise_ref <= 200):
+                return jsonify({"error": "proximityNoiseRef must be an ambient level in dB, in (0, 200]"}), 400
 
         # base**layer grows fast on a deep graph; a runaway vector would swamp every
         # other objective and bloat the Z3 coefficients rather than fail outright.
@@ -1196,6 +1692,29 @@ def _solve_impl():
     except (TypeError, ValueError):
         w_time = 1.0
     if w_time < 0: w_time = 0.0
+
+    # ── Alternative-routing enumeration (opt-in) ──────────────────────────────
+    # `enumerate`: how many routings to return, the first being the one /solve would
+    # have returned on its own. 0 (the default) keeps the reply exactly as it was.
+    # Capped because every extra routing is another Z3 check and the reply carries a
+    # full count and noise matrix per entry.
+    enumerate_n = data.get("enumerate", 0)
+    try:
+        enumerate_n = int(enumerate_n)
+    except (TypeError, ValueError):
+        return jsonify({"error": "enumerate must be an integer"}), 400
+    if enumerate_n < 0:
+        return jsonify({"error": "enumerate must be >= 0"}), 400
+    if enumerate_n > 50:
+        return jsonify({"error": "enumerate must be <= 50"}), 400
+
+    enumerate_distinct = data.get("enumerateDistinct", "counts")
+    if enumerate_distinct not in ("counts", "paths"):
+        return jsonify({"error": "enumerateDistinct must be 'counts' or 'paths'"}), 400
+
+    enumerate_at_optimum = data.get("enumerateAtOptimum", True)
+    if not isinstance(enumerate_at_optimum, bool):
+        enumerate_at_optimum = True
 
     aircraft_multipliers = None
     raw_mult = data.get("aircraftMultipliers")
@@ -1252,7 +1771,11 @@ def _solve_impl():
             if any(w < 0 for w in station_transit_weights):
                 return jsonify({"error": "stationTransitWeights values must be non-negative"}), 400
 
-    should_optimize = optimize_util or optimize_prior or optimize_prox or soft_T
+    # enumerate_n is in here because the enumeration lives in phase 2: under hard T
+    # with no objective, phase 2 would otherwise be skipped entirely and a caller
+    # asking for alternatives would silently get one route.
+    should_optimize = (optimize_util or optimize_prior or optimize_prox or soft_T
+                       or enumerate_n > 0)
     if result["status"] != "sat" or not should_optimize:
         return jsonify(result)
 
@@ -1268,7 +1791,12 @@ def _solve_impl():
             station_transit_weights,
             util_noise_mode,
             aircraft_multipliers,
-            baseline, aircraft_dB
+            baseline, aircraft_dB,
+            proximity_mode=proximity_mode,
+            proximity_noise_ref=proximity_noise_ref,
+            enumerate_n=enumerate_n,
+            enumerate_distinct=enumerate_distinct,
+            enumerate_at_optimum=enumerate_at_optimum
         )
     except SolveCancelled:
         raise   # not an error — must reach solve()'s handler, not become a 500
@@ -1291,24 +1819,69 @@ def _solve_impl():
         # long messages to their first sentence, and more to the point a reader
         # skimming a warning must not have to reach sentence three to learn that
         # the map in front of them ignores the choices they just made.
+        #
+        # Reaching here now means Z3 found NOTHING — an incumbent would have been
+        # salvaged and returned as a partial sat result — so the message no longer
+        # has to hedge about what the route does or does not reflect.
+        principle = _principle_name(optimize_prox, optimize_prior, optimize_util,
+                                    util_noise_mode, station_transit_weights is not None)
+        # The returned paths are PHASE 1's, so they are result["T"] long, not
+        # T_for_phase2. Quoting the phase-2 horizon named a number that the route in
+        # the reply does not have.
+        T_returned = result["T"]
+        if principle is None:
+            lead = ("Your noise limit is still enforced, but arrival times were not "
+                    "optimized. No fairness objective was active — this rule is the hard "
+                    "D/U cap, which phase 1 applied — so the routing below is valid. ")
+        else:
+            lead = (f"This routing does NOT apply {principle}. Phase-2 optimization failed, "
+                    f"so the map shows a plain feasible route that ignores it. ")
         if opt_result["reason"] == "timeout":
-            detail = (
-                f"This routing does NOT reflect your fairness choices. "
-                f"Phase-2 optimization ran out of time after {_timeout_ms() // 1000}s at "
-                f"T={T_for_phase2} without finding a weighted solution, so the map shows a "
-                f"plain feasible route instead. Raise the time limit in Admin, or tighten D/U, "
-                f"lower T_max, reduce the station weight, or reduce N/aircraft multipliers."
+            detail = lead + (
+                f"It ran out of time after {_timeout_ms() // 1000}s at T={T_for_phase2} "
+                f"without reaching any solution at all; the route shown is phase 1's at "
+                f"T={T_returned}. Raise the time limit in Admin, or tighten D/U, lower "
+                f"T_max, reduce the station weight, or reduce N/aircraft multipliers."
             )
         else:
-            detail = (
-                f"This routing does NOT reflect your fairness choices. "
-                f"Phase-2 optimization unexpectedly found no solution at T={T_for_phase2} "
-                f"despite phase-1 confirming feasibility, so the map shows a plain feasible "
-                f"route instead."
+            detail = lead + (
+                f"It unexpectedly found no solution at T={T_for_phase2} despite phase 1 "
+                f"confirming feasibility at T={T_returned}."
             )
-        result["warning"] = detail
+        # Machine-readable, so a caller never has to parse the sentence above.
+        result["warning"]           = detail
+        result["objectiveMode"]      = OBJECTIVE_MODE
+        result["optimality"]         = "none"
+        # Nothing was optimized, so this is False even though an objective was
+        # configured; principleImposed just below is what says whether the routing
+        # still honours what was asked for.
+        result["principleOptimized"] = False
+        result["phase2Failed"]       = True
+        result["phase2FailReason"]   = opt_result["reason"]
+        result["principleImposed"]   = principle is None
         return jsonify(result)
+
     opt_result["T_min"] = result["T"]
+    # Set on every phase-2 success too, so a caller reads flags rather than probing
+    # for a missing key. principleImposed answers "does this routing honour what was
+    # asked for?" — yes here, including for Equal/Sufficientarian, whose rule is the
+    # hard cap rather than an objective. That is a different question from
+    # principleOptimized, which asks whether an objective term existed at all.
+    opt_result["phase2Failed"]     = False
+    opt_result["principleImposed"] = True
+    if opt_result.get("optimality") == "partial":
+        # Deliberately a notice and not a warning: the objective WAS applied, Z3 just
+        # could not prove the answer best before the clock ran out. The map on screen
+        # does reflect the choices made, so alarming language would be wrong here.
+        subject = _principle_name(optimize_prox, optimize_prior, optimize_util,
+                                  util_noise_mode, station_transit_weights is not None)
+        if subject is None:
+            subject = "the arrival-time tie-break"
+        opt_result["notice"] = (
+            f"This routing DOES apply {subject}, but it is the best found within "
+            f"{_timeout_ms() // 1000}s rather than a proven best. A longer time limit in "
+            f"Admin may turn up a slightly better one; the noise limits are exact either way."
+        )
     if derived_proximity and opt_result.get("status") == "sat":
         # Only for the server-derived path: with a client-supplied vector the caller
         # already knows the weights, but here it otherwise cannot see what was priced.
