@@ -8,6 +8,7 @@ the dashboard shows where the noise lands.
 ```
 .
 ├── solver_server_dB.py       the solver — a Flask service on port 5051
+├── solver_server_dB_energy.py  the same solver with noise priced by energy — port 5052
 ├── UPDATE_RECORD.md          every change to the solver, with dates and commits
 ├── 5x5_realtime_solver/      the participant dashboard (+ its own README)
 └── data/                     past result sets, filed by date (a README in each)
@@ -15,6 +16,7 @@ the dashboard shows where the noise lands.
 
 Start here: this file for the solver, `5x5_realtime_solver/README.md` for the
 activity, `UPDATE_RECORD.md` for how the solver got here and what is still open.
+The energy variant has its own section at the end of this file.
 
 ---
 
@@ -163,3 +165,87 @@ reply = S.app.test_client().post("/solve", json=payload).get_json()
 The solver pool has historically leaked orphaned processes across sessions. Check
 before assuming a port is free, and **never kill a Python process you did not
 start** — sessions run concurrently.
+
+---
+
+# `solver_server_dB_energy.py`
+
+```
+pip install z3-solver flask flask-cors
+python solver_server_dB_energy.py   # 127.0.0.1:5052
+```
+
+The same solver, the same request and reply formats, the same `/solve`,
+`/progress` and `/cancel`, on port **5052** so it can run beside the dB solver. It
+was copied from this branch's `solver_server_dB.py` and changes one thing: how
+noise is priced inside Z3.
+
+## Using it
+
+- **From the dashboard:** open the admin panel and set **Address** to
+  `http://127.0.0.1:5052`. Nothing else changes; every request field the dashboard
+  sends is accepted.
+- **From Python:** import it in place of the dB solver.
+
+  ```python
+  import solver_server_dB_energy as S
+  reply = S.app.test_client().post("/solve", json=payload).get_json()
+  ```
+
+- **To compare against the dB encoding in one process**, add `"noiseModel": "dB"`
+  to the request. The default is `"energy"`.
+- **For a request with no time limit**, send a large `timeoutMs` and lift the
+  server's own ceiling first: `S.SOLVE_TIMEOUT_CAP_MS = 2**32 - 1` (Z3's "no
+  timeout").
+
+## What it does differently
+
+Every aircraft emits the same `aircraftDB`, so a tile's increase is
+`10*log10(1 + n*r_m)` with `r_m = 10**((aircraftDB - baseline[m])/10)`. The dB
+solver puts that through a per-tile `If`-chain lookup. This file uses the argument
+of the log instead, which is linear in the count:
+
+| | `solver_server_dB.py` | `solver_server_dB_energy.py` |
+|---|---|---|
+| noise objectives | sum of dB from the lookup table (centi-dB) | sum of `n*R_m`, `R_m = round(1e6*r_m)` |
+| `U` cap | `dbmax - dbmin <= 100*U` | `1e6*x_max <= K*x_min`, `x = 1e6 + n*R_m`, `K = round(10**((U+0.005)/10)*1e6)` |
+| `D` cap | count limit `D_count[m]` | unchanged |
+| People trip term (`utilNoiseMode` off) | 25-branch lookup per aircraft and timestep | `sum(tw[m]*wcnt[m][t])`, the same value |
+
+`R_m` is 1,000,000 for a 45 dB tile, 100,000 for 55 dB and 10,000 for 65 dB: an
+aircraft over a quiet tile costs 100 times one over a loud tile. The `+0.005` in `K`
+matches the dB table's rounding, so both files draw the `U` limit in the same place
+(they can disagree only when a spread is within about 0.005 dB of `U`).
+
+The reply carries the same dB fields, recomputed exactly from the final routing,
+plus the values that were actually minimized: `totalUtilEnergy`,
+`protectedEnergy`, `proximityEnergy`, and `noiseModel`.
+
+## It is a different objective
+
+Summing energy is not summing dB. The dB sum is concave in `n`, so it gives a
+discount for stacking aircraft on one tile in the same step. The energy sum gives
+no discount. Both still say "fly over loud tiles", by a factor of 70 to 100, so the
+routings mostly agree. On the paper's fleet runs, wherever both proved optimality,
+the two routings use the same tiles and add the same total energy. They differ in
+one place: the dB solver holds aircraft at Downtown so they land together on the
+45 dB Commuter vertiport, and the energy solver lets them land a step apart. That
+moves the peak from 4.77 to 3.01 dB at N = 6, and from 6.99 to 4.77 dB at N = 16.
+
+The energy objective is **indifferent** to stacking, not against it. The spreading
+comes from the arrival-time tie-break, so a tied routing that stacks can still be
+returned. To rule stacking out, send a `D` cap.
+
+## Speed
+
+| case | `solver_server_dB.py` | `solver_server_dB_energy.py` |
+|---|---|---|
+| paper `fleet\|default`, Utilitarian and Proportional, N = 6–8 | optimal in 77 s to 8.2 h | optimal in 3.7–13.8 s |
+| the same, N = 14–24 | stopped at 15.4 h, partial | optimal in 17.5 s to 2.3 min |
+| the same, N = 30–32 | stopped after 35–40 min, partial | optimal in 1.2–5.7 min |
+| 5x5 dashboard, Equal 10 dB + People, N = 16 | not proven in 15 min | optimal in 49.5 s |
+
+The People row is the trip-term rewrite alone; that term has no noise in it, so the
+energy change by itself does not speed it up. On three N = 6 People cases the
+rewritten term returns exactly the dB solver's `totalTransit`, per-aircraft
+`transitTimes` and arrival penalty.
