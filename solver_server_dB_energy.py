@@ -31,7 +31,7 @@ from collections import deque
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from z3 import (Int, And, Or, Not, Implies, Sum, If, Solver, Optimize, Bool, sat, unknown,
-                main_ctx, Z3Exception)
+                main_ctx, Z3Exception, is_true)
 
 app = Flask(__name__)
 CORS(app)
@@ -1291,29 +1291,19 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
                 total_util_noise = Sum([wdB_by_t[t][m] for t in range(T) for m in range(M)])
             objective_terms.append(eff_w_util * total_util_noise)
         else:
-            # hm[i][t]: aircraft i has changed location at least once in t'=1..t
-            # it[i][t]: aircraft i is currently accumulating transit cost at time t
-            hm = [[Bool(f"o_hm_{i}_{t}") for t in range(T)] for i in range(N)]
-            it = [[Bool(f"o_it_{i}_{t}") for t in range(T)] for i in range(N)]
-
-            for i in range(N):
-                opt.add(hm[i][0] == False)
-                opt.add(it[i][0] == False)
-                for t in range(1, T):
-                    opt.add(hm[i][t] == Or(hm[i][t - 1], L[i][t] != L[i][t - 1]))
-                    # Arrival timestep IS counted — gate on t-1 arrival, not t
-                    opt.add(it[i][t] == And(hm[i][t], Not(ha[i][t - 1])))
-
-            if int_tw is not None:
-                def _tw_expr(L_it, weights=int_tw):
-                    e = weights[0]
-                    for m in range(1, M):
-                        e = If(L_it == m + 1, weights[m], e)
-                    return e
-                transit = [Sum([If(it[i][t], _tw_expr(L[i][t]) * int_mult[i], 0) for t in range(T)]) for i in range(N)]
-            else:
-                transit = [Sum([If(it[i][t], W_SCALE * int_mult[i], 0) for t in range(T)]) for i in range(N)]
-            total_transit = Sum(transit)
+            # Transit cost, built off the shared count instead of per aircraft. An
+            # aircraft is "in transit" exactly when active[i][t] holds (it has left its
+            # start and not arrived before t; the arrival step counts), and wcnt[m][t]
+            # sums int_mult over the active aircraft on m. So
+            #   sum_i sum_t active*int_mult*tw[L_it]  ==  sum_t sum_m tw[m]*wcnt[m][t],
+            # the same value the per-aircraft form computed. The per-aircraft form put
+            # a 25-deep If(L == m, w_m, ...) on every aircraft-timestep, which Z3 can
+            # only bound by splitting on positions: on the 5x5 Equal 10 + People case
+            # (N=16) it found the optimum, 82 weighted steps, but could not prove it in
+            # 15 min, while this form proves the same 82 in under a minute.
+            # Per-aircraft transitTimes are recovered from the model after the solve.
+            tw = int_tw if int_tw is not None else [W_SCALE] * M
+            total_transit = Sum([tw[m] * wcnt_by_t[t][m] for t in range(T) for m in range(M)])
             objective_terms.append(eff_w_util * total_transit)
 
     if eff_w_prior > 0:
@@ -1521,7 +1511,11 @@ def optimize_objectives(N, T, M, D, U, adjacency, start_positions, end_positions
             # dashboard sidesteps it by measuring trip length from the returned paths
             # instead (see its comment at ~:1628). Divide at the point of display, or
             # migrate dB45_collection first.
-            result["transitTimes"] = [model.evaluate(transit[i]).as_long() for i in range(N)]
+            tw = int_tw if int_tw is not None else [W_SCALE] * M
+            result["transitTimes"] = [
+                sum(tw[model.evaluate(L[i][t]).as_long() - 1] * int_mult[i]
+                    for t in range(T) if is_true(model.evaluate(active[i][t], model_completion=True)))
+                for i in range(N)]
             result["totalTransit"] = model.evaluate(total_transit).as_long()
 
     if eff_w_prior > 0 and not energy:
